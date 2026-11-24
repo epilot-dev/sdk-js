@@ -26,6 +26,9 @@ const { data } = await phoneIntegrationClient.batchSearchCustomers(...)
 
 **phone-integration**
 - [`batchSearchCustomers`](#batchsearchcustomers)
+- [`getActiveCall`](#getactivecall)
+- [`reportActiveCall`](#reportactivecall)
+- [`clearActiveCall`](#clearactivecall)
 
 **manager**
 - [`getManagerStatus`](#getmanagerstatus)
@@ -73,6 +76,8 @@ const { data } = await phoneIntegrationClient.batchSearchCustomers(...)
 - [`CustomerSearchResult`](#customersearchresult)
 - [`CustomerIdentifier`](#customeridentifier)
 - [`CustomerSummary`](#customersummary)
+- [`ActiveCall`](#activecall)
+- [`ActiveCallReport`](#activecallreport)
 - [`AgentState`](#agentstate)
 - [`AgentPresence`](#agentpresence)
 - [`AgentPresenceRequest`](#agentpresencerequest)
@@ -162,6 +167,85 @@ const { data } = await client.batchSearchCustomers({
 ```
 
 </details>
+
+---
+
+### `getActiveCall`
+
+Whether the signed-in user is on a phone call right now, and which conversation it is. The
+answer is about the caller only (the user of the bearer token).
+
+`GET /v1/calls/active`
+
+```ts
+const { data } = await client.getActiveCall()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "on_call": true,
+  "conversation_id": "01KW704DAM1PM5SDGKFDY9BNK0",
+  "started_at": "1970-01-01T00:00:00.000Z",
+  "source": "softphone",
+  "expires_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `reportActiveCall`
+
+Reports the call the signed-in user is on. Sent by the epilot 360 phone when a call is
+answered and again every 30 seconds while it lasts: a report is valid for 2 minutes
+(`expires_at`), so a phone th
+
+`PUT /v1/calls/active`
+
+```ts
+const { data } = await client.reportActiveCall(
+  null,
+  {
+    conversation_id: '01KW704DAM1PM5SDGKFDY9BNK0',
+    started_at: '2026-11-10T10:00:00.000Z'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "on_call": true,
+  "conversation_id": "01KW704DAM1PM5SDGKFDY9BNK0",
+  "started_at": "1970-01-01T00:00:00.000Z",
+  "source": "softphone",
+  "expires_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `clearActiveCall`
+
+Clears the signed-in user's reported call, when their part of it ended (hung up, or handed
+over to another agent). With `conversation_id`, only a report of that conversation is
+cleared, so a late "cal
+
+`DELETE /v1/calls/active`
+
+```ts
+const { data } = await client.clearActiveCall({
+  conversation_id: 'example',
+})
+```
 
 ---
 
@@ -385,8 +469,8 @@ const { data } = await client.listLiveAgents()
 ### `setAgentRouting`
 
 Sets an agent's skills and direct queue membership (full sets, not deltas), in this order:
-1. Skills: the agent's skills in the phone system are replaced by `skills`, so the phone system
-   routes on 
+1. Skills: the agent's skills in the phone system are replaced by `skills` (lowercased, see
+   `Skill`), so t
 
 `PUT /v1/manager/agents/{provider_agent_id}/routing`
 
@@ -1240,8 +1324,8 @@ const { data } = await client.listSkills()
 ### `createSkill`
 
 Adds a skill to the organization's catalogue (epilot only: nothing is written to the phone
-system until an agent gets the skill or a queue accepts it). The skill is trimmed and must then
-be 1 to 100 c
+system until an agent gets the skill or a queue accepts it). The skill is trimmed, must then be
+1 to 100 char
 
 `POST /v1/manager/skills`
 
@@ -1272,9 +1356,8 @@ const { data } = await client.createSkill(
 
 ### `deleteSkill`
 
-Deletes a skill everywhere: it is taken from every agent that has it and from every routing step
-of every queue that accepts it in the phone system, then removed from the catalogue.
-Idempotent: a skil
+Deletes a skill everywhere (in any letter case, see `Skill`): it is taken from every agent that has it and from every routing step
+of every queue that accepts it in the phone system, then removed from
 
 `DELETE /v1/manager/skills/{tag}`
 
@@ -1656,6 +1739,29 @@ type CustomerSummary = {
 }
 ```
 
+### `ActiveCall`
+
+The phone call a user is on right now.
+
+```ts
+type ActiveCall = {
+  on_call: boolean
+  conversation_id?: string
+  started_at?: string // date-time
+  source?: "softphone" | "provider"
+  expires_at?: string // date-time
+}
+```
+
+### `ActiveCallReport`
+
+```ts
+type ActiveCallReport = {
+  conversation_id: string
+  started_at?: string
+}
+```
+
 ### `AgentState`
 
 The agent's live line state as the provider reports it, plus `busy` for anyone who cannot take a
@@ -1705,7 +1811,7 @@ type AgentPresenceChange = {
 A skill as the phone system holds it (Babelforce: an agent tag). epilot's convention for skills is
 `<skill category>:`<label>`` (e.g. `language:german`), which the control center shows as
 "Category · Label"; a skill without a colon has no category.
-
+Skills are case-insensitive and stored lowercased, in
 
 ```ts
 type Skill = string

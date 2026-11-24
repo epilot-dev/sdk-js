@@ -197,6 +197,7 @@ const { data } = await client.updateNote(
     ],
     read_by: ['string'],
     reactions: {},
+    reactions_notified: ['string'],
     _archived_at: '1970-01-01T00:00:00.000Z'
   },
 )
@@ -526,7 +527,9 @@ type NotePatchRequestBody = {
   }>
   read_by?: string[]
   reactions?: Record<string, string[]>
+  reactions_notified?: string[]
   _archived_at?: string // date-time
+  annotation?: Record<string, unknown>
 }
 ```
 
@@ -613,6 +616,7 @@ type NotePutRequestBody = {
   }>
   read_by?: string[]
   reactions?: Record<string, string[]>
+  reactions_notified?: string[]
   _archived_at?: string // date-time
 }
 ```

@@ -44,7 +44,8 @@
             "required": false
           }
         ],
-        "operationId": "getAddresses"
+        "operationId": "getAddresses",
+        "responses": {}
       }
     },
     "/v1/suggestions:validate": {
@@ -60,7 +61,8 @@
             "in": "query",
             "name": "fileId"
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/public/availability:check": {
@@ -97,7 +99,8 @@
             "name": "streetNumber",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/addresses-files:validate": {
@@ -108,7 +111,8 @@
             "in": "query",
             "name": "fileId"
           }
-        ]
+        ],
+        "responses": {}
       }
     }
   },

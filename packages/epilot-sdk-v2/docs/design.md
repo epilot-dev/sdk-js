@@ -31,28 +31,36 @@ const { data } = await designClient.getAllDesigns(...)
 - [`deleteDesign`](#deletedesign)
 - [`updateDesign`](#updatedesign)
 - [`duplicateDesign`](#duplicatedesign)
-- [`getThemeFromDesign`](#getthemefromdesign)
+- [`duplicateDesignAsV1`](#duplicatedesignasv1)
+- [`getDesignVariables`](#getdesignvariables)
+- [`generateDesign`](#generatedesign)
+- [`generateDesignDocument`](#generatedesigndocument)
+- [`createDesignDocumentJob`](#createdesigndocumentjob)
+- [`getDesignDocumentJob`](#getdesigndocumentjob)
 - [`uploadFile`](#uploadfile)
 - [`getFiles`](#getfiles)
 - [`getConsumerDesign`](#getconsumerdesign)
-- [`addConsumer`](#addconsumer)
-- [`removeConsumer`](#removeconsumer)
 
 **Schemas**
+- [`DuplicateDesignAsV1Req`](#duplicatedesignasv1req)
+- [`JourneyChoice`](#journeychoice)
+- [`DuplicateDesignAsV1Plan`](#duplicatedesignasv1plan)
 - [`UploadFileReq`](#uploadfilereq)
 - [`UploadFileRes`](#uploadfileres)
 - [`GetFilesRes`](#getfilesres)
 - [`GetAllDesignsRes`](#getalldesignsres)
-- [`GetBrandsRes`](#getbrandsres)
 - [`AddDesignReq`](#adddesignreq)
 - [`AddDesignRes`](#adddesignres)
 - [`GetDesignRes`](#getdesignres)
+- [`GetDesignVariablesRes`](#getdesignvariablesres)
 - [`UpdateDesignReq`](#updatedesignreq)
+- [`Journey_Write`](#journey_write)
 - [`ItemMetada`](#itemmetada)
 - [`AddConsumerReq`](#addconsumerreq)
 - [`RemoveConsumerReq`](#removeconsumerreq)
 - [`DesignItem`](#designitem)
-- [`BrandItem`](#branditem)
+- [`Design_Document_V1`](#design_document_v1)
+- [`UpdateDesignConflict`](#updatedesignconflict)
 - [`Custom_Style`](#custom_style)
 - [`Journey`](#journey)
 - [`ConsumerData`](#consumerdata)
@@ -65,6 +73,22 @@ const { data } = await designClient.getAllDesigns(...)
 - [`FontData`](#fontdata)
 - [`FontResponseUrl`](#fontresponseurl)
 - [`WidgetPortalData`](#widgetportaldata)
+- [`GenerateDesignReq`](#generatedesignreq)
+- [`GenerateDesignRes`](#generatedesignres)
+- [`GenerateDesignDocumentReq`](#generatedesigndocumentreq)
+- [`FindingId`](#findingid)
+- [`FindingStatus`](#findingstatus)
+- [`FindingDetail`](#findingdetail)
+- [`DesignFinding`](#designfinding)
+- [`GenerateDesignDocumentRes`](#generatedesigndocumentres)
+- [`CreateDesignDocumentJobReq`](#createdesigndocumentjobreq)
+- [`BrandGuidelineAttachment`](#brandguidelineattachment)
+- [`GeneratedDesignDocument`](#generateddesigndocument)
+- [`ReviewChange`](#reviewchange)
+- [`ReviewScreenshot`](#reviewscreenshot)
+- [`ReviewedDesignDocument`](#revieweddesigndocument)
+- [`DesignDocumentJob`](#designdocumentjob)
+- [`GeneratedDesign`](#generateddesign)
 - [`ErrorResp`](#errorresp)
 - [`FileData`](#filedata)
 - [`DesignId`](#designid)
@@ -104,7 +128,14 @@ const { data } = await client.getAllDesigns()
       "_manifest": ["string"],
       "custom_theme": "string",
       "use_custom_theme": true,
-      "design_tokens": {}
+      "design_tokens": {},
+      "version": 1,
+      "colors": {},
+      "typography": {},
+      "shape": {},
+      "components": {},
+      "assets": {},
+      "consumer": {}
     }
   ]
 }
@@ -206,6 +237,16 @@ const { data } = await client.addDesign(
         chip_hover_background: 'string',
         chip_text_color: 'string',
         chip_hover_text_color: 'string'
+      },
+      version: 1,
+      colors: {},
+      typography: {},
+      shape: {},
+      components: {},
+      assets: {},
+      consumer: {
+        widgets: [ /* ... */ ],
+        customer_portals: [ /* ... */ ]
       }
     }
   },
@@ -304,6 +345,16 @@ const { data } = await client.addDesign(
       "chip_hover_background": "string",
       "chip_text_color": "string",
       "chip_hover_text_color": "string"
+    },
+    "version": 1,
+    "colors": {},
+    "typography": {},
+    "shape": {},
+    "components": {},
+    "assets": {},
+    "consumer": {
+      "widgets": [],
+      "customer_portals": []
     }
   }
 }
@@ -417,6 +468,16 @@ const { data } = await client.getDesign({
       "chip_hover_background": "string",
       "chip_text_color": "string",
       "chip_hover_text_color": "string"
+    },
+    "version": 1,
+    "colors": {},
+    "typography": {},
+    "shape": {},
+    "components": {},
+    "assets": {},
+    "consumer": {
+      "widgets": [],
+      "customer_portals": []
     }
   }
 }
@@ -442,7 +503,7 @@ const { data } = await client.deleteDesign({
 
 ### `updateDesign`
 
-Update a especific design owned by user organization
+Update a especific design owned by user organization. A body with `version: 1` is validated against the design document v1 schema and stored as v1. A v1 body leaves the stored `style`, `design_tokens`
 
 `PUT /v1/designs/{designId}`
 
@@ -450,6 +511,7 @@ Update a especific design owned by user organization
 const { data } = await client.updateDesign(
   {
     designId: 'example',
+    If-Match: 'example',
   },
   {
     design: {
@@ -534,7 +596,23 @@ const { data } = await client.updateDesign(
         chip_hover_background: 'string',
         chip_text_color: 'string',
         chip_hover_text_color: 'string'
+      },
+      version: 1,
+      colors: {},
+      typography: {},
+      shape: {},
+      components: {},
+      assets: {},
+      consumer: {
+        widgets: [ /* ... */ ],
+        customer_portals: [ /* ... */ ]
       }
+    },
+    journey_write: {
+      primary_color: 'keep',
+      font: 'keep',
+      border_radius: 'keep',
+      logo: 'keep'
     }
   },
 )
@@ -646,6 +724,16 @@ const { data } = await client.duplicateDesign({
       "chip_hover_background": "string",
       "chip_text_color": "string",
       "chip_hover_text_color": "string"
+    },
+    "version": 1,
+    "colors": {},
+    "typography": {},
+    "shape": {},
+    "components": {},
+    "assets": {},
+    "consumer": {
+      "widgets": [],
+      "customer_portals": []
     }
   }
 }
@@ -655,17 +743,94 @@ const { data } = await client.duplicateDesign({
 
 ---
 
-### `getThemeFromDesign`
+### `duplicateDesignAsV1`
 
-Search for a especific design owned by user organization and parse them to a new or old theme
+Duplicate a classic design (no version) as a v1 design document. The original stays as it is. The copy is named "``<name>`` (v1)", starts with no journeys or portals and keeps the original's journey field
 
-`GET /v1/designs/{designId}/parse`
+`POST /v1/designs/{designId}/duplicate-as-v1`
 
 ```ts
-const { data } = await client.getThemeFromDesign({
+const { data } = await client.duplicateDesignAsV1(
+  {
+    designId: 'example',
+  },
+  {
+    dry_run: true,
+    answers: {
+      assets: {
+        logo: 0,
+        favicon: 0
+      },
+      journeys: {
+        primary_color: 'sync',
+        font: 'sync',
+        border_radius: 'sync',
+        logo: 'sync'
+      }
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "message": "string",
+  "conversion": {
+    "name": "string",
+    "asset_questions": [
+      {
+        "kind": "logo",
+        "options": [
+          {
+            "asset": {},
+            "sources": [
+              {
+                "portal_id": "string",
+                "portal_name": "string",
+                "page": "string"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "journey_questions": [
+      {
+        "leaf": "primary_color",
+        "journeys": {},
+        "design": {},
+        "adoptable": true
+      }
+    ],
+    "open": {
+      "assets": ["string"],
+      "journeys": ["string"]
+    },
+    "unmapped": {},
+    "radius_adjusted": {},
+    "hex_normalized": {},
+    "notes": ["string"],
+    "invalid": ["string"]
+  }
+}
+```
+
+</details>
+
+---
+
+### `getDesignVariables`
+
+The design as flat `design.*` template variables (e.g. `design.colors.primary`, `design.assets.logo.url`), for consumers that render designs into text templates such as email templates. Classic design
+
+`GET /v1/designs/{designId}/variables`
+
+```ts
+const { data } = await client.getDesignVariables({
   designId: 'example',
-  orgId: 'example',
-  theme: 'example',
 })
 ```
 
@@ -674,11 +839,42 @@ const { data } = await client.getThemeFromDesign({
 
 ```json
 {
-  "theme": "NEW",
+  "design_id": "string",
+  "variables": {
+    "design.name": "Stadtwerke Blau",
+    "design.colors.primary": "#0054A6",
+    "design.shape.radius": "8",
+    "design.assets.logo.url": "https://go.epilot.cloud/designs/org/logo/logo.png"
+  }
+}
+```
+
+</details>
+
+---
+
+### `generateDesign`
+
+Generates a design (palette, text colours, font, logo and border radius) from a public
+website with AI. The result is cached per organization and URL for 30 days.
+
+`POST /v1/designs/generate`
+
+```ts
+const { data } = await client.generateDesign(
+  null,
+  {
+    url: 'https://www.twl.de'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
   "design": {
-    "id": "string",
-    "last_modified_at": "string",
-    "style_name": "string",
     "style": {
       "logo": {
         "main": {
@@ -718,9 +914,342 @@ const { data } = await client.getThemeFromDesign({
         "secondary": "string"
       }
     },
-    "custom_theme": "string",
-    "use_custom_theme": true,
-    "journey_design_tokens": {}
+    "theme": {
+      "shape": {
+        "borderRadius": "8"
+      }
+    }
+  },
+  "cached": true
+}
+```
+
+</details>
+
+---
+
+### `generateDesignDocument`
+
+Reads a public website and returns a v1 design document plus one finding for each
+id in fixed order. This version chooses the favicon in code and derives the site name.
+The other findings are `not_fou
+
+`POST /v1/designs/document/generate`
+
+```ts
+const { data } = await client.generateDesignDocument(
+  null,
+  {
+    url: 'https://www.stadtwerke-musterstadt.de'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "document": {
+    "version": 1,
+    "colors": {},
+    "typography": {},
+    "shape": {},
+    "components": {},
+    "assets": {},
+    "consumer": {
+      "widgets": [
+        {
+          "id": "string",
+          "name": "string"
+        }
+      ],
+      "customer_portals": [
+        {
+          "id": "string",
+          "name": "string"
+        }
+      ]
+    }
+  },
+  "findings": [
+    {
+      "id": "primary_color",
+      "status": "found",
+      "detail": {
+        "family": "string"
+      }
+    },
+    {
+      "id": "primary_color",
+      "status": "found",
+      "detail": {
+        "family": "string"
+      }
+    }
+  ],
+  "site_name": "Stadtwerke Musterstadt",
+  "cached": true
+}
+```
+
+</details>
+
+---
+
+### `createDesignDocumentJob`
+
+Generates a v1 design document from a public website like `generateDesignDocument`, returns it
+right away as `baseline`, and starts an AI review of it in the background. The review looks at the
+websit
+
+`POST /v1/designs/document/generate/jobs`
+
+```ts
+const { data } = await client.createDesignDocumentJob(
+  null,
+  {
+    url: 'https://www.stadtwerke-musterstadt.de',
+    language: 'de',
+    attachments: [
+      {
+        s3ref: {
+          bucket: 'string',
+          key: 'string'
+        },
+        mime_type: 'application/pdf',
+        filename: 'string'
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "job_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "running",
+  "steps": ["string"],
+  "screenshots": [
+    {
+      "index": 0,
+      "label": "string",
+      "kind": "string",
+      "box": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "page_url": "string",
+      "tool": "string",
+      "taken_at": "string",
+      "data_url": "string"
+    }
+  ],
+  "baseline": {
+    "document": {
+      "version": 1,
+      "colors": {},
+      "typography": {},
+      "shape": {},
+      "components": {},
+      "assets": {},
+      "consumer": {
+        "widgets": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ],
+        "customer_portals": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ]
+      }
+    },
+    "findings": [
+      {
+        "id": "primary_color",
+        "status": "found",
+        "detail": {
+          "family": "string"
+        }
+      }
+    ],
+    "site_name": "string"
+  },
+  "result": {
+    "document": {
+      "version": 1,
+      "colors": {},
+      "typography": {},
+      "shape": {},
+      "components": {},
+      "assets": {},
+      "consumer": {
+        "widgets": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ],
+        "customer_portals": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ]
+      }
+    },
+    "findings": [
+      {
+        "id": "primary_color",
+        "status": "found",
+        "detail": {
+          "family": "string"
+        }
+      }
+    ],
+    "site_name": "string",
+    "notes": "string",
+    "changes": [
+      {
+        "id": "primary_color",
+        "change": "confirmed",
+        "origin": "guidelines",
+        "source": "string"
+      }
+    ]
+  }
+}
+```
+
+</details>
+
+---
+
+### `getDesignDocumentJob`
+
+The state of a design document review started with `createDesignDocumentJob`. While it runs,
+`steps` lists the browser tools used so far. When it completes, `result` holds the reviewed design
+document
+
+`GET /v1/designs/document/generate/jobs/{jobId}`
+
+```ts
+const { data } = await client.getDesignDocumentJob({
+  jobId: 'example',
+  screenshots_after: 1,
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "job_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "running",
+  "steps": ["string"],
+  "screenshots": [
+    {
+      "index": 0,
+      "label": "string",
+      "kind": "string",
+      "box": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "page_url": "string",
+      "tool": "string",
+      "taken_at": "string",
+      "data_url": "string"
+    }
+  ],
+  "baseline": {
+    "document": {
+      "version": 1,
+      "colors": {},
+      "typography": {},
+      "shape": {},
+      "components": {},
+      "assets": {},
+      "consumer": {
+        "widgets": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ],
+        "customer_portals": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ]
+      }
+    },
+    "findings": [
+      {
+        "id": "primary_color",
+        "status": "found",
+        "detail": {
+          "family": "string"
+        }
+      }
+    ],
+    "site_name": "string"
+  },
+  "result": {
+    "document": {
+      "version": 1,
+      "colors": {},
+      "typography": {},
+      "shape": {},
+      "components": {},
+      "assets": {},
+      "consumer": {
+        "widgets": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ],
+        "customer_portals": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ]
+      }
+    },
+    "findings": [
+      {
+        "id": "primary_color",
+        "status": "found",
+        "detail": {
+          "family": "string"
+        }
+      }
+    ],
+    "site_name": "string",
+    "notes": "string",
+    "changes": [
+      {
+        "id": "primary_color",
+        "change": "confirmed",
+        "origin": "guidelines",
+        "source": "string"
+      }
+    ]
   }
 }
 ```
@@ -894,6 +1423,16 @@ const { data } = await client.getConsumerDesign({
       "chip_hover_background": "string",
       "chip_text_color": "string",
       "chip_hover_text_color": "string"
+    },
+    "version": 1,
+    "colors": {},
+    "typography": {},
+    "shape": {},
+    "components": {},
+    "assets": {},
+    "consumer": {
+      "widgets": [],
+      "customer_portals": []
     }
   }
 }
@@ -903,50 +1442,63 @@ const { data } = await client.getConsumerDesign({
 
 ---
 
-### `addConsumer`
-
-Add a consumer that uses a specific design
-
-`PUT /v1/designs/addConsumer/{application}/{designId}`
-
-```ts
-const { data } = await client.addConsumer(
-  {
-    designId: 'example',
-    application: 'example',
-  },
-  {
-    consumer_id: '4a062990-a6a3-11eb-9828-4f3da7d4935a',
-    consumer_name: 'string',
-    should_delete: 'string'
-  },
-)
-```
-
----
-
-### `removeConsumer`
-
-Remove a consumer that uses a specific design
-
-`PUT /v1/designs/removeConsumer/{application}/{designId}`
-
-```ts
-const { data } = await client.removeConsumer(
-  {
-    designId: 'example',
-    application: 'example',
-  },
-  {
-    consumer_id: '4a062990-a6a3-11eb-9828-4f3da7d4935a',
-    should_delete: 'string'
-  },
-)
-```
-
----
-
 ## Schemas
+
+### `DuplicateDesignAsV1Req`
+
+```ts
+type DuplicateDesignAsV1Req = {
+  dry_run?: boolean
+  answers?: {
+    assets?: {
+      logo?: { ... }
+      favicon?: { ... }
+    }
+    journeys?: {
+      primary_color?: { ... }
+      font?: { ... }
+      border_radius?: { ... }
+      logo?: { ... }
+    }
+  }
+}
+```
+
+### `JourneyChoice`
+
+```ts
+type JourneyChoice = "sync" | "design" | "keep"
+```
+
+### `DuplicateDesignAsV1Plan`
+
+```ts
+type DuplicateDesignAsV1Plan = {
+  message?: string
+  conversion?: {
+    name?: string
+    asset_questions?: Array<{
+      kind?: { ... }
+      options?: { ... }
+    }>
+    journey_questions?: Array<{
+      leaf?: { ... }
+      journeys?: { ... }
+      design?: { ... }
+      adoptable?: { ... }
+    }>
+    open?: {
+      assets?: { ... }
+      journeys?: { ... }
+    }
+    unmapped?: Record<string, unknown>
+    radius_adjusted?: Record<string, unknown>
+    hex_normalized?: Record<string, string>
+    notes?: string[]
+    invalid?: string[]
+  }
+}
+```
 
 ### `UploadFileReq`
 
@@ -1077,25 +1629,18 @@ type GetAllDesignsRes = {
       chip_text_color?: { ... }
       chip_hover_text_color?: { ... }
     }
+    version?: 1
+    colors?: Record<string, unknown>
+    typography?: Record<string, unknown>
+    shape?: Record<string, unknown>
+    components?: Record<string, unknown>
+    assets?: Record<string, unknown>
+    consumer?: {
+      widgets: { ... }
+      customer_portals: { ... }
+    }
   }>
-}
-```
-
-### `GetBrandsRes`
-
-```ts
-type GetBrandsRes = {
-  brands?: Array<{
-    id: string
-    name: string
-    created_by?: string
-    created_date?: string
-    main_brand?: string
-    organization_id?: string
-    updated_date?: string
-    updated_by?: string
-    status?: string
-  }>
+  // ...
 }
 ```
 
@@ -1185,6 +1730,16 @@ type AddDesignReq = {
       chip_hover_background?: { ... }
       chip_text_color?: { ... }
       chip_hover_text_color?: { ... }
+    }
+    version?: 1
+    colors?: Record<string, unknown>
+    typography?: Record<string, unknown>
+    shape?: Record<string, unknown>
+    components?: Record<string, unknown>
+    assets?: Record<string, unknown>
+    consumer?: {
+      widgets: { ... }
+      customer_portals: { ... }
     }
   }
 }
@@ -1282,7 +1837,18 @@ type AddDesignRes = {
       chip_text_color?: { ... }
       chip_hover_text_color?: { ... }
     }
+    version?: 1
+    colors?: Record<string, unknown>
+    typography?: Record<string, unknown>
+    shape?: Record<string, unknown>
+    components?: Record<string, unknown>
+    assets?: Record<string, unknown>
+    consumer?: {
+      widgets: { ... }
+      customer_portals: { ... }
+    }
   }
+  // ...
 }
 ```
 
@@ -1378,7 +1944,27 @@ type GetDesignRes = {
       chip_text_color?: { ... }
       chip_hover_text_color?: { ... }
     }
+    version?: 1
+    colors?: Record<string, unknown>
+    typography?: Record<string, unknown>
+    shape?: Record<string, unknown>
+    components?: Record<string, unknown>
+    assets?: Record<string, unknown>
+    consumer?: {
+      widgets: { ... }
+      customer_portals: { ... }
+    }
   }
+  // ...
+}
+```
+
+### `GetDesignVariablesRes`
+
+```ts
+type GetDesignVariablesRes = {
+  design_id: string
+  variables: Record<string, string>
 }
 ```
 
@@ -1469,8 +2055,30 @@ type UpdateDesignReq = {
       chip_text_color?: { ... }
       chip_hover_text_color?: { ... }
     }
+    version?: 1
+    colors?: Record<string, unknown>
+    typography?: Record<string, unknown>
+    shape?: Record<string, unknown>
+    components?: Record<string, unknown>
+    assets?: Record<string, unknown>
+    consumer?: {
+      widgets: { ... }
+      customer_portals: { ... }
+    }
   }
+  journey_write?: {
+    primary_color?: "keep" | "sync"
+    font?: "keep" | "sync"
+    border_radius?: "keep" | "sync"
+    logo?: "keep" | "sync"
+  // ...
 }
+```
+
+### `Journey_Write`
+
+```ts
+type Journey_Write = "keep" | "sync"
 ```
 
 ### `ItemMetada`
@@ -1491,7 +2099,6 @@ type ItemMetada = {
 type AddConsumerReq = {
   consumer_id: string
   consumer_name: string
-  should_delete?: string
 }
 ```
 
@@ -1500,7 +2107,6 @@ type AddConsumerReq = {
 ```ts
 type RemoveConsumerReq = {
   consumer_id: string
-  should_delete?: string
 }
 ```
 
@@ -1548,19 +2154,135 @@ type DesignItem = {
 }
 ```
 
-### `BrandItem`
+### `Design_Document_V1`
+
+Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and 
 
 ```ts
-type BrandItem = {
-  id: string
-  name: string
-  created_by?: string
-  created_date?: string
-  main_brand?: string
-  organization_id?: string
-  updated_date?: string
-  updated_by?: string
-  status?: string
+type Design_Document_V1 = {
+  version?: 1
+  colors?: Record<string, unknown>
+  typography?: Record<string, unknown>
+  shape?: Record<string, unknown>
+  components?: Record<string, unknown>
+  assets?: Record<string, unknown>
+  consumer?: {
+    widgets: Array<{
+      id: { ... }
+      name: { ... }
+    }>
+    customer_portals: Array<{
+      id: { ... }
+      name: { ... }
+    }>
+  }
+}
+```
+
+### `UpdateDesignConflict`
+
+```ts
+type UpdateDesignConflict = {
+  message?: string
+  design?: {
+    id?: string
+    created_at?: string
+    created_by?: string
+    edited: boolean
+    last_modified_at?: string
+    brand_id?: string
+    brand_name?: string
+    user?: {
+      emailaddress?: { ... }
+      fullname?: { ... }
+      name?: { ... }
+      userid?: { ... }
+    }
+    style_name: string
+    style: {
+      logo?: { ... }
+      palette: { ... }
+      typography: { ... }
+      shape?: { ... }
+      consumer: { ... }
+    }
+    is_default?: boolean
+    _manifest?: string[]
+    custom_theme?: string
+    use_custom_theme?: boolean
+    design_tokens?: {
+      coupon?: { ... }
+      cashback?: { ... }
+      custom_css?: { ... }
+      accent_color?: { ... }
+      outline_color?: { ... }
+      divider_color?: { ... }
+      link_color?: { ... }
+      link_hover_color?: { ... }
+      font_size_scale?: { ... }
+      topbar_height?: { ... }
+      topbar_logo_alignment?: { ... }
+      logo_size?: { ... }
+      input_background?: { ... }
+      input_border_color?: { ... }
+      input_text_color?: { ... }
+      input_label_color?: { ... }
+      input_border_radius?: { ... }
+      input_height?: { ... }
+      input_variant?: { ... }
+      button_primary_bg?: { ... }
+      button_primary_text?: { ... }
+      button_primary_hover_bg?: { ... }
+      button_primary_hover_text?: { ... }
+      button_outlined_border?: { ... }
+      button_outlined_text?: { ... }
+      button_outlined_hover_bg?: { ... }
+      button_outlined_hover_text?: { ... }
+      button_ghost_bg?: { ... }
+      button_ghost_text?: { ... }
+      button_ghost_hover_bg?: { ... }
+      button_ghost_hover_text?: { ... }
+      button_border_radius?: { ... }
+      button_height?: { ... }
+      card_background?: { ... }
+      card_border_color?: { ... }
+      card_variant?: { ... }
+      summary_card_background?: { ... }
+      toggle_selected_bg?: { ... }
+      toggle_selected_text?: { ... }
+      toggle_hover_bg?: { ... }
+      toggle_hover_text?: { ... }
+      toggle_border_color?: { ... }
+      dropdown_hover_bg?: { ... }
+      dropdown_hover_text?: { ... }
+      dropdown_selected_bg?: { ... }
+      dropdown_selected_text?: { ... }
+      switch_unchecked_color?: { ... }
+      switch_unchecked_bg?: { ... }
+      switch_border_radius?: { ... }
+      checkbox_unchecked_color?: { ... }
+      checkbox_label_color?: { ... }
+      radio_unchecked_color?: { ... }
+      radio_label_color?: { ... }
+      datepicker_selected_bg?: { ... }
+      datepicker_selected_color?: { ... }
+      datepicker_border_radius?: { ... }
+      chip_background?: { ... }
+      chip_hover_background?: { ... }
+      chip_text_color?: { ... }
+      chip_hover_text_color?: { ... }
+    }
+    version?: 1
+    colors?: Record<string, unknown>
+    typography?: Record<string, unknown>
+    shape?: Record<string, unknown>
+    components?: Record<string, unknown>
+    assets?: Record<string, unknown>
+    consumer?: {
+      widgets: { ... }
+      customer_portals: { ... }
+    }
+  // ...
 }
 ```
 
@@ -1768,11 +2490,327 @@ type WidgetPortalData = {
 }
 ```
 
+### `GenerateDesignReq`
+
+```ts
+type GenerateDesignReq = {
+  url: string // uri
+}
+```
+
+### `GenerateDesignRes`
+
+```ts
+type GenerateDesignRes = {
+  design: {
+    style: {
+      logo: { ... }
+      palette: { ... }
+      typography: { ... }
+    }
+    theme: {
+      shape: { ... }
+    }
+  }
+  cached: boolean
+}
+```
+
+### `GenerateDesignDocumentReq`
+
+```ts
+type GenerateDesignDocumentReq = {
+  url: string // uri
+}
+```
+
+### `FindingId`
+
+```ts
+type FindingId = "primary_color" | "fonts" | "corners" | "primary_button" | "logo" | "favicon"
+```
+
+### `FindingStatus`
+
+```ts
+type FindingStatus = "found" | "not_found" | "not_available"
+```
+
+### `FindingDetail`
+
+```ts
+type FindingDetail = {
+  family: string
+}
+```
+
+### `DesignFinding`
+
+```ts
+type DesignFinding = {
+  id: "primary_color" | "fonts" | "corners" | "primary_button" | "logo" | "favicon"
+  status: "found" | "not_found" | "not_available"
+  detail?: {
+    family: string
+  }
+}
+```
+
+### `GenerateDesignDocumentRes`
+
+```ts
+type GenerateDesignDocumentRes = {
+  document: {
+    version?: 1
+    colors?: Record<string, unknown>
+    typography?: Record<string, unknown>
+    shape?: Record<string, unknown>
+    components?: Record<string, unknown>
+    assets?: Record<string, unknown>
+    consumer?: {
+      widgets: { ... }
+      customer_portals: { ... }
+    }
+  }
+  findings: Array<{
+    id: "primary_color" | "fonts" | "corners" | "primary_button" | "logo" | "favicon"
+    status: "found" | "not_found" | "not_available"
+    detail?: {
+      family: { ... }
+    }
+  }>
+  site_name: string
+  cached: boolean
+}
+```
+
+### `CreateDesignDocumentJobReq`
+
+```ts
+type CreateDesignDocumentJobReq = {
+  url: string // uri
+  language?: "de" | "en"
+  attachments?: Array<{
+    s3ref: {
+      bucket: { ... }
+      key: { ... }
+    }
+    mime_type: "application/pdf" | "image/png" | "image/jpeg" | "image/webp"
+    filename?: string
+  }>
+}
+```
+
+### `BrandGuidelineAttachment`
+
+```ts
+type BrandGuidelineAttachment = {
+  s3ref: {
+    bucket: string
+    key: string
+  }
+  mime_type: "application/pdf" | "image/png" | "image/jpeg" | "image/webp"
+  filename?: string
+}
+```
+
+### `GeneratedDesignDocument`
+
+```ts
+type GeneratedDesignDocument = {
+  document: {
+    version?: 1
+    colors?: Record<string, unknown>
+    typography?: Record<string, unknown>
+    shape?: Record<string, unknown>
+    components?: Record<string, unknown>
+    assets?: Record<string, unknown>
+    consumer?: {
+      widgets: { ... }
+      customer_portals: { ... }
+    }
+  }
+  findings: Array<{
+    id: "primary_color" | "fonts" | "corners" | "primary_button" | "logo" | "favicon"
+    status: "found" | "not_found" | "not_available"
+    detail?: {
+      family: { ... }
+    }
+  }>
+  site_name: string
+}
+```
+
+### `ReviewChange`
+
+```ts
+type ReviewChange = {
+  id: "primary_color" | "fonts" | "corners" | "primary_button" | "logo"
+  change: "confirmed" | "changed" | "added" | "removed"
+  origin?: "guidelines" | "website"
+  source?: string
+}
+```
+
+### `ReviewScreenshot`
+
+```ts
+type ReviewScreenshot = {
+  index: number
+  label: string
+  kind?: string
+  box?: {
+    x?: number
+    y?: number
+    width?: number
+    height?: number
+  }
+  page_url: string
+  tool?: string
+  taken_at?: string
+  data_url: string
+}
+```
+
+### `ReviewedDesignDocument`
+
+```ts
+type ReviewedDesignDocument = {
+  document: {
+    version?: 1
+    colors?: Record<string, unknown>
+    typography?: Record<string, unknown>
+    shape?: Record<string, unknown>
+    components?: Record<string, unknown>
+    assets?: Record<string, unknown>
+    consumer?: {
+      widgets: { ... }
+      customer_portals: { ... }
+    }
+  }
+  findings: Array<{
+    id: "primary_color" | "fonts" | "corners" | "primary_button" | "logo" | "favicon"
+    status: "found" | "not_found" | "not_available"
+    detail?: {
+      family: { ... }
+    }
+  }>
+  site_name: string
+  notes: string
+  changes: Array<{
+    id: "primary_color" | "fonts" | "corners" | "primary_button" | "logo"
+    change: "confirmed" | "changed" | "added" | "removed"
+    origin?: "guidelines" | "website"
+    source?: string
+  }>
+}
+```
+
+### `DesignDocumentJob`
+
+```ts
+type DesignDocumentJob = {
+  job_id: string // uuid
+  status: "running" | "completed" | "failed" | "skipped"
+  steps: string[]
+  screenshots?: Array<{
+    index: number
+    label: string
+    kind?: string
+    box?: {
+      x?: { ... }
+      y?: { ... }
+      width?: { ... }
+      height?: { ... }
+    }
+    page_url: string
+    tool?: string
+    taken_at?: string
+    data_url: string
+  }>
+  baseline: {
+    document: {
+      version?: { ... }
+      colors?: { ... }
+      typography?: { ... }
+      shape?: { ... }
+      components?: { ... }
+      assets?: { ... }
+      consumer?: { ... }
+    }
+    findings: Array<{
+      id: { ... }
+      status: { ... }
+      detail?: { ... }
+    }>
+    site_name: string
+  }
+  result?: {
+    document: {
+      version?: { ... }
+      colors?: { ... }
+      typography?: { ... }
+      shape?: { ... }
+      components?: { ... }
+      assets?: { ... }
+      consumer?: { ... }
+    }
+    findings: Array<{
+      id: { ... }
+      status: { ... }
+      detail?: { ... }
+    }>
+    site_name: string
+    notes: string
+    changes: Array<{
+      id: { ... }
+      change: { ... }
+      origin?: { ... }
+      source?: { ... }
+    }>
+  }
+}
+```
+
+### `GeneratedDesign`
+
+Partial design to merge into the design being edited
+
+```ts
+type GeneratedDesign = {
+  style: {
+    logo: {
+      main?: { ... }
+    }
+    palette: {
+      primary: { ... }
+      secondary: { ... }
+      error: { ... }
+      background: { ... }
+      paper: { ... }
+      navbar: { ... }
+      portal_login_background?: { ... }
+    }
+    typography: {
+      font: { ... }
+      primary: { ... }
+      secondary: { ... }
+    }
+  }
+  theme: {
+    shape: {
+      borderRadius: { ... }
+    }
+  }
+}
+```
+
 ### `ErrorResp`
 
 ```ts
 type ErrorResp = {
   message?: string
+  code?: string
   error?: object
 }
 ```
@@ -1841,6 +2879,13 @@ type ParseThemeFromDesignResp = {
     custom_theme?: string
     use_custom_theme?: boolean
     journey_design_tokens?: object
+    version?: 1
+    colors?: Record<string, unknown>
+    typography?: Record<string, unknown>
+    shape?: Record<string, unknown>
+    components?: Record<string, unknown>
+    assets?: Record<string, unknown>
+    journey?: Record<string, unknown>
   }
 }
 ```

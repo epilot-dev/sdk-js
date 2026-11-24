@@ -35,6 +35,11 @@ export declare namespace Components {
         export type ForbiddenByRule = Schemas.ErrorResp | Schemas.FailedRuleErrorResp;
         export type GatewayTimeout = Schemas.ErrorResp;
         export type InternalServerError = Schemas.ErrorResp;
+        export type InvalidPortalConfigWrite = Schemas.ErrorResp | /**
+         * A write refused by the portal config validation (`reason: PORTAL_VALIDATION_FAILED`); nothing was saved.
+         *
+         */
+        Schemas.PortalValidationFailedResp;
         export type InvalidRequest = Schemas.ErrorResp;
         export type InvalidRequestCreateMeterReading = {
             /**
@@ -76,7 +81,36 @@ export declare namespace Components {
              */
             max_size_bytes?: number;
         }
+        export interface ResponseTooLarge {
+            /**
+             * Error message
+             */
+            message?: string;
+            /**
+             * Machine-readable cause, when the API can name one. `PORTAL_USER_PENDING_ACTIVATION` means the portal user is authenticated but not mapped to a contact yet, so re-authenticating will not help.
+             */
+            reason?: string;
+            code: "RESPONSE_TOO_LARGE";
+            /**
+             * Size of the response that was not returned
+             */
+            size_bytes?: number;
+            /**
+             * The largest response that can be returned
+             */
+            max_size_bytes?: number;
+        }
         export type ServiceUnavailable = Schemas.ErrorResp;
+        export interface TemporaryPasswordInvalidRequest {
+            /**
+             * Error message
+             */
+            message?: string;
+            /**
+             * Machine-readable cause, when the API can name one. `PORTAL_USER_PENDING_ACTIVATION` means the portal user is authenticated but not mapped to a contact yet, so re-authenticating will not help.
+             */
+            reason?: "invalid_link" | "temporary_password_expired" | "password_already_set";
+        }
         export type TooManyRequests = Schemas.ErrorResp;
         export type Unauthorized = Schemas.ErrorResp;
     }
@@ -956,6 +990,24 @@ export declare namespace Components {
              * true
              */
             access_status?: boolean;
+            /**
+             * The user's portal roles: their own roles the portal allows, else the portal's default
+             * role.
+             *
+             */
+            roles?: PortalRoleRef[];
+            /**
+             * Slug of the first of `roles`.
+             * example:
+             * b2b_admin
+             */
+            role?: string;
+            /**
+             * Display name of `role`.
+             * example:
+             * B2B admin
+             */
+            role_name?: string;
         }
         export interface CampaignWidget {
             id: string;
@@ -1114,6 +1166,24 @@ export declare namespace Components {
              * Entity type used as the primary identifier for self-registration
              */
             self_registration_entity?: "contact" | "account";
+            registration_target_group?: /**
+             * Limits who can get a portal user to existing contacts or accounts matching targets,
+             * with the same rules as page and block visibility. Targets are evaluated against the
+             * registration entity (`self_registration_entity`): the contact in contact mode, the
+             * account in account mode. Applies wherever an existing record is resolved for a new
+             * portal user: self-registration, SSO sign-in, journeys and invitations by contact id.
+             * Contacts and accounts created during registration (per `self_registration_setting`
+             * or `self_registration_account_setting`) are not checked. A self-registration outside
+             * the group is rejected exactly like one with no matching record
+             * (`SELF_REGISTRATION_NOT_ALLOWED`, or `ACCOUNT_NOT_VERIFIED` in account mode); a
+             * request naming the contact explicitly fails with `NOT_IN_REGISTRATION_TARGET_GROUP`.
+             * The registration pre-check (`checkContactExists`) answers `exists: false` for a
+             * record outside the group, so sign-up stops at the identification step.
+             * If target matching fails, registration is rejected. Without targets every matching
+             * record can register. The group also applies to `identifyContact`.
+             *
+             */
+            RegistrationTargetGroup;
             /**
              * Enable or disable user account self management
              * example:
@@ -1169,7 +1239,7 @@ export declare namespace Components {
                 prevent_user_enumeration?: boolean;
             };
             /**
-             * AWS Cognito Pool details for the portal
+             * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
              */
             cognito_details?: {
                 /**
@@ -1411,6 +1481,81 @@ export declare namespace Components {
              * ]
              */
             registration_identifiers?: ContractIdentifier[];
+            /**
+             * Slug of the portal role portal users of this portal get unless they have their own
+             * `role`. Unset means the built-in default role of the portal type, e.g.
+             * `default_end_customer_portal_role`.
+             *
+             * example:
+             * default_end_customer_portal_role
+             */
+            default_role?: string;
+            /**
+             * Slugs of the portal roles a portal user of this portal may be given (portal_user
+             * `role`). The default role is always allowed, whether or not it is listed.
+             *
+             * example:
+             * [
+             *   "b2b_admin",
+             *   "b2b_viewer"
+             * ]
+             */
+            allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
             /**
              * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
              *
@@ -1598,7 +1743,7 @@ export declare namespace Components {
                 [name: string]: Block;
             };
             /**
-             * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. Admin/builder-only — never exposed via the public portal config.
+             * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. When the notification template references an email template (`email_template_id`), portal users who opted in to email notifications additionally receive that email. Admin/builder-only — never exposed via the public portal config.
              */
             notification_triggers?: NotificationTriggerConfig[];
             /**
@@ -1749,7 +1894,7 @@ export declare namespace Components {
                 prevent_user_enumeration?: boolean;
             };
             /**
-             * AWS Cognito Pool details for the portal
+             * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
              */
             cognito_details?: {
                 /**
@@ -1991,6 +2136,81 @@ export declare namespace Components {
              * ]
              */
             registration_identifiers?: ContractIdentifier[];
+            /**
+             * Slug of the portal role portal users of this portal get unless they have their own
+             * `role`. Unset means the built-in default role of the portal type, e.g.
+             * `default_end_customer_portal_role`.
+             *
+             * example:
+             * default_end_customer_portal_role
+             */
+            default_role?: string;
+            /**
+             * Slugs of the portal roles a portal user of this portal may be given (portal_user
+             * `role`). The default role is always allowed, whether or not it is listed.
+             *
+             * example:
+             * [
+             *   "b2b_admin",
+             *   "b2b_viewer"
+             * ]
+             */
+            allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
             /**
              * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
              *
@@ -5365,7 +5585,7 @@ export declare namespace Components {
              */
             is_canary?: boolean;
             /**
-             * Whether the portal still runs the old design (the `new_design` feature setting is off). Legacy portals are always served the frozen legacy bundle, even when the org is in canary.
+             * Always false: every portal runs the new design.
              */
             is_legacy_design?: boolean;
             /**
@@ -5519,6 +5739,61 @@ export declare namespace Components {
                 de?: string;
             };
             schema?: string;
+        }
+        /**
+         * A counter (measurement channel) of a meter
+         */
+        export interface MeterCounter {
+            _id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * Title of the entity
+             * example:
+             * Example Entity
+             */
+            _title: string;
+            /**
+             * Organization ID the entity belongs to
+             * example:
+             * 123
+             */
+            _org: string;
+            /**
+             * Array of entity tags
+             * example:
+             * [
+             *   "example",
+             *   "mock"
+             * ]
+             */
+            _tags?: string[];
+            /**
+             * Creation timestamp of the entity
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _created_at: string; // date-time
+            /**
+             * Last update timestamp of the entity
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _updated_at: string; // date-time
+            _schema: "meter_counter";
+            obis_number?: string;
+            direction?: Direction;
+            transformer_ratio?: number;
+            unit?: string;
+            forecast_reading_value?: string;
+            forecast_as_of?: string;
+            current_consumption?: number;
+            last_reading?: string;
+            conversion_factor?: number;
+            tariff_type?: TariffType;
         }
         export interface MeterReading {
             /**
@@ -5793,7 +6068,7 @@ export declare namespace Components {
                 store_url?: string;
                 last_build?: /* Latest build/upload status for a platform (system-written). */ MobileBuildStatus;
             };
-            ota?: /* OTA (over-the-air) update settings for the portal's mobile app. Drives the OTA build pipeline and the per-portal manifest. channel / update_strategy / min_native_version are epilot-internal controls. */ MobileOtaConfig;
+            ota?: /* OTA (over-the-air) update settings for the portal's mobile app. Drives the OTA build pipeline and the per-portal manifest. channel / update_strategy / recommended_native_version / min_supported_native_version are epilot-internal controls. */ MobileOtaConfig;
         }
         /**
          * Editable mobile fields for PUT. Only mobile-relevant settings + app branding can be changed. Portal-derived values (display_name, app_host), the portal logo, and system-written fields (credentials_status, app_store_id, last_build, …) are ignored if sent.
@@ -5814,10 +6089,10 @@ export declare namespace Components {
                 store_url?: string;
             };
             branding?: MobileBranding;
-            ota?: /* OTA (over-the-air) update settings for the portal's mobile app. Drives the OTA build pipeline and the per-portal manifest. channel / update_strategy / min_native_version are epilot-internal controls. */ MobileOtaConfig;
+            ota?: /* OTA (over-the-air) update settings for the portal's mobile app. Drives the OTA build pipeline and the per-portal manifest. channel / update_strategy / recommended_native_version / min_supported_native_version are epilot-internal controls. */ MobileOtaConfig;
         }
         /**
-         * OTA (over-the-air) update settings for the portal's mobile app. Drives the OTA build pipeline and the per-portal manifest. channel / update_strategy / min_native_version are epilot-internal controls.
+         * OTA (over-the-air) update settings for the portal's mobile app. Drives the OTA build pipeline and the per-portal manifest. channel / update_strategy / recommended_native_version / min_supported_native_version are epilot-internal controls.
          */
         export interface MobileOtaConfig {
             [name: string]: any;
@@ -5838,9 +6113,17 @@ export declare namespace Components {
              */
             update_strategy?: "next-launch" | "immediate";
             /**
-             * Minimum native app version required to load OTA bundles.
+             * Native app versions below this see a dismissible "update available" prompt linking to the App Store / Play Store.
+             * example:
+             * 2.0.0
              */
-            min_native_version?: string;
+            recommended_native_version?: string; // ^\d+(\.\d+){0,2}(-[0-9A-Za-z.-]+)?$
+            /**
+             * Minimum native app version. Versions below this are blocked until the user updates from the App Store / Play Store and load no new OTA bundle.
+             * example:
+             * 1.4.0
+             */
+            min_supported_native_version?: string; // ^\d+(\.\d+){0,2}(-[0-9A-Za-z.-]+)?$
         }
         /**
          * Mobile OIDC configuration. Values are resolved at SSO invocation time, so the
@@ -5863,27 +6146,6 @@ export declare namespace Components {
              * 123456
              */
             client_secret?: string;
-        }
-        export interface NewDesignMigrationResult {
-            org_id?: string;
-            portal_id?: string;
-            origin?: string;
-            name?: string;
-            is_v3_item?: boolean;
-            dry_run?: boolean;
-            /**
-             * True when the migration was written (false for dry_run)
-             */
-            migrated?: boolean;
-            summary?: {
-                [name: string]: any;
-            };
-            /**
-             * Stored feature_settings and pages before the migration, for rollback
-             */
-            before?: {
-                [name: string]: any;
-            };
         }
         export interface NotificationTriggerConfig {
             /**
@@ -6291,9 +6553,24 @@ export declare namespace Components {
             updateStrategy: "next-launch" | "immediate";
             /**
              * example:
-             * 1.0.0
+             * 2.0.0
              */
-            minNativeVersion?: string;
+            recommendedNativeVersion?: string;
+            /**
+             * example:
+             * 1.4.0
+             */
+            minSupportedNativeVersion?: string;
+            /**
+             * example:
+             * https://apps.apple.com/app/id1234567890
+             */
+            iosStoreUrl?: string;
+            /**
+             * example:
+             * https://play.google.com/store/apps/details?id=com.example.portal
+             */
+            androidStoreUrl?: string;
         }
         export interface OutstandingTask {
             /**
@@ -6355,6 +6632,10 @@ export declare namespace Components {
              * /dashboard
              */
             path?: string;
+            /**
+             * The entities the page offers its blocks: contact and portal user, the entity of a detail page, and what selectors on the page select. The API derives it from the page and its blocks when the page is read; a value sent in a request is ignored.
+             *
+             */
             schema?: string[];
             /**
              * The conditions that need to be met for the page to be shown
@@ -6416,7 +6697,7 @@ export declare namespace Components {
              */
             order: number;
             /**
-             * Whether the page is a system page
+             * Whether the page is a system page. Server-managed on createPortalPage and updatePortalPage.
              * example:
              * false
              */
@@ -6521,6 +6802,10 @@ export declare namespace Components {
              * /dashboard
              */
             path?: string;
+            /**
+             * The entities the page offers its blocks: contact and portal user, the entity of a detail page, and what selectors on the page select. The API derives it from the page and its blocks when the page is read; a value sent in a request is ignored.
+             *
+             */
             schema?: string[];
             /**
              * The conditions that need to be met for the page to be shown
@@ -6582,7 +6867,7 @@ export declare namespace Components {
              */
             order: number;
             /**
-             * Whether the page is a system page
+             * Whether the page is a system page. Server-managed on createPortalPage and updatePortalPage.
              * example:
              * false
              */
@@ -6716,6 +7001,24 @@ export declare namespace Components {
              * Entity type used as the primary identifier for self-registration
              */
             self_registration_entity?: "contact" | "account";
+            registration_target_group?: /**
+             * Limits who can get a portal user to existing contacts or accounts matching targets,
+             * with the same rules as page and block visibility. Targets are evaluated against the
+             * registration entity (`self_registration_entity`): the contact in contact mode, the
+             * account in account mode. Applies wherever an existing record is resolved for a new
+             * portal user: self-registration, SSO sign-in, journeys and invitations by contact id.
+             * Contacts and accounts created during registration (per `self_registration_setting`
+             * or `self_registration_account_setting`) are not checked. A self-registration outside
+             * the group is rejected exactly like one with no matching record
+             * (`SELF_REGISTRATION_NOT_ALLOWED`, or `ACCOUNT_NOT_VERIFIED` in account mode); a
+             * request naming the contact explicitly fails with `NOT_IN_REGISTRATION_TARGET_GROUP`.
+             * The registration pre-check (`checkContactExists`) answers `exists: false` for a
+             * record outside the group, so sign-up stops at the identification step.
+             * If target matching fails, registration is rejected. Without targets every matching
+             * record can register. The group also applies to `identifyContact`.
+             *
+             */
+            RegistrationTargetGroup;
             /**
              * Enable or disable user account self management
              * example:
@@ -6771,7 +7074,7 @@ export declare namespace Components {
                 prevent_user_enumeration?: boolean;
             };
             /**
-             * AWS Cognito Pool details for the portal
+             * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
              */
             cognito_details?: {
                 /**
@@ -7014,6 +7317,81 @@ export declare namespace Components {
              */
             registration_identifiers?: ContractIdentifier[];
             /**
+             * Slug of the portal role portal users of this portal get unless they have their own
+             * `role`. Unset means the built-in default role of the portal type, e.g.
+             * `default_end_customer_portal_role`.
+             *
+             * example:
+             * default_end_customer_portal_role
+             */
+            default_role?: string;
+            /**
+             * Slugs of the portal roles a portal user of this portal may be given (portal_user
+             * `role`). The default role is always allowed, whether or not it is listed.
+             *
+             * example:
+             * [
+             *   "b2b_admin",
+             *   "b2b_viewer"
+             * ]
+             */
+            allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
+            /**
              * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
              *
              */
@@ -7200,7 +7578,7 @@ export declare namespace Components {
                 [name: string]: Block;
             };
             /**
-             * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. Admin/builder-only — never exposed via the public portal config.
+             * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. When the notification template references an email template (`email_template_id`), portal users who opted in to email notifications additionally receive that email. Admin/builder-only — never exposed via the public portal config.
              */
             notification_triggers?: NotificationTriggerConfig[];
             /**
@@ -7398,6 +7776,81 @@ export declare namespace Components {
              * Identifiers to identify a contact of a portal user during the registration.
              */
             registration_identifiers?: ContractIdentifier[];
+            /**
+             * Slug of the portal role portal users of this portal get unless they have their own
+             * `role`. Unset means the built-in default role of the portal type, e.g.
+             * `default_end_customer_portal_role`.
+             *
+             * example:
+             * default_end_customer_portal_role
+             */
+            default_role?: string;
+            /**
+             * Slugs of the portal roles a portal user of this portal may be given (portal_user
+             * `role`). The default role is always allowed, whether or not it is listed.
+             *
+             * example:
+             * [
+             *   "b2b_admin",
+             *   "b2b_viewer"
+             * ]
+             */
+            allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
             /**
              * Surfaces this portal's data is reached from besides the portal UI itself.
              */
@@ -7606,7 +8059,7 @@ export declare namespace Components {
                 prevent_user_enumeration?: boolean;
             };
             /**
-             * AWS Cognito Pool details for the portal
+             * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
              */
             cognito_details?: {
                 /**
@@ -7848,6 +8301,81 @@ export declare namespace Components {
              * ]
              */
             registration_identifiers?: ContractIdentifier[];
+            /**
+             * Slug of the portal role portal users of this portal get unless they have their own
+             * `role`. Unset means the built-in default role of the portal type, e.g.
+             * `default_end_customer_portal_role`.
+             *
+             * example:
+             * default_end_customer_portal_role
+             */
+            default_role?: string;
+            /**
+             * Slugs of the portal roles a portal user of this portal may be given (portal_user
+             * `role`). The default role is always allowed, whether or not it is listed.
+             *
+             * example:
+             * [
+             *   "b2b_admin",
+             *   "b2b_viewer"
+             * ]
+             */
+            allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
             /**
              * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
              *
@@ -8073,536 +8601,10 @@ export declare namespace Components {
             pages?: Page[];
         }
         /**
-         * Contact attributes a portal user can change. Other attributes are ignored.
-         * Value types follow the organization's contact schema.
+         * The portal config as `createPortalConfig` and `putPortalConfig` return it, with the validation of what was written.
          *
          */
-        export interface PortalContactUpdate {
-            [name: string]: any;
-            /**
-             * example:
-             * de
-             */
-            language?: string;
-            first_name?: any;
-            last_name?: any;
-            salutation?: any;
-            phone?: any;
-            phone_number?: any;
-            mobile?: any;
-            street?: any;
-            street_number?: any;
-            postal_code?: any;
-            city?: any;
-            country?: any;
-            preferred_language?: any;
-            communication_preferences?: any;
-        }
-        /**
-         * Contract attributes a portal user can change. Other attributes are ignored.
-         */
-        export interface PortalContractUpdate {
-            [name: string]: any;
-            /**
-             * Installment amount in cents
-             * example:
-             * 8500
-             */
-            installment_amount?: number;
-            /**
-             * Installment amount as a decimal string
-             * example:
-             * 85.00
-             */
-            installment_amount_decimal?: string;
-        }
-        /**
-         * Limits portal chat to portal users matching targets, with the same rules as page and block visibility. Without targets every signed-in portal user can use the chat.
-         */
-        export interface PortalCopilotVisibility {
-            /**
-             * Target IDs that must match for the portal user to use the chat
-             */
-            visible_for_targets?: string[];
-            /**
-             * Operator for visible_for_targets matching
-             */
-            visible_for_operator?: "and" | "or";
-            /**
-             * Target IDs that if matched deny the portal user the chat
-             */
-            hidden_for_targets?: string[];
-            /**
-             * Operator for hidden_for_targets matching
-             */
-            hidden_for_operator?: "and" | "or";
-        }
-        /**
-         * One column of the portal data export CSV.
-         */
-        export interface PortalDataExportColumn {
-            /**
-             * Stable, immutable column id (snake_case). Append-only contract: never rename, reorder semantics, or remove an existing key; new columns are appended.
-             *
-             * example:
-             * vertragsnummer
-             */
-            key: string;
-            /**
-             * Localized header label, keyed by language (de, en).
-             * example:
-             * {
-             *   "de": "Vertragsnummer",
-             *   "en": "Contract number"
-             * }
-             */
-            header: {
-                [name: string]: string;
-            };
-            /**
-             * Where the value comes from: relation hops from the anchor entity plus the attribute to read on the resolved entity. An empty path means the anchor itself.
-             *
-             */
-            source: {
-                /**
-                 * Relation hops from the anchor entity (max 3).
-                 * example:
-                 * [
-                 *   "customer"
-                 * ]
-                 */
-                path?: string[];
-                /**
-                 * Attribute to read on the resolved entity.
-                 * example:
-                 * customer_number
-                 */
-                attribute: string;
-                /**
-                 * Which part of an address-typed attribute to render.
-                 */
-                address_field?: "full" | "street" | "street_number" | "postal_code" | "city" | "additional_info" | "country";
-            };
-            formatter?: "text" | "date" | "money_cents" | "enum" | "address";
-            /**
-             * Localized value maps for the enum formatter, keyed by language then raw value.
-             *
-             */
-            enum_labels?: {
-                [name: string]: {
-                    [name: string]: string;
-                };
-            };
-        }
-        /**
-         * Portal-facing overrides of a stage description, configured per portal
-         * audience in the Flows Hub. Served unresolved for the same reason as
-         * `PortalNameOverrides`; a block falls back to `description` when its
-         * audience's key is absent. The values are rich text, like `description`
-         * itself.
-         *
-         */
-        export interface PortalDescriptionOverrides {
-            /**
-             * Description shown in the End Customer Portal
-             */
-            ecp?: string;
-            /**
-             * Description shown in the Installer Portal
-             */
-            installer?: string;
-        }
-        /**
-         * Feature settings for the portal
-         */
-        export interface PortalFeatureSettings {
-            /**
-             * Retired, not read. A portal shows a start page by having a `dashboard` page.
-             */
-            start_page?: boolean;
-            /**
-             * Retired, not read. Billing follows the organization's `commodity_billing` setting.
-             */
-            billing?: boolean;
-            /**
-             * Retired, not read. Billing pages and blocks follow the organization's `commodity_billing` setting.
-             */
-            commodity_billing?: boolean;
-            /**
-             * Retired, not read.
-             */
-            change_due_date?: boolean;
-            /**
-             * Enable or disable the new design for the portal
-             */
-            new_design?: boolean;
-            /**
-             * Enable the MCP (AI agent) connector channel for this portal
-             */
-            mcp_enabled?: boolean;
-            /**
-             * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
-             */
-            mcp_grant_version?: number;
-            /**
-             * Enable the portal copilot chat for this portal
-             */
-            portal_copilot?: boolean;
-            /**
-             * ID of the Agent Builder portal agent this portal's copilot chat runs, set by Agent Builder. When unset, or when the agent no longer exists in the portal's organization, the chat runs the default portal copilot.
-             */
-            portal_copilot_agent_id?: string;
-            portal_copilot_visibility?: /* Limits portal chat to portal users matching targets, with the same rules as page and block visibility. Without targets every signed-in portal user can use the chat. */ PortalCopilotVisibility;
-        }
-        /**
-         * Settings of the portal's header bar, stored once per portal.
-         *
-         */
-        export interface PortalHeader {
-            /**
-             * The design of the header bar
-             */
-            design?: {
-                [name: string]: any;
-                overrides?: /**
-                 * Design overrides scoped to the header bar. Only `components.inputs` and `elements.icon_actions` can be overridden; colours, shape and every other key are refused with a 400 on every write. `null` clears the overrides.
-                 *
-                 * example:
-                 * {
-                 *   "components": {
-                 *     "inputs": {
-                 *       "style": "soft",
-                 *       "color": "neutral",
-                 *       "label_position": "inset"
-                 *     }
-                 *   },
-                 *   "elements": {
-                 *     "icon_actions": {
-                 *       "style": "ghost",
-                 *       "color": "primary"
-                 *     }
-                 *   }
-                 * }
-                 */
-                PortalHeaderDesignOverrides;
-            };
-        }
-        /**
-         * Design overrides scoped to the header bar. Only `components.inputs` and `elements.icon_actions` can be overridden; colours, shape and every other key are refused with a 400 on every write. `null` clears the overrides.
-         *
-         * example:
-         * {
-         *   "components": {
-         *     "inputs": {
-         *       "style": "soft",
-         *       "color": "neutral",
-         *       "label_position": "inset"
-         *     }
-         *   },
-         *   "elements": {
-         *     "icon_actions": {
-         *       "style": "ghost",
-         *       "color": "primary"
-         *     }
-         *   }
-         * }
-         */
-        export type PortalHeaderDesignOverrides = {
-            components?: {
-                /**
-                 * Inputs in the header bar, such as search
-                 */
-                inputs?: {
-                    style?: "soft" | "surface" | "outline" | "ghost";
-                    color?: "primary" | "neutral";
-                    label_position?: "outset" | "inset";
-                };
-            };
-            elements?: {
-                /**
-                 * Icon buttons in the header bar
-                 */
-                icon_actions?: {
-                    style?: "solid" | "soft" | "surface" | "outline" | "ghost";
-                    /**
-                     * A button colour, or a custom colour of the portal's design by id
-                     */
-                    color?: /* A button colour, or a custom colour of the portal's design by id */ ("primary" | "neutral" | "danger") | {
-                        custom: string; // ^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$
-                    };
-                };
-            };
-        } | null;
-        /**
-         * ID of the portal
-         * example:
-         * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
-         */
-        export type PortalId = string;
-        /**
-         * Portal-facing overrides of a flow or stage title, configured per portal
-         * audience in the Flows Hub. Served unresolved because this endpoint asks
-         * the Workflows API for audience `all` — one cached response feeds blocks
-         * of both audiences, so each block picks its own override and falls back
-         * to `name` when the key is absent.
-         *
-         */
-        export interface PortalNameOverrides {
-            /**
-             * Title shown in the End Customer Portal
-             */
-            ecp?: string;
-            /**
-             * Title shown in the Installer Portal
-             */
-            installer?: string;
-        }
-        /**
-         * A 360 notification addressed to a portal user.
-         */
-        export interface PortalNotification {
-            /**
-             * Stable string identifier of the notification (the numeric notification id as a string).
-             * example:
-             * 1234567890
-             */
-            id: string;
-            /**
-             * Numeric id of the notification, used to mark it as read.
-             * example:
-             * 1234567890
-             */
-            notification_id?: number;
-            /**
-             * Type of notification.
-             * example:
-             * workflow_step_overdue
-             */
-            type?: string;
-            /**
-             * Localized, already-rendered notification title.
-             */
-            title?: {
-                en?: string;
-                de?: string;
-            };
-            /**
-             * Localized, already-rendered notification message.
-             */
-            message?: {
-                en?: string;
-                de?: string;
-            };
-            /**
-             * When the notification was created.
-             */
-            created_at?: string; // date-time
-            /**
-             * Whether the notification has been read by the user.
-             * example:
-             * false
-             */
-            read: boolean;
-            /**
-             * Optional URL the notification points to.
-             */
-            redirect_url?: string;
-        }
-        export interface PortalRevision {
-            /**
-             * example:
-             * 2026-08-25T14:03:11.482Z-a7f3c1d9
-             */
-            revision_id: string;
-            created_at: string; // date-time
-            /**
-             * May be absent — an internal-auth caller carries no user id.
-             */
-            created_by?: string;
-            /**
-             * Set at publish time when the publish request carries one, or by renaming the revision with `updatePortalRevision`. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
-             *
-             * example:
-             * FAQ page launch
-             */
-            name?: string;
-            description?: string;
-            source?: /**
-             * Where a revision came from, when it was not saved in the builder. Not part of the portal config. The builder renders it in the viewer's language for an unnamed revision.
-             *
-             */
-            RevisionSource;
-            page_count: number;
-            /**
-             * The last time this revision was published. NOT the same question as `is_published`: a revision that was live yesterday still carries a `published_at`.
-             *
-             */
-            published_at?: string; // date-time
-            /**
-             * Who performed the last publish of this revision.
-             */
-            published_by?: string;
-            /**
-             * Whether this revision is the one currently live.
-             */
-            is_published: boolean;
-            /**
-             * The snapshotted portal configuration. Secret-typed extension option values are removed entirely — not masked — before the response is assembled.
-             *
-             */
-            config: {
-                [name: string]: any;
-            };
-            pages: /**
-             * A page from a revision snapshot. Same shape as a live `Page`, without the server-managed fields (`past_routes`, `_created_at`, `_updated_at`, `is_deleted`), which publish re-derives from the live portal.
-             *
-             */
-            RevisionPage[];
-            /**
-             * The SSO identity providers captured in this revision, with `client_secret` REDACTED exactly as the admin portal-config GET redacts it (no read path returns a stored secret).
-             * Publishing this revision replaces every live provider on this portal's origin, not just this portal's own, with this set. Identity providers key on `IDP#{origin}#{slug}`, a partition shared by every portal on that origin, so any other portal sharing it (an ADDITIONAL_PORTAL clone, most commonly) is affected too. A client can diff this against the live providers (by `slug`, and on `oidc_config.oidc_issuer` / `oidc_config.client_id` for a changed provider) to warn that a publish would also change SSO configuration, for this portal and any others sharing its origin.
-             * ABSENT and `[]` are different answers. `[]` means the revision has no providers and publishing it removes the live ones; absent means the revision was saved before provider versioning, carries no SSO opinion, and publishing it changes no provider.
-             *
-             */
-            identity_providers?: /**
-             * SSO identity provider configuration.
-             *
-             * Env var interpolation: only string fields under `oidc_config` and
-             * `mobile_oidc_config` (incl. their nested `metadata`) are passed through
-             * Liquid templating, so they may contain `{{ env.VAR }}` placeholders that
-             * get resolved at runtime against the organization's environment.
-             *
-             * The following fields are used as literal values and MUST NOT contain
-             * template syntax: `slug`, `display_name`, `provider_type`, all keys and
-             * values under `attribute_mappings` (used as JSONPath-like accessors into
-             * token claims), and all keys and values under `entity_matching`.
-             *
-             */
-            ProviderConfig[];
-            email_templates?: /* Email templates used for authentication and internal processes */ EmailTemplates;
-            /**
-             * The portal's email template settings as they were live when the revision was saved. Read-only: this field cannot be set through the revision request and is always captured from live.
-             *
-             */
-            email_template_settings?: {
-                [name: string]: any;
-            };
-        }
-        export interface PortalRevisionCreated {
-            /**
-             * example:
-             * 2026-08-25T14:03:11.482Z-a7f3c1d9
-             */
-            revision_id: string;
-            created_at: string; // date-time
-            /**
-             * May be absent — an internal-auth caller carries no user id.
-             */
-            created_by?: string;
-            /**
-             * Set at publish time when the publish request carries one, or by renaming the revision with `updatePortalRevision`. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
-             *
-             * example:
-             * FAQ page launch
-             */
-            name?: string;
-            description?: string;
-            source?: /**
-             * Where a revision came from, when it was not saved in the builder. Not part of the portal config. The builder renders it in the viewer's language for an unnamed revision.
-             *
-             */
-            RevisionSource;
-            page_count: number;
-            /**
-             * The last time this revision was published. NOT the same question as `is_published`: a revision that was live yesterday still carries a `published_at`.
-             *
-             */
-            published_at?: string; // date-time
-            /**
-             * Who performed the last publish of this revision.
-             */
-            published_by?: string;
-            /**
-             * Whether this revision is the one currently live.
-             */
-            is_published: boolean;
-            /**
-             * The SSO identity providers just captured into this revision, with `client_secret` REDACTED exactly as the admin portal-config GET redacts it. Returned only here — not on list items or elsewhere — because the caller who just submitted providers is the one reader who needs to see what got captured, e.g. to warn that the revision was saved without a client secret.
-             *
-             */
-            identity_providers?: /**
-             * SSO identity provider configuration.
-             *
-             * Env var interpolation: only string fields under `oidc_config` and
-             * `mobile_oidc_config` (incl. their nested `metadata`) are passed through
-             * Liquid templating, so they may contain `{{ env.VAR }}` placeholders that
-             * get resolved at runtime against the organization's environment.
-             *
-             * The following fields are used as literal values and MUST NOT contain
-             * template syntax: `slug`, `display_name`, `provider_type`, all keys and
-             * values under `attribute_mappings` (used as JSONPath-like accessors into
-             * token claims), and all keys and values under `entity_matching`.
-             *
-             */
-            ProviderConfig[];
-            /**
-             * Only when the request asked to `publish`. The result of publishing this revision.
-             */
-            published?: {
-                revision_id: string;
-                published_at: string; // date-time
-                published_by?: string;
-                /**
-                 * The name now on the revision: the one sent in the request, or the one a previous publish set when this request omitted `name`. Absent when neither exists.
-                 *
-                 * example:
-                 * FAQ page launch
-                 */
-                name?: string;
-                /**
-                 * Stable, machine-readable codes for best-effort post-publish side effects that exhausted their retries. Publishing itself succeeded; these are not error messages and not meant for display as-is. Clients map each code to their own localized text.
-                 * Known codes: `allowed_entities_change` (portal entity grants and detail pages did not sync), `dns_records_clear` (the previous domain's DNS records were not cleared). New codes may be added without a client update, so treat an unrecognized code as a generic "a follow-up step did not finish" case rather than an error.
-                 *
-                 */
-                post_publish_warnings: string[];
-                /**
-                 * Only present when non-empty: blueprint-managed live pages/blocks this publish could not replace because the publisher is not the owning blueprint. Their live version stays as it is; the rest of the revision was published. Detach a node to make it publishable.
-                 *
-                 * example:
-                 * [
-                 *   "allowed_entities_change"
-                 * ]
-                 */
-                held_back?: /* A blueprint-managed page or block a write tried to change; the stored version was kept. */ HeldBackNode[];
-            };
-        }
-        export interface PortalRevisionList {
-            results: PortalRevisionSummary[];
-            /**
-             * Opaque cursor to pass back as `cursor` to fetch the next page. When `next_cursor` is absent, the client has reached the end of the dataset.
-             *
-             */
-            next_cursor?: string;
-        }
-        export interface PortalRevisionPreview {
-            /**
-             * Short-lived token that makes portal reads return this revision. Send it in the `x-portal-preview-token` header.
-             *
-             */
-            preview_token: string;
-            /**
-             * When the preview token stops being honoured.
-             */
-            expires_at: string; // date-time
-            /**
-             * Link that opens the revision in the portal on its live domain.
-             * example:
-             * https://portal.example.com/?preview_token=eyJhbGciOiJIUzI1NiIs...
-             */
-            url: string;
-        }
-        export interface PortalRevisionRequest {
-            [name: string]: any;
+        export interface PortalConfigV3WriteResult {
             /**
              * Journey actions allowed on an entity by a portal user
              */
@@ -8658,21 +8660,7 @@ export declare namespace Components {
              * `{{ env.VAR }}` references pass through.
              *
              */
-            identity_providers?: /**
-             * SSO identity provider configuration.
-             *
-             * Env var interpolation: only string fields under `oidc_config` and
-             * `mobile_oidc_config` (incl. their nested `metadata`) are passed through
-             * Liquid templating, so they may contain `{{ env.VAR }}` placeholders that
-             * get resolved at runtime against the organization's environment.
-             *
-             * The following fields are used as literal values and MUST NOT contain
-             * template syntax: `slug`, `display_name`, `provider_type`, all keys and
-             * values under `attribute_mappings` (used as JSONPath-like accessors into
-             * token claims), and all keys and values under `entity_matching`.
-             *
-             */
-            ProviderConfig[];
+            identity_providers?: ProviderPublicConfig[];
             mobile_config?: /* Mobile app configuration for the portal. Stored inside the portal's config object. Identifiers/branding are non-secret; signing credentials live in a secure store, never here. */ MobileConfig;
             /**
              * Enable/Disable the portal access
@@ -8797,7 +8785,7 @@ export declare namespace Components {
                 prevent_user_enumeration?: boolean;
             };
             /**
-             * AWS Cognito Pool details for the portal
+             * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
              */
             cognito_details?: {
                 /**
@@ -9039,6 +9027,2229 @@ export declare namespace Components {
              * ]
              */
             registration_identifiers?: ContractIdentifier[];
+            /**
+             * Slug of the portal role portal users of this portal get unless they have their own
+             * `role`. Unset means the built-in default role of the portal type, e.g.
+             * `default_end_customer_portal_role`.
+             *
+             * example:
+             * default_end_customer_portal_role
+             */
+            default_role?: string;
+            /**
+             * Slugs of the portal roles a portal user of this portal may be given (portal_user
+             * `role`). The default role is always allowed, whether or not it is listed.
+             *
+             * example:
+             * [
+             *   "b2b_admin",
+             *   "b2b_viewer"
+             * ]
+             */
+            allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
+            /**
+             * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
+             *
+             */
+            surfaces?: /**
+             * One surface a portal's data is reached from (see `surfaces` on the portal config).
+             *
+             * A surface names how callers authenticate on it and what they may reach once they
+             * have. Data access is always a subset of the portal's own: a schema not in
+             * `allowed_portal_entities` cannot be opened up by a surface, and the portal's
+             * contact-relation rules still apply underneath the surface's own.
+             *
+             * Tokens minted for a surface (currently: contact identification tokens for
+             * `registration_identifiers` surfaces) carry the surface id. The surface's data
+             * access is resolved from the portal config on every request, not baked into the
+             * token, so tightening a surface applies to tokens already in circulation.
+             *
+             */
+            PortalSurface[];
+            /**
+             * Account-mode only. Identifiers on the contact entity of the primarily
+             * identified account. Used to pick an existing related contact within the
+             * resolved account; if none matches, the values are written onto the new
+             * contact that is created and linked to the account.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "first_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   }
+             * ]
+             */
+            contact_identifiers_for_account?: RegistrationIdentifier[];
+            /**
+             * Contact attributes collected from the user during self-registration that are
+             * written onto the newly created contact but are not used to identify an
+             * existing one.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "first_name",
+             *     "required": true
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "required": true
+             *   }
+             * ]
+             */
+            additional_contact_attributes?: /**
+             * A contact attribute that is collected from the user during self-registration
+             * and written onto the newly created contact, but is NOT used to identify
+             * an existing contact.
+             *
+             */
+            AdditionalContactAttribute[];
+            /**
+             * Journeys automatically opened on a portal user action
+             */
+            triggered_journeys?: {
+                trigger_name?: "FIRST_LOGIN" | "ACCEPT_ORDER" | "DECLINE_ORDER";
+                journey_id?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                EntityId /* uuid */;
+                /**
+                 * Context parameters forwarded to the journey when it is
+                 * auto-triggered. Values may contain handlebars templates
+                 * that reference the available context (e.g.
+                 * `{{contact._id}}`, `{{portal_user.email}}`,
+                 * `{{order._id}}`) — these are resolved at trigger time by
+                 * `GET /v2/portal/config/triggered-journeys/{trigger_name}`
+                 * using the caller's auth context plus runtime entities
+                 * supplied via the `context_entities` query param.
+                 *
+                 */
+                context_params?: {
+                    key?: string;
+                    value?: string;
+                }[];
+            }[];
+            /**
+             * Rules for editing an entity by a portal user
+             */
+            entity_edit_rules?: {
+                slug?: /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                EntitySlug;
+                /**
+                 * example:
+                 * first_name
+                 */
+                attribute?: string;
+                rule_type?: "cadence" | "relative_to_current_value" | "days_before_date" | "overdue_payments";
+                cadence_period_type?: "days" | "weeks" | "months";
+                /**
+                 * example:
+                 * 1
+                 */
+                cadence_period?: number;
+                /**
+                 * example:
+                 * 1
+                 */
+                changes_allowed?: number;
+                /**
+                 * example:
+                 * 1
+                 */
+                grace_period?: number;
+                /**
+                 * example:
+                 * 10%
+                 */
+                allowed_increment?: string;
+                /**
+                 * example:
+                 * 10%
+                 */
+                allowed_decrement?: string;
+                /**
+                 * example:
+                 * 10
+                 */
+                number_of_days_before_restriction?: number;
+            }[];
+            allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
+            /**
+             * Prevent indexing by search engines
+             */
+            prevent_search_engine_indexing?: boolean;
+            /**
+             * Grace period in days for meter readings
+             */
+            meter_reading_grace_period?: number;
+            /**
+             * Number of years to look back for showing inactive contracts in the portal
+             */
+            inactive_contract_cutoff_years?: number;
+            /**
+             * Whether this is a dummy/test portal configuration
+             */
+            is_dummy?: boolean;
+            /**
+             * Always true. Legacy v2 storage was migrated; field kept for compatibility and will be removed.
+             */
+            is_v3_item?: boolean;
+            /**
+             * The revision currently live on this portal. Absent until the first publish.
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            published_revision_id?: string;
+            portal_id?: /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            PortalId;
+            /**
+             * Key of the portal config
+             * example:
+             * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            portal_sk_v3?: string;
+            origin?: /* Origin of the portal */ Origin;
+            /**
+             * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+             */
+            global_blocks?: {
+                [name: string]: Block;
+            };
+            /**
+             * ID of the organization
+             * example:
+             * 12345
+             */
+            organization_id?: string;
+            /**
+             * Organization settings
+             */
+            org_settings?: {
+                /**
+                 * Canary feature flag
+                 */
+                canary?: {
+                    /**
+                     * Enable/Disable the canary feature
+                     */
+                    enabled?: boolean;
+                };
+                /**
+                 * Disable Advanced Usage Metrics
+                 */
+                notracking?: {
+                    /**
+                     * Disable browser-side scripts that track advanced usage metrics
+                     */
+                    enabled?: boolean;
+                };
+            };
+            /**
+             * Feature flags for the portal
+             */
+            feature_flags?: {
+                [name: string]: boolean;
+            };
+            /**
+             * Permissions granted to a portal user while accessing entities
+             */
+            grants?: Grant[];
+            pages?: Page[];
+            /**
+             * Findings for the portal this write leaves behind; absent when the validation could not run.
+             *
+             */
+            validation?: {
+                /**
+                 * `true` when there is no finding with severity `error`.
+                 */
+                valid: boolean;
+                /**
+                 * Errors first, then warnings.
+                 */
+                findings: /* One thing the portal config validation found. */ PortalValidationFinding[];
+            };
+        }
+        /**
+         * The portal config as `upsertPortal` returns it, with the validation of what was written.
+         */
+        export interface PortalConfigWriteResult {
+            mobile_config?: /* Mobile app configuration for the portal. Stored inside the portal's config object. Identifiers/branding are non-secret; signing credentials live in a secure store, never here. */ MobileConfig;
+            /**
+             * Enable/Disable the portal access
+             */
+            enabled?: boolean;
+            /**
+             * A short name to identify your portal
+             * example:
+             * Installer Portal
+             */
+            name?: string;
+            /**
+             * The URL on which the portal is accessible
+             * example:
+             * abc.com
+             */
+            domain?: string;
+            /**
+             * Mark true if the domain is an Epilot domain
+             */
+            is_epilot_domain?: boolean;
+            /**
+             * The URL on which the portal is accessible
+             * example:
+             * example-portal-12345.ecp.epilot.cloud
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
+            design_id?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            header?: /**
+             * Settings of the portal's header bar, stored once per portal.
+             *
+             */
+            PortalHeader;
+            /**
+             * Allowed portal entities for the portal
+             * example:
+             * [
+             *   "contact",
+             *   "contract"
+             * ]
+             */
+            allowed_portal_entities?: string[];
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Controls behavior of self-registration when account is the registration
+             * entity. `BLOCK_IF_PORTAL_USER_EXISTS` matches an existing account and
+             * rejects the request when any portal user is already linked to that
+             * account (no creation). Blocking can also be enabled on the other
+             * non-create modes via `block_registration_if_portal_user_exists`.
+             *
+             */
+            self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY";
+            /**
+             * Account-mode only. Reject registration when the resolved account already
+             * has any portal user (any portal user whose mapped contact is linked to
+             * the account).
+             *
+             */
+            block_registration_if_portal_user_exists?: boolean;
+            /**
+             * Entity type used as the primary identifier for self-registration
+             */
+            self_registration_entity?: "contact" | "account";
+            registration_target_group?: /**
+             * Limits who can get a portal user to existing contacts or accounts matching targets,
+             * with the same rules as page and block visibility. Targets are evaluated against the
+             * registration entity (`self_registration_entity`): the contact in contact mode, the
+             * account in account mode. Applies wherever an existing record is resolved for a new
+             * portal user: self-registration, SSO sign-in, journeys and invitations by contact id.
+             * Contacts and accounts created during registration (per `self_registration_setting`
+             * or `self_registration_account_setting`) are not checked. A self-registration outside
+             * the group is rejected exactly like one with no matching record
+             * (`SELF_REGISTRATION_NOT_ALLOWED`, or `ACCOUNT_NOT_VERIFIED` in account mode); a
+             * request naming the contact explicitly fails with `NOT_IN_REGISTRATION_TARGET_GROUP`.
+             * The registration pre-check (`checkContactExists`) answers `exists: false` for a
+             * record outside the group, so sign-up stops at the identification step.
+             * If target matching fails, registration is rejected. Without targets every matching
+             * record can register. The group also applies to `identifyContact`.
+             *
+             */
+            RegistrationTargetGroup;
+            /**
+             * Enable or disable user account self management
+             * example:
+             * false
+             */
+            user_account_self_management?: boolean;
+            feature_settings?: /* Feature settings for the portal */ PortalFeatureSettings;
+            /**
+             * Access token for the portal
+             */
+            accessToken?: string;
+            advanced_mfa?: {
+                /**
+                 * Advanced MFA feature flag
+                 */
+                enabled?: boolean;
+            };
+            /**
+             * Authentication settings for the portal
+             */
+            auth_settings?: {
+                passwordless_login?: {
+                    /**
+                     * Passwordless login feature flag
+                     */
+                    enabled?: boolean;
+                };
+                /**
+                 * Opt-in, set by the configuring user. When enabled, a second factor is enforced after the password and portal users can add passkeys (fingerprint, face or device PIN) as one variant of it, next to the email code of advanced_mfa. Users with a passkey use it by default; with advanced_mfa off, the passkey is the only second factor once a user has added one. On passwordless portals a passkey can replace the email code. Passkeys are bound to the domain they were added on. Default off; turning it off again restores the previous behaviour and keeps registered passkeys.
+                 *
+                 */
+                passkeys?: {
+                    /**
+                     * Enforce a second factor and allow passkeys as one variant of it
+                     */
+                    enabled?: boolean;
+                };
+                entry_point?: "PASSWORD" | "SSO";
+                preferred_sso_providers?: /**
+                 * URL-friendly slug to use as organization-unique identifier for Provider
+                 * example:
+                 * office-365-login
+                 */
+                ProviderSlug /* [0-9a-z_-]+ */[];
+                /**
+                 * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
+                 */
+                auto_redirect_to_sso?: boolean;
+                /**
+                 * Opt-in. When true, suppresses responses that reveal whether a user exists for public, pre-authentication actions (the login entry-point check and self-registration), at the expense of some UX. Already-authenticated actions are unaffected. Default false.
+                 *
+                 */
+                prevent_user_enumeration?: boolean;
+            };
+            /**
+             * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
+             */
+            cognito_details?: {
+                /**
+                 * Cognito user pool client ID
+                 * example:
+                 * 6bsd0jkgoie74k2i8mrhc1vest
+                 */
+                cognito_user_pool_client_id?: string;
+                /**
+                 * Cognito user pool client ID used by the native portal apps (longer refresh token validity)
+                 * example:
+                 * 3k9fj2l1m0n8b7v6c5x4z3a2s1
+                 */
+                cognito_mobile_client_id?: string;
+                /**
+                 * Cognito user pool ARN
+                 * example:
+                 * arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341
+                 */
+                cognito_user_pool_arn?: string;
+                /**
+                 * Cognito user pool ID
+                 * example:
+                 * eu-central-1_CUEQRNbUb
+                 */
+                cognito_user_pool_id?: string;
+                /**
+                 * Timeouts for the cognito tokens
+                 */
+                timeouts?: {
+                    /**
+                     * Timeout for the refresh token
+                     * example:
+                     * 300
+                     */
+                    refresh_token?: number;
+                    /**
+                     * Timeout for the access token
+                     * example:
+                     * 300
+                     */
+                    access_token?: number;
+                    /**
+                     * Timeout for the id token
+                     * example:
+                     * 300
+                     */
+                    id_token?: number;
+                };
+                /**
+                 * Advanced authentication settings for the portal
+                 */
+                advanced_authentication?: {
+                    /**
+                     * Enables detailed logging of user authentication attempts including risk assessments, IP addresses, user agents, and device information. These logs can be used for security analysis and monitoring.
+                     * example:
+                     * true
+                     */
+                    user_activity_logging?: boolean;
+                    /**
+                     * Automatically assesses risk for every authentication session. Based on risk ratings, can block authentication or require MFA for suspicious sign-in attempts. Helps protect user accounts from potential attacks by adapting security measures in real-time.
+                     * example:
+                     * true
+                     */
+                    adaptive_authentication?: boolean;
+                    /**
+                     * Checks passwords against databases of leaked and commonly-guessed passwords during sign-up, sign-in, and password reset. Blocks or warns users when insecure passwords are detected, preventing unauthorized access from compromised credentials.
+                     * example:
+                     * true
+                     */
+                    compromised_credentials_detection?: boolean;
+                };
+                /**
+                 * Password policy for the portal
+                 */
+                password_policy?: {
+                    /**
+                     * Minimum password length
+                     * example:
+                     * 8
+                     */
+                    minimum_length?: number;
+                    /**
+                     * Maximum password length
+                     * example:
+                     * 256
+                     */
+                    maximum_length?: number;
+                    /**
+                     * Require lowercase characters
+                     * example:
+                     * true
+                     */
+                    require_lowercase?: boolean;
+                    /**
+                     * Require uppercase characters
+                     * example:
+                     * true
+                     */
+                    require_uppercase?: boolean;
+                    /**
+                     * Require numbers
+                     * example:
+                     * true
+                     */
+                    require_numbers?: boolean;
+                    /**
+                     * Require symbols
+                     * example:
+                     * true
+                     */
+                    require_symbols?: boolean;
+                    /**
+                     * Number of previous passwords a user is prevented from reusing. Set to 0 to disable reuse prevention. Maps to Cognito's PasswordHistorySize and requires the user pool to be on the Essentials or Plus feature plan.
+                     * example:
+                     * 3
+                     */
+                    password_history_size?: number;
+                };
+            };
+            /**
+             * Stringified object with configuration details
+             */
+            config?: string;
+            /**
+             * Deprecated. Use registration_identifiers instead.
+             * example:
+             * [
+             *   "email",
+             *   "last_name"
+             * ]
+             */
+            contact_identifiers?: string[];
+            /**
+             * example:
+             * {
+             *   "contact": [
+             *     "name",
+             *     "address"
+             *   ],
+             *   "contract": [
+             *     "installment_amount"
+             *   ]
+             * }
+             */
+            approval_state_attributes?: {
+                [name: string]: string[];
+            };
+            email_templates?: /* Email templates used for authentication and internal processes */ EmailTemplates;
+            /**
+             * Teaser & Banner Image web links
+             */
+            images?: {
+                /**
+                 * URL of the order left teaser image
+                 * example:
+                 * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-left-teaser.jpeg
+                 */
+                orderLeftTeaser?: string | null;
+                /**
+                 * URL of the order right teaser image
+                 * example:
+                 * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-right-teaser.jpeg
+                 */
+                orderRightTeaser?: string | null;
+                /**
+                 * URL of the welcome banner image
+                 * example:
+                 * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/welcome-banner.jpeg
+                 */
+                welcomeBanner?: string | null;
+            };
+            /**
+             * Identifiers used to identify an entity by a portal user. Deprecated. Use contract_identifiers instead.
+             */
+            entity_identifiers?: {
+                type?: {
+                    /**
+                     * Enable/Disable the entity identifier
+                     */
+                    isEnabled?: boolean;
+                    /**
+                     * Attributes used to identify an entity
+                     */
+                    attributes?: string[];
+                };
+            };
+            /**
+             * Identifiers to identify a contract by a portal user.
+             * example:
+             * [
+             *   {
+             *     "name": "email",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "contract_number",
+             *     "schema": "contract"
+             *   }
+             * ]
+             */
+            contract_identifiers?: ContractIdentifier[];
+            /**
+             * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+             *   - `contracts`: the user's Contact is added as a customer of the Contract.
+             *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+             *
+             */
+            self_assignment_mode?: "contracts" | "customer_to_portal_user";
+            /**
+             * Configuration for contract selector in the portal
+             */
+            contract_selector_config?: {
+                /**
+                 * Whether to show inactive contracts in the selector
+                 */
+                show_inactive?: boolean;
+                /**
+                 * Path to the property to use as the contract title
+                 */
+                title_path?: string;
+            };
+            /**
+             * Identifiers to identify a contact of a portal user during the registration.
+             * example:
+             * [
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "contract_number",
+             *     "schema": "contract"
+             *   }
+             * ]
+             */
+            registration_identifiers?: ContractIdentifier[];
+            /**
+             * Slug of the portal role portal users of this portal get unless they have their own
+             * `role`. Unset means the built-in default role of the portal type, e.g.
+             * `default_end_customer_portal_role`.
+             *
+             * example:
+             * default_end_customer_portal_role
+             */
+            default_role?: string;
+            /**
+             * Slugs of the portal roles a portal user of this portal may be given (portal_user
+             * `role`). The default role is always allowed, whether or not it is listed.
+             *
+             * example:
+             * [
+             *   "b2b_admin",
+             *   "b2b_viewer"
+             * ]
+             */
+            allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
+            /**
+             * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
+             *
+             */
+            surfaces?: /**
+             * One surface a portal's data is reached from (see `surfaces` on the portal config).
+             *
+             * A surface names how callers authenticate on it and what they may reach once they
+             * have. Data access is always a subset of the portal's own: a schema not in
+             * `allowed_portal_entities` cannot be opened up by a surface, and the portal's
+             * contact-relation rules still apply underneath the surface's own.
+             *
+             * Tokens minted for a surface (currently: contact identification tokens for
+             * `registration_identifiers` surfaces) carry the surface id. The surface's data
+             * access is resolved from the portal config on every request, not baked into the
+             * token, so tightening a surface applies to tokens already in circulation.
+             *
+             */
+            PortalSurface[];
+            /**
+             * Account-mode only. Identifiers on the contact entity of the primarily
+             * identified account. Used to pick an existing related contact within the
+             * resolved account; if none matches, the values are written onto the new
+             * contact that is created and linked to the account.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "first_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   }
+             * ]
+             */
+            contact_identifiers_for_account?: RegistrationIdentifier[];
+            /**
+             * Contact attributes collected from the user during self-registration that are
+             * written onto the newly created contact but are not used to identify an
+             * existing one.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "first_name",
+             *     "required": true
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "required": true
+             *   }
+             * ]
+             */
+            additional_contact_attributes?: /**
+             * A contact attribute that is collected from the user during self-registration
+             * and written onto the newly created contact, but is NOT used to identify
+             * an existing contact.
+             *
+             */
+            AdditionalContactAttribute[];
+            /**
+             * Journeys automatically opened on a portal user action
+             */
+            triggered_journeys?: {
+                trigger_name?: "FIRST_LOGIN" | "ACCEPT_ORDER" | "DECLINE_ORDER";
+                journey_id?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                EntityId /* uuid */;
+                /**
+                 * Context parameters forwarded to the journey when it is
+                 * auto-triggered. Values may contain handlebars templates
+                 * that reference the available context (e.g.
+                 * `{{contact._id}}`, `{{portal_user.email}}`,
+                 * `{{order._id}}`) — these are resolved at trigger time by
+                 * `GET /v2/portal/config/triggered-journeys/{trigger_name}`
+                 * using the caller's auth context plus runtime entities
+                 * supplied via the `context_entities` query param.
+                 *
+                 */
+                context_params?: {
+                    key?: string;
+                    value?: string;
+                }[];
+            }[];
+            /**
+             * Rules for editing an entity by a portal user
+             */
+            entity_edit_rules?: {
+                slug?: /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                EntitySlug;
+                /**
+                 * example:
+                 * first_name
+                 */
+                attribute?: string;
+                rule_type?: "cadence" | "relative_to_current_value" | "days_before_date" | "overdue_payments";
+                cadence_period_type?: "days" | "weeks" | "months";
+                /**
+                 * example:
+                 * 1
+                 */
+                cadence_period?: number;
+                /**
+                 * example:
+                 * 1
+                 */
+                changes_allowed?: number;
+                /**
+                 * example:
+                 * 1
+                 */
+                grace_period?: number;
+                /**
+                 * example:
+                 * 10%
+                 */
+                allowed_increment?: string;
+                /**
+                 * example:
+                 * 10%
+                 */
+                allowed_decrement?: string;
+                /**
+                 * example:
+                 * 10
+                 */
+                number_of_days_before_restriction?: number;
+            }[];
+            allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
+            /**
+             * Prevent indexing by search engines
+             */
+            prevent_search_engine_indexing?: boolean;
+            /**
+             * Grace period in days for meter readings
+             */
+            meter_reading_grace_period?: number;
+            /**
+             * Number of years to look back for showing inactive contracts in the portal
+             */
+            inactive_contract_cutoff_years?: number;
+            /**
+             * Whether this is a dummy/test portal configuration
+             */
+            is_dummy?: boolean;
+            /**
+             * Always true. Legacy v2 storage was migrated; field kept for compatibility and will be removed.
+             */
+            is_v3_item?: boolean;
+            /**
+             * The revision currently live on this portal. Absent until the first publish.
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            published_revision_id?: string;
+            portal_id?: /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            PortalId;
+            /**
+             * Key of the portal config
+             * example:
+             * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            portal_sk_v3?: string;
+            origin?: /* Origin of the portal */ Origin;
+            pages?: {
+                [name: string]: Page;
+            };
+            /**
+             * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+             */
+            global_blocks?: {
+                [name: string]: Block;
+            };
+            /**
+             * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. When the notification template references an email template (`email_template_id`), portal users who opted in to email notifications additionally receive that email. Admin/builder-only — never exposed via the public portal config.
+             */
+            notification_triggers?: NotificationTriggerConfig[];
+            /**
+             * Master toggle for the portal's engagement center (in-app notifications including the notification triggers above). Off when absent — portal users only see the engagement center and receive trigger notifications after an admin enables it.
+             */
+            engagement_center_enabled?: boolean;
+            engagement_center_task_templates?: /* Handlebars templates rendering each outstanding task (to-do) row in the portal's engagement center. Resolved server-side per task against the task's entity (same variable syntax as page block templates, e.g. `{{order.order_number}}`, custom and environment variables) plus `task.*` (the workflow step, e.g. `{{task.name}}`), `workflow.*` (the execution, e.g. `{{workflow.name}}`) and `entity.*` (the task's entity regardless of its schema, e.g. `{{entity._title}}`). A template that is absent or blank keeps the portal's default rendering for that line. Admin/builder-only — never exposed via the public portal config. */ EngagementCenterTaskTemplates;
+            /**
+             * Name of the engagement center shown to portal users (header button and drawer title), keyed by language (de, en). A blank or absent language keeps the portal's own translated default.
+             * example:
+             * {
+             *   "de": "Mein Postfach",
+             *   "en": "My inbox"
+             * }
+             */
+            engagement_center_title?: {
+                [name: string]: string;
+            };
+            /**
+             * ID of the organization
+             * example:
+             * 12345
+             */
+            id?: string;
+            /**
+             * ID of the organization
+             * example:
+             * 12345
+             */
+            organization_id?: string;
+            /**
+             * Blueprint instance ids managing this portal. Server-managed: ignored (stripped) on every write from a user.
+             *
+             */
+            _manifest?: string[];
+            /**
+             * Id of this portal in the blueprint source. Set once: a blueprint install or update (portal create, `page_upsert_mode=slug`, or a revision with `revision_source` `blueprint_sync`) may give a portal the lineage it does not have yet, unless another portal of the organization holds it. A portal created as a copy next to the organization's live portal of its origin (downgraded to `ADDITIONAL_PORTAL`) never takes it. After that it never changes; every other write keeps the stored value. Locks nothing on its own.
+             *
+             */
+            _lineage_id?: string;
+            /**
+             * Lineage ids of pages detached from their blueprint; a blueprint sync leaves them alone. Server-managed.
+             *
+             */
+            detached_lineage_ids?: string[];
+            /**
+             * Only present on write responses: blueprint-managed pages/blocks the request tried to change. Their stored version was kept and the rest of the save succeeded.
+             *
+             */
+            held_back?: /* A blueprint-managed page or block a write tried to change; the stored version was kept. */ HeldBackNode[];
+            /**
+             * Organization settings
+             */
+            org_settings?: {
+                /**
+                 * Canary feature flag
+                 */
+                canary?: {
+                    /**
+                     * Enable/Disable the canary feature
+                     */
+                    enabled?: boolean;
+                };
+                /**
+                 * Disable Advanced Usage Metrics
+                 */
+                notracking?: {
+                    /**
+                     * Disable browser-side scripts that track advanced usage metrics
+                     */
+                    enabled?: boolean;
+                };
+            };
+            /**
+             * Feature flags for the portal
+             */
+            feature_flags?: {
+                [name: string]: boolean;
+            };
+            /**
+             * Public portal config only. The validation rules referenced by `validation_rule_id` on the
+             * registration fields and the `contract_identifiers`, keyed by rule ID, so the registration and
+             * add-contract forms can check values as they are typed. Present only when such rules are configured.
+             *
+             */
+            registration_validation_rules?: {
+                [name: string]: /* A validation rule of the organization, as embedded in the public portal config. */ RegistrationValidationRule;
+            };
+            /**
+             * Permissions granted to a portal user while accessing entities
+             */
+            grants?: Grant[];
+            identity_providers?: ProviderPublicConfig[];
+            /**
+             * Present only when the request carried a valid `x-portal-preview-token`: the config is this revision's, not the live one.
+             *
+             */
+            preview_revision?: {
+                /**
+                 * example:
+                 * 2026-08-25T14:03:11.482Z-a7f3c1d9
+                 */
+                revision_id: string;
+                name?: string;
+                created_at: string; // date-time
+            };
+            /**
+             * Findings for the portal this write leaves behind; absent when the validation could not run.
+             *
+             */
+            validation?: {
+                /**
+                 * `true` when there is no finding with severity `error`.
+                 */
+                valid: boolean;
+                /**
+                 * Errors first, then warnings.
+                 */
+                findings: /* One thing the portal config validation found. */ PortalValidationFinding[];
+            };
+        }
+        /**
+         * Contact attributes a portal user can change. Other attributes are ignored.
+         * Value types follow the organization's contact schema.
+         *
+         */
+        export interface PortalContactUpdate {
+            [name: string]: any;
+            /**
+             * example:
+             * de
+             */
+            language?: string;
+            first_name?: any;
+            last_name?: any;
+            salutation?: any;
+            phone?: any;
+            phone_number?: any;
+            mobile?: any;
+            street?: any;
+            street_number?: any;
+            postal_code?: any;
+            city?: any;
+            country?: any;
+            preferred_language?: any;
+            communication_preferences?: any;
+        }
+        /**
+         * Contract attributes a portal user can change. Other attributes are ignored.
+         */
+        export interface PortalContractUpdate {
+            [name: string]: any;
+            /**
+             * Installment amount in cents
+             * example:
+             * 8500
+             */
+            installment_amount?: number;
+            /**
+             * Installment amount as a decimal string
+             * example:
+             * 85.00
+             */
+            installment_amount_decimal?: string;
+        }
+        /**
+         * Limits portal chat to portal users matching targets, with the same rules as page and block visibility. Without targets every signed-in portal user can use the chat.
+         */
+        export interface PortalCopilotVisibility {
+            /**
+             * Target IDs that must match for the portal user to use the chat
+             */
+            visible_for_targets?: string[];
+            /**
+             * Operator for visible_for_targets matching
+             */
+            visible_for_operator?: "and" | "or";
+            /**
+             * Target IDs that if matched deny the portal user the chat
+             */
+            hidden_for_targets?: string[];
+            /**
+             * Operator for hidden_for_targets matching
+             */
+            hidden_for_operator?: "and" | "or";
+        }
+        /**
+         * One column of the portal data export. Send the column value as `template`; `source` is the older single-attribute shape, still accepted.
+         *
+         */
+        export interface PortalDataExportColumn {
+            /**
+             * Stable, immutable column id (snake_case). Append-only contract: never rename, reorder semantics, or remove an existing key; new columns are appended.
+             *
+             * example:
+             * vertragsnummer
+             */
+            key: string;
+            /**
+             * Localized header label, keyed by language (de, en).
+             * example:
+             * {
+             *   "de": "Vertragsnummer",
+             *   "en": "Contract number"
+             * }
+             */
+            header: {
+                [name: string]: string;
+            };
+            /**
+             * Older single-attribute shape (use `template`): relation hops from the anchor entity plus the attribute to read on the resolved entity. An empty path means the anchor itself.
+             *
+             */
+            source?: {
+                /**
+                 * Relation hops from the anchor entity (max 3).
+                 * example:
+                 * [
+                 *   "customer"
+                 * ]
+                 */
+                path?: string[];
+                /**
+                 * Attribute to read on the resolved entity.
+                 * example:
+                 * customer_number
+                 */
+                attribute: string;
+                /**
+                 * Which part of an address-typed attribute to render.
+                 */
+                address_field?: "full" | "street" | "street_number" | "postal_code" | "city" | "additional_info" | "country";
+            };
+            /**
+             * The column value as a Handlebars template, rendered per row with the portal's block template engine and helpers, e.g. `{{#if contract.customer.name}}{{contract.customer.name}}{{else}}{{contract.customer.first_name}}{{/if}}`. Variables are anchor-relative paths with up to 3 relation hops; a relation resolves to its first entity, and block-style indices (`contract.customer.0.name`) are accepted. A template that is exactly one variable is read as that attribute and can use any `formatter`; any other template renders as text.
+             *
+             * example:
+             * {{contract.customer.last_name}}
+             */
+            template?: string;
+            /**
+             * Address part for the `address` formatter on a single-variable template.
+             */
+            address_field?: "full" | "street" | "street_number" | "postal_code" | "city" | "additional_info" | "country";
+            formatter?: "text" | "date" | "money_cents" | "enum" | "address";
+            /**
+             * Localized value maps for the enum formatter, keyed by language then raw value.
+             *
+             */
+            enum_labels?: {
+                [name: string]: {
+                    [name: string]: string;
+                };
+            };
+        }
+        /**
+         * Portal-facing overrides of a stage description, configured per portal
+         * audience in the Flows Hub. Served unresolved for the same reason as
+         * `PortalNameOverrides`; a block falls back to `description` when its
+         * audience's key is absent. The values are rich text, like `description`
+         * itself.
+         *
+         */
+        export interface PortalDescriptionOverrides {
+            /**
+             * Description shown in the End Customer Portal
+             */
+            ecp?: string;
+            /**
+             * Description shown in the Installer Portal
+             */
+            installer?: string;
+        }
+        /**
+         * Feature settings for the portal
+         */
+        export interface PortalFeatureSettings {
+            /**
+             * Retired, not read. A portal shows a start page by having a `dashboard` page.
+             */
+            start_page?: boolean;
+            /**
+             * Retired, not read. Billing follows the organization's `commodity_billing` setting.
+             */
+            billing?: boolean;
+            /**
+             * Retired, not read. Billing pages and blocks follow the organization's `commodity_billing` setting.
+             */
+            commodity_billing?: boolean;
+            /**
+             * Retired, not read.
+             */
+            change_due_date?: boolean;
+            /**
+             * Ignored, every portal runs the new design.
+             */
+            new_design?: boolean;
+            /**
+             * Enable the MCP (AI agent) connector channel for this portal
+             */
+            mcp_enabled?: boolean;
+            /**
+             * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
+             */
+            mcp_grant_version?: number;
+            /**
+             * Enable the portal copilot chat for this portal
+             */
+            portal_copilot?: boolean;
+            /**
+             * ID of the Agent Builder portal agent this portal's copilot chat runs, set by Agent Builder. When unset, or when the agent no longer exists in the portal's organization, the chat runs the default portal copilot.
+             */
+            portal_copilot_agent_id?: string;
+            portal_copilot_visibility?: /* Limits portal chat to portal users matching targets, with the same rules as page and block visibility. Without targets every signed-in portal user can use the chat. */ PortalCopilotVisibility;
+        }
+        /**
+         * Settings of the portal's header bar, stored once per portal.
+         *
+         */
+        export interface PortalHeader {
+            /**
+             * The design of the header bar
+             */
+            design?: {
+                [name: string]: any;
+                overrides?: /**
+                 * Design overrides scoped to the header bar. Only `components.inputs` and `elements.icon_actions` can be overridden; colours, shape and every other key are refused with a 400 on every write. `null` clears the overrides.
+                 *
+                 * example:
+                 * {
+                 *   "components": {
+                 *     "inputs": {
+                 *       "style": "soft",
+                 *       "color": "neutral",
+                 *       "label_position": "inset"
+                 *     }
+                 *   },
+                 *   "elements": {
+                 *     "icon_actions": {
+                 *       "variant": "icon"
+                 *     }
+                 *   }
+                 * }
+                 */
+                PortalHeaderDesignOverrides;
+            };
+        }
+        /**
+         * Design overrides scoped to the header bar. Only `components.inputs` and `elements.icon_actions` can be overridden; colours, shape and every other key are refused with a 400 on every write. `null` clears the overrides.
+         *
+         * example:
+         * {
+         *   "components": {
+         *     "inputs": {
+         *       "style": "soft",
+         *       "color": "neutral",
+         *       "label_position": "inset"
+         *     }
+         *   },
+         *   "elements": {
+         *     "icon_actions": {
+         *       "variant": "icon"
+         *     }
+         *   }
+         * }
+         */
+        export type PortalHeaderDesignOverrides = {
+            components?: {
+                /**
+                 * Inputs in the header bar, such as search
+                 */
+                inputs?: {
+                    style?: "soft" | "surface" | "outline" | "ghost";
+                    color?: "primary" | "neutral";
+                    label_position?: "outset" | "inset";
+                };
+            };
+            elements?: {
+                /**
+                 * Icon buttons in the header bar (inbox, profile, menu). They draw as the Button variant picked here, with that variant's look in the portal design; unset keeps the icon variant.
+                 *
+                 */
+                icon_actions?: {
+                    variant?: "primary" | "secondary" | "tertiary" | "icon";
+                };
+            };
+        } | null;
+        /**
+         * ID of the portal
+         * example:
+         * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+         */
+        export type PortalId = string;
+        /**
+         * A meter reading submitted by a portal user for a counter of the meter in the path.
+         */
+        export interface PortalMeterReading {
+            value: number;
+            counter_id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            direction?: Direction;
+            timestamp?: string;
+            read_by?: /**
+             * The person who recorded the reading
+             * example:
+             * John Doe
+             */
+            ReadBy;
+            reason?: /**
+             * The reason for recording the reading
+             * If no reason is specified or left empty, the Epilot UI will show 'Regular' as the default display text
+             *
+             * example:
+             * Storing the feed-in record
+             */
+            Reason;
+            source?: Source;
+            status?: ReadingStatus;
+            remark?: string | null;
+            metadata?: {
+                [name: string]: string;
+            };
+        }
+        /**
+         * Portal-facing overrides of a flow or stage title, configured per portal
+         * audience in the Flows Hub. Served unresolved because this endpoint asks
+         * the Workflows API for audience `all` — one cached response feeds blocks
+         * of both audiences, so each block picks its own override and falls back
+         * to `name` when the key is absent.
+         *
+         */
+        export interface PortalNameOverrides {
+            /**
+             * Title shown in the End Customer Portal
+             */
+            ecp?: string;
+            /**
+             * Title shown in the Installer Portal
+             */
+            installer?: string;
+        }
+        /**
+         * A 360 notification addressed to a portal user.
+         */
+        export interface PortalNotification {
+            /**
+             * Stable string identifier of the notification (the numeric notification id as a string).
+             * example:
+             * 1234567890
+             */
+            id: string;
+            /**
+             * Numeric id of the notification, used to mark it as read.
+             * example:
+             * 1234567890
+             */
+            notification_id?: number;
+            /**
+             * Type of notification.
+             * example:
+             * workflow_step_overdue
+             */
+            type?: string;
+            /**
+             * Localized, already-rendered notification title.
+             */
+            title?: {
+                en?: string;
+                de?: string;
+            };
+            /**
+             * Localized, already-rendered notification message.
+             */
+            message?: {
+                en?: string;
+                de?: string;
+            };
+            /**
+             * When the notification was created.
+             */
+            created_at?: string; // date-time
+            /**
+             * Whether the notification has been read by the user.
+             * example:
+             * false
+             */
+            read: boolean;
+            /**
+             * Optional URL the notification points to.
+             */
+            redirect_url?: string;
+        }
+        export interface PortalRevision {
+            /**
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            revision_id: string;
+            created_at: string; // date-time
+            /**
+             * May be absent — an internal-auth caller carries no user id.
+             */
+            created_by?: string;
+            created_by_actor?: /* The AI agent or API token that made a write. Absent when a person used their own login. */ PortalRevisionActor;
+            /**
+             * Set at publish time when the publish request carries one, or by renaming the revision with `updatePortalRevision`. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
+             *
+             * example:
+             * FAQ page launch
+             */
+            name?: string;
+            description?: string;
+            source?: /**
+             * Where a revision came from, when it was not saved in the builder. Not part of the portal config. The builder renders it in the viewer's language for an unnamed revision.
+             *
+             */
+            RevisionSource;
+            page_count: number;
+            /**
+             * The last time this revision was published. NOT the same question as `is_published`: a revision that was live yesterday still carries a `published_at`.
+             *
+             */
+            published_at?: string; // date-time
+            /**
+             * Who performed the last publish of this revision.
+             */
+            published_by?: string;
+            published_by_actor?: /* The AI agent or API token that made a write. Absent when a person used their own login. */ PortalRevisionActor;
+            /**
+             * Whether this revision is the one currently live.
+             */
+            is_published: boolean;
+            /**
+             * The snapshotted portal configuration. Secret-typed extension option values are removed entirely — not masked — before the response is assembled.
+             *
+             */
+            config: {
+                [name: string]: any;
+            };
+            pages: /**
+             * A page from a revision snapshot. Same shape as a live `Page`, without the server-managed fields (`past_routes`, `_created_at`, `_updated_at`, `is_deleted`), which publish re-derives from the live portal.
+             *
+             */
+            RevisionPage[];
+            /**
+             * The SSO identity providers captured in this revision, with `client_secret` REDACTED exactly as the admin portal-config GET redacts it (no read path returns a stored secret).
+             * Publishing this revision replaces every live provider on this portal's origin, not just this portal's own, with this set. Identity providers key on `IDP#{origin}#{slug}`, a partition shared by every portal on that origin, so any other portal sharing it (an ADDITIONAL_PORTAL clone, most commonly) is affected too. A client can diff this against the live providers (by `slug`, and on `oidc_config.oidc_issuer` / `oidc_config.client_id` for a changed provider) to warn that a publish would also change SSO configuration, for this portal and any others sharing its origin.
+             * ABSENT and `[]` are different answers. `[]` means the revision has no providers and publishing it removes the live ones; absent means the revision was saved before provider versioning, carries no SSO opinion, and publishing it changes no provider.
+             *
+             */
+            identity_providers?: /**
+             * SSO identity provider configuration.
+             *
+             * Env var interpolation: only string fields under `oidc_config` and
+             * `mobile_oidc_config` (incl. their nested `metadata`) are passed through
+             * Liquid templating, so they may contain `{{ env.VAR }}` placeholders that
+             * get resolved at runtime against the organization's environment.
+             *
+             * The following fields are used as literal values and MUST NOT contain
+             * template syntax: `slug`, `display_name`, `provider_type`, all keys and
+             * values under `attribute_mappings` (used as JSONPath-like accessors into
+             * token claims), and all keys and values under `entity_matching`.
+             *
+             */
+            ProviderConfig[];
+            email_templates?: /* Email templates used for authentication and internal processes */ EmailTemplates;
+            /**
+             * The portal's email template settings as they were live when the revision was saved. Read-only: this field cannot be set through the revision request and is always captured from live.
+             *
+             */
+            email_template_settings?: {
+                [name: string]: any;
+            };
+        }
+        /**
+         * The AI agent or API token that made a write. Absent when a person used their own login.
+         */
+        export interface PortalRevisionActor {
+            type: "agent" | "api_token";
+            /**
+             * The agent's name, or the name of the API token.
+             * example:
+             * Claude
+             */
+            name?: string;
+            /**
+             * Agent only. Id of the epilot user who approved the agent.
+             */
+            on_behalf_of?: string;
+            /**
+             * Agent only. The purpose the agent gave for its access.
+             */
+            purpose?: string;
+            /**
+             * Agent only. Where the agent runs.
+             */
+            host?: string;
+        }
+        export interface PortalRevisionCreated {
+            /**
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            revision_id: string;
+            created_at: string; // date-time
+            /**
+             * May be absent — an internal-auth caller carries no user id.
+             */
+            created_by?: string;
+            created_by_actor?: /* The AI agent or API token that made a write. Absent when a person used their own login. */ PortalRevisionActor;
+            /**
+             * Set at publish time when the publish request carries one, or by renaming the revision with `updatePortalRevision`. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
+             *
+             * example:
+             * FAQ page launch
+             */
+            name?: string;
+            description?: string;
+            source?: /**
+             * Where a revision came from, when it was not saved in the builder. Not part of the portal config. The builder renders it in the viewer's language for an unnamed revision.
+             *
+             */
+            RevisionSource;
+            page_count: number;
+            /**
+             * The last time this revision was published. NOT the same question as `is_published`: a revision that was live yesterday still carries a `published_at`.
+             *
+             */
+            published_at?: string; // date-time
+            /**
+             * Who performed the last publish of this revision.
+             */
+            published_by?: string;
+            published_by_actor?: /* The AI agent or API token that made a write. Absent when a person used their own login. */ PortalRevisionActor;
+            /**
+             * Whether this revision is the one currently live.
+             */
+            is_published: boolean;
+            /**
+             * The SSO identity providers just captured into this revision, with `client_secret` REDACTED exactly as the admin portal-config GET redacts it. Returned only here — not on list items or elsewhere — because the caller who just submitted providers is the one reader who needs to see what got captured, e.g. to warn that the revision was saved without a client secret.
+             *
+             */
+            identity_providers?: /**
+             * SSO identity provider configuration.
+             *
+             * Env var interpolation: only string fields under `oidc_config` and
+             * `mobile_oidc_config` (incl. their nested `metadata`) are passed through
+             * Liquid templating, so they may contain `{{ env.VAR }}` placeholders that
+             * get resolved at runtime against the organization's environment.
+             *
+             * The following fields are used as literal values and MUST NOT contain
+             * template syntax: `slug`, `display_name`, `provider_type`, all keys and
+             * values under `attribute_mappings` (used as JSONPath-like accessors into
+             * token claims), and all keys and values under `entity_matching`.
+             *
+             */
+            ProviderConfig[];
+            /**
+             * Only when the request asked to `publish`. The result of publishing this revision.
+             */
+            published?: {
+                revision_id: string;
+                published_at: string; // date-time
+                published_by?: string;
+                published_by_actor?: /* The AI agent or API token that made a write. Absent when a person used their own login. */ PortalRevisionActor;
+                /**
+                 * The name now on the revision: the one sent in the request, or the one a previous publish set when this request omitted `name`. Absent when neither exists.
+                 *
+                 * example:
+                 * FAQ page launch
+                 */
+                name?: string;
+                /**
+                 * Stable, machine-readable codes for best-effort post-publish side effects that exhausted their retries. Publishing itself succeeded; these are not error messages and not meant for display as-is. Clients map each code to their own localized text.
+                 * Known codes: `allowed_entities_change` (portal entity grants and detail pages did not sync), `dns_records_clear` (the previous domain's DNS records were not cleared). New codes may be added without a client update, so treat an unrecognized code as a generic "a follow-up step did not finish" case rather than an error.
+                 *
+                 */
+                post_publish_warnings: string[];
+                /**
+                 * Only present when non-empty: blueprint-managed live pages/blocks this publish could not replace because the publisher is not the owning blueprint. Their live version stays as it is; the rest of the revision was published. Detach a node to make it publishable.
+                 *
+                 * example:
+                 * [
+                 *   "allowed_entities_change"
+                 * ]
+                 */
+                held_back?: /* A blueprint-managed page or block a write tried to change; the stored version was kept. */ HeldBackNode[];
+                /**
+                 * Findings for the portal this publish made live; response only.
+                 *
+                 */
+                validation?: {
+                    /**
+                     * `true` when there is no finding with severity `error`.
+                     */
+                    valid: boolean;
+                    /**
+                     * Errors first, then warnings.
+                     */
+                    findings: /* One thing the portal config validation found. */ PortalValidationFinding[];
+                };
+            };
+            /**
+             * Findings of the portal config validation for this revision; response only.
+             *
+             */
+            validation?: {
+                /**
+                 * `true` when there is no finding with severity `error`.
+                 */
+                valid: boolean;
+                /**
+                 * Errors first, then warnings.
+                 */
+                findings: /* One thing the portal config validation found. */ PortalValidationFinding[];
+            };
+        }
+        export interface PortalRevisionList {
+            results: PortalRevisionSummary[];
+            /**
+             * Opaque cursor to pass back as `cursor` to fetch the next page. When `next_cursor` is absent, the client has reached the end of the dataset.
+             *
+             */
+            next_cursor?: string;
+        }
+        export interface PortalRevisionPreview {
+            /**
+             * Short-lived token that makes portal reads return this revision. Send it in the `x-portal-preview-token` header.
+             *
+             */
+            preview_token: string;
+            /**
+             * When the preview token stops being honoured.
+             */
+            expires_at: string; // date-time
+            /**
+             * Link that opens the revision in the portal on its live domain.
+             * example:
+             * https://portal.example.com/?preview_token=eyJhbGciOiJIUzI1NiIs...
+             */
+            url: string;
+        }
+        export interface PortalRevisionRequest {
+            [name: string]: any;
+            /**
+             * Journey actions allowed on an entity by a portal user
+             */
+            entity_actions?: {
+                journey_id?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                EntityId /* uuid */;
+                slug?: /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                EntitySlug;
+                action_Label?: {
+                    en?: string;
+                    de?: string;
+                };
+            }[];
+            /**
+             * Configured Portal extensions
+             */
+            extensions?: ExtensionConfig[];
+            /**
+             * Configured Portal extensions hooks
+             */
+            extension_hooks?: {
+                [name: string]: ExtensionHookSelection;
+            };
+            /**
+             * Default 360 user to notify upon an internal notification
+             */
+            default_user_to_notify?: {
+                /**
+                 * Default admin users for pending user notification to notify
+                 */
+                onPendingUser?: AdminUser[];
+            };
+            /**
+             * SSO identity providers for the portal. When sent on a portal save (PUT/POST),
+             * the list is fully synced — incoming providers are upserted and any existing
+             * providers not in the list are deleted. Omit the field to leave SSO
+             * configuration unchanged; send an empty array to remove all providers.
+             *
+             * Secrets: a provider sent without `oidc_config.client_secret` keeps the
+             * stored secret for the same slug; an explicit empty string clears it.
+             * A sent secret must be an `{{ env.VAR }}` reference (unless
+             * `expose_client_secret` is set): a plaintext value is rejected with 400
+             * (`PLAINTEXT_CLIENT_SECRET`).
+             * `getPortalConfigV3` returns providers with raw secrets redacted;
+             * `{{ env.VAR }}` references pass through.
+             *
+             */
+            identity_providers?: /**
+             * SSO identity provider configuration.
+             *
+             * Env var interpolation: only string fields under `oidc_config` and
+             * `mobile_oidc_config` (incl. their nested `metadata`) are passed through
+             * Liquid templating, so they may contain `{{ env.VAR }}` placeholders that
+             * get resolved at runtime against the organization's environment.
+             *
+             * The following fields are used as literal values and MUST NOT contain
+             * template syntax: `slug`, `display_name`, `provider_type`, all keys and
+             * values under `attribute_mappings` (used as JSONPath-like accessors into
+             * token claims), and all keys and values under `entity_matching`.
+             *
+             */
+            ProviderConfig[];
+            mobile_config?: /* Mobile app configuration for the portal. Stored inside the portal's config object. Identifiers/branding are non-secret; signing credentials live in a secure store, never here. */ MobileConfig;
+            /**
+             * Enable/Disable the portal access
+             */
+            enabled?: boolean;
+            /**
+             * A short name to identify your portal
+             * example:
+             * Installer Portal
+             */
+            name?: string;
+            /**
+             * The URL on which the portal is accessible
+             * example:
+             * abc.com
+             */
+            domain?: string;
+            /**
+             * Mark true if the domain is an Epilot domain
+             */
+            is_epilot_domain?: boolean;
+            /**
+             * The Epilot domain on which the portal is accessible
+             * example:
+             * example-portal-1.ecp.epilot.io
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
+            design_id?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            header?: /**
+             * Settings of the portal's header bar, stored once per portal.
+             *
+             */
+            PortalHeader;
+            /**
+             * Allowed portal entities for the portal
+             * example:
+             * [
+             *   "contact",
+             *   "contract"
+             * ]
+             */
+            allowed_portal_entities?: string[];
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Controls behavior of self-registration when account is the registration
+             * entity. `BLOCK_IF_PORTAL_USER_EXISTS` matches an existing account and
+             * rejects the request when any portal user is already linked to that
+             * account (no creation). Blocking can also be enabled on the other
+             * non-create modes via `block_registration_if_portal_user_exists`.
+             *
+             */
+            self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY";
+            /**
+             * Account-mode only. Reject registration when the resolved account already
+             * has any portal user (any portal user whose mapped contact is linked to
+             * the account).
+             *
+             */
+            block_registration_if_portal_user_exists?: boolean;
+            /**
+             * Entity type used as the primary identifier for self-registration
+             */
+            self_registration_entity?: "contact" | "account";
+            /**
+             * Enable or disable user account self management
+             * example:
+             * false
+             */
+            user_account_self_management?: boolean;
+            feature_settings?: /* Feature settings for the portal */ PortalFeatureSettings;
+            /**
+             * Access token for the portal
+             */
+            accessToken?: string;
+            advanced_mfa?: {
+                /**
+                 * Advanced MFA feature flag
+                 */
+                enabled?: boolean;
+            };
+            /**
+             * Authentication settings for the portal
+             */
+            auth_settings?: {
+                passwordless_login?: {
+                    /**
+                     * Passwordless login feature flag
+                     */
+                    enabled?: boolean;
+                };
+                /**
+                 * Opt-in, set by the configuring user. When enabled, a second factor is enforced after the password and portal users can add passkeys (fingerprint, face or device PIN) as one variant of it, next to the email code of advanced_mfa. Users with a passkey use it by default; with advanced_mfa off, the passkey is the only second factor once a user has added one. On passwordless portals a passkey can replace the email code. Passkeys are bound to the domain they were added on. Default off; turning it off again restores the previous behaviour and keeps registered passkeys.
+                 *
+                 */
+                passkeys?: {
+                    /**
+                     * Enforce a second factor and allow passkeys as one variant of it
+                     */
+                    enabled?: boolean;
+                };
+                entry_point?: "PASSWORD" | "SSO";
+                preferred_sso_providers?: /**
+                 * URL-friendly slug to use as organization-unique identifier for Provider
+                 * example:
+                 * office-365-login
+                 */
+                ProviderSlug /* [0-9a-z_-]+ */[];
+                /**
+                 * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
+                 */
+                auto_redirect_to_sso?: boolean;
+                /**
+                 * Opt-in. When true, suppresses responses that reveal whether a user exists for public, pre-authentication actions (the login entry-point check and self-registration), at the expense of some UX. Already-authenticated actions are unaffected. Default false.
+                 *
+                 */
+                prevent_user_enumeration?: boolean;
+            };
+            /**
+             * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
+             */
+            cognito_details?: {
+                /**
+                 * Cognito user pool client ID
+                 * example:
+                 * 6bsd0jkgoie74k2i8mrhc1vest
+                 */
+                cognito_user_pool_client_id?: string;
+                /**
+                 * Cognito user pool client ID used by the native portal apps (longer refresh token validity)
+                 * example:
+                 * 3k9fj2l1m0n8b7v6c5x4z3a2s1
+                 */
+                cognito_mobile_client_id?: string;
+                /**
+                 * Cognito user pool ARN
+                 * example:
+                 * arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341
+                 */
+                cognito_user_pool_arn?: string;
+                /**
+                 * Cognito user pool ID
+                 * example:
+                 * eu-central-1_CUEQRNbUb
+                 */
+                cognito_user_pool_id?: string;
+                /**
+                 * Timeouts for the cognito tokens
+                 */
+                timeouts?: {
+                    /**
+                     * Timeout for the refresh token
+                     * example:
+                     * 300
+                     */
+                    refresh_token?: number;
+                    /**
+                     * Timeout for the access token
+                     * example:
+                     * 300
+                     */
+                    access_token?: number;
+                    /**
+                     * Timeout for the id token
+                     * example:
+                     * 300
+                     */
+                    id_token?: number;
+                };
+                /**
+                 * Advanced authentication settings for the portal
+                 */
+                advanced_authentication?: {
+                    /**
+                     * Enables detailed logging of user authentication attempts including risk assessments, IP addresses, user agents, and device information. These logs can be used for security analysis and monitoring.
+                     * example:
+                     * true
+                     */
+                    user_activity_logging?: boolean;
+                    /**
+                     * Automatically assesses risk for every authentication session. Based on risk ratings, can block authentication or require MFA for suspicious sign-in attempts. Helps protect user accounts from potential attacks by adapting security measures in real-time.
+                     * example:
+                     * true
+                     */
+                    adaptive_authentication?: boolean;
+                    /**
+                     * Checks passwords against databases of leaked and commonly-guessed passwords during sign-up, sign-in, and password reset. Blocks or warns users when insecure passwords are detected, preventing unauthorized access from compromised credentials.
+                     * example:
+                     * true
+                     */
+                    compromised_credentials_detection?: boolean;
+                };
+                /**
+                 * Password policy for the portal
+                 */
+                password_policy?: {
+                    /**
+                     * Minimum password length
+                     * example:
+                     * 8
+                     */
+                    minimum_length?: number;
+                    /**
+                     * Maximum password length
+                     * example:
+                     * 256
+                     */
+                    maximum_length?: number;
+                    /**
+                     * Require lowercase characters
+                     * example:
+                     * true
+                     */
+                    require_lowercase?: boolean;
+                    /**
+                     * Require uppercase characters
+                     * example:
+                     * true
+                     */
+                    require_uppercase?: boolean;
+                    /**
+                     * Require numbers
+                     * example:
+                     * true
+                     */
+                    require_numbers?: boolean;
+                    /**
+                     * Require symbols
+                     * example:
+                     * true
+                     */
+                    require_symbols?: boolean;
+                    /**
+                     * Number of previous passwords a user is prevented from reusing. Set to 0 to disable reuse prevention. Maps to Cognito's PasswordHistorySize and requires the user pool to be on the Essentials or Plus feature plan.
+                     * example:
+                     * 3
+                     */
+                    password_history_size?: number;
+                };
+            };
+            /**
+             * Stringified object with configuration details
+             */
+            config?: string;
+            /**
+             * Deprecated. Use registration_identifiers instead.
+             * example:
+             * [
+             *   "email",
+             *   "last_name"
+             * ]
+             */
+            contact_identifiers?: string[];
+            /**
+             * example:
+             * {
+             *   "contact": [
+             *     "name",
+             *     "address"
+             *   ],
+             *   "contract": [
+             *     "installment_amount"
+             *   ]
+             * }
+             */
+            approval_state_attributes?: {
+                [name: string]: string[];
+            };
+            email_templates?: /* Email templates used for authentication and internal processes */ EmailTemplates;
+            /**
+             * Teaser & Banner Image web links
+             */
+            images?: {
+                /**
+                 * URL of the order left teaser image
+                 * example:
+                 * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-left-teaser.jpeg
+                 */
+                orderLeftTeaser?: string | null;
+                /**
+                 * URL of the order right teaser image
+                 * example:
+                 * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-right-teaser.jpeg
+                 */
+                orderRightTeaser?: string | null;
+                /**
+                 * URL of the welcome banner image
+                 * example:
+                 * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/welcome-banner.jpeg
+                 */
+                welcomeBanner?: string | null;
+            };
+            /**
+             * Identifiers used to identify an entity by a portal user. Deprecated. Use contract_identifiers instead.
+             */
+            entity_identifiers?: {
+                type?: {
+                    /**
+                     * Enable/Disable the entity identifier
+                     */
+                    isEnabled?: boolean;
+                    /**
+                     * Attributes used to identify an entity
+                     */
+                    attributes?: string[];
+                };
+            };
+            /**
+             * Identifiers to identify a contract by a portal user.
+             * example:
+             * [
+             *   {
+             *     "name": "email",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "contract_number",
+             *     "schema": "contract"
+             *   }
+             * ]
+             */
+            contract_identifiers?: ContractIdentifier[];
+            /**
+             * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+             *   - `contracts`: the user's Contact is added as a customer of the Contract.
+             *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+             *
+             */
+            self_assignment_mode?: "contracts" | "customer_to_portal_user";
+            /**
+             * Configuration for contract selector in the portal
+             */
+            contract_selector_config?: {
+                /**
+                 * Whether to show inactive contracts in the selector
+                 */
+                show_inactive?: boolean;
+                /**
+                 * Path to the property to use as the contract title
+                 */
+                title_path?: string;
+            };
+            /**
+             * Identifiers to identify a contact of a portal user during the registration.
+             * example:
+             * [
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "contract_number",
+             *     "schema": "contract"
+             *   }
+             * ]
+             */
+            registration_identifiers?: ContractIdentifier[];
+            /**
+             * Slug of the portal role portal users of this portal get unless they have their own
+             * `role`. Unset means the built-in default role of the portal type, e.g.
+             * `default_end_customer_portal_role`.
+             *
+             * example:
+             * default_end_customer_portal_role
+             */
+            default_role?: string;
+            /**
+             * Slugs of the portal roles a portal user of this portal may be given (portal_user
+             * `role`). The default role is always allowed, whether or not it is listed.
+             *
+             * example:
+             * [
+             *   "b2b_admin",
+             *   "b2b_viewer"
+             * ]
+             */
+            allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
             /**
              * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
              *
@@ -9268,6 +11479,7 @@ export declare namespace Components {
              * May be absent — an internal-auth caller carries no user id.
              */
             created_by?: string;
+            created_by_actor?: /* The AI agent or API token that made a write. Absent when a person used their own login. */ PortalRevisionActor;
             /**
              * Set at publish time when the publish request carries one, or by renaming the revision with `updatePortalRevision`. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
              *
@@ -9291,10 +11503,23 @@ export declare namespace Components {
              * Who performed the last publish of this revision.
              */
             published_by?: string;
+            published_by_actor?: /* The AI agent or API token that made a write. Absent when a person used their own login. */ PortalRevisionActor;
             /**
              * Whether this revision is the one currently live.
              */
             is_published: boolean;
+        }
+        export interface PortalRoleRef {
+            /**
+             * example:
+             * b2b_admin
+             */
+            slug: string;
+            /**
+             * example:
+             * B2B admin
+             */
+            name: string;
         }
         /**
          * One surface a portal's data is reached from (see `surfaces` on the portal config).
@@ -9354,7 +11579,9 @@ export declare namespace Components {
              * ones otherwise), runs the contact lookup and the `registrationIdentifiersCheck`
              * hook on them, and refuses to issue tokens (403) unless there are at least two.
              * Entries without `name` or `schema` are ignored. A `validation_rule_id` on an
-             * identifier (own or inherited) is checked before the lookup.
+             * identifier (own or inherited) is checked before the lookup. An own identifier without
+             * a `validation_rule_id` uses the rule of the portal's registration identifier for the
+             * same field (`schema` and `name`), if that has one.
              *
              * example:
              * [
@@ -9384,12 +11611,12 @@ export declare namespace Components {
              */
             entities?: /* One schema this surface reaches, with the targets that always apply to it. */ PortalSurfaceEntityAccess[];
             /**
-             * 360 role whose grants apply on this surface (`<org_id>:<slug>`), giving
-             * vertical permissions - which attributes and actions are permitted. Omitted
-             * means the portal's default role.
+             * Slug of the portal role whose grants apply on this surface, giving vertical
+             * permissions - which attributes and actions are permitted. Omitted means the
+             * portal's default role.
              *
              * example:
-             * 728:public_journeys_readonly
+             * public_journeys_readonly
              */
             role_id?: string;
         }
@@ -9498,7 +11725,7 @@ export declare namespace Components {
             _schema: "portal_user";
         }
         /**
-         * Resolved notification preferences of a portal user. Notifications are opt-out: a channel that was never stored on the portal user resolves to enabled (true).
+         * Resolved notification preferences of a portal user. In-app notifications are opt-out: when never stored on the portal user they resolve to enabled (true). Email notifications are opt-in: when never stored they resolve to disabled (false).
          */
         export interface PortalUserNotificationPreferences {
             /**
@@ -9507,6 +11734,12 @@ export declare namespace Components {
              * true
              */
             in_app: boolean;
+            /**
+             * Whether the portal user additionally receives engagement center notifications by email. Only sent for notification templates that reference an email template.
+             * example:
+             * false
+             */
+            email: boolean;
         }
         export interface PortalUserPasskey {
             /**
@@ -9556,6 +11789,76 @@ export declare namespace Components {
              * 9ba94f20-b872-11ed-b30a-b3e3bf2dc8ab
              */
             design_id?: string;
+        }
+        /**
+         * A write refused by the portal config validation (`reason: PORTAL_VALIDATION_FAILED`); nothing was saved.
+         *
+         */
+        export interface PortalValidationFailedResp {
+            /**
+             * Error message
+             */
+            message?: string;
+            /**
+             * Machine-readable cause, when the API can name one. `PORTAL_USER_PENDING_ACTIVATION` means the portal user is authenticated but not mapped to a contact yet, so re-authenticating will not help.
+             */
+            reason?: string;
+            /**
+             * All findings for the portal the write would have left behind, with the errors that refused it in `blocking`.
+             *
+             */
+            validation?: {
+                /**
+                 * `true` when there is no finding with severity `error`.
+                 */
+                valid: boolean;
+                /**
+                 * Errors first, then warnings.
+                 */
+                findings: /* One thing the portal config validation found. */ PortalValidationFinding[];
+                blocking?: /* One thing the portal config validation found. */ PortalValidationFinding[];
+            };
+        }
+        /**
+         * One thing the portal config validation found.
+         */
+        export interface PortalValidationFinding {
+            /**
+             * Stable, machine-readable code. New codes can be added; treat an unknown code by its `severity`.
+             *
+             * example:
+             * BLOCK_PARENT_UNRESOLVED
+             */
+            code: string;
+            /**
+             * `error`: the portal is broken for its users; `warning`: it works but is degraded or looks unintended.
+             *
+             */
+            severity: "error" | "warning";
+            /**
+             * Stable locator of the offending value: pages are addressed by slug, blocks by id.
+             *
+             * example:
+             * pages[slug=login].blocks[id=c495fef9-eeca-4019-a989-8390dcd9825b].parentId
+             */
+            path: string;
+            /**
+             * Human-readable explanation; not stable, do not parse it.
+             */
+            message: string;
+        }
+        /**
+         * Result of the portal config validation.
+         */
+        export interface PortalValidationResult {
+            /**
+             * `true` when there is no finding with severity `error`.
+             */
+            valid: boolean;
+            /**
+             * Errors first, then warnings.
+             */
+            findings: /* One thing the portal config validation found. */ PortalValidationFinding[];
         }
         export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget | PaymentWidget | MeterReadingWidget | MeterChartWidget | CampaignWidget | ProductRecommendationsWidget;
         /**
@@ -9770,6 +12073,26 @@ export declare namespace Components {
              * Last update timestamp of the underlying task/step
              */
             updated_at?: string;
+        }
+        /**
+         * What a portal config write adds to its response; never stored and never returned by a read.
+         *
+         */
+        export interface PortalWriteValidation {
+            /**
+             * Findings for the portal this write leaves behind; absent when the validation could not run.
+             *
+             */
+            validation?: {
+                /**
+                 * `true` when there is no finding with severity `error`.
+                 */
+                valid: boolean;
+                /**
+                 * Errors first, then warnings.
+                 */
+                findings: /* One thing the portal config validation found. */ PortalValidationFinding[];
+            };
         }
         /**
          * The revision a config response shows instead of the live portal config.
@@ -10217,6 +12540,7 @@ export declare namespace Components {
             revision_id: string;
             published_at: string; // date-time
             published_by?: string;
+            published_by_actor?: /* The AI agent or API token that made a write. Absent when a person used their own login. */ PortalRevisionActor;
             /**
              * The name now on the revision: the one sent in the request, or the one a previous publish set when this request omitted `name`. Absent when neither exists.
              *
@@ -10239,6 +12563,20 @@ export declare namespace Components {
              * ]
              */
             held_back?: /* A blueprint-managed page or block a write tried to change; the stored version was kept. */ HeldBackNode[];
+            /**
+             * Findings for the portal this publish made live; response only.
+             *
+             */
+            validation?: {
+                /**
+                 * `true` when there is no finding with severity `error`.
+                 */
+                valid: boolean;
+                /**
+                 * Errors first, then warnings.
+                 */
+                findings: /* One thing the portal config validation found. */ PortalValidationFinding[];
+            };
         }
         export interface PublishRevisionRequest {
             /**
@@ -10278,6 +12616,127 @@ export declare namespace Components {
          * Storing the feed-in record
          */
         export type Reason = "" | "regular" | "irregular" | "last" | "first" | "meter_change" | "contract_change" | "meter_adjustment";
+        /**
+         * Which records portal users see in the portal's lists, per record type (schema slug). A
+         * record type without an entry uses its default rule (`record_access_defaults`), or else any
+         * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+         * `file` and `portal_user` are ignored.
+         *
+         * example:
+         * {
+         *   "contract": {
+         *     "conditions": [
+         *       {
+         *         "type": "relation_attribute",
+         *         "attribute": "customer"
+         *       },
+         *       {
+         *         "type": "relation_attribute",
+         *         "attribute": "property_manager"
+         *       }
+         *     ]
+         *   },
+         *   "meter": {
+         *     "conditions": [
+         *       {
+         *         "type": "relation_attribute",
+         *         "attribute": "customer"
+         *       },
+         *       {
+         *         "type": "relation_attribute",
+         *         "through": "contract",
+         *         "attribute": "customer"
+         *       },
+         *       {
+         *         "type": "relation_attribute",
+         *         "through": "contract",
+         *         "attribute": "property_manager"
+         *       }
+         *     ]
+         *   },
+         *   "ticket": {
+         *     "conditions": [
+         *       {
+         *         "type": "relation_attribute",
+         *         "attribute": "customer"
+         *       }
+         *     ]
+         *   }
+         * }
+         */
+        export interface RecordAccess {
+            [name: string]: /* A record is visible when one of the conditions applies. */ RecordAccessRule;
+        }
+        export type RecordAccessCondition = /**
+         * The record's relation attribute `attribute` contains the user's contact. With `through`,
+         * the record related through the attribute `through` must contain it instead, e.g. on meters
+         * `through: contract, attribute: customer`.
+         *
+         */
+        RecordAccessRelationAttributeCondition;
+        /**
+         * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+         * write.
+         *
+         */
+        export interface RecordAccessDefaults {
+            [name: string]: {
+                conditions: {
+                    type: "relation_attribute";
+                    attribute: string;
+                    through?: string;
+                }[];
+                /**
+                 * Records with one of these attribute values are never listed.
+                 */
+                never_listed?: {
+                    attribute: string;
+                    value: string;
+                }[];
+            };
+        }
+        /**
+         * A schema slug or attribute name. Letters, digits and underscores only.
+         */
+        export type RecordAccessName = string; // ^[A-Za-z_][A-Za-z0-9_]{0,63}$
+        /**
+         * The record's relation attribute `attribute` contains the user's contact. With `through`,
+         * the record related through the attribute `through` must contain it instead, e.g. on meters
+         * `through: contract, attribute: customer`.
+         *
+         */
+        export interface RecordAccessRelationAttributeCondition {
+            type: "relation_attribute";
+            attribute: /* A schema slug or attribute name. Letters, digits and underscores only. */ RecordAccessName /* ^[A-Za-z_][A-Za-z0-9_]{0,63}$ */;
+            through?: /* A schema slug or attribute name. Letters, digits and underscores only. */ RecordAccessName /* ^[A-Za-z_][A-Za-z0-9_]{0,63}$ */;
+        }
+        /**
+         * A record is visible when one of the conditions applies.
+         */
+        export interface RecordAccessRule {
+            conditions: [
+                RecordAccessCondition,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?
+            ];
+        }
         export interface RegistrationIdentifier {
             /**
              * Name of the identifier/attribute
@@ -10297,6 +12756,41 @@ export declare namespace Components {
              *
              */
             validation_rule_id?: string;
+        }
+        /**
+         * Limits who can get a portal user to existing contacts or accounts matching targets,
+         * with the same rules as page and block visibility. Targets are evaluated against the
+         * registration entity (`self_registration_entity`): the contact in contact mode, the
+         * account in account mode. Applies wherever an existing record is resolved for a new
+         * portal user: self-registration, SSO sign-in, journeys and invitations by contact id.
+         * Contacts and accounts created during registration (per `self_registration_setting`
+         * or `self_registration_account_setting`) are not checked. A self-registration outside
+         * the group is rejected exactly like one with no matching record
+         * (`SELF_REGISTRATION_NOT_ALLOWED`, or `ACCOUNT_NOT_VERIFIED` in account mode); a
+         * request naming the contact explicitly fails with `NOT_IN_REGISTRATION_TARGET_GROUP`.
+         * The registration pre-check (`checkContactExists`) answers `exists: false` for a
+         * record outside the group, so sign-up stops at the identification step.
+         * If target matching fails, registration is rejected. Without targets every matching
+         * record can register. The group also applies to `identifyContact`.
+         *
+         */
+        export interface RegistrationTargetGroup {
+            /**
+             * Target IDs the contact or account must match to register
+             */
+            visible_for_targets?: string[];
+            /**
+             * Operator for visible_for_targets matching
+             */
+            visible_for_operator?: "and" | "or";
+            /**
+             * Target IDs that if matched deny registration
+             */
+            hidden_for_targets?: string[];
+            /**
+             * Operator for hidden_for_targets matching
+             */
+            hidden_for_operator?: "and" | "or";
         }
         /**
          * A validation rule of the organization, as embedded in the public portal config.
@@ -10455,6 +12949,10 @@ export declare namespace Components {
              * /dashboard
              */
             path?: string;
+            /**
+             * The entities the page offers its blocks: contact and portal user, the entity of a detail page, and what selectors on the page select. The API derives it from the page and its blocks when the page is read; a value sent in a request is ignored.
+             *
+             */
             schema?: string[];
             /**
              * The conditions that need to be met for the page to be shown
@@ -10516,7 +13014,7 @@ export declare namespace Components {
              */
             order: number;
             /**
-             * Whether the page is a system page
+             * Whether the page is a system page. Server-managed on createPortalPage and updatePortalPage.
              * example:
              * false
              */
@@ -11324,6 +13822,24 @@ export declare namespace Components {
              * Entity type used as the primary identifier for self-registration
              */
             self_registration_entity?: "contact" | "account";
+            registration_target_group?: /**
+             * Limits who can get a portal user to existing contacts or accounts matching targets,
+             * with the same rules as page and block visibility. Targets are evaluated against the
+             * registration entity (`self_registration_entity`): the contact in contact mode, the
+             * account in account mode. Applies wherever an existing record is resolved for a new
+             * portal user: self-registration, SSO sign-in, journeys and invitations by contact id.
+             * Contacts and accounts created during registration (per `self_registration_setting`
+             * or `self_registration_account_setting`) are not checked. A self-registration outside
+             * the group is rejected exactly like one with no matching record
+             * (`SELF_REGISTRATION_NOT_ALLOWED`, or `ACCOUNT_NOT_VERIFIED` in account mode); a
+             * request naming the contact explicitly fails with `NOT_IN_REGISTRATION_TARGET_GROUP`.
+             * The registration pre-check (`checkContactExists`) answers `exists: false` for a
+             * record outside the group, so sign-up stops at the identification step.
+             * If target matching fails, registration is rejected. Without targets every matching
+             * record can register. The group also applies to `identifyContact`.
+             *
+             */
+            RegistrationTargetGroup;
             /**
              * Enable or disable user account self management
              * example:
@@ -11379,7 +13895,7 @@ export declare namespace Components {
                 prevent_user_enumeration?: boolean;
             };
             /**
-             * AWS Cognito Pool details for the portal
+             * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
              */
             cognito_details?: {
                 /**
@@ -11622,6 +14138,81 @@ export declare namespace Components {
              */
             registration_identifiers?: ContractIdentifier[];
             /**
+             * Slug of the portal role portal users of this portal get unless they have their own
+             * `role`. Unset means the built-in default role of the portal type, e.g.
+             * `default_end_customer_portal_role`.
+             *
+             * example:
+             * default_end_customer_portal_role
+             */
+            default_role?: string;
+            /**
+             * Slugs of the portal roles a portal user of this portal may be given (portal_user
+             * `role`). The default role is always allowed, whether or not it is listed.
+             *
+             * example:
+             * [
+             *   "b2b_admin",
+             *   "b2b_viewer"
+             * ]
+             */
+            allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
+            /**
              * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
              *
              */
@@ -11808,7 +14399,7 @@ export declare namespace Components {
                 [name: string]: Block;
             };
             /**
-             * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. Admin/builder-only — never exposed via the public portal config.
+             * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. When the notification template references an email template (`email_template_id`), portal users who opted in to email notifications additionally receive that email. Admin/builder-only — never exposed via the public portal config.
              */
             notification_triggers?: NotificationTriggerConfig[];
             /**
@@ -12023,7 +14614,7 @@ export declare namespace Components {
                 prevent_user_enumeration?: boolean;
             };
             /**
-             * AWS Cognito Pool details for the portal
+             * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
              */
             cognito_details?: {
                 /**
@@ -12265,6 +14856,81 @@ export declare namespace Components {
              * ]
              */
             registration_identifiers?: ContractIdentifier[];
+            /**
+             * Slug of the portal role portal users of this portal get unless they have their own
+             * `role`. Unset means the built-in default role of the portal type, e.g.
+             * `default_end_customer_portal_role`.
+             *
+             * example:
+             * default_end_customer_portal_role
+             */
+            default_role?: string;
+            /**
+             * Slugs of the portal roles a portal user of this portal may be given (portal_user
+             * `role`). The default role is always allowed, whether or not it is listed.
+             *
+             * example:
+             * [
+             *   "b2b_admin",
+             *   "b2b_viewer"
+             * ]
+             */
+            allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
             /**
              * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
              *
@@ -12589,13 +15255,6 @@ export declare namespace Components {
                 en?: string;
                 de?: string;
             };
-        }
-        /**
-         * Workflow identifier object
-         */
-        export interface WorfklowIdentifier {
-            defition_id?: string;
-            name?: string;
         }
         /**
          * example:
@@ -12976,7 +15635,7 @@ export declare namespace Paths {
                  */
                 message?: string;
             }
-            export type $400 = Components.Responses.InvalidRequest;
+            export type $400 = Components.Responses.TemporaryPasswordInvalidRequest;
             export type $429 = Components.Responses.TooManyRequests;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -13147,18 +15806,34 @@ export declare namespace Paths {
                 filters_context?: {
                     [key: string]: any;
                 }[];
+                /**
+                 * Target ids the list is scoped to. Every target must match.
+                 */
+                targets?: string[];
+                /**
+                 * Target ids of which at least one must match.
+                 */
+                match_any_targets?: string[];
                 sort?: any;
             };
             /**
              * Ordered column definitions; order is the CSV column order.
              */
-            columns: /* One column of the portal data export CSV. */ Components.Schemas.PortalDataExportColumn[];
+            columns: /**
+             * One column of the portal data export. Send the column value as `template`; `source` is the older single-attribute shape, still accepted.
+             *
+             */
+            Components.Schemas.PortalDataExportColumn[];
             expand_over?: string;
             /**
              * example:
              * de
              */
             language?: string;
+            /**
+             * File format of the export. Defaults to csv.
+             */
+            format?: "csv" | "xlsx";
         }
         namespace Responses {
             export interface $202 {
@@ -13190,10 +15865,135 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace CreateMeterReadings {
+        namespace Parameters {
+            export type MeterId = string;
+        }
+        export interface PathParameters {
+            meter_id: Parameters.MeterId;
+        }
+        export interface RequestBody {
+            readings: [
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?
+            ];
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: Components.Schemas.MeterReading[];
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace CreatePortalConfig {
         export type RequestBody = Components.Schemas.UpsertPortalConfigV3;
         namespace Responses {
-            export type $201 = Components.Schemas.PortalConfigV3;
+            export type $201 = /**
+             * The portal config as `createPortalConfig` and `putPortalConfig` return it, with the validation of what was written.
+             *
+             */
+            Components.Schemas.PortalConfigV3WriteResult;
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -13241,7 +16041,7 @@ export declare namespace Paths {
         export type RequestBody = Components.Schemas.PortalRevisionRequest;
         namespace Responses {
             export type $201 = Components.Schemas.PortalRevisionCreated;
-            export type $400 = Components.Responses.InvalidRequest;
+            export type $400 = Components.Responses.InvalidPortalConfigWrite;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -13459,6 +16259,8 @@ export declare namespace Paths {
                 Components.Schemas.EntityId /* uuid */;
             }
             export type $401 = Components.Responses.Unauthorized;
+            export interface $403 {
+            }
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -13821,211 +16623,6 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace GetAllOpportunities {
-        namespace Parameters {
-            /**
-             * Initial offset to set for the search results
-             * example:
-             * 0
-             */
-            export type From = number;
-            /**
-             * Size of the search results
-             * example:
-             * 100
-             */
-            export type Size = number;
-        }
-        export interface QueryParameters {
-            from?: /**
-             * Initial offset to set for the search results
-             * example:
-             * 0
-             */
-            Parameters.From;
-            size?: /**
-             * Size of the search results
-             * example:
-             * 100
-             */
-            Parameters.Size;
-        }
-        namespace Responses {
-            export interface $200 {
-                data?: {
-                    [name: string]: any;
-                    _id: /**
-                     * Entity ID
-                     * example:
-                     * 5da0a718-c822-403d-9f5d-20d4584e0528
-                     */
-                    Components.Schemas.EntityId /* uuid */;
-                    /**
-                     * Title of the entity
-                     * example:
-                     * Example Entity
-                     */
-                    _title: string;
-                    /**
-                     * Organization ID the entity belongs to
-                     * example:
-                     * 123
-                     */
-                    _org: string;
-                    /**
-                     * Array of entity tags
-                     * example:
-                     * [
-                     *   "example",
-                     *   "mock"
-                     * ]
-                     */
-                    _tags?: string[];
-                    /**
-                     * Creation timestamp of the entity
-                     * example:
-                     * 2021-02-09T12:41:43.662Z
-                     */
-                    _created_at: string; // date-time
-                    /**
-                     * Last update timestamp of the entity
-                     * example:
-                     * 2021-02-09T12:41:43.662Z
-                     */
-                    _updated_at: string; // date-time
-                    /**
-                     * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
-                     */
-                    templates_output_highlighted?: {
-                        [name: string]: string | {
-                            [name: string]: string;
-                        };
-                    };
-                    /**
-                     * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
-                     */
-                    search_snippets?: {
-                        /**
-                         * Human-readable field label
-                         */
-                        field?: string;
-                        /**
-                         * Highlighted text fragment with <em> tags
-                         */
-                        fragment?: string;
-                    }[];
-                    _schema: "opportunity";
-                    journey_actions?: Components.Schemas.JourneyActions;
-                }[];
-            }
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
-            export type $404 = Components.Responses.NotFound;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace GetAllOrders {
-        namespace Parameters {
-            /**
-             * Initial offset to set for the search results
-             * example:
-             * 0
-             */
-            export type From = number;
-            /**
-             * Size of the search results
-             * example:
-             * 100
-             */
-            export type Size = number;
-        }
-        export interface QueryParameters {
-            from?: /**
-             * Initial offset to set for the search results
-             * example:
-             * 0
-             */
-            Parameters.From;
-            size?: /**
-             * Size of the search results
-             * example:
-             * 100
-             */
-            Parameters.Size;
-        }
-        namespace Responses {
-            export interface $200 {
-                data?: {
-                    [name: string]: any;
-                    _id: /**
-                     * Entity ID
-                     * example:
-                     * 5da0a718-c822-403d-9f5d-20d4584e0528
-                     */
-                    Components.Schemas.EntityId /* uuid */;
-                    /**
-                     * Title of the entity
-                     * example:
-                     * Example Entity
-                     */
-                    _title: string;
-                    /**
-                     * Organization ID the entity belongs to
-                     * example:
-                     * 123
-                     */
-                    _org: string;
-                    /**
-                     * Array of entity tags
-                     * example:
-                     * [
-                     *   "example",
-                     *   "mock"
-                     * ]
-                     */
-                    _tags?: string[];
-                    /**
-                     * Creation timestamp of the entity
-                     * example:
-                     * 2021-02-09T12:41:43.662Z
-                     */
-                    _created_at: string; // date-time
-                    /**
-                     * Last update timestamp of the entity
-                     * example:
-                     * 2021-02-09T12:41:43.662Z
-                     */
-                    _updated_at: string; // date-time
-                    /**
-                     * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
-                     */
-                    templates_output_highlighted?: {
-                        [name: string]: string | {
-                            [name: string]: string;
-                        };
-                    };
-                    /**
-                     * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
-                     */
-                    search_snippets?: {
-                        /**
-                         * Human-readable field label
-                         */
-                        field?: string;
-                        /**
-                         * Highlighted text fragment with <em> tags
-                         */
-                        fragment?: string;
-                    }[];
-                    _schema: "order";
-                    journey_actions?: Components.Schemas.JourneyActions;
-                }[];
-            }
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
     namespace GetAllPortalConfigs {
         namespace Responses {
             export interface $200 {
@@ -14033,53 +16630,41 @@ export declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $413 = Components.Responses.ResponseTooLarge;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace GetAllRequests {
+    namespace GetAllowedMeterReading {
         namespace Parameters {
+            export type MeterId = string;
             /**
-             * Initial offset to set for the search results
              * example:
-             * 0
+             * 2022-10-01T10:10:00.000Z
              */
-            export type From = number;
-            /**
-             * Size of the search results
-             * example:
-             * 100
-             */
-            export type Size = number;
+            export type Timestamp = string;
+        }
+        export interface PathParameters {
+            meter_id: Parameters.MeterId;
         }
         export interface QueryParameters {
-            from?: /**
-             * Initial offset to set for the search results
+            timestamp?: /**
              * example:
-             * 0
+             * 2022-10-01T10:10:00.000Z
              */
-            Parameters.From;
-            size?: /**
-             * Size of the search results
-             * example:
-             * 100
-             */
-            Parameters.Size;
+            Parameters.Timestamp;
         }
         namespace Responses {
             export interface $200 {
-                /**
-                 * Total number of hits
-                 * example:
-                 * 1
-                 */
-                hits?: number;
-                results?: ({
-                    journey_actions?: Components.Schemas.JourneyActions;
-                } & (/* The opportunity entity */ Components.Schemas.Opportunity | /* The order entity */ Components.Schemas.Order))[];
+                data?: {
+                    counter_id?: string;
+                    min_value?: number;
+                    max_value?: number;
+                    last_reading?: string; // date-time
+                }[];
             }
+            export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
-            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -14460,6 +17045,23 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetContractMeters {
+        namespace Parameters {
+            export type ContractId = string;
+        }
+        export interface PathParameters {
+            contract_id: Parameters.ContractId;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: /* The meter entity */ Components.Schemas.Meter[];
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetContractWithTemplates {
         namespace Parameters {
             export type Id = /**
@@ -14778,58 +17380,6 @@ export declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace GetEntityActivityFeed {
-        namespace Parameters {
-            export type After = string; // date-time
-            export type Before = string; // date-time
-            export type From = number;
-            export type Id = /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */;
-            export type IncludeRelations = boolean;
-            export type Size = number;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-            /**
-             * example:
-             * SyncActivity
-             */
-            export type Type = string;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-            id: Parameters.Id;
-        }
-        export interface QueryParameters {
-            after?: Parameters.After /* date-time */;
-            before?: Parameters.Before /* date-time */;
-            from?: Parameters.From;
-            size?: Parameters.Size;
-            type?: /**
-             * example:
-             * SyncActivity
-             */
-            Parameters.Type;
-            include_relations?: Parameters.IncludeRelations;
-        }
-        namespace Responses {
-            export interface $200 {
-                /**
-                 * example:
-                 * 1
-                 */
-                total?: number;
-                results?: Components.Schemas.ActivityItem[];
-            }
         }
     }
     namespace GetEntityIdentifiers {
@@ -15624,33 +18174,16 @@ export declare namespace Paths {
             export interface $200 {
                 jobId?: string;
                 status?: "queued" | "running" | "ready" | "failed" | "expired";
+                /**
+                 * File format of the export, as requested on createExport.
+                 */
+                format?: "csv" | "xlsx";
                 downloadUrl?: string;
                 error?: string;
             }
             export type $401 = Components.Responses.Unauthorized;
             export interface $404 {
             }
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace GetExternalLinks {
-        namespace Parameters {
-            export type ContactId = /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */;
-            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
-        }
-        export interface QueryParameters {
-            origin?: Parameters.Origin;
-            contactId?: Parameters.ContactId;
-        }
-        namespace Responses {
-            export type $200 = Components.Schemas.ExternalLink[];
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -15722,6 +18255,63 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetMeter {
+        namespace Parameters {
+            export type MeterId = string;
+        }
+        export interface PathParameters {
+            meter_id: Parameters.MeterId;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: {
+                    entity?: /* The meter entity */ Components.Schemas.Meter;
+                    journey_actions?: Components.Schemas.JourneyActions;
+                    relations?: Components.Schemas.EntityItem[];
+                };
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetMeterCounter {
+        namespace Parameters {
+            export type CounterId = string;
+        }
+        export interface PathParameters {
+            counter_id: Parameters.CounterId;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: /* A counter (measurement channel) of a meter */ Components.Schemas.MeterCounter;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetMeterCounters {
+        namespace Parameters {
+            export type MeterId = string;
+        }
+        export interface PathParameters {
+            meter_id: Parameters.MeterId;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: /* A counter (measurement channel) of a meter */ Components.Schemas.MeterCounter[];
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetMeterReadings {
         export interface RequestBody {
             meter_id: string;
@@ -15742,7 +18332,7 @@ export declare namespace Paths {
                 [name: string]: string;
             };
             /**
-             * When true, the response includes `counter` with the counter's unit, OBIS number, direction and tariff type. Access is checked by metering-api on the counter's parent meter.
+             * When true, the response includes `counter` with the counter's unit, OBIS number, direction and tariff type, if the caller has access to the counter's meter.
              */
             include_counter?: boolean;
             /**
@@ -16046,6 +18636,24 @@ export declare namespace Paths {
                  * Entity type used as the primary identifier for self-registration
                  */
                 self_registration_entity?: "contact" | "account";
+                registration_target_group?: /**
+                 * Limits who can get a portal user to existing contacts or accounts matching targets,
+                 * with the same rules as page and block visibility. Targets are evaluated against the
+                 * registration entity (`self_registration_entity`): the contact in contact mode, the
+                 * account in account mode. Applies wherever an existing record is resolved for a new
+                 * portal user: self-registration, SSO sign-in, journeys and invitations by contact id.
+                 * Contacts and accounts created during registration (per `self_registration_setting`
+                 * or `self_registration_account_setting`) are not checked. A self-registration outside
+                 * the group is rejected exactly like one with no matching record
+                 * (`SELF_REGISTRATION_NOT_ALLOWED`, or `ACCOUNT_NOT_VERIFIED` in account mode); a
+                 * request naming the contact explicitly fails with `NOT_IN_REGISTRATION_TARGET_GROUP`.
+                 * The registration pre-check (`checkContactExists`) answers `exists: false` for a
+                 * record outside the group, so sign-up stops at the identification step.
+                 * If target matching fails, registration is rejected. Without targets every matching
+                 * record can register. The group also applies to `identifyContact`.
+                 *
+                 */
+                Components.Schemas.RegistrationTargetGroup;
                 /**
                  * Enable or disable user account self management
                  * example:
@@ -16101,7 +18709,7 @@ export declare namespace Paths {
                     prevent_user_enumeration?: boolean;
                 };
                 /**
-                 * AWS Cognito Pool details for the portal
+                 * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
                  */
                 cognito_details?: {
                     /**
@@ -16344,6 +18952,81 @@ export declare namespace Paths {
                  */
                 registration_identifiers?: Components.Schemas.ContractIdentifier[];
                 /**
+                 * Slug of the portal role portal users of this portal get unless they have their own
+                 * `role`. Unset means the built-in default role of the portal type, e.g.
+                 * `default_end_customer_portal_role`.
+                 *
+                 * example:
+                 * default_end_customer_portal_role
+                 */
+                default_role?: string;
+                /**
+                 * Slugs of the portal roles a portal user of this portal may be given (portal_user
+                 * `role`). The default role is always allowed, whether or not it is listed.
+                 *
+                 * example:
+                 * [
+                 *   "b2b_admin",
+                 *   "b2b_viewer"
+                 * ]
+                 */
+                allowed_roles?: string[];
+                record_access?: /**
+                 * Which records portal users see in the portal's lists, per record type (schema slug). A
+                 * record type without an entry uses its default rule (`record_access_defaults`), or else any
+                 * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+                 * `file` and `portal_user` are ignored.
+                 *
+                 * example:
+                 * {
+                 *   "contract": {
+                 *     "conditions": [
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "customer"
+                 *       },
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "property_manager"
+                 *       }
+                 *     ]
+                 *   },
+                 *   "meter": {
+                 *     "conditions": [
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "customer"
+                 *       },
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "through": "contract",
+                 *         "attribute": "customer"
+                 *       },
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "through": "contract",
+                 *         "attribute": "property_manager"
+                 *       }
+                 *     ]
+                 *   },
+                 *   "ticket": {
+                 *     "conditions": [
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "customer"
+                 *       }
+                 *     ]
+                 *   }
+                 * }
+                 */
+                Components.Schemas.RecordAccess;
+                record_access_defaults?: /**
+                 * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+                 * write.
+                 *
+                 */
+                Components.Schemas.RecordAccessDefaults;
+                /**
                  * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
                  *
                  */
@@ -16530,7 +19213,7 @@ export declare namespace Paths {
                     [name: string]: Components.Schemas.Block;
                 };
                 /**
-                 * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. Admin/builder-only — never exposed via the public portal config.
+                 * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. When the notification template references an email template (`email_template_id`), portal users who opted in to email notifications additionally receive that email. Admin/builder-only — never exposed via the public portal config.
                  */
                 notification_triggers?: Components.Schemas.NotificationTriggerConfig[];
                 /**
@@ -16759,6 +19442,24 @@ export declare namespace Paths {
                  * Entity type used as the primary identifier for self-registration
                  */
                 self_registration_entity?: "contact" | "account";
+                registration_target_group?: /**
+                 * Limits who can get a portal user to existing contacts or accounts matching targets,
+                 * with the same rules as page and block visibility. Targets are evaluated against the
+                 * registration entity (`self_registration_entity`): the contact in contact mode, the
+                 * account in account mode. Applies wherever an existing record is resolved for a new
+                 * portal user: self-registration, SSO sign-in, journeys and invitations by contact id.
+                 * Contacts and accounts created during registration (per `self_registration_setting`
+                 * or `self_registration_account_setting`) are not checked. A self-registration outside
+                 * the group is rejected exactly like one with no matching record
+                 * (`SELF_REGISTRATION_NOT_ALLOWED`, or `ACCOUNT_NOT_VERIFIED` in account mode); a
+                 * request naming the contact explicitly fails with `NOT_IN_REGISTRATION_TARGET_GROUP`.
+                 * The registration pre-check (`checkContactExists`) answers `exists: false` for a
+                 * record outside the group, so sign-up stops at the identification step.
+                 * If target matching fails, registration is rejected. Without targets every matching
+                 * record can register. The group also applies to `identifyContact`.
+                 *
+                 */
+                Components.Schemas.RegistrationTargetGroup;
                 /**
                  * Enable or disable user account self management
                  * example:
@@ -16814,7 +19515,7 @@ export declare namespace Paths {
                     prevent_user_enumeration?: boolean;
                 };
                 /**
-                 * AWS Cognito Pool details for the portal
+                 * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
                  */
                 cognito_details?: {
                     /**
@@ -17057,6 +19758,81 @@ export declare namespace Paths {
                  */
                 registration_identifiers?: Components.Schemas.ContractIdentifier[];
                 /**
+                 * Slug of the portal role portal users of this portal get unless they have their own
+                 * `role`. Unset means the built-in default role of the portal type, e.g.
+                 * `default_end_customer_portal_role`.
+                 *
+                 * example:
+                 * default_end_customer_portal_role
+                 */
+                default_role?: string;
+                /**
+                 * Slugs of the portal roles a portal user of this portal may be given (portal_user
+                 * `role`). The default role is always allowed, whether or not it is listed.
+                 *
+                 * example:
+                 * [
+                 *   "b2b_admin",
+                 *   "b2b_viewer"
+                 * ]
+                 */
+                allowed_roles?: string[];
+                record_access?: /**
+                 * Which records portal users see in the portal's lists, per record type (schema slug). A
+                 * record type without an entry uses its default rule (`record_access_defaults`), or else any
+                 * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+                 * `file` and `portal_user` are ignored.
+                 *
+                 * example:
+                 * {
+                 *   "contract": {
+                 *     "conditions": [
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "customer"
+                 *       },
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "property_manager"
+                 *       }
+                 *     ]
+                 *   },
+                 *   "meter": {
+                 *     "conditions": [
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "customer"
+                 *       },
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "through": "contract",
+                 *         "attribute": "customer"
+                 *       },
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "through": "contract",
+                 *         "attribute": "property_manager"
+                 *       }
+                 *     ]
+                 *   },
+                 *   "ticket": {
+                 *     "conditions": [
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "customer"
+                 *       }
+                 *     ]
+                 *   }
+                 * }
+                 */
+                Components.Schemas.RecordAccess;
+                record_access_defaults?: /**
+                 * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+                 * write.
+                 *
+                 */
+                Components.Schemas.RecordAccessDefaults;
+                /**
                  * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
                  *
                  */
@@ -17243,7 +20019,7 @@ export declare namespace Paths {
                     [name: string]: Components.Schemas.Block;
                 };
                 /**
-                 * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. Admin/builder-only — never exposed via the public portal config.
+                 * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. When the notification template references an email template (`email_template_id`), portal users who opted in to email notifications additionally receive that email. Admin/builder-only — never exposed via the public portal config.
                  */
                 notification_triggers?: Components.Schemas.NotificationTriggerConfig[];
                 /**
@@ -17669,6 +20445,26 @@ export declare namespace Paths {
         namespace Responses {
             export interface $200 {
                 data?: /* The portal user entity */ Components.Schemas.PortalUser;
+                /**
+                 * Present only for a portal with portal roles. Replaces the grants of the
+                 * portal config for this user.
+                 *
+                 */
+                portal_roles?: {
+                    /**
+                     * Slugs of the user's portal roles (at least one)
+                     * example:
+                     * [
+                     *   "b2b_admin",
+                     *   "b2b_billing"
+                     * ]
+                     */
+                    roles: string[];
+                    /**
+                     * Grants of all of `roles` together
+                     */
+                    grants: Components.Schemas.Grant[];
+                };
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $500 = Components.Responses.InternalServerError;
@@ -17686,10 +20482,37 @@ export declare namespace Paths {
     }
     namespace GetPortalUserNotificationPreferences {
         namespace Responses {
-            export type $200 = /* Resolved notification preferences of a portal user. Notifications are opt-out: a channel that was never stored on the portal user resolves to enabled (true). */ Components.Schemas.PortalUserNotificationPreferences;
+            export type $200 = /* Resolved notification preferences of a portal user. In-app notifications are opt-out: when never stored on the portal user they resolve to enabled (true). Email notifications are opt-in: when never stored they resolve to disabled (false). */ Components.Schemas.PortalUserNotificationPreferences;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetPortalUserRole {
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Slugs of the caller's portal roles (at least one)
+                 * example:
+                 * [
+                 *   "b2b_admin",
+                 *   "b2b_billing"
+                 * ]
+                 */
+                roles: string[];
+                /**
+                 * First of `roles`
+                 * example:
+                 * b2b_admin
+                 */
+                role: string;
+                /**
+                 * Grants of all of `roles` together
+                 */
+                grants: Components.Schemas.Grant[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -18044,6 +20867,24 @@ export declare namespace Paths {
                  * Entity type used as the primary identifier for self-registration
                  */
                 self_registration_entity?: "contact" | "account";
+                registration_target_group?: /**
+                 * Limits who can get a portal user to existing contacts or accounts matching targets,
+                 * with the same rules as page and block visibility. Targets are evaluated against the
+                 * registration entity (`self_registration_entity`): the contact in contact mode, the
+                 * account in account mode. Applies wherever an existing record is resolved for a new
+                 * portal user: self-registration, SSO sign-in, journeys and invitations by contact id.
+                 * Contacts and accounts created during registration (per `self_registration_setting`
+                 * or `self_registration_account_setting`) are not checked. A self-registration outside
+                 * the group is rejected exactly like one with no matching record
+                 * (`SELF_REGISTRATION_NOT_ALLOWED`, or `ACCOUNT_NOT_VERIFIED` in account mode); a
+                 * request naming the contact explicitly fails with `NOT_IN_REGISTRATION_TARGET_GROUP`.
+                 * The registration pre-check (`checkContactExists`) answers `exists: false` for a
+                 * record outside the group, so sign-up stops at the identification step.
+                 * If target matching fails, registration is rejected. Without targets every matching
+                 * record can register. The group also applies to `identifyContact`.
+                 *
+                 */
+                Components.Schemas.RegistrationTargetGroup;
                 /**
                  * Enable or disable user account self management
                  * example:
@@ -18099,7 +20940,7 @@ export declare namespace Paths {
                     prevent_user_enumeration?: boolean;
                 };
                 /**
-                 * AWS Cognito Pool details for the portal
+                 * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
                  */
                 cognito_details?: {
                     /**
@@ -18342,6 +21183,81 @@ export declare namespace Paths {
                  */
                 registration_identifiers?: Components.Schemas.ContractIdentifier[];
                 /**
+                 * Slug of the portal role portal users of this portal get unless they have their own
+                 * `role`. Unset means the built-in default role of the portal type, e.g.
+                 * `default_end_customer_portal_role`.
+                 *
+                 * example:
+                 * default_end_customer_portal_role
+                 */
+                default_role?: string;
+                /**
+                 * Slugs of the portal roles a portal user of this portal may be given (portal_user
+                 * `role`). The default role is always allowed, whether or not it is listed.
+                 *
+                 * example:
+                 * [
+                 *   "b2b_admin",
+                 *   "b2b_viewer"
+                 * ]
+                 */
+                allowed_roles?: string[];
+                record_access?: /**
+                 * Which records portal users see in the portal's lists, per record type (schema slug). A
+                 * record type without an entry uses its default rule (`record_access_defaults`), or else any
+                 * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+                 * `file` and `portal_user` are ignored.
+                 *
+                 * example:
+                 * {
+                 *   "contract": {
+                 *     "conditions": [
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "customer"
+                 *       },
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "property_manager"
+                 *       }
+                 *     ]
+                 *   },
+                 *   "meter": {
+                 *     "conditions": [
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "customer"
+                 *       },
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "through": "contract",
+                 *         "attribute": "customer"
+                 *       },
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "through": "contract",
+                 *         "attribute": "property_manager"
+                 *       }
+                 *     ]
+                 *   },
+                 *   "ticket": {
+                 *     "conditions": [
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "customer"
+                 *       }
+                 *     ]
+                 *   }
+                 * }
+                 */
+                Components.Schemas.RecordAccess;
+                record_access_defaults?: /**
+                 * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+                 * write.
+                 *
+                 */
+                Components.Schemas.RecordAccessDefaults;
+                /**
                  * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
                  *
                  */
@@ -18528,7 +21444,7 @@ export declare namespace Paths {
                     [name: string]: Components.Schemas.Block;
                 };
                 /**
-                 * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. Admin/builder-only — never exposed via the public portal config.
+                 * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. When the notification template references an email template (`email_template_id`), portal users who opted in to email notifications additionally receive that email. Admin/builder-only — never exposed via the public portal config.
                  */
                 notification_triggers?: Components.Schemas.NotificationTriggerConfig[];
                 /**
@@ -18928,71 +21844,6 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace GetResolvedExternalLink {
-        namespace Parameters {
-            export type ContactId = /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */;
-            export type Id = /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */;
-            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-        }
-        export interface QueryParameters {
-            origin?: Parameters.Origin;
-            contactId?: Parameters.ContactId;
-        }
-        namespace Responses {
-            export type $200 = Components.Schemas.ExternalLink;
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace GetResolvedExternalLinkV3 {
-        namespace Parameters {
-            export type ContactId = /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */;
-            export type Id = /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */;
-            export type PortalId = /**
-             * ID of the portal
-             * example:
-             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
-             */
-            Components.Schemas.PortalId;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-        }
-        export interface QueryParameters {
-            portal_id?: Parameters.PortalId;
-            contactId?: Parameters.ContactId;
-        }
-        namespace Responses {
-            export type $200 = Components.Schemas.ExternalLink;
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
     namespace GetResolvedSeamlessLink {
         namespace Parameters {
             export type AppId = string;
@@ -19100,95 +21951,6 @@ export declare namespace Paths {
             export interface $200 {
                 schemas?: Components.Schemas.Schema[];
             }
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace GetSearchResultsForOpportunities {
-        namespace Parameters {
-            /**
-             * Initial offset to set for the search results
-             * example:
-             * 0
-             */
-            export type From = number;
-            /**
-             * Size of the search results
-             * example:
-             * 1000
-             */
-            export type Size = number;
-        }
-        export interface QueryParameters {
-            from?: /**
-             * Initial offset to set for the search results
-             * example:
-             * 0
-             */
-            Parameters.From;
-            size?: /**
-             * Size of the search results
-             * example:
-             * 1000
-             */
-            Parameters.Size;
-        }
-        export interface RequestBody {
-            addresses?: string[];
-            customers?: string[];
-            purposes?: /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */[];
-            workflows?: any[];
-        }
-        namespace Responses {
-            export interface $200 {
-                data?: /* The opportunity entity */ Components.Schemas.Opportunity[];
-            }
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
-            export type $404 = Components.Responses.NotFound;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace GetSearchableAttributesForOpportunities {
-        namespace Parameters {
-            /**
-             * Initial offset to set for the search results
-             * example:
-             * 0
-             */
-            export type From = number;
-            /**
-             * Size of the search results
-             * example:
-             * 1000
-             */
-            export type Size = number;
-        }
-        export interface QueryParameters {
-            from?: /**
-             * Initial offset to set for the search results
-             * example:
-             * 0
-             */
-            Parameters.From;
-            size?: /**
-             * Size of the search results
-             * example:
-             * 1000
-             */
-            Parameters.Size;
-        }
-        namespace Responses {
-            export interface $200 {
-                data?: /* The opportunity entity */ Components.Schemas.Opportunity[];
-            }
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
-            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -19417,7 +22179,29 @@ export declare namespace Paths {
                 [name: string]: string | string[];
             };
             /**
+             * Portal roles (slugs) to give the invited user. Omitted or empty means the
+             * portal's default role. Each must be the portal's default role or one of its
+             * `allowed_roles`, else 400 (`ROLE_NOT_ALLOWED`). Any other role needs a
+             * `portal_user:assign_role` grant on the inviter's roles whose resource is the
+             * role slug or `*`, else 403 (`ROLE_ASSIGNMENT_NOT_PERMITTED`). An inviter
+             * without permission to invite gets 403 (`INVITE_NOT_PERMITTED`).
+             *
+             * example:
+             * [
+             *   "b2b_admin",
+             *   "b2b_billing"
+             * ]
+             */
+            roles?: string[];
+            /**
+             * A single role to give the invited user; use `roles`. Ignored when `roles` is set.
+             * example:
+             * b2b_admin
+             */
+            role?: string;
+            /**
              * Additional portal user entity fields to set when creating the portal user for the invited user.
+             * `role` is ignored here; use the top-level `roles` instead.
              * These are mapped directly to portal_user entity attributes.
              * Values can be strings or arrays of strings (for multiselect attributes).
              *
@@ -19448,6 +22232,7 @@ export declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $413 = Components.Responses.ResponseTooLarge;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -19553,6 +22338,26 @@ export declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ListPortalRoles {
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Whether the caller may invite users
+                 */
+                can_invite: boolean;
+                /**
+                 * Slug of the portal's default role
+                 */
+                default_role: string;
+                roles: {
+                    slug: string;
+                    name: string;
+                }[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -19876,7 +22681,7 @@ export declare namespace Paths {
         export type RequestBody = Components.Schemas.PublishRevisionRequest;
         namespace Responses {
             export type $200 = Components.Schemas.PublishResult;
-            export type $400 = Components.Responses.InvalidRequest;
+            export type $400 = Components.Responses.InvalidPortalConfigWrite;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -19926,8 +22731,12 @@ export declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.PortalConfigV3;
         namespace Responses {
-            export type $200 = Components.Schemas.PortalConfigV3;
-            export type $400 = Components.Responses.InvalidRequest;
+            export type $200 = /**
+             * The portal config as `createPortalConfig` and `putPortalConfig` return it, with the validation of what was written.
+             *
+             */
+            Components.Schemas.PortalConfigV3WriteResult;
+            export type $400 = Components.Responses.InvalidPortalConfigWrite;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -20086,6 +22895,26 @@ export declare namespace Paths {
                      * ]
                      */
                     userEmailsOnEntity?: string[];
+                    /**
+                     * The origin of the resolved portal, e.g. for `{{linkToPortal "END_CUSTOMER_PORTAL" "contracts"}}`
+                     * example:
+                     * END_CUSTOMER_PORTAL
+                     */
+                    origin?: string;
+                    /**
+                     * The path of each visible page by its slug, nested pages included. Pages the portal opens an entity on
+                     * by its id end in `/:id`; on the others the entity goes in `?<schema>Id=<id>`.
+                     *
+                     * example:
+                     * {
+                     *   "documents": "/documents",
+                     *   "contract": "/contract/:id",
+                     *   "opportunities": "/requests/opportunities/:id"
+                     * }
+                     */
+                    pagePaths?: {
+                        [name: string]: string;
+                    };
                 };
             }
             export type $401 = Components.Responses.Unauthorized;
@@ -20136,6 +22965,44 @@ export declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ResendTemporaryPasswordLink {
+        export interface RequestBody {
+            /**
+             * Organization ID
+             * example:
+             * 123
+             */
+            org_id: string;
+            /**
+             * ID of the portal the user belongs to
+             * example:
+             * 7hj28akg-97fb-4f5c-b2a1-3e4fbc1d8c7a
+             */
+            portal_id: string;
+            /**
+             * Email address of the portal user
+             * example:
+             * user@example.com
+             */
+            email: string;
+            /**
+             * Temporary password from the expired link
+             */
+            temporary_password: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * If the link has expired, a new one has been sent.
+                 */
+                message?: string;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $429 = Components.Responses.TooManyRequests;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -20274,6 +23141,55 @@ export declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $429 = Components.Responses.TooManyRequests;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace SetPartnerRole {
+        namespace Parameters {
+            /**
+             * Portal user ID of the account user
+             */
+            export type PartnerId = string;
+        }
+        export interface PathParameters {
+            partner_id: /* Portal user ID of the account user */ Parameters.PartnerId;
+        }
+        export interface RequestBody {
+            /**
+             * Role slugs the user holds from now on; empty or null for the portal's default role
+             * example:
+             * [
+             *   "b2b_billing"
+             * ]
+             */
+            roles?: string[] | null;
+            /**
+             * A single role to give the user (null for the default role); use `roles`. Ignored when `roles` is set.
+             * example:
+             * b2b_billing
+             */
+            role?: string | null;
+        }
+        namespace Responses {
+            export interface $200 {
+                roles?: Components.Schemas.PortalRoleRef[];
+                /**
+                 * First of `roles`
+                 * example:
+                 * b2b_billing
+                 */
+                role?: string;
+                /**
+                 * Name of `role`
+                 * example:
+                 * Billing
+                 */
+                role_name?: string;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -20847,6 +23763,8 @@ export declare namespace Paths {
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export interface $403 {
+            }
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -20859,9 +23777,13 @@ export declare namespace Paths {
              * Whether the portal user wants to receive in-app notifications.
              */
             in_app?: boolean;
+            /**
+             * Whether the portal user wants to additionally receive engagement center notifications by email (opt-in).
+             */
+            email?: boolean;
         }
         namespace Responses {
-            export type $200 = /* Resolved notification preferences of a portal user. Notifications are opt-out: a channel that was never stored on the portal user resolves to enabled (true). */ Components.Schemas.PortalUserNotificationPreferences;
+            export type $200 = /* Resolved notification preferences of a portal user. In-app notifications are opt-out: when never stored on the portal user they resolve to enabled (true). Email notifications are opt-in: when never stored they resolve to disabled (false). */ Components.Schemas.PortalUserNotificationPreferences;
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -20953,6 +23875,7 @@ export declare namespace Paths {
                 message: "Email Templates upserted successfully";
                 emailTemplates: /* Email templates used for authentication and internal processes */ Components.Schemas.EmailTemplates;
             }
+            export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $409 = Components.Responses.Conflict;
@@ -20972,6 +23895,7 @@ export declare namespace Paths {
                 message: "Email Templates upserted successfully";
                 emailTemplates: /* Email templates used for authentication and internal processes */ Components.Schemas.EmailTemplates;
             }
+            export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $409 = Components.Responses.Conflict;
@@ -20989,9 +23913,9 @@ export declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.UpsertPortalConfig;
         namespace Responses {
-            export type $200 = Components.Schemas.PortalConfig;
-            export type $201 = Components.Schemas.PortalConfig;
-            export type $400 = Components.Responses.InvalidRequest;
+            export type $200 = /* The portal config as `upsertPortal` returns it, with the validation of what was written. */ Components.Schemas.PortalConfigWriteResult;
+            export type $201 = /* The portal config as `upsertPortal` returns it, with the validation of what was written. */ Components.Schemas.PortalConfigWriteResult;
+            export type $400 = Components.Responses.InvalidPortalConfigWrite;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $409 = Components.Responses.Conflict;
@@ -21361,6 +24285,45 @@ export declare namespace Paths {
             }
         }
     }
+    namespace ValidatePortalConfig {
+        namespace Parameters {
+            export type PageUpsertMode = "id" | "slug";
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            export type PortalId = string; // uuid
+            /**
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            export type RevisionId = string;
+        }
+        export interface PathParameters {
+            portal_id: /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Parameters.PortalId /* uuid */;
+        }
+        export interface QueryParameters {
+            revision_id?: /**
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            Parameters.RevisionId;
+            page_upsert_mode?: Parameters.PageUpsertMode;
+        }
+        export type RequestBody = Components.Schemas.PortalConfigV3;
+        namespace Responses {
+            export type $200 = /* Result of the portal config validation. */ Components.Schemas.PortalValidationResult;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ValidateToken {
         namespace Responses {
             export interface $204 {
@@ -21488,7 +24451,7 @@ export interface OperationMethods {
   /**
    * createExport - createExport
    * 
-   * Request an asynchronous CSV export of the portal user's entities for one schema. Columns come from the request Returns a job id to poll.
+   * Request an asynchronous CSV or XLSX export of the portal user's entities for one schema. Columns come from the request Returns a job id to poll.
    * 
    */
   'createExport'(
@@ -21603,26 +24566,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPrices.Responses.$200>
   /**
-   * getExternalLinks - getExternalLinks
-   * 
-   * Retrieves the portal configuration external links.
-   */
-  'getExternalLinks'(
-    parameters?: Parameters<Paths.GetExternalLinks.QueryParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetExternalLinks.Responses.$200>
-  /**
-   * getResolvedExternalLink - getResolvedExternalLink
-   * 
-   * Retrieves a resolved portal external link. Use /v2/portal/resolve:seamless-link/{id} instead.
-   */
-  'getResolvedExternalLink'(
-    parameters?: Parameters<Paths.GetResolvedExternalLink.QueryParameters & Paths.GetResolvedExternalLink.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetResolvedExternalLink.Responses.$200>
-  /**
    * getExternalLinksV3 - getExternalLinksV3
    * 
    * Retrieves the portal configuration external links.
@@ -21632,16 +24575,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetExternalLinksV3.Responses.$200>
-  /**
-   * getResolvedExternalLinkV3 - getResolvedExternalLinkV3
-   * 
-   * Retrieves a resolved portal external link. Use /v2/portal/resolve:seamless-link/{id} instead.
-   */
-  'getResolvedExternalLinkV3'(
-    parameters?: Parameters<Paths.GetResolvedExternalLinkV3.QueryParameters & Paths.GetResolvedExternalLinkV3.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetResolvedExternalLinkV3.Responses.$200>
   /**
    * getResolvedSeamlessLink - getResolvedSeamlessLink
    * 
@@ -21695,7 +24628,12 @@ export interface OperationMethods {
   /**
    * getAllPortalConfigs - getAllPortalConfigs
    * 
-   * Retrieves all portal configurations.
+   * Retrieves all portal configurations, each with its pages, email templates and grants.
+   * 
+   * The response grows with the number and size of the portals and has a size limit. To list
+   * the portals, use `listPortalConfigSummaries`, and read a single portal's full
+   * configuration with `getPortalConfigV3`.
+   * 
    */
   'getAllPortalConfigs'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -21715,7 +24653,8 @@ export interface OperationMethods {
   /**
    * upsertEmailTemplates - upsertEmailTemplates
    * 
-   * Upserts the email templates of a portal
+   * Upserts the email templates of a portal. A slot can only be set to an email template of the organization (or to `null`): a template id the organization does not have fails with `400` (`reason: EMAIL_TEMPLATE_NOT_FOUND`) and nothing is changed. Ids the portal already stores never fail the call.
+   * 
    */
   'upsertEmailTemplates'(
     parameters?: Parameters<Paths.UpsertEmailTemplates.QueryParameters> | null,
@@ -21767,7 +24706,7 @@ export interface OperationMethods {
   /**
    * upsertEmailTemplatesByPortalId - upsertEmailTemplatesByPortalId
    * 
-   * Upserts the email templates of a portal by portal ID. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
+   * Upserts the email templates of a portal by portal ID. A slot can only be set to an email template of the organization (or to `null`): a template id the organization does not have fails with `400` (`reason: EMAIL_TEMPLATE_NOT_FOUND`) and nothing is changed. Ids the portal already stores never fail the call. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
    * 
    */
   'upsertEmailTemplatesByPortalId'(
@@ -22067,7 +25006,9 @@ export interface OperationMethods {
   /**
    * getPortalUser - getPortalUser
    * 
-   * Get the portal user details
+   * Get the portal user details. For a portal with portal roles, also the user's roles and
+   * their grants, so the portal shows what those roles allow without another request.
+   * 
    */
   'getPortalUser'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -22293,16 +25234,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ConfigureDistributionV3.Responses.$200>
   /**
-   * getAllOrders - getAllOrders
-   * 
-   * Get all orders for the portal user. Use searchPortalUserEntities instead.
-   */
-  'getAllOrders'(
-    parameters?: Parameters<Paths.GetAllOrders.QueryParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetAllOrders.Responses.$200>
-  /**
    * postOrderAcceptance - postOrderAcceptance
    * 
    * Accept/decline an offer by id
@@ -22323,36 +25254,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetOrder.Responses.$200>
   /**
-   * getAllOpportunities - getAllOpportunities
-   * 
-   * Get all opportunities of a portal user. Use searchPortalUserEntities instead.
-   */
-  'getAllOpportunities'(
-    parameters?: Parameters<Paths.GetAllOpportunities.QueryParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetAllOpportunities.Responses.$200>
-  /**
-   * getSearchableAttributesForOpportunities - getSearchableAttributesForOpportunities
-   * 
-   * Get all opportunity searchable attributes for a portal user. Use searchPortalUserEntities instead.
-   */
-  'getSearchableAttributesForOpportunities'(
-    parameters?: Parameters<Paths.GetSearchableAttributesForOpportunities.QueryParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetSearchableAttributesForOpportunities.Responses.$200>
-  /**
-   * getSearchResultsForOpportunities - getSearchResultsForOpportunities
-   * 
-   * Get all opportunity with the given searched attributes. Use searchPortalUserEntities instead.
-   */
-  'getSearchResultsForOpportunities'(
-    parameters?: Parameters<Paths.GetSearchResultsForOpportunities.QueryParameters> | null,
-    data?: Paths.GetSearchResultsForOpportunities.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetSearchResultsForOpportunities.Responses.$200>
-  /**
    * getOpportunity - getOpportunity
    * 
    * Get an opportunity by id. Use getPortalUserEntity instead.
@@ -22362,16 +25263,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetOpportunity.Responses.$200>
-  /**
-   * getAllRequests - getAllRequests
-   * 
-   * Get all opportunities & orders of a portal user. Use searchPortalUserEntities instead.
-   */
-  'getAllRequests'(
-    parameters?: Parameters<Paths.GetAllRequests.QueryParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetAllRequests.Responses.$200>
   /**
    * getAllContracts - getAllContracts
    * 
@@ -22439,17 +25330,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntityIdentifiers.Responses.$200>
-  /**
-   * getEntityActivityFeed - getEntityActivityFeed
-   * 
-   * Get activity feed for an entity
-   * 
-   */
-  'getEntityActivityFeed'(
-    parameters?: Parameters<Paths.GetEntityActivityFeed.QueryParameters & Paths.GetEntityActivityFeed.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetEntityActivityFeed.Responses.$200>
   /**
    * validateCadenceEntityEditRules - validateCadenceEntityEditRules
    * 
@@ -22794,6 +25674,71 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetMeterReadings.Responses.$200>
   /**
+   * getMeter - getMeter
+   * 
+   * Retrieves a meter of the portal user, with its journey actions and related entities.
+   */
+  'getMeter'(
+    parameters?: Parameters<Paths.GetMeter.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMeter.Responses.$200>
+  /**
+   * getMeterCounters - getMeterCounters
+   * 
+   * Retrieves the counters of a meter of the portal user.
+   */
+  'getMeterCounters'(
+    parameters?: Parameters<Paths.GetMeterCounters.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMeterCounters.Responses.$200>
+  /**
+   * createMeterReadings - createMeterReadings
+   * 
+   * Inserts readings for several counters of a meter of the portal user at once, one reading per
+   * counter and at most 100 per request. Use `createMeterReading` instead when the portal has a
+   * meter reading plausibility check hook configured.
+   * 
+   */
+  'createMeterReadings'(
+    parameters?: Parameters<Paths.CreateMeterReadings.PathParameters> | null,
+    data?: Paths.CreateMeterReadings.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateMeterReadings.Responses.$200>
+  /**
+   * getAllowedMeterReading - getAllowedMeterReading
+   * 
+   * Returns the allowed min/max reading per counter of the meter, derived from its reading history.
+   * Unlike `getAllowedMeterReadingRange`, this needs no plausibility check hook.
+   * 
+   */
+  'getAllowedMeterReading'(
+    parameters?: Parameters<Paths.GetAllowedMeterReading.QueryParameters & Paths.GetAllowedMeterReading.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetAllowedMeterReading.Responses.$200>
+  /**
+   * getMeterCounter - getMeterCounter
+   * 
+   * Retrieves a counter of a meter of the portal user, incl. its unit and last reading.
+   */
+  'getMeterCounter'(
+    parameters?: Parameters<Paths.GetMeterCounter.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMeterCounter.Responses.$200>
+  /**
+   * getContractMeters - getContractMeters
+   * 
+   * Retrieves the meters of a contract of the portal user.
+   */
+  'getContractMeters'(
+    parameters?: Parameters<Paths.GetContractMeters.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetContractMeters.Responses.$200>
+  /**
    * getSSOProvider - getSSOProvider
    * 
    * Returns the public configuration of a single SSO identity provider with env var
@@ -23088,6 +26033,17 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CompleteTemporaryPassword.Responses.$200>
   /**
+   * resendTemporaryPasswordLink - resendTemporaryPasswordLink
+   * 
+   * Sends a fresh set-password link to a portal user whose link has expired. A new link is only sent when the temporary password of that login has expired; the response is the same in every other case.
+   * 
+   */
+  'resendTemporaryPasswordLink'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ResendTemporaryPasswordLink.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ResendTemporaryPasswordLink.Responses.$200>
+  /**
    * updateCampaignPortalBlockStatus - updateCampaignPortalBlockStatus
    * 
    * Updates the status of a campaign portal block for multiple recipients.
@@ -23170,7 +26126,22 @@ export interface OperationMethods {
   /**
    * createPortalConfig - createPortalConfig
    * 
-   * Creates a new portal configuration.
+   * Creates a new portal configuration. Only `name` and `origin` are required; keys left out
+   * get these defaults (a value that is sent is always stored as sent):
+   * 
+   * | Field | Default when omitted |
+   * | --- | --- |
+   * | `registration_identifiers` | `[{ "name": "email", "schema": "contact" }]` |
+   * | `self_registration_entity` | `contact` |
+   * | `config` | `{"available_languages":["german"]}` |
+   * | `meter_reading_grace_period` | `30` |
+   * | `user_account_self_management` | `false` |
+   * | `prevent_search_engine_indexing` | `true` outside production and for sandbox organizations |
+   * | `design_id` | The organization's default design, if it has one |
+   * | `pages` | The default pages (the ones `getDefaultPages` returns) |
+   * 
+   * `self_registration_setting` has no default and reads as `DENY`.
+   * 
    */
   'createPortalConfig'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -23302,9 +26273,31 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublishPortalRevision.Responses.$200>
   /**
+   * validatePortalConfig - validatePortalConfig
+   * 
+   * Dry run: reports what would leave the portal broken (`error`) or degraded (`warning`). Writes nothing, although it is a `POST`.
+   * 
+   * - no body: the stored portal;
+   * - a candidate body, as `putPortalConfig` takes it: the portal that body would leave behind;
+   * - `revision_id`: the portal that publishing this revision would make live (no body allowed).
+   * 
+   * Findings have a stable `code` and `path`; the portal config writes return the same findings as `validation`. Besides the settings and pages, every block is checked: an unknown block type, a block placed, nested or sectioned where the portal does not render it, a missing block it depends on, and a block that is not allowed on a public page.
+   * 
+   */
+  'validatePortalConfig'(
+    parameters?: Parameters<Paths.ValidatePortalConfig.QueryParameters & Paths.ValidatePortalConfig.PathParameters> | null,
+    data?: Paths.ValidatePortalConfig.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ValidatePortalConfig.Responses.$200>
+  /**
    * listAllPortalConfigs - listAllPortalConfigs
    * 
-   * Retrieves all portal configurations.
+   * Retrieves all portal configurations, each with its pages, email templates and grants.
+   * 
+   * The response grows with the number and size of the portals and has a size limit. To list
+   * the portals, use `listPortalConfigSummaries`, and read a single portal's full
+   * configuration with `getPortalConfigV3`.
+   * 
    */
   'listAllPortalConfigs'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -23347,6 +26340,31 @@ export interface OperationMethods {
     data?: Paths.ClonePortalConfig.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ClonePortalConfig.Responses.$201>
+  /**
+   * getPortalUserRole - getPortalUserRole
+   * 
+   * The signed-in portal user's roles and their grants together.
+   * 
+   */
+  'getPortalUserRole'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPortalUserRole.Responses.$200>
+  /**
+   * listPortalRoles - listPortalRoles
+   * 
+   * Roles the caller may give to users they invite: the portal's default role first, then each
+   * of the portal's `allowed_roles` that the caller's role holds a `portal_user:assign_role`
+   * grant for (resource = role slug or `*`). `can_invite` says whether the caller may invite
+   * users at all.
+   * 
+   */
+  'listPortalRoles'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListPortalRoles.Responses.$200>
   /**
    * invitePartner - invitePartner
    * 
@@ -23397,6 +26415,23 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DisablePartner.Responses.$200>
+  /**
+   * setPartnerRole - setPartnerRole
+   * 
+   * Changes the portal roles of another user on the caller's account.
+   * 
+   * Every new role must be the portal's default role or one of its `allowed_roles` (400
+   * `ROLE_NOT_ALLOWED`). The caller's roles need `portal_user:assign_role` grants covering
+   * every role the change adds or removes (403 `ROLE_ASSIGNMENT_NOT_PERMITTED`). Callers
+   * cannot change their own roles (403 `ROLE_SELF_CHANGE`). `roles: []` resets the user to the
+   * portal's default role. The new roles apply from the user's next sign-in or session refresh.
+   * 
+   */
+  'setPartnerRole'(
+    parameters?: Parameters<Paths.SetPartnerRole.PathParameters> | null,
+    data?: Paths.SetPartnerRole.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SetPartnerRole.Responses.$200>
   /**
    * enablePartner - enablePartner
    * 
@@ -23561,7 +26596,7 @@ export interface PathsDictionary {
     /**
      * createExport - createExport
      * 
-     * Request an asynchronous CSV export of the portal user's entities for one schema. Columns come from the request Returns a job id to poll.
+     * Request an asynchronous CSV or XLSX export of the portal user's entities for one schema. Columns come from the request Returns a job id to poll.
      * 
      */
     'post'(
@@ -23696,30 +26731,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPrices.Responses.$200>
   }
-  ['/v2/portal/external-links']: {
-    /**
-     * getExternalLinks - getExternalLinks
-     * 
-     * Retrieves the portal configuration external links.
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetExternalLinks.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetExternalLinks.Responses.$200>
-  }
-  ['/v2/portal/resolve:external-link/{id}']: {
-    /**
-     * getResolvedExternalLink - getResolvedExternalLink
-     * 
-     * Retrieves a resolved portal external link. Use /v2/portal/resolve:seamless-link/{id} instead.
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetResolvedExternalLink.QueryParameters & Paths.GetResolvedExternalLink.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetResolvedExternalLink.Responses.$200>
-  }
   ['/v3/portal/external-links']: {
     /**
      * getExternalLinksV3 - getExternalLinksV3
@@ -23731,18 +26742,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetExternalLinksV3.Responses.$200>
-  }
-  ['/v3/portal/resolve:external-link/{id}']: {
-    /**
-     * getResolvedExternalLinkV3 - getResolvedExternalLinkV3
-     * 
-     * Retrieves a resolved portal external link. Use /v2/portal/resolve:seamless-link/{id} instead.
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetResolvedExternalLinkV3.QueryParameters & Paths.GetResolvedExternalLinkV3.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetResolvedExternalLinkV3.Responses.$200>
   }
   ['/v2/portal/resolve:seamless-link']: {
     /**
@@ -23808,7 +26807,12 @@ export interface PathsDictionary {
     /**
      * getAllPortalConfigs - getAllPortalConfigs
      * 
-     * Retrieves all portal configurations.
+     * Retrieves all portal configurations, each with its pages, email templates and grants.
+     * 
+     * The response grows with the number and size of the portals and has a size limit. To list
+     * the portals, use `listPortalConfigSummaries`, and read a single portal's full
+     * configuration with `getPortalConfigV3`.
+     * 
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -23820,7 +26824,8 @@ export interface PathsDictionary {
     /**
      * upsertEmailTemplates - upsertEmailTemplates
      * 
-     * Upserts the email templates of a portal
+     * Upserts the email templates of a portal. A slot can only be set to an email template of the organization (or to `null`): a template id the organization does not have fails with `400` (`reason: EMAIL_TEMPLATE_NOT_FOUND`) and nothing is changed. Ids the portal already stores never fail the call.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.UpsertEmailTemplates.QueryParameters> | null,
@@ -23878,7 +26883,7 @@ export interface PathsDictionary {
     /**
      * upsertEmailTemplatesByPortalId - upsertEmailTemplatesByPortalId
      * 
-     * Upserts the email templates of a portal by portal ID. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
+     * Upserts the email templates of a portal by portal ID. A slot can only be set to an email template of the organization (or to `null`): a template id the organization does not have fails with `400` (`reason: EMAIL_TEMPLATE_NOT_FOUND`) and nothing is changed. Ids the portal already stores never fail the call. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
      * 
      */
     'post'(
@@ -24234,7 +27239,9 @@ export interface PathsDictionary {
     /**
      * getPortalUser - getPortalUser
      * 
-     * Get the portal user details
+     * Get the portal user details. For a portal with portal roles, also the user's roles and
+     * their grants, so the portal shows what those roles allow without another request.
+     * 
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -24492,18 +27499,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ConfigureDistributionV3.Responses.$200>
   }
-  ['/v2/portal/order']: {
-    /**
-     * getAllOrders - getAllOrders
-     * 
-     * Get all orders for the portal user. Use searchPortalUserEntities instead.
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetAllOrders.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetAllOrders.Responses.$200>
-  }
   ['/v2/portal/order/{id}/acceptance']: {
     /**
      * postOrderAcceptance - postOrderAcceptance
@@ -24528,42 +27523,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetOrder.Responses.$200>
   }
-  ['/v2/portal/opportunity']: {
-    /**
-     * getAllOpportunities - getAllOpportunities
-     * 
-     * Get all opportunities of a portal user. Use searchPortalUserEntities instead.
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetAllOpportunities.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetAllOpportunities.Responses.$200>
-  }
-  ['/v2/portal/opportunities/searchable-attributes']: {
-    /**
-     * getSearchableAttributesForOpportunities - getSearchableAttributesForOpportunities
-     * 
-     * Get all opportunity searchable attributes for a portal user. Use searchPortalUserEntities instead.
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetSearchableAttributesForOpportunities.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetSearchableAttributesForOpportunities.Responses.$200>
-  }
-  ['/v2/portal/opportunities/search']: {
-    /**
-     * getSearchResultsForOpportunities - getSearchResultsForOpportunities
-     * 
-     * Get all opportunity with the given searched attributes. Use searchPortalUserEntities instead.
-     */
-    'post'(
-      parameters?: Parameters<Paths.GetSearchResultsForOpportunities.QueryParameters> | null,
-      data?: Paths.GetSearchResultsForOpportunities.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetSearchResultsForOpportunities.Responses.$200>
-  }
   ['/v2/portal/opportunities/{id}']: {
     /**
      * getOpportunity - getOpportunity
@@ -24575,18 +27534,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetOpportunity.Responses.$200>
-  }
-  ['/v2/portal/request']: {
-    /**
-     * getAllRequests - getAllRequests
-     * 
-     * Get all opportunities & orders of a portal user. Use searchPortalUserEntities instead.
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetAllRequests.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetAllRequests.Responses.$200>
   }
   ['/v2/portal/contract']: {
     /**
@@ -24664,19 +27611,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntityIdentifiers.Responses.$200>
-  }
-  ['/v2/portal/entity/{slug}/{id}/activity']: {
-    /**
-     * getEntityActivityFeed - getEntityActivityFeed
-     * 
-     * Get activity feed for an entity
-     * 
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetEntityActivityFeed.QueryParameters & Paths.GetEntityActivityFeed.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetEntityActivityFeed.Responses.$200>
   }
   ['/v2/portal/{slug}/{id}:validateRule']: {
     /**
@@ -25081,6 +28015,83 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetMeterReadings.Responses.$200>
   }
+  ['/v2/portal/metering/meter/{meter_id}']: {
+    /**
+     * getMeter - getMeter
+     * 
+     * Retrieves a meter of the portal user, with its journey actions and related entities.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetMeter.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMeter.Responses.$200>
+  }
+  ['/v2/portal/metering/meter/{meter_id}/counters']: {
+    /**
+     * getMeterCounters - getMeterCounters
+     * 
+     * Retrieves the counters of a meter of the portal user.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetMeterCounters.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMeterCounters.Responses.$200>
+  }
+  ['/v2/portal/metering/meter/{meter_id}/readings']: {
+    /**
+     * createMeterReadings - createMeterReadings
+     * 
+     * Inserts readings for several counters of a meter of the portal user at once, one reading per
+     * counter and at most 100 per request. Use `createMeterReading` instead when the portal has a
+     * meter reading plausibility check hook configured.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateMeterReadings.PathParameters> | null,
+      data?: Paths.CreateMeterReadings.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateMeterReadings.Responses.$200>
+  }
+  ['/v2/portal/metering/meter/{meter_id}/allowed-reading']: {
+    /**
+     * getAllowedMeterReading - getAllowedMeterReading
+     * 
+     * Returns the allowed min/max reading per counter of the meter, derived from its reading history.
+     * Unlike `getAllowedMeterReadingRange`, this needs no plausibility check hook.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetAllowedMeterReading.QueryParameters & Paths.GetAllowedMeterReading.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetAllowedMeterReading.Responses.$200>
+  }
+  ['/v2/portal/metering/counter/{counter_id}']: {
+    /**
+     * getMeterCounter - getMeterCounter
+     * 
+     * Retrieves a counter of a meter of the portal user, incl. its unit and last reading.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetMeterCounter.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMeterCounter.Responses.$200>
+  }
+  ['/v2/portal/metering/contract/{contract_id}/meters']: {
+    /**
+     * getContractMeters - getContractMeters
+     * 
+     * Retrieves the meters of a contract of the portal user.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetContractMeters.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetContractMeters.Responses.$200>
+  }
   ['/v2/portal/public/sso/providers/{provider_slug}']: {
     /**
      * getSSOProvider - getSSOProvider
@@ -25411,6 +28422,19 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CompleteTemporaryPassword.Responses.$200>
   }
+  ['/v3/portal/public/user/temporary-password/resend']: {
+    /**
+     * resendTemporaryPasswordLink - resendTemporaryPasswordLink
+     * 
+     * Sends a fresh set-password link to a portal user whose link has expired. A new link is only sent when the temporary password of that login has expired; the response is the same in every other case.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ResendTemporaryPasswordLink.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ResendTemporaryPasswordLink.Responses.$200>
+  }
   ['/v2/portal/campaign/{campaign_id}/entity:status']: {
     /**
      * updateCampaignPortalBlockStatus - updateCampaignPortalBlockStatus
@@ -25511,7 +28535,22 @@ export interface PathsDictionary {
     /**
      * createPortalConfig - createPortalConfig
      * 
-     * Creates a new portal configuration.
+     * Creates a new portal configuration. Only `name` and `origin` are required; keys left out
+     * get these defaults (a value that is sent is always stored as sent):
+     * 
+     * | Field | Default when omitted |
+     * | --- | --- |
+     * | `registration_identifiers` | `[{ "name": "email", "schema": "contact" }]` |
+     * | `self_registration_entity` | `contact` |
+     * | `config` | `{"available_languages":["german"]}` |
+     * | `meter_reading_grace_period` | `30` |
+     * | `user_account_self_management` | `false` |
+     * | `prevent_search_engine_indexing` | `true` outside production and for sandbox organizations |
+     * | `design_id` | The organization's default design, if it has one |
+     * | `pages` | The default pages (the ones `getDefaultPages` returns) |
+     * 
+     * `self_registration_setting` has no default and reads as `DENY`.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -25653,11 +28692,35 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PublishPortalRevision.Responses.$200>
   }
+  ['/v3/portal/config/{portal_id}/validate']: {
+    /**
+     * validatePortalConfig - validatePortalConfig
+     * 
+     * Dry run: reports what would leave the portal broken (`error`) or degraded (`warning`). Writes nothing, although it is a `POST`.
+     * 
+     * - no body: the stored portal;
+     * - a candidate body, as `putPortalConfig` takes it: the portal that body would leave behind;
+     * - `revision_id`: the portal that publishing this revision would make live (no body allowed).
+     * 
+     * Findings have a stable `code` and `path`; the portal config writes return the same findings as `validation`. Besides the settings and pages, every block is checked: an unknown block type, a block placed, nested or sectioned where the portal does not render it, a missing block it depends on, and a block that is not allowed on a public page.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.ValidatePortalConfig.QueryParameters & Paths.ValidatePortalConfig.PathParameters> | null,
+      data?: Paths.ValidatePortalConfig.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ValidatePortalConfig.Responses.$200>
+  }
   ['/v3/portal/configs']: {
     /**
      * listAllPortalConfigs - listAllPortalConfigs
      * 
-     * Retrieves all portal configurations.
+     * Retrieves all portal configurations, each with its pages, email templates and grants.
+     * 
+     * The response grows with the number and size of the portals and has a size limit. To list
+     * the portals, use `listPortalConfigSummaries`, and read a single portal's full
+     * configuration with `getPortalConfigV3`.
+     * 
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -25706,6 +28769,35 @@ export interface PathsDictionary {
       data?: Paths.ClonePortalConfig.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ClonePortalConfig.Responses.$201>
+  }
+  ['/v3/portal/user/role']: {
+    /**
+     * getPortalUserRole - getPortalUserRole
+     * 
+     * The signed-in portal user's roles and their grants together.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPortalUserRole.Responses.$200>
+  }
+  ['/v3/portal/roles']: {
+    /**
+     * listPortalRoles - listPortalRoles
+     * 
+     * Roles the caller may give to users they invite: the portal's default role first, then each
+     * of the portal's `allowed_roles` that the caller's role holds a `portal_user:assign_role`
+     * grant for (resource = role slug or `*`). `can_invite` says whether the caller may invite
+     * users at all.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListPortalRoles.Responses.$200>
   }
   ['/v3/portal/partner/invite']: {
     /**
@@ -25766,6 +28858,25 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DisablePartner.Responses.$200>
+  }
+  ['/v3/portal/partner/{partner_id}/role']: {
+    /**
+     * setPartnerRole - setPartnerRole
+     * 
+     * Changes the portal roles of another user on the caller's account.
+     * 
+     * Every new role must be the portal's default role or one of its `allowed_roles` (400
+     * `ROLE_NOT_ALLOWED`). The caller's roles need `portal_user:assign_role` grants covering
+     * every role the change adds or removes (403 `ROLE_ASSIGNMENT_NOT_PERMITTED`). Callers
+     * cannot change their own roles (403 `ROLE_SELF_CHANGE`). `roles: []` resets the user to the
+     * portal's default role. The new roles apply from the user's next sign-in or session refresh.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.SetPartnerRole.PathParameters> | null,
+      data?: Paths.SetPartnerRole.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SetPartnerRole.Responses.$200>
   }
   ['/v3/portal/partner/{partner_id}/enable']: {
     /**
@@ -25936,6 +29047,7 @@ export type JourneyContextUsagesResponse = Components.Schemas.JourneyContextUsag
 export type JuiceSettings = Components.Schemas.JuiceSettings;
 export type Meter = Components.Schemas.Meter;
 export type MeterChartWidget = Components.Schemas.MeterChartWidget;
+export type MeterCounter = Components.Schemas.MeterCounter;
 export type MeterReading = Components.Schemas.MeterReading;
 export type MeterReadingCounterDetails = Components.Schemas.MeterReadingCounterDetails;
 export type MeterReadingPhoto = Components.Schemas.MeterReadingPhoto;
@@ -25947,7 +29059,6 @@ export type MobileConfig = Components.Schemas.MobileConfig;
 export type MobileConfigUpdate = Components.Schemas.MobileConfigUpdate;
 export type MobileOtaConfig = Components.Schemas.MobileOtaConfig;
 export type MoblieOIDCConfig = Components.Schemas.MoblieOIDCConfig;
-export type NewDesignMigrationResult = Components.Schemas.NewDesignMigrationResult;
 export type NotificationTriggerConfig = Components.Schemas.NotificationTriggerConfig;
 export type OIDCProviderConfig = Components.Schemas.OIDCProviderConfig;
 export type OIDCProviderMetadata = Components.Schemas.OIDCProviderMetadata;
@@ -25963,6 +29074,8 @@ export type PaymentWidget = Components.Schemas.PaymentWidget;
 export type PortalConfig = Components.Schemas.PortalConfig;
 export type PortalConfigSummaryV3 = Components.Schemas.PortalConfigSummaryV3;
 export type PortalConfigV3 = Components.Schemas.PortalConfigV3;
+export type PortalConfigV3WriteResult = Components.Schemas.PortalConfigV3WriteResult;
+export type PortalConfigWriteResult = Components.Schemas.PortalConfigWriteResult;
 export type PortalContactUpdate = Components.Schemas.PortalContactUpdate;
 export type PortalContractUpdate = Components.Schemas.PortalContractUpdate;
 export type PortalCopilotVisibility = Components.Schemas.PortalCopilotVisibility;
@@ -25972,14 +29085,17 @@ export type PortalFeatureSettings = Components.Schemas.PortalFeatureSettings;
 export type PortalHeader = Components.Schemas.PortalHeader;
 export type PortalHeaderDesignOverrides = Components.Schemas.PortalHeaderDesignOverrides;
 export type PortalId = Components.Schemas.PortalId;
+export type PortalMeterReading = Components.Schemas.PortalMeterReading;
 export type PortalNameOverrides = Components.Schemas.PortalNameOverrides;
 export type PortalNotification = Components.Schemas.PortalNotification;
 export type PortalRevision = Components.Schemas.PortalRevision;
+export type PortalRevisionActor = Components.Schemas.PortalRevisionActor;
 export type PortalRevisionCreated = Components.Schemas.PortalRevisionCreated;
 export type PortalRevisionList = Components.Schemas.PortalRevisionList;
 export type PortalRevisionPreview = Components.Schemas.PortalRevisionPreview;
 export type PortalRevisionRequest = Components.Schemas.PortalRevisionRequest;
 export type PortalRevisionSummary = Components.Schemas.PortalRevisionSummary;
+export type PortalRoleRef = Components.Schemas.PortalRoleRef;
 export type PortalSurface = Components.Schemas.PortalSurface;
 export type PortalSurfaceDataAccess = Components.Schemas.PortalSurfaceDataAccess;
 export type PortalSurfaceEntityAccess = Components.Schemas.PortalSurfaceEntityAccess;
@@ -25989,10 +29105,14 @@ export type PortalUserNotificationPreferences = Components.Schemas.PortalUserNot
 export type PortalUserPasskey = Components.Schemas.PortalUserPasskey;
 export type PortalUserRegistrationStatus = Components.Schemas.PortalUserRegistrationStatus;
 export type PortalUsingDesign = Components.Schemas.PortalUsingDesign;
+export type PortalValidationFailedResp = Components.Schemas.PortalValidationFailedResp;
+export type PortalValidationFinding = Components.Schemas.PortalValidationFinding;
+export type PortalValidationResult = Components.Schemas.PortalValidationResult;
 export type PortalWidget = Components.Schemas.PortalWidget;
 export type PortalWorkflow = Components.Schemas.PortalWorkflow;
 export type PortalWorkflowStage = Components.Schemas.PortalWorkflowStage;
 export type PortalWorkflowTask = Components.Schemas.PortalWorkflowTask;
+export type PortalWriteValidation = Components.Schemas.PortalWriteValidation;
 export type PreviewRevision = Components.Schemas.PreviewRevision;
 export type Product = Components.Schemas.Product;
 export type ProductRecommendationsWidget = Components.Schemas.ProductRecommendationsWidget;
@@ -26017,7 +29137,14 @@ export type PublishRevisionRequest = Components.Schemas.PublishRevisionRequest;
 export type ReadBy = Components.Schemas.ReadBy;
 export type ReadingStatus = Components.Schemas.ReadingStatus;
 export type Reason = Components.Schemas.Reason;
+export type RecordAccess = Components.Schemas.RecordAccess;
+export type RecordAccessCondition = Components.Schemas.RecordAccessCondition;
+export type RecordAccessDefaults = Components.Schemas.RecordAccessDefaults;
+export type RecordAccessName = Components.Schemas.RecordAccessName;
+export type RecordAccessRelationAttributeCondition = Components.Schemas.RecordAccessRelationAttributeCondition;
+export type RecordAccessRule = Components.Schemas.RecordAccessRule;
 export type RegistrationIdentifier = Components.Schemas.RegistrationIdentifier;
+export type RegistrationTargetGroup = Components.Schemas.RegistrationTargetGroup;
 export type RegistrationValidationRule = Components.Schemas.RegistrationValidationRule;
 export type ReimbursementEvent = Components.Schemas.ReimbursementEvent;
 export type RevisionPage = Components.Schemas.RevisionPage;
@@ -26058,6 +29185,5 @@ export type VisualizationMetadata = Components.Schemas.VisualizationMetadata;
 export type VisualizationTypeOption = Components.Schemas.VisualizationTypeOption;
 export type WidgetAction = Components.Schemas.WidgetAction;
 export type WidgetBase = Components.Schemas.WidgetBase;
-export type WorfklowIdentifier = Components.Schemas.WorfklowIdentifier;
 export type WorkflowExecution = Components.Schemas.WorkflowExecution;
 export type WorkflowStep = Components.Schemas.WorkflowStep;

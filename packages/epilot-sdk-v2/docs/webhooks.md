@@ -37,6 +37,8 @@ const { data } = await webhooksClient.getPublicKey(...)
 - [`batchReplayEvents`](#batchreplayevents)
 - [`getEventById`](#geteventbyid)
 - [`replayEvent`](#replayevent)
+- [`getConfigRevisions`](#getconfigrevisions)
+- [`getConfigRevision`](#getconfigrevision)
 - [`getWebhookExample`](#getwebhookexample)
 
 **Events**
@@ -65,6 +67,12 @@ const { data } = await webhooksClient.getPublicKey(...)
 - [`CustomOAuthParameter`](#customoauthparameter)
 - [`Metadata`](#metadata)
 - [`ExecutionPayload`](#executionpayload)
+- [`WebhookConfigRevisionList`](#webhookconfigrevisionlist)
+- [`WebhookConfigRevision`](#webhookconfigrevision)
+- [`WebhookConfigRevisionDetail`](#webhookconfigrevisiondetail)
+- [`WebhookConfigRevisionConflict`](#webhookconfigrevisionconflict)
+- [`WebhookConfigRevisionChange`](#webhookconfigrevisionchange)
+- [`WebhookEventAttempt`](#webhookeventattempt)
 - [`WebhookEvent`](#webhookevent)
 - [`ExampleRequest`](#examplerequest)
 - [`ExampleResponse`](#exampleresponse)
@@ -144,6 +152,7 @@ const { data } = await client.getConfigs({
 ```json
 [
   {
+    "name": "Customer Request Created Webhook",
     "eventName": "CustomerRequest_Created",
     "url": "https://my-partner-service.api.com",
     "httpMethod": "POST",
@@ -177,6 +186,7 @@ Create Webhook Client Config
 const { data } = await client.createConfig(
   null,
   {
+    name: 'Customer Request Created Webhook',
     eventName: 'CustomerRequest_Created',
     url: 'https://my-partner-service.api.com',
     httpMethod: 'POST',
@@ -201,6 +211,7 @@ const { data } = await client.createConfig(
 
 ```json
 {
+  "name": "Customer Request Created Webhook",
   "eventName": "CustomerRequest_Created",
   "url": "https://my-partner-service.api.com",
   "httpMethod": "POST",
@@ -240,6 +251,7 @@ const { data } = await client.getConfig({
 
 ```json
 {
+  "name": "Customer Request Created Webhook",
   "eventName": "CustomerRequest_Created",
   "url": "https://my-partner-service.api.com",
   "httpMethod": "POST",
@@ -272,8 +284,11 @@ Update Webhook Client Config
 const { data } = await client.updateConfig(
   {
     configId: 'example',
+    based_on_revision_id: 'example',
+    restored_from_revision_id: 'example',
   },
   {
+    name: 'Customer Request Created Webhook',
     eventName: 'CustomerRequest_Created',
     url: 'https://my-partner-service.api.com',
     httpMethod: 'POST',
@@ -298,6 +313,7 @@ const { data } = await client.updateConfig(
 
 ```json
 {
+  "name": "Customer Request Created Webhook",
   "eventName": "CustomerRequest_Created",
   "url": "https://my-partner-service.api.com",
   "httpMethod": "POST",
@@ -336,7 +352,9 @@ const { data } = await client.deleteConfig({
 
 ### `testOAuth`
 
-Test OAuth connection
+Tests the OAuth client credentials configuration for a saved webhook by attempting
+a token exchange against the configured OAuth endpoint. Returns success with token
+metadata (e.g. expires_in, token_t
 
 `POST /v1/webhooks/configs/{configId}/test-oauth`
 
@@ -364,7 +382,7 @@ const { data } = await client.testOAuth({
 
 ### `triggerWebhook`
 
-triggers a webhook event either async or sync
+Triggers a webhook event either async or sync
 
 `POST /v1/webhooks/configs/{configId}/trigger`
 
@@ -480,6 +498,19 @@ const { data } = await client.getEventById({
   "payload": "string",
   "original_payload": "string",
   "retry_attempt": 0,
+  "next_retry_at": "1970-01-01T00:00:00.000Z",
+  "max_retry_attempts": 0,
+  "attempts": [
+    {
+      "retry_attempt": 0,
+      "status": "succeeded",
+      "created_at": "2021-04-27T12:01:13.000Z",
+      "status_code": 0,
+      "message": "string",
+      "code": "string",
+      "next_retry_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
   "can_reapply_transform": true,
   "can_reapply_transform_reason": "available"
 }
@@ -506,6 +537,101 @@ const { data } = await client.replayEvent(
   },
 )
 ```
+
+---
+
+### `getConfigRevisions`
+
+List the change history of a webhook configuration, newest first. Each revision records who made the change and which fields changed, with before/after values. Secret values (passwords, API keys, clie
+
+`GET /v1/webhooks/configs/{configId}/revisions`
+
+```ts
+const { data } = await client.getConfigRevisions({
+  configId: 'example',
+  limit: 1,
+  cursor: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "revision_id": "MjAyNi0xMS0wOVQxNDozMjowMC4wMDBaIzdoajI4YWFz",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "created_by": "string",
+      "source": "create",
+      "restored_from": {
+        "revision_id": "string",
+        "created_at": "1970-01-01T00:00:00.000Z"
+      },
+      "changes": [
+        {
+          "field": "url",
+          "kind": "added",
+          "key": "string",
+          "before": {},
+          "after": {},
+          "redacted": true
+        }
+      ],
+      "truncated": true
+    }
+  ],
+  "next_cursor": "string"
+}
+```
+
+</details>
+
+---
+
+### `getConfigRevision`
+
+One revision of a webhook configuration, including the configuration as it was after that change. Secret values are never included. Used to review or restore an earlier version.
+
+`GET /v1/webhooks/configs/{configId}/revisions/{revisionId}`
+
+```ts
+const { data } = await client.getConfigRevision({
+  configId: 'example',
+  revisionId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "revision_id": "MjAyNi0xMS0wOVQxNDozMjowMC4wMDBaIzdoajI4YWFz",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": "string",
+  "source": "create",
+  "restored_from": {
+    "revision_id": "string",
+    "created_at": "1970-01-01T00:00:00.000Z"
+  },
+  "changes": [
+    {
+      "field": "url",
+      "kind": "added",
+      "key": "string",
+      "before": {},
+      "after": {},
+      "redacted": true
+    }
+  ],
+  "truncated": true,
+  "configuration": {}
+}
+```
+
+</details>
 
 ---
 
@@ -619,6 +745,19 @@ const { data } = await client.getWebhookEventsV2(
       "payload": "string",
       "original_payload": "string",
       "retry_attempt": 0,
+      "next_retry_at": "1970-01-01T00:00:00.000Z",
+      "max_retry_attempts": 0,
+      "attempts": [
+        {
+          "retry_attempt": 0,
+          "status": "succeeded",
+          "created_at": "2021-04-27T12:01:13.000Z",
+          "status_code": 0,
+          "message": "string",
+          "code": "string",
+          "next_retry_at": "1970-01-01T00:00:00.000Z"
+        }
+      ],
       "can_reapply_transform": true,
       "can_reapply_transform_reason": "available"
     }
@@ -661,7 +800,7 @@ type SearchOptions = {
     to?: string // date-time
   }
   event_id?: string
-  status?: "succeeded" | "failed" | "skipped"
+  status?: "succeeded" | "failed" | "skipped" | "retrying"
 }
 ```
 
@@ -695,11 +834,22 @@ type EventListResponse = {
       execution_id?: { ... }
       action_id?: { ... }
     }
-    status?: "succeeded" | "failed" | "in_progress" | "skipped"
+    status?: "succeeded" | "failed" | "in_progress" | "skipped" | "retrying"
     http_method?: "GET" | "POST" | "PUT"
     payload?: string
     original_payload?: string
     retry_attempt?: number
+    next_retry_at?: string // date-time
+    max_retry_attempts?: number
+    attempts?: Array<{
+      retry_attempt: { ... }
+      status: { ... }
+      created_at?: { ... }
+      status_code?: { ... }
+      message?: { ... }
+      code?: { ... }
+      next_retry_at?: { ... }
+    }>
     can_reapply_transform?: boolean
     can_reapply_transform_reason?: "available" | "no_transform_configured" | "no_original_source"
   }>
@@ -892,6 +1042,7 @@ type WebhookConfig = {
     integration_id: string // uuid
     use_case_slug: string
   }
+  integrationId?: string // uuid
   status?: "active" | "inactive" | "incomplete"
   jsonataExpression?: string
   deliveryMode?: "json_base64" | "binary_multipart"
@@ -1040,6 +1191,140 @@ type ExecutionPayload = {
 }
 ```
 
+### `WebhookConfigRevisionList`
+
+```ts
+type WebhookConfigRevisionList = {
+  results: Array<{
+    revision_id: string
+    created_at: string // date-time
+    created_by?: string
+    source: "create" | "update" | "restore"
+    restored_from?: {
+      revision_id: { ... }
+      created_at: { ... }
+    }
+    changes: Array<{
+      field: { ... }
+      kind: { ... }
+      key?: { ... }
+      before?: { ... }
+      after?: { ... }
+      redacted?: { ... }
+    }>
+    truncated?: boolean
+  }>
+  next_cursor?: string
+}
+```
+
+### `WebhookConfigRevision`
+
+One saved change to a webhook configuration.
+
+```ts
+type WebhookConfigRevision = {
+  revision_id: string
+  created_at: string // date-time
+  created_by?: string
+  source: "create" | "update" | "restore"
+  restored_from?: {
+    revision_id: string
+    created_at: string // date-time
+  }
+  changes: Array<{
+    field: string
+    kind: "added" | "removed" | "changed"
+    key?: string
+    before?: unknown
+    after?: unknown
+    redacted?: boolean
+  }>
+  truncated?: boolean
+}
+```
+
+### `WebhookConfigRevisionDetail`
+
+```ts
+type WebhookConfigRevisionDetail = {
+  revision_id: string
+  created_at: string // date-time
+  created_by?: string
+  source: "create" | "update" | "restore"
+  restored_from?: {
+    revision_id: string
+    created_at: string // date-time
+  }
+  changes: Array<{
+    field: string
+    kind: "added" | "removed" | "changed"
+    key?: string
+    before?: unknown
+    after?: unknown
+    redacted?: boolean
+  }>
+  truncated?: boolean
+  configuration: Record<string, unknown>
+}
+```
+
+### `WebhookConfigRevisionConflict`
+
+```ts
+type WebhookConfigRevisionConflict = {
+  message: string
+  latest_revision?: {
+    revision_id: string
+    created_at: string // date-time
+    created_by?: string
+    source: "create" | "update" | "restore"
+    restored_from?: {
+      revision_id: { ... }
+      created_at: { ... }
+    }
+    changes: Array<{
+      field: { ... }
+      kind: { ... }
+      key?: { ... }
+      before?: { ... }
+      after?: { ... }
+      redacted?: { ... }
+    }>
+    truncated?: boolean
+  }
+}
+```
+
+### `WebhookConfigRevisionChange`
+
+```ts
+type WebhookConfigRevisionChange = {
+  field: string
+  kind: "added" | "removed" | "changed"
+  key?: string
+  before?: unknown
+  after?: unknown
+  redacted?: boolean
+}
+```
+
+### `WebhookEventAttempt`
+
+Summary of a single delivery attempt of a webhook event.
+
+```ts
+type WebhookEventAttempt = {
+  retry_attempt: number
+  status: "succeeded" | "failed" | "skipped" | "retrying"
+  created_at?: string
+  status_code?: number
+  message?: string
+  code?: string
+  next_retry_at?: string // date-time
+}
+```
+
 ### `WebhookEvent`
 
 ```ts
@@ -1069,11 +1354,22 @@ type WebhookEvent = {
     execution_id?: string
     action_id?: string
   }
-  status?: "succeeded" | "failed" | "in_progress" | "skipped"
+  status?: "succeeded" | "failed" | "in_progress" | "skipped" | "retrying"
   http_method?: "GET" | "POST" | "PUT"
   payload?: string
   original_payload?: string
   retry_attempt?: number
+  next_retry_at?: string // date-time
+  max_retry_attempts?: number
+  attempts?: Array<{
+    retry_attempt: number
+    status: "succeeded" | "failed" | "skipped" | "retrying"
+    created_at?: string
+    status_code?: number
+    message?: string
+    code?: string
+    next_retry_at?: string // date-time
+  }>
   can_reapply_transform?: boolean
   can_reapply_transform_reason?: "available" | "no_transform_configured" | "no_original_source"
 }

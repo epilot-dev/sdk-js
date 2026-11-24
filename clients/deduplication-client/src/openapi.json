@@ -107,7 +107,7 @@
       "post": {
         "operationId": "detectDuplicates",
         "summary": "detectDuplicates",
-        "description": "Detects potential duplicate entities for the given entity using the schema's prioritized uniqueness rules. Returns matches with a confidence score.",
+        "description": "Detects potential duplicate entities for the given entity using the schema's prioritized uniqueness rules. Returns matches with a confidence score. Used by entity-mapping-api while the self-contained deduplication flag is off; see POST /v1/duplicates/resolve for the action-based answer.",
         "tags": [],
         "requestBody": {
           "content": {
@@ -132,11 +132,43 @@
         }
       }
     },
+    "/v1/duplicates/resolve": {
+      "post": {
+        "operationId": "resolveDuplicates",
+        "summary": "resolveDuplicates",
+        "description": "Answers 'is this payload an existing record, and which one?' as an action the caller executes: update that entity, create, or ask the user. The action follows from the matching rule's strength and the caller's mode; callers never see scores. Flagging of the written record happens afterwards, from the entity event, and is not the caller's concern.",
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveDuplicatesRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The action to take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolveDuplicatesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No UniquenessCriteria for the schema, or the named rule set does not exist"
+          }
+        }
+      }
+    },
     "/v1/duplicates/dismiss": {
       "post": {
         "operationId": "dismissDuplicates",
         "summary": "dismissDuplicates",
-        "description": "Confirms entities as NOT duplicates: clears the internal duplicate-detection flags (_matching_entities) on each given entity, so they stop appearing as open duplicate sets. The records themselves are not modified otherwise.",
+        "description": "Confirms entities as NOT duplicates. Every pair among them is remembered as dismissed, so no later flagging pass raises it again, and the entries they hold about each other are removed from their duplicate flags. The records themselves are not modified otherwise.",
         "tags": [],
         "requestBody": {
           "content": {
@@ -149,7 +181,7 @@
         },
         "responses": {
           "200": {
-            "description": "Flags cleared",
+            "description": "Pairs dismissed",
             "content": {
               "application/json": {
                 "schema": {
@@ -165,7 +197,7 @@
       "get": {
         "operationId": "listUniquenessCriteria",
         "summary": "listUniquenessCriteria",
-        "description": "Lists UniquenessCriteria for the requesting organization. Optionally filtered by schema.",
+        "description": "Lists the rule sets of the requesting organization, optionally one schema's, each with its usages.",
         "tags": [],
         "parameters": [
           {
@@ -194,7 +226,7 @@
       "post": {
         "operationId": "createUniquenessCriteria",
         "summary": "createUniquenessCriteria",
-        "description": "Creates a new UniquenessCriteria record.",
+        "description": "Creates a rule set. The first set of a schema becomes its global set unless 'global' is false.",
         "tags": [],
         "requestBody": {
           "content": {
@@ -215,6 +247,16 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "The rule set's state forbids the operation; the body names the usages that block it",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleSetConflict"
+                }
+              }
+            }
           }
         }
       }
@@ -223,7 +265,7 @@
       "get": {
         "operationId": "getUniquenessCriteria",
         "summary": "getUniquenessCriteria",
-        "description": "Fetch a single UniquenessCriteria record.",
+        "description": "The schema's global rule set.",
         "tags": [],
         "parameters": [
           {
@@ -255,7 +297,7 @@
       "put": {
         "operationId": "updateUniquenessCriteria",
         "summary": "updateUniquenessCriteria",
-        "description": "Replace the matchRules on an existing UniquenessCriteria record.",
+        "description": "Replaces the rules, and the name when given, of the schema's global rule set.",
         "tags": [],
         "parameters": [
           {
@@ -296,7 +338,7 @@
       "delete": {
         "operationId": "deleteUniquenessCriteria",
         "summary": "deleteUniquenessCriteria",
-        "description": "Delete a UniquenessCriteria record.",
+        "description": "Deletes the schema's global rule set. Refused while it is referenced or while the schema has other rule sets.",
         "tags": [],
         "parameters": [
           {
@@ -315,6 +357,315 @@
           },
           "404": {
             "description": "Record not found"
+          },
+          "409": {
+            "description": "The rule set's state forbids the operation; the body names the usages that block it",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleSetConflict"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/uniqueness-criteria/{schema}/{id}": {
+      "get": {
+        "operationId": "getUniquenessCriteriaById",
+        "summary": "getUniquenessCriteriaById",
+        "description": "One rule set by id.",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Entity schema slug."
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Rule set id."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The rule set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UniquenessCriteria"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Record not found"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateUniquenessCriteriaById",
+        "summary": "updateUniquenessCriteriaById",
+        "description": "Replaces the rules, and the name when given, of a rule set.",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Entity schema slug."
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Rule set id."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UniquenessCriteriaUpdateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated rule set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UniquenessCriteria"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Record not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteUniquenessCriteriaById",
+        "summary": "deleteUniquenessCriteriaById",
+        "description": "Deletes a rule set. Refused with the usages while a consumer references it, and while it is the global set of a schema that has other rule sets.",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Entity schema slug."
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Rule set id."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Record deleted"
+          },
+          "404": {
+            "description": "Record not found"
+          },
+          "409": {
+            "description": "The rule set's state forbids the operation; the body names the usages that block it",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleSetConflict"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/uniqueness-criteria/{schema}/{id}/global": {
+      "post": {
+        "operationId": "setGlobalUniquenessCriteria",
+        "summary": "setGlobalUniquenessCriteria",
+        "description": "Makes the rule set the schema's global one. The previous global set becomes a custom set.",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Entity schema slug."
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Rule set id."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The rule set, now global",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UniquenessCriteria"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Record not found"
+          }
+        }
+      }
+    },
+    "/v1/uniqueness-criteria/{schema}/{id}/usages/{consumer}/{ref}": {
+      "put": {
+        "operationId": "registerUniquenessCriteriaUsage",
+        "summary": "registerUniquenessCriteriaUsage",
+        "description": "Records that a consumer configuration references the rule set. Idempotent. A referenced rule set cannot be deleted.",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Entity schema slug."
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Rule set id."
+          },
+          {
+            "name": "consumer",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Kind of configuration referencing the rule set, e.g. 'automation_action'."
+          },
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identifier of the configuration within the consumer."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleSetUsageBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The recorded usage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleSetUsage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Record not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "unregisterUniquenessCriteriaUsage",
+        "summary": "unregisterUniquenessCriteriaUsage",
+        "description": "Removes a consumer configuration's reference to the rule set.",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Entity schema slug."
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Rule set id."
+          },
+          {
+            "name": "consumer",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Kind of configuration referencing the rule set, e.g. 'automation_action'."
+          },
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identifier of the configuration within the consumer."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Usage removed"
           }
         }
       }
@@ -541,12 +892,12 @@
           "schema": {
             "type": "string",
             "minLength": 1,
-            "description": "Entity schema to search (e.g. 'contact'). Must have UniquenessCriteria configured for the calling org."
+            "description": "Entity schema to search (e.g. 'contact'). Must have UniquenessCriteria configured for the calling org, unless the entity carries an explicit '_id' that resolves."
           },
           "entity": {
             "type": "object",
             "additionalProperties": {},
-            "description": "The entity to look up potential duplicates for. Attribute values are extracted from this entity per the schema's match rules; system fields such as '_id' are supported. A rule is evaluated when at least one of its attributes resolves to a non-empty value on this entity; attributes without a value require candidates to also lack a value for them."
+            "description": "The entity to look up potential duplicates for. An explicit '_id' is a direct reference: if that entity exists in the schema, it is returned as the single match (confidence 1) before any rule runs — no UniquenessCriteria required. Otherwise attribute values are extracted from this entity per the schema's match rules; a rule is evaluated only when every one of its attributes resolves to a non-empty value."
           }
         },
         "required": [
@@ -587,6 +938,13 @@
             },
             "minItems": 1,
             "description": "Names of the attributes that matched on the rule that produced this hit."
+          },
+          "fuzzy_attributes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Attributes matched in fuzzy mode whose value is not the same as the source's: they would not have matched exactly. Absent when every attribute matched exactly."
           }
         },
         "required": [
@@ -594,6 +952,166 @@
           "confidence",
           "matched_attributes"
         ]
+      },
+      "ResolveDuplicatesRequestBody": {
+        "type": "object",
+        "properties": {
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Entity schema the payload is about to be written to."
+          },
+          "entity": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "The payload about to be written. An explicit '_id' that resolves is a direct reference and answers 'update' before any rule runs."
+          },
+          "mode": {
+            "$ref": "#/components/schemas/ResolutionMode"
+          },
+          "criteria_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Rule set to resolve with instead of the schema's global set."
+          }
+        },
+        "required": [
+          "schema",
+          "entity",
+          "mode"
+        ]
+      },
+      "ResolutionMode": {
+        "type": "string",
+        "enum": [
+          "automated",
+          "interactive"
+        ],
+        "description": "'automated' when no human is present (automations, integrations): certain matches are acted on, probable ones only flagged. 'interactive' when a person is filling in a form: every match is put in front of them."
+      },
+      "ResolveDuplicatesResponse": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "action": {
+                "type": "string",
+                "enum": [
+                  "update"
+                ],
+                "description": "Exactly one certain match in automated mode: write the payload into this entity."
+              },
+              "entity": {
+                "$ref": "#/components/schemas/Entity"
+              },
+              "rule_name": {
+                "type": "string"
+              },
+              "matched_attributes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1
+              }
+            },
+            "required": [
+              "action",
+              "entity",
+              "matched_attributes"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": {
+                "type": "string",
+                "enum": [
+                  "create"
+                ],
+                "description": "Create a new record. Flagging happens afterwards, from the entity event."
+              },
+              "reason": {
+                "type": "string",
+                "enum": [
+                  "no_match",
+                  "ambiguous",
+                  "probable_only"
+                ],
+                "description": "'ambiguous': a certain rule matched more than one record, which contradicts the rule, so nothing is updated. 'probable_only': only probable matches were found."
+              }
+            },
+            "required": [
+              "action",
+              "reason"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": {
+                "type": "string",
+                "enum": [
+                  "ask"
+                ],
+                "description": "Interactive mode with matches: show the candidates and let the person choose."
+              },
+              "candidates": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ResolutionCandidate"
+                },
+                "minItems": 1
+              }
+            },
+            "required": [
+              "action",
+              "candidates"
+            ]
+          }
+        ]
+      },
+      "ResolutionCandidate": {
+        "type": "object",
+        "properties": {
+          "entity": {
+            "$ref": "#/components/schemas/Entity"
+          },
+          "strength": {
+            "$ref": "#/components/schemas/RuleStrength"
+          },
+          "rule_name": {
+            "type": "string"
+          },
+          "matched_attributes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Names of the attributes that matched on the rule that produced this candidate."
+          },
+          "fuzzy_attributes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Attributes matched in fuzzy mode whose value is not the same as the source's: they would not have matched exactly. Absent when every attribute matched exactly."
+          }
+        },
+        "required": [
+          "entity",
+          "strength",
+          "matched_attributes"
+        ]
+      },
+      "RuleStrength": {
+        "type": "string",
+        "enum": [
+          "certain",
+          "probable"
+        ],
+        "description": "How sure a match on the rule is. 'certain': the attributes identify one record. 'probable': the records are likely the same and a person should decide."
       },
       "DismissDuplicatesRequestBody": {
         "type": "object",
@@ -610,7 +1128,7 @@
             },
             "minItems": 1,
             "maxItems": 100,
-            "description": "Entities whose duplicate flags (_matching_entities) are cleared — the records are confirmed as NOT duplicates and stay separate"
+            "description": "Records a human confirmed as distinct. Every pair among them is remembered as dismissed, so no later flagging pass raises it again, and the entries they hold about each other are removed from their duplicate flags."
           }
         },
         "required": [
@@ -626,7 +1144,7 @@
             "items": {
               "type": "string"
             },
-            "description": "Entity ids whose duplicate flags were cleared"
+            "description": "Entity ids whose pairs were recorded as dismissed"
           }
         },
         "required": [
@@ -653,16 +1171,24 @@
           "id": {
             "type": "string",
             "format": "uuid",
-            "description": "Unique identifier of the criteria record."
+            "description": "Unique identifier of the rule set."
           },
           "orgId": {
             "type": "string",
-            "description": "Organization the criteria belong to."
+            "description": "Organization the rule set belongs to."
           },
           "schema": {
             "type": "string",
             "minLength": 1,
-            "description": "Entity schema these criteria apply to (e.g. 'contact')."
+            "description": "Entity schema the rule set applies to (e.g. 'contact')."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the rule set. When none was given, the attributes of its rules joined with commas."
+          },
+          "global": {
+            "type": "boolean",
+            "description": "Whether this is the schema's global rule set: the one flagging on create evaluates and resolution uses when no rule set is named. At most one per schema."
           },
           "matchRules": {
             "type": "array",
@@ -671,6 +1197,13 @@
             },
             "minItems": 1,
             "description": "Ordered list of match rules. Order is the evaluation priority."
+          },
+          "usages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleSetUsage"
+            },
+            "description": "Consumer configurations that reference this rule set."
           },
           "createdAt": {
             "type": "string",
@@ -687,11 +1220,14 @@
           "id",
           "orgId",
           "schema",
+          "name",
+          "global",
           "matchRules",
+          "usages",
           "createdAt",
           "updatedAt"
         ],
-        "description": "Defines what makes an entity of a given schema unique within an organization."
+        "description": "A named rule set defining what makes an entity of a schema the same record. An org can have several per schema, at most one of them global."
       },
       "MatchRule": {
         "type": "object",
@@ -707,18 +1243,20 @@
               "$ref": "#/components/schemas/MatchAttribute"
             },
             "minItems": 1,
-            "description": "Attributes that must all match for this rule to fire. Attributes without a value on the source entity must also have no value on a matching candidate."
+            "description": "Attributes that must all match for this rule to fire. The rule is skipped when the source entity has no value for any of them."
+          },
+          "strength": {
+            "$ref": "#/components/schemas/RuleStrength"
           },
           "confidence": {
             "type": "number",
             "minimum": 0,
             "maximum": 1,
-            "description": "Confidence assigned to matches produced by this rule, between 0 and 1."
+            "description": "Score form of the strength, used by the detect-duplicates path: 1 is certain, anything lower probable. One of strength and confidence is required; responses carry both."
           }
         },
         "required": [
-          "attributes",
-          "confidence"
+          "attributes"
         ],
         "description": "One way to identify the same entity. Evaluated in order; first rule whose attributes are all available and that returns hits wins."
       },
@@ -729,12 +1267,57 @@
             "type": "string",
             "minLength": 1,
             "description": "Name of the entity attribute to match on. Its query path is resolved from the entity schema at query time."
+          },
+          "match": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MatchMode"
+              },
+              {
+                "description": "Defaults to 'exact'."
+              }
+            ]
           }
         },
         "required": [
           "attribute"
         ],
-        "description": "One attribute participating in a match rule. Wrapped as an object so per-attribute options can be added later."
+        "description": "One attribute participating in a match rule."
+      },
+      "MatchMode": {
+        "type": "string",
+        "enum": [
+          "exact",
+          "fuzzy"
+        ],
+        "description": "How an attribute's values are compared. 'exact': the same value, ignoring case and surrounding whitespace. 'fuzzy': also ignoring doubled spaces and umlaut transcription (Müller / Mueller), and allowing a typo or two, scaled by the value's length. Fuzzy applies to text-like attributes (string, text, select, email, phone, address, payment); any other attribute is compared exactly whatever its mode."
+      },
+      "RuleSetUsage": {
+        "type": "object",
+        "properties": {
+          "consumer": {
+            "type": "string",
+            "description": "Kind of configuration that references the rule set, e.g. 'automation_action'."
+          },
+          "ref": {
+            "type": "string",
+            "description": "Identifier of that configuration within the consumer."
+          },
+          "label": {
+            "type": "string",
+            "description": "Display name of the configuration, for 'where is this used'."
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "consumer",
+          "ref",
+          "registeredAt"
+        ],
+        "description": "A consumer configuration that references a rule set. A referenced rule set cannot be deleted."
       },
       "UniquenessCriteriaCreateBody": {
         "type": "object",
@@ -742,7 +1325,17 @@
           "schema": {
             "type": "string",
             "minLength": 1,
-            "description": "Entity schema these criteria apply to."
+            "description": "Entity schema the rule set applies to."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Optional name. Without one the rule set is named after its rules' attributes."
+          },
+          "global": {
+            "type": "boolean",
+            "description": "Omitted: the set is global when the schema has no global set yet. 'true' when one exists is a conflict; make a set global explicitly instead."
           },
           "matchRules": {
             "type": "array",
@@ -757,9 +1350,34 @@
           "matchRules"
         ]
       },
+      "RuleSetConflict": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "usages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleSetUsage"
+            },
+            "description": "The references that block the operation, when that is the reason."
+          }
+        },
+        "required": [
+          "message",
+          "usages"
+        ]
+      },
       "UniquenessCriteriaUpdateBody": {
         "type": "object",
         "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "New name; omitted keeps the current one."
+          },
           "matchRules": {
             "type": "array",
             "items": {
@@ -771,6 +1389,16 @@
         "required": [
           "matchRules"
         ]
+      },
+      "RuleSetUsageBody": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Display name of the referencing configuration."
+          }
+        }
       }
     }
   },

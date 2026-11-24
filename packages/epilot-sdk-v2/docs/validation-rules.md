@@ -96,6 +96,7 @@ const { data } = await client.getValidationRules()
     {
       "title": "string",
       "placeholder": "string",
+      "description": "string",
       "used_by": [
         {
           "type": "journey",
@@ -162,6 +163,7 @@ const { data } = await client.createValidationRule(
   {
     title: 'string',
     placeholder: 'string',
+    description: 'string',
     used_by: [
       {
         type: 'journey',
@@ -211,6 +213,7 @@ const { data } = await client.createValidationRule(
 {
   "title": "string",
   "placeholder": "string",
+  "description": "string",
   "used_by": [
     {
       "type": "journey",
@@ -282,6 +285,7 @@ const { data } = await client.getValidationRuleById({
 {
   "title": "string",
   "placeholder": "string",
+  "description": "string",
   "used_by": [
     {
       "type": "journey",
@@ -348,6 +352,7 @@ const { data } = await client.updateValidationRule(
   {
     title: 'string',
     placeholder: 'string',
+    description: 'string',
     used_by: [
       {
         type: 'journey',
@@ -397,6 +402,7 @@ const { data } = await client.updateValidationRule(
 {
   "title": "string",
   "placeholder": "string",
+  "description": "string",
   "used_by": [
     {
       "type": "journey",
@@ -488,6 +494,7 @@ const { data } = await client.addUsedByReference(
 {
   "title": "string",
   "placeholder": "string",
+  "description": "string",
   "used_by": [
     {
       "type": "journey",
@@ -565,6 +572,7 @@ const { data } = await client.removeUsedByReference(
 {
   "title": "string",
   "placeholder": "string",
+  "description": "string",
   "used_by": [
     {
       "type": "journey",
@@ -649,6 +657,7 @@ type CreateValidationRuleRequest = object
 type UpdateValidationRuleRequest = {
   title?: string
   placeholder?: string
+  description?: string
   used_by?: Array<{
     type: "journey" | "entity" | "portal"
     schema_slug?: string
@@ -716,6 +725,7 @@ type UpdateValidationRuleRequest = {
 type ValidationRuleBase = {
   title?: string
   placeholder?: string
+  description?: string
   used_by?: Array<{
     type: "journey" | "entity" | "portal"
     schema_slug?: string
@@ -1893,11 +1903,7 @@ type ConditionValue = {
   path: string
   adjust?: {
     type: "percent" | "absolute"
-    value: number | {
-      source: { ... }
-      path: { ... }
-      adjust?: { ... }
-    } | {
+    value: number | { ... } | {
       source: { ... }
       key: { ... }
       adjust?: { ... }
@@ -1985,6 +1991,10 @@ type ConditionValue = {
     source: "external"
     app_id: string
     hook_id: string
+    result_id: string
+    inputs?: Record<string, {
+      source: { ... }
+      name: { ... }
   // ...
 }
 ```
@@ -2002,11 +2012,7 @@ type ScalarValue = {
   path: string
   adjust?: {
     type: "percent" | "absolute"
-    value: number | {
-      source: { ... }
-      path: { ... }
-      adjust?: { ... }
-    } | {
+    value: number | { ... } | {
       source: { ... }
       key: { ... }
       adjust?: { ... }
@@ -2094,6 +2100,10 @@ type ScalarValue = {
     source: "external"
     app_id: string
     hook_id: string
+    result_id: string
+    inputs?: Record<string, {
+      source: { ... }
+      name: { ... }
   // ...
 }
 ```
@@ -2111,26 +2121,7 @@ type ValueReference = {
   path: string
   adjust?: {
     type: "percent" | "absolute"
-    value: number | {
-      source: { ... }
-      path: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      app_id: { ... }
-      hook_id: { ... }
-      result_id: { ... }
-      inputs?: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      name: { ... }
-      adjust?: { ... }
-    }
+    value: number | { ... }
     direction: "increase" | "decrease"
     rounding?: "up" | "down"
   }
@@ -2139,26 +2130,7 @@ type ValueReference = {
   key: string
   adjust?: {
     type: "percent" | "absolute"
-    value: number | {
-      source: { ... }
-      path: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      app_id: { ... }
-      hook_id: { ... }
-      result_id: { ... }
-      inputs?: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      name: { ... }
-      adjust?: { ... }
-    }
+    value: number | { ... }
     direction: "increase" | "decrease"
     rounding?: "up" | "down"
   }
@@ -2179,26 +2151,7 @@ type ValueReference = {
   }>
   adjust?: {
     type: "percent" | "absolute"
-    value: number | {
-      source: { ... }
-      path: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      app_id: { ... }
-      hook_id: { ... }
-      result_id: { ... }
-      inputs?: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      name: { ... }
-      adjust?: { ... }
-    }
+    value: number | { ... }
     direction: "increase" | "decrease"
     rounding?: "up" | "down"
   }
@@ -2206,7 +2159,11 @@ type ValueReference = {
   source: "parameter"
   name: string
   adjust?: {
-  // ...
+    type: "percent" | "absolute"
+    value: number | { ... }
+    direction: "increase" | "decrease"
+    rounding?: "up" | "down"
+  }
 }
 ```
 
@@ -2229,11 +2186,7 @@ type EnvironmentValue = {
       source: { ... }
       path: { ... }
       adjust?: { ... }
-    } | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    } | {
+    } | { ... } | {
       source: { ... }
       app_id: { ... }
       hook_id: { ... }
@@ -2284,14 +2237,7 @@ type ExternalValue = {
       source: { ... }
       key: { ... }
       adjust?: { ... }
-    } | {
-      source: { ... }
-      app_id: { ... }
-      hook_id: { ... }
-      result_id: { ... }
-      inputs?: { ... }
-      adjust?: { ... }
-    } | {
+    } | { ... } | {
       source: { ... }
       name: { ... }
       adjust?: { ... }
@@ -2330,11 +2276,7 @@ type ParameterValue = {
       result_id: { ... }
       inputs?: { ... }
       adjust?: { ... }
-    } | {
-      source: { ... }
-      name: { ... }
-      adjust?: { ... }
-    }
+    } | { ... }
     direction: "increase" | "decrease"
     rounding?: "up" | "down"
   }
@@ -2365,11 +2307,7 @@ type ContextValue = {
   path: string
   adjust?: {
     type: "percent" | "absolute"
-    value: number | {
-      source: { ... }
-      path: { ... }
-      adjust?: { ... }
-    } | {
+    value: number | { ... } | {
       source: { ... }
       key: { ... }
       adjust?: { ... }
@@ -2403,21 +2341,11 @@ type ValueAdjustment = {
   value: number | {
     source: "context"
     path: string
-    adjust?: {
-      type: { ... }
-      value: { ... }
-      direction: { ... }
-      rounding?: { ... }
-    }
+    adjust?: { ... }
   } | {
     source: "environment"
     key: string
-    adjust?: {
-      type: { ... }
-      value: { ... }
-      direction: { ... }
-      rounding?: { ... }
-    }
+    adjust?: { ... }
   } | {
     source: "external"
     app_id: string
@@ -2428,21 +2356,11 @@ type ValueAdjustment = {
       name: { ... }
       adjust?: { ... }
     }>
-    adjust?: {
-      type: { ... }
-      value: { ... }
-      direction: { ... }
-      rounding?: { ... }
-    }
+    adjust?: { ... }
   } | {
     source: "parameter"
     name: string
-    adjust?: {
-      type: { ... }
-      value: { ... }
-      direction: { ... }
-      rounding?: { ... }
-    }
+    adjust?: { ... }
   }
   direction: "increase" | "decrease"
   rounding?: "up" | "down"

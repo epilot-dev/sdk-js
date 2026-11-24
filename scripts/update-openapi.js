@@ -17,6 +17,9 @@ const OPENAPICMD = 'npx openapicmd';
 const OUTPUT_FILE = './src/openapi.json';
 const RUNTIME_FILE = './src/openapi-runtime.json';
 
+/** Only absolute http(s) URLs are valid servers (drops null entries and stray CLI flags). */
+const isValidServer = (server) => typeof server?.url === 'string' && /^https?:\/\//.test(server.url);
+
 /**
  * Deduplicates the servers array in an OpenAPI spec by URL.
  * Ensures at least one server exists using the fallback URL if needed.
@@ -28,7 +31,7 @@ function deduplicateServers(spec, fallbackServerURL, serverVariablesMap = {}) {
   const uniqueServers = [];
 
   for (const server of servers) {
-    if (server?.url && !seen.has(server.url)) {
+    if (isValidServer(server) && !seen.has(server.url)) {
       seen.add(server.url);
       // restore variables stripped by --server flag
       if (serverVariablesMap[server.url]) {
@@ -50,11 +53,11 @@ function deduplicateServers(spec, fallbackServerURL, serverVariablesMap = {}) {
 // get server from default external source
 console.log(`===> Reading server URL from ${defaultSrc}...`);
 const definitionJSON = execSync(`${OPENAPICMD} read --json ${defaultSrc}`).toString();
-const originalServers = JSON.parse(definitionJSON).servers || [];
+const originalServers = (JSON.parse(definitionJSON).servers || []).filter(isValidServer);
 const serverURL = originalServers[0]?.url;
 // build map of url → variables to restore after openapicmd --server strips them
 const serverVariablesMap = Object.fromEntries(
-  originalServers.filter((s) => s?.url && s?.variables).map((s) => [s.url, s.variables]),
+  originalServers.filter((s) => s.variables).map((s) => [s.url, s.variables]),
 );
 console.log(`=====>> URL: ${serverURL}`);
 

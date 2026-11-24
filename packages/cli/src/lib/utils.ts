@@ -102,19 +102,43 @@ export const pager = (content: string): void => {
   }
 };
 
-export const RESET = '\x1b[0m';
-export const BOLD = '\x1b[1m';
-export const DIM = '\x1b[2m';
-export const GREEN = '\x1b[32m';
-export const RED = '\x1b[31m';
-export const YELLOW = '\x1b[33m';
-export const CYAN = '\x1b[36m';
-export const WHITE = '\x1b[37m';
-export const BG_GREEN = '\x1b[42m';
-export const BG_RED = '\x1b[41m';
-export const BG_YELLOW = '\x1b[43m';
-export const MAGENTA = '\x1b[35m';
-export const BLUE = '\x1b[34m';
+type ColorStreams = { stdout: { isTTY?: boolean }; stderr: { isTTY?: boolean } };
+
+/**
+ * Whether the CLI writes ANSI colours. Same precedence as Node's own `util.inspect` colouring:
+ * - `FORCE_COLOR` set: colour unless it is `0` / `false`
+ * - `NO_COLOR` set and non-empty (https://no-color.org): no colour
+ * - `TERM=dumb`: no colour
+ * - otherwise only when both stdout and stderr are terminals, so piped or captured output (scripts, CI,
+ *   AI agents parsing the output) never contains escape codes.
+ */
+export const colorEnabled = (
+  env: NodeJS.ProcessEnv = process.env,
+  streams: ColorStreams = { stdout: process.stdout, stderr: process.stderr },
+): boolean => {
+  const force = env.FORCE_COLOR;
+  if (force !== undefined && force !== '') return force !== '0' && force.toLowerCase() !== 'false';
+  if (env.NO_COLOR) return false;
+  if (env.TERM === 'dumb') return false;
+  return Boolean(streams.stdout.isTTY && streams.stderr.isTTY);
+};
+
+const COLOR = colorEnabled();
+const sgr = (code: string) => (COLOR ? `\x1b[${code}m` : '');
+
+export const RESET = sgr('0');
+export const BOLD = sgr('1');
+export const DIM = sgr('2');
+export const GREEN = sgr('32');
+export const RED = sgr('31');
+export const YELLOW = sgr('33');
+export const CYAN = sgr('36');
+export const WHITE = sgr('37');
+export const BG_GREEN = sgr('42');
+export const BG_RED = sgr('41');
+export const BG_YELLOW = sgr('43');
+export const MAGENTA = sgr('35');
+export const BLUE = sgr('34');
 
 /**
  * Syntax-highlight a JSON string with ANSI colors.

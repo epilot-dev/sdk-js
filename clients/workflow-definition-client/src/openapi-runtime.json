@@ -59,6 +59,9 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/EnforceLimitsParam"
+          },
+          {
+            "$ref": "#/components/parameters/ClientSupportsAdvLoopsParam"
           }
         ],
         "requestBody": {
@@ -90,6 +93,12 @@
             "in": "path",
             "name": "flowId",
             "required": true
+          },
+          {
+            "$ref": "#/components/parameters/SkipHealParam"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeRevisionParam"
           }
         ],
         "responses": {}
@@ -104,6 +113,9 @@
           },
           {
             "$ref": "#/components/parameters/EnforceLimitsParam"
+          },
+          {
+            "$ref": "#/components/parameters/ClientSupportsAdvLoopsParam"
           }
         ],
         "requestBody": {
@@ -123,6 +135,87 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v2/flows/templates/{flowId}/revisions": {
+      "post": {
+        "operationId": "createFlowRevision",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/EnforceLimitsParam"
+          },
+          {
+            "$ref": "#/components/parameters/ClientSupportsAdvLoopsParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listFlowRevisions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/flows/templates/{flowId}/revisions/{revisionId}": {
+      "get": {
+        "operationId": "getFlowRevision",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/FlowRevisionIdParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/flows/templates/{flowId}/publish": {
+      "post": {
+        "operationId": "publishFlowRevision",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },
@@ -274,6 +367,50 @@
         "responses": {}
       }
     },
+    "/v1/workflows/closing-reason-categories": {
+      "get": {
+        "operationId": "getAllClosingReasonCategories",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createClosingReasonCategory",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/workflows/closing-reason-categories/{categoryId}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "categoryId",
+          "required": true,
+          "description": "unique id to identify the closing reason category."
+        }
+      ],
+      "get": {
+        "operationId": "getClosingReasonCategory",
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "updateClosingReasonCategory",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteClosingReasonCategory",
+        "responses": {}
+      }
+    },
     "/v1/workflows/definitions/{definitionId}/closing-reasons": {
       "get": {
         "operationId": "getWorkflowClosingReasons",
@@ -307,9 +444,29 @@
   },
   "components": {
     "parameters": {
+      "ClientSupportsAdvLoopsParam": {
+        "in": "query",
+        "name": "client_supports_adv_loops",
+        "required": false
+      },
       "EnforceLimitsParam": {
         "in": "query",
         "name": "enforce_limits",
+        "required": false
+      },
+      "IncludeRevisionParam": {
+        "in": "query",
+        "name": "include_revision",
+        "required": false
+      },
+      "FlowRevisionIdParam": {
+        "in": "path",
+        "name": "revisionId",
+        "required": true
+      },
+      "SkipHealParam": {
+        "in": "query",
+        "name": "skip_heal",
         "required": false
       }
     }

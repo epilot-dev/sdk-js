@@ -135,7 +135,8 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
   ENTITY_NO_OP: { level: 'success', description: 'No changes were needed for the entity' },
   ENTITY_REFERENCE_NOT_FOUND: {
     level: 'error',
-    description: 'A direct-by-id entity reference points at an entity that does not exist or has a different schema',
+    description:
+      'An entity reference could not be resolved: a direct-by-id reference points at an entity that does not exist or has a different schema, or a `resolve_refs` reference matches no entity, more than one, or has no unique ID values',
   },
   ENTITY_UPDATED: { level: 'success', description: 'An existing entity was updated in epilot' },
   ENV_VAR_REF_JSONATA_FAILED: {
@@ -151,6 +152,11 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
     description: 'The environment variable an env_var_ref field points at does not exist, so the field was left unset',
   },
   EVENT_NOT_CONFIGURED: { level: 'error', description: 'No mapping configuration found for this event type' },
+  EVENT_TOO_WIDE: {
+    level: 'error',
+    description:
+      'The event would produce more updates than one event may (the default is 5,000), so none of it was processed. Split the event into several smaller events, or change the mapping so that one event produces fewer updates',
+  },
   EXTERNAL_API_ERROR: { level: 'error', description: 'An external API returned an error' },
   EXTERNAL_ERROR: {
     level: 'error',
@@ -350,6 +356,11 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
     description:
       'A param the use case marks as required resolved to nothing, so the delivery was stopped before anything was sent — see param_name',
   },
+  SANDBOX_LANE: {
+    level: 'info',
+    description:
+      'This organization is a sandbox, so its large loads are processed at a deliberately low rate, separately from production organizations. Nothing is lost, but large loads take longer. Use a production organization for full-volume migrations, or ask epilot for a time-boxed lift before a rehearsal. Reported at most once per hour per integration',
+  },
   SECURE_PROXY_DISABLED: { level: 'error', description: 'The secure proxy use case is disabled' },
   SECURE_PROXY_DOMAIN_BLOCKED: { level: 'error', description: 'The target domain is blocked' },
   SECURE_PROXY_DOMAIN_NOT_ALLOWED: { level: 'error', description: 'The target domain is not in the allowlist' },
@@ -371,6 +382,11 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
     level: 'warning',
     description:
       'The entity was written but not shared with the partner orgs in partner_org_ids: this organization has no partnership with them. Set up the partnership, or fix the partner_org_id in the mapping',
+  },
+  SHARING_PARTNER_NOT_PROVISIONED: {
+    level: 'warning',
+    description:
+      'The entity was written but a partner lookup in the mapping found no partner org to share it with: no entity matched details.unique_ids, or the match has no partner org id yet (details.reason). Expected while a partner org is still being set up: the next event for the entity shares it once the partner org id is set',
   },
   SHARING_REJECTED: {
     level: 'warning',

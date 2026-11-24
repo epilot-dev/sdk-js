@@ -50,6 +50,8 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`createSyncJob`](#createsyncjob)
 - [`listSyncJobs`](#listsyncjobs)
 - [`getSyncJob`](#getsyncjob)
+- [`getSyncJobHealth`](#getsyncjobhealth)
+- [`runSyncJobHealth`](#runsyncjobhealth)
 - [`retrySyncJob`](#retrysyncjob)
 - [`planSyncJobRetry`](#plansyncjobretry)
 - [`cancelSyncJob`](#cancelsyncjob)
@@ -66,6 +68,11 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`listDeleteJobs`](#listdeletejobs)
 - [`getDeleteJob`](#getdeletejob)
 - [`listDeleteJobResources`](#listdeletejobresources)
+
+**Previews**
+- [`createPreview`](#createpreview)
+- [`listPreviews`](#listpreviews)
+- [`getPreview`](#getpreview)
 
 **Schemas**
 - [`ResourceType`](#resourcetype)
@@ -107,6 +114,10 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`SyncRequiredBy`](#syncrequiredby)
 - [`SyncJobEventListResponse`](#syncjobeventlistresponse)
 - [`SyncJobBatch`](#syncjobbatch)
+- [`SyncJobHealthStatus`](#syncjobhealthstatus)
+- [`HealthSeverityCounts`](#healthseveritycounts)
+- [`SyncJobHealthCheck`](#syncjobhealthcheck)
+- [`SyncJobHealth`](#syncjobhealth)
 - [`SyncJob`](#syncjob)
 - [`SyncJobListResponse`](#syncjoblistresponse)
 - [`SyncJobResource`](#syncjobresource)
@@ -115,6 +126,8 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`SyncPlanMatch`](#syncplanmatch)
 - [`SyncPlanDiffStatus`](#syncplandiffstatus)
 - [`SyncResourcePlan`](#syncresourceplan)
+- [`SyncPlanConflict`](#syncplanconflict)
+- [`SyncPlanConflictPath`](#syncplanconflictpath)
 - [`SyncPlanCounts`](#syncplancounts)
 - [`SyncPlan`](#syncplan)
 - [`SyncPlanChange`](#syncplanchange)
@@ -124,6 +137,7 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`SyncPlanReplanRequest`](#syncplanreplanrequest)
 - [`SyncPlanMissingDependency`](#syncplanmissingdependency)
 - [`SyncPlanApplyErrorResponse`](#syncplanapplyerrorresponse)
+- [`SyncPlanUnresolvedConflict`](#syncplanunresolvedconflict)
 - [`DeleteJobStatus`](#deletejobstatus)
 - [`DeleteJobResourceStatus`](#deletejobresourcestatus)
 - [`DeleteJobCounts`](#deletejobcounts)
@@ -135,6 +149,9 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`SnapshotInventoryItem`](#snapshotinventoryitem)
 - [`SnapshotInventorySkippedType`](#snapshotinventoryskippedtype)
 - [`ConfigInventoryResponse`](#configinventoryresponse)
+- [`CreatePreviewRequest`](#createpreviewrequest)
+- [`PreviewStatus`](#previewstatus)
+- [`Preview`](#preview)
 
 ### `listConfigTypes`
 
@@ -776,6 +793,14 @@ const { data } = await client.createSyncJob(
   },
   "started_at": "1970-01-01T00:00:00.000Z",
   "finished_at": "1970-01-01T00:00:00.000Z",
+  "health_check": {
+    "status": "pending",
+    "counts": {
+      "error": 0,
+      "warning": 0,
+      "info": 0
+    }
+  },
   "events": [
     {
       "id": "string",
@@ -814,7 +839,8 @@ const { data } = await client.createSyncJob(
     "no_change": 0,
     "skip": 0,
     "failed": 0,
-    "not_compared": 0
+    "not_compared": 0,
+    "conflicts": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -889,6 +915,14 @@ const { data } = await client.listSyncJobs({
       },
       "started_at": "1970-01-01T00:00:00.000Z",
       "finished_at": "1970-01-01T00:00:00.000Z",
+      "health_check": {
+        "status": "pending",
+        "counts": {
+          "error": 0,
+          "warning": 0,
+          "info": 0
+        }
+      },
       "events": [
         {
           "id": "string",
@@ -927,7 +961,8 @@ const { data } = await client.listSyncJobs({
         "no_change": 0,
         "skip": 0,
         "failed": 0,
-        "not_compared": 0
+        "not_compared": 0,
+        "conflicts": 0
       },
       "planned_at": "1970-01-01T00:00:00.000Z",
       "expires_at": "1970-01-01T00:00:00.000Z",
@@ -1000,6 +1035,14 @@ const { data } = await client.getSyncJob({
   },
   "started_at": "1970-01-01T00:00:00.000Z",
   "finished_at": "1970-01-01T00:00:00.000Z",
+  "health_check": {
+    "status": "pending",
+    "counts": {
+      "error": 0,
+      "warning": 0,
+      "info": 0
+    }
+  },
   "events": [
     {
       "id": "string",
@@ -1038,7 +1081,8 @@ const { data } = await client.getSyncJob({
     "no_change": 0,
     "skip": 0,
     "failed": 0,
-    "not_compared": 0
+    "not_compared": 0,
+    "conflicts": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -1064,6 +1108,88 @@ const { data } = await client.getSyncJob({
 ```
 
 </details>
+
+---
+
+### `getSyncJobHealth`
+
+Targeted health check of an applied (non-dry-run) sync job. When the job
+reaches its terminal status, the target org is scanned asynchronously
+for the configs the job wrote — rows with status `created
+
+`GET /v1/configs/sync-jobs/{id}/health`
+
+```ts
+const { data } = await client.getSyncJobHealth({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "status": "pending",
+  "started_at": "1970-01-01T00:00:00.000Z",
+  "finished_at": "1970-01-01T00:00:00.000Z",
+  "scanned": 0,
+  "counts": {
+    "error": 0,
+    "warning": 0,
+    "info": 0
+  },
+  "error": "string",
+  "findings": [
+    {
+      "id": "string",
+      "code": "broken_reference",
+      "severity": "error",
+      "source_type": "string",
+      "source_id": "string",
+      "source_title": "string",
+      "message": "string",
+      "message_key": "string",
+      "message_params": {},
+      "ref_type": "string",
+      "ref_id": "string",
+      "ref_title": "string",
+      "source_link": "string",
+      "ref_link": "string",
+      "owner_type": "string",
+      "owner_id": "string",
+      "owner_title": "string",
+      "owner_link": "string",
+      "path": "string",
+      "cleanable": true,
+      "ignored": true,
+      "ignored_at": "1970-01-01T00:00:00.000Z",
+      "ignored_by": "string",
+      "ignored_reason": "string",
+      "first_seen": "1970-01-01T00:00:00.000Z",
+      "last_seen": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `runSyncJobHealth`
+
+Start the targeted health check of a finished, applied sync job again:
+for jobs that finished before checks existed (`not_run`), checks that
+failed or got stuck, or to re-check after fixing something.
+
+`POST /v1/configs/sync-jobs/{id}/health:run`
+
+```ts
+const { data } = await client.runSyncJobHealth({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
 
 ---
 
@@ -1121,6 +1247,14 @@ const { data } = await client.retrySyncJob(
   },
   "started_at": "1970-01-01T00:00:00.000Z",
   "finished_at": "1970-01-01T00:00:00.000Z",
+  "health_check": {
+    "status": "pending",
+    "counts": {
+      "error": 0,
+      "warning": 0,
+      "info": 0
+    }
+  },
   "events": [
     {
       "id": "string",
@@ -1159,7 +1293,8 @@ const { data } = await client.retrySyncJob(
     "no_change": 0,
     "skip": 0,
     "failed": 0,
-    "not_compared": 0
+    "not_compared": 0,
+    "conflicts": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -1223,12 +1358,7 @@ const { data } = await client.planSyncJobRetry(
       "source_id": "string",
       "target_id": "string",
       "title": "string",
-      "required_by": {
-        "type": "string",
-        "source_id": "string",
-        "title": "string",
-        "reason": "typed_reference"
-      },
+      "required_by": {},
       "status": "pending",
       "phase": "phase_0",
       "attempt": 0,
@@ -1236,20 +1366,7 @@ const { data } = await client.planSyncJobRetry(
       "updated_at": "1970-01-01T00:00:00.000Z",
       "source_link": "string",
       "target_link": "string",
-      "plan": {
-        "action": "create",
-        "match": "lineage",
-        "diff_status": "computed",
-        "change_count": 0,
-        "changed_paths": ["string"],
-        "note": "string",
-        "depends_on": [
-          {
-            "type": "string",
-            "source_id": "string"
-          }
-        ]
-      },
+      "plan": {},
       "excluded_from_apply": "unchanged"
     }
   ],
@@ -1259,12 +1376,7 @@ const { data } = await client.planSyncJobRetry(
       "source_id": "string",
       "target_id": "string",
       "title": "string",
-      "required_by": {
-        "type": "string",
-        "source_id": "string",
-        "title": "string",
-        "reason": "typed_reference"
-      },
+      "required_by": {},
       "status": "pending",
       "phase": "phase_0",
       "attempt": 0,
@@ -1272,20 +1384,7 @@ const { data } = await client.planSyncJobRetry(
       "updated_at": "1970-01-01T00:00:00.000Z",
       "source_link": "string",
       "target_link": "string",
-      "plan": {
-        "action": "create",
-        "match": "lineage",
-        "diff_status": "computed",
-        "change_count": 0,
-        "changed_paths": ["string"],
-        "note": "string",
-        "depends_on": [
-          {
-            "type": "string",
-            "source_id": "string"
-          }
-        ]
-      },
+      "plan": {},
       "excluded_from_apply": "unchanged"
     }
   ],
@@ -1339,6 +1438,14 @@ const { data } = await client.cancelSyncJob({
   },
   "started_at": "1970-01-01T00:00:00.000Z",
   "finished_at": "1970-01-01T00:00:00.000Z",
+  "health_check": {
+    "status": "pending",
+    "counts": {
+      "error": 0,
+      "warning": 0,
+      "info": 0
+    }
+  },
   "events": [
     {
       "id": "string",
@@ -1377,7 +1484,8 @@ const { data } = await client.cancelSyncJob({
     "no_change": 0,
     "skip": 0,
     "failed": 0,
-    "not_compared": 0
+    "not_compared": 0,
+    "conflicts": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -1483,6 +1591,7 @@ const { data } = await client.listSyncJobResources({
   status: 'example',
   type: 'example',
   plan_action: 'example',
+  has_conflicts: true,
 })
 ```
 
@@ -1523,7 +1632,34 @@ const { data } = await client.listSyncJobResources({
             "type": "string",
             "source_id": "string"
           }
-        ]
+        ],
+        "conflicts": [
+          {
+            "code": "mostly_replaced",
+            "certainty": "exact",
+            "requires_decision": true,
+            "paths": [
+              {
+                "path": "string",
+                "kind": "added",
+                "base": {},
+                "source": {},
+                "target": {}
+              }
+            ],
+            "paths_truncated": true,
+            "total_paths": 0,
+            "last_synced_at": "1970-01-01T00:00:00.000Z",
+            "target_updated_at": "1970-01-01T00:00:00.000Z",
+            "target_updated_by": "string",
+            "target_updated_by_name": "string",
+            "source_updated_at": "1970-01-01T00:00:00.000Z",
+            "replaced_ratio": 0.92,
+            "replaced_fields": 198,
+            "total_fields": 214
+          }
+        ],
+        "conflict_resolution": "overwrite"
       },
       "excluded_from_apply": "unchanged"
     }
@@ -1561,6 +1697,7 @@ const { data } = await client.getSyncPlan({
   "expires_at": "1970-01-01T00:00:00.000Z",
   "planned_at": "1970-01-01T00:00:00.000Z",
   "replanned_at": "1970-01-01T00:00:00.000Z",
+  "conflicts_checked_at": "1970-01-01T00:00:00.000Z",
   "source_org_id": "string",
   "target_org_id": "string",
   "started_at": "1970-01-01T00:00:00.000Z",
@@ -1572,7 +1709,8 @@ const { data } = await client.getSyncPlan({
     "no_change": 0,
     "skip": 0,
     "failed": 0,
-    "not_compared": 0
+    "not_compared": 0,
+    "conflicts": 0
   },
   "by_type": [
     {
@@ -1583,6 +1721,7 @@ const { data } = await client.getSyncPlan({
       "skip": 0,
       "failed": 0,
       "not_compared": 0,
+      "conflicts": 0,
       "type": "string"
     }
   ],
@@ -1721,6 +1860,12 @@ const { data } = await client.applySyncPlan(
         source_id: 'string'
       }
     ],
+    overwrite_conflicts: [
+      {
+        type: 'string',
+        source_id: 'string'
+      }
+    ],
     allow_missing_dependencies: false
   },
 )
@@ -1754,6 +1899,14 @@ const { data } = await client.applySyncPlan(
   },
   "started_at": "1970-01-01T00:00:00.000Z",
   "finished_at": "1970-01-01T00:00:00.000Z",
+  "health_check": {
+    "status": "pending",
+    "counts": {
+      "error": 0,
+      "warning": 0,
+      "info": 0
+    }
+  },
   "events": [
     {
       "id": "string",
@@ -1792,7 +1945,8 @@ const { data } = await client.applySyncPlan(
     "no_change": 0,
     "skip": 0,
     "failed": 0,
-    "not_compared": 0
+    "not_compared": 0,
+    "conflicts": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -2096,6 +2250,121 @@ const { data } = await client.getConfigInventory({
 
 ---
 
+### `createPreview`
+
+Starts a preview of the caller's current org (internal callers: the org in `x-ivy-org-id`,
+plus `requester`): a new, temporary org with
+`organization_use: Preview` (parent = this org) that receives a 
+
+`POST /v1/previews`
+
+```ts
+const { data } = await client.createPreview(
+  null,
+  {
+    name: 'string',
+    requester: {
+      user_id: 'string',
+      email: 'user@example.com',
+      display_name: 'string',
+      language: 'de'
+    }
+  },
+)
+```
+
+---
+
+### `listPreviews`
+
+Lists the previews requested from the caller's current org, newest first (max 50).
+
+`GET /v1/previews`
+
+```ts
+const { data } = await client.listPreviews()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "id": "string",
+      "name": "string",
+      "status": "creating_org",
+      "source_org_id": "string",
+      "preview_org_id": "string",
+      "sync_job_id": "string",
+      "sync_status": "string",
+      "skipped_types": [
+        {
+          "type": "string",
+          "reason": "string"
+        }
+      ],
+      "requested_by": {
+        "user_id": "string",
+        "email": "string"
+      },
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "error": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getPreview`
+
+Returns a preview requested from the caller's current org, with its progress.
+
+`GET /v1/previews/{id}`
+
+```ts
+const { data } = await client.getPreview({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "string",
+  "name": "string",
+  "status": "creating_org",
+  "source_org_id": "string",
+  "preview_org_id": "string",
+  "sync_job_id": "string",
+  "sync_status": "string",
+  "skipped_types": [
+    {
+      "type": "string",
+      "reason": "string"
+    }
+  ],
+  "requested_by": {
+    "user_id": "string",
+    "email": "string"
+  },
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "error": "string"
+}
+```
+
+</details>
+
+---
+
 ## Schemas
 
 ### `ResourceType`
@@ -2236,7 +2505,7 @@ type HealthScanStartResponse = {
 ```ts
 type HealthFinding = {
   id: string
-  code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration"
+  code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration" | "source_org_reference" | "secret_value_missing" | "env_value_missing"
   severity: "error" | "warning" | "info"
   source_type: string
   source_id: string
@@ -2290,7 +2559,7 @@ type HealthReportResponse = {
   error?: string
   findings: Array<{
     id: string
-    code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration"
+    code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration" | "source_org_reference" | "secret_value_missing" | "env_value_missing"
     severity: "error" | "warning" | "info"
     source_type: string
     source_id: string
@@ -2561,6 +2830,7 @@ type BreakLineageResponse = {
 ```ts
 type ErrorResponse = {
   status: number
+  code?: string
   error: string
 }
 ```
@@ -2678,6 +2948,8 @@ type SyncJobRetryPlan = {
       changed_paths?: { ... }
       note?: { ... }
       depends_on?: { ... }
+      conflicts?: { ... }
+      conflict_resolution?: { ... }
     }
     excluded_from_apply?: "unchanged" | "excluded" | "not_syncable"
   }>
@@ -2707,6 +2979,8 @@ type SyncJobRetryPlan = {
       changed_paths?: { ... }
       note?: { ... }
       depends_on?: { ... }
+      conflicts?: { ... }
+      conflict_resolution?: { ... }
     }
     excluded_from_apply?: "unchanged" | "excluded" | "not_syncable"
   }>
@@ -2881,6 +3155,95 @@ type SyncJobBatch = {
 }
 ```
 
+### `SyncJobHealthStatus`
+
+State of a sync job's post-import health check. `pending`: queued,
+`running`: scanning, `done`: findings available, `failed`: the check
+itself failed or did not finish (the import is unaffected), `skipped`:
+nothing to check (a plan, a job that wrote nothing, or a cancelled
+job), `not_run`: a finishe
+
+```ts
+type SyncJobHealthStatus = "pending" | "running" | "done" | "failed" | "skipped" | "not_run"
+```
+
+### `HealthSeverityCounts`
+
+```ts
+type HealthSeverityCounts = {
+  error: number
+  warning: number
+  info: number
+}
+```
+
+### `SyncJobHealthCheck`
+
+Compact state of the job's post-import health check. Full results:
+`getSyncJobHealth`. Absent on plans and on jobs that finished before
+the check existed.
+
+
+```ts
+type SyncJobHealthCheck = {
+  status: "pending" | "running" | "done" | "failed" | "skipped" | "not_run"
+  counts: {
+    error: number
+    warning: number
+    info: number
+  }
+}
+```
+
+### `SyncJobHealth`
+
+Targeted health check of the configs a sync job wrote into the target
+org. Findings carry `first_seen` = `last_seen` = `finished_at`.
+
+
+```ts
+type SyncJobHealth = {
+  status: "pending" | "running" | "done" | "failed" | "skipped" | "not_run"
+  started_at?: string // date-time
+  finished_at?: string // date-time
+  scanned: number
+  counts: {
+    error: number
+    warning: number
+    info: number
+  }
+  error?: string
+  findings: Array<{
+    id: string
+    code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration" | "source_org_reference" | "secret_value_missing" | "env_value_missing"
+    severity: "error" | "warning" | "info"
+    source_type: string
+    source_id: string
+    source_title: string
+    message: string
+    message_key?: string
+    message_params?: Record<string, unknown>
+    ref_type?: string
+    ref_id?: string
+    ref_title?: string
+    source_link?: string
+    ref_link?: string
+    owner_type?: string
+    owner_id?: string
+    owner_title?: string
+    owner_link?: string
+    path?: string
+    cleanable?: boolean
+    ignored?: boolean
+    ignored_at?: string // date-time
+    ignored_by?: string
+    ignored_reason?: string
+    first_seen: string // date-time
+    last_seen: string // date-time
+  }>
+}
+```
+
 ### `SyncJob`
 
 Sync job header as surfaced by `getSyncJob` and the create response. The
@@ -2912,6 +3275,14 @@ type SyncJob = {
   }
   started_at: string // date-time
   finished_at?: string // date-time
+  health_check?: {
+    status: "pending" | "running" | "done" | "failed" | "skipped" | "not_run"
+    counts: {
+      error: { ... }
+      warning: { ... }
+      info: { ... }
+    }
+  }
   events?: Array<{
     id?: string
     kind?: "resource" | "dependency" | "step"
@@ -2945,6 +3316,7 @@ type SyncJob = {
     skip: number
     failed: number
     not_compared: number
+    conflicts?: number
   }
   planned_at?: string // date-time
   expires_at?: string // date-time
@@ -2996,6 +3368,10 @@ type SyncJobListResponse = {
     }
     started_at: string // date-time
     finished_at?: string // date-time
+    health_check?: {
+      status: { ... }
+      counts: { ... }
+    }
     events?: Array<{
       id?: { ... }
       kind?: { ... }
@@ -3024,6 +3400,7 @@ type SyncJobListResponse = {
       skip: { ... }
       failed: { ... }
       not_compared: { ... }
+      conflicts?: { ... }
     }
     planned_at?: string // date-time
     expires_at?: string // date-time
@@ -3081,6 +3458,23 @@ type SyncJobResource = {
       type: { ... }
       source_id: { ... }
     }>
+    conflicts?: Array<{
+      code: { ... }
+      certainty: { ... }
+      requires_decision: { ... }
+      paths: { ... }
+      paths_truncated: { ... }
+      total_paths: { ... }
+      last_synced_at?: { ... }
+      target_updated_at?: { ... }
+      target_updated_by?: { ... }
+      target_updated_by_name?: { ... }
+      source_updated_at?: { ... }
+      replaced_ratio?: { ... }
+      replaced_fields?: { ... }
+      total_fields?: { ... }
+    }>
+    conflict_resolution?: "overwrite" | "keep_target"
   }
   excluded_from_apply?: "unchanged" | "excluded" | "not_syncable"
 }
@@ -3119,6 +3513,8 @@ type SyncJobResourceListResponse = {
       changed_paths?: { ... }
       note?: { ... }
       depends_on?: { ... }
+      conflicts?: { ... }
+      conflict_resolution?: { ... }
     }
     excluded_from_apply?: "unchanged" | "excluded" | "not_syncable"
   }>
@@ -3177,6 +3573,76 @@ type SyncResourcePlan = {
     type: string
     source_id: string
   }>
+  conflicts?: Array<{
+    code: "mostly_replaced" | "target_edited" | "both_edited" | "target_only_removed"
+    certainty: "exact" | "possible"
+    requires_decision: boolean
+    paths: Array<{
+      path: { ... }
+      kind: { ... }
+      base?: { ... }
+      source?: { ... }
+      target?: { ... }
+    }>
+    paths_truncated: boolean
+    total_paths: number
+    last_synced_at?: string // date-time
+    target_updated_at?: string // date-time
+    target_updated_by?: string
+    target_updated_by_name?: string
+    source_updated_at?: string // date-time
+    replaced_ratio?: number
+    replaced_fields?: number
+    total_fields?: number
+  }>
+  conflict_resolution?: "overwrite" | "keep_target"
+}
+```
+
+### `SyncPlanConflict`
+
+Target edits since the last sync that applying the row would
+overwrite. Detection compares normalized plan views (the projection
+`getSyncPlanDiff` uses: no own ids, org ids, timestamps or audit
+fields; references rewritten through lineage; array items matched by
+identity), never edit dates alone.
+
+W
+
+```ts
+type SyncPlanConflict = {
+  code: "mostly_replaced" | "target_edited" | "both_edited" | "target_only_removed"
+  certainty: "exact" | "possible"
+  requires_decision: boolean
+  paths: Array<{
+    path: string
+    kind: "added" | "removed" | "changed" | "reordered"
+    base?: unknown
+    source?: unknown
+    target?: unknown
+  }>
+  paths_truncated: boolean
+  total_paths: number
+  last_synced_at?: string // date-time
+  target_updated_at?: string // date-time
+  target_updated_by?: string
+  target_updated_by_name?: string
+  source_updated_at?: string // date-time
+  replaced_ratio?: number
+  replaced_fields?: number
+  total_fields?: number
+}
+```
+
+### `SyncPlanConflictPath`
+
+```ts
+type SyncPlanConflictPath = {
+  path: string
+  kind: "added" | "removed" | "changed" | "reordered"
+  base?: unknown
+  source?: unknown
+  target?: unknown
 }
 ```
 
@@ -3197,6 +3663,7 @@ type SyncPlanCounts = {
   skip: number
   failed: number
   not_compared: number
+  conflicts?: number
 }
 ```
 
@@ -3211,6 +3678,7 @@ type SyncPlan = {
   expires_at?: string // date-time
   planned_at?: string // date-time
   replanned_at?: string // date-time
+  conflicts_checked_at?: string // date-time
   source_org_id: string
   target_org_id: string
   started_at?: string // date-time
@@ -3223,6 +3691,7 @@ type SyncPlan = {
     skip: number
     failed: number
     not_compared: number
+    conflicts?: number
   }
   by_type: Array<{
     total: number
@@ -3232,6 +3701,7 @@ type SyncPlan = {
     skip: number
     failed: number
     not_compared: number
+    conflicts?: number
     type: string
   }>
   applied_by?: string[]
@@ -3322,6 +3792,10 @@ type SyncPlanApplyRequest = {
     type: string
     source_id: string
   }>
+  overwrite_conflicts?: Array<{
+    type: string
+    source_id: string
+  }>
   allow_missing_dependencies?: boolean
 }
 ```
@@ -3359,7 +3833,8 @@ type SyncPlanMissingDependency = {
 type SyncPlanApplyErrorResponse = {
   status?: number
   error?: string
-  code?: "target_auth_token_missing" | "empty_selection" | "invalid_resources" | "plan_not_ready" | "plan_expired" | "nothing_to_apply" | "missing_dependencies"
+  code?: "target_auth_token_missing" | "empty_selection" | "invalid_resources" | "plan_not_ready" | "plan_expired" | "nothing_to_apply" | "missing_dependencies" | "unresolved_conflicts"
+  message?: string
   invalid_resources?: Array<{
     type: string
     source_id: string
@@ -3374,6 +3849,23 @@ type SyncPlanApplyErrorResponse = {
       title?: { ... }
     }>
   }>
+  resources?: Array<{
+    type: string
+    source_id: string
+    title?: string
+    codes: "target_edited" | "both_edited" | "target_only_removed"[]
+  }>
+}
+```
+
+### `SyncPlanUnresolvedConflict`
+
+```ts
+type SyncPlanUnresolvedConflict = {
+  type: string
+  source_id: string
+  title?: string
+  codes: "target_edited" | "both_edited" | "target_only_removed"[]
 }
 ```
 
@@ -3551,5 +4043,57 @@ type ConfigInventoryResponse = {
     type: string
     reason: string
   }>
+}
+```
+
+### `CreatePreviewRequest`
+
+```ts
+type CreatePreviewRequest = {
+  name?: string
+  requester?: {
+    user_id?: string
+    email?: string // email
+    display_name?: string
+    language?: "de" | "en"
+  }
+}
+```
+
+### `PreviewStatus`
+
+- creating_org: the preview org is being created
+- copying_configuration: the sync job copying this org's configuration is running
+- inviting: the requester is being invited to the preview org
+- ready: the requester got the "your preview org is ready" email
+- failed: see `error`
+
+
+```ts
+type PreviewStatus = "creating_org" | "copying_configuration" | "inviting" | "ready" | "failed"
+```
+
+### `Preview`
+
+```ts
+type Preview = {
+  id: string
+  name: string
+  status: "creating_org" | "copying_configuration" | "inviting" | "ready" | "failed"
+  source_org_id: string
+  preview_org_id?: string
+  sync_job_id?: string
+  sync_status?: string
+  skipped_types?: Array<{
+    type: string
+    reason: string
+  }>
+  requested_by: {
+    user_id?: string
+    email?: string
+  }
+  created_at: string // date-time
+  updated_at: string // date-time
+  error?: string
 }
 ```

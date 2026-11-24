@@ -73,6 +73,36 @@
         "responses": {}
       }
     },
+    "/v1/snapshots/{id}/restores/{index}": {
+      "get": {
+        "operationId": "getRestore",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "index",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "offset"
+          },
+          {
+            "in": "query",
+            "name": "limit"
+          },
+          {
+            "in": "query",
+            "name": "action"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/snapshots/{id}:restore": {
       "parameters": [
         {
@@ -158,12 +188,25 @@
   },
   "components": {
     "responses": {
+      "RestoreConflict": {
+        "headers": {
+          "Retry-After": {}
+        },
+        "content": {
+          "application/json": {}
+        }
+      },
       "BadRequest": {
         "content": {
           "application/json": {}
         }
       },
       "Unauthorized": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Forbidden": {
         "content": {
           "application/json": {}
         }

@@ -1,6 +1,8 @@
 /**
- * Lazy-loaded OpenAPI spec — returns the full OpenAPI JSON document for an API.
- * Each spec is loaded via dynamic import() so only the requested spec affects bundle size.
+ * Lazy-loaded OpenAPI spec — returns the full OpenAPI JSON document for an API, looked up by name.
+ *
+ * The import() below is a glob, so a bundler emits one lazy chunk per spec. Only the root entry
+ * may reach this module; `@epilot/sdk/<api>` entries pass their own spec via lazyApiDocs().
  */
 
 import type { Document } from 'openapi-client-axios';

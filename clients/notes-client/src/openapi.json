@@ -37,6 +37,12 @@
     "/v1/note": {
       "post": {
         "operationId": "createNote",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:create",
+            "resource": "comment"
+          }
+        ],
         "summary": "createNote",
         "description": "Creates a new Note entry",
         "tags": [
@@ -68,6 +74,12 @@
     "/v1/note/{id}": {
       "get": {
         "operationId": "getNote",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "comment:{id}"
+          }
+        ],
         "summary": "getNote",
         "description": "Retrieves a single Note entry based on it's Entity ID",
         "tags": [
@@ -109,6 +121,12 @@
       },
       "patch": {
         "operationId": "patchNote",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "comment:{id}"
+          }
+        ],
         "summary": "patchNote",
         "description": "Updates an existing Note entry",
         "tags": [
@@ -150,6 +168,12 @@
       },
       "put": {
         "operationId": "updateNote",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "comment:{id}"
+          }
+        ],
         "summary": "updateNote",
         "description": "Updates an existing Note entry",
         "tags": [
@@ -191,6 +215,12 @@
       },
       "delete": {
         "operationId": "deleteNote",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:delete",
+            "resource": "comment:{id}"
+          }
+        ],
         "summary": "deleteNote",
         "description": "Deletes a single Note entry based on it's Entity ID",
         "tags": [
@@ -218,6 +248,17 @@
     "/v1/notes:search": {
       "post": {
         "operationId": "searchNotesByContext",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "comment"
+          },
+          {
+            "action": "entity:view",
+            "resource": "comment",
+            "filter": true
+          }
+        ],
         "summary": "searchNotesByContext",
         "description": "Search for a paginated list of Notes based on one or more contexts",
         "tags": [
@@ -249,6 +290,17 @@
     "/v1/notes/{entity_id}": {
       "get": {
         "operationId": "getNotesByContext",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "comment"
+          },
+          {
+            "action": "entity:view",
+            "resource": "comment",
+            "filter": true
+          }
+        ],
         "summary": "getNotesByContext",
         "deprecated": true,
         "description": "Given a `context_type`, returns a list of Notes that belong to that context within the specified `id`. \nThis endpoint is deprecated but will be kept for backwards compatibility. Please use the `searchNotesByContext` endpoint instead.",
@@ -334,6 +386,12 @@
     "/v1/note/{id}/pin": {
       "post": {
         "operationId": "pinNote",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "comment:{id}"
+          }
+        ],
         "summary": "pinNote",
         "description": "Pins a single Note entry based on it's Entity ID",
         "tags": [
@@ -361,6 +419,12 @@
     "/v1/note/{id}/archive": {
       "post": {
         "operationId": "archiveNote",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "comment:{id}"
+          }
+        ],
         "summary": "archiveNote",
         "description": "Archives a root Note entry by setting its `_archived_at` timestamp to the current server time. The same timestamp is cascaded to every comment under the note so the entire thread is hidden from default listings. Returns 400 if the supplied id is a comment.",
         "tags": [
@@ -395,6 +459,12 @@
     "/v1/note/{id}/unarchive": {
       "post": {
         "operationId": "unarchiveNote",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "comment:{id}"
+          }
+        ],
         "summary": "unarchiveNote",
         "description": "Unarchives a root Note entry by clearing its `_archived_at` value. The clear cascades to every comment under the note so the entire thread returns to the active view. Returns 400 if the supplied id is a comment.",
         "tags": [
@@ -429,6 +499,12 @@
     "/v1/note/{id}/context": {
       "get": {
         "operationId": "getNoteContexts",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "comment:{id}"
+          }
+        ],
         "summary": "getNoteContexts",
         "description": "Gets all the Entity and non-Entity records the Note is contextually attached to",
         "tags": [
@@ -466,6 +542,12 @@
     "/v1/note/{id}/reaction": {
       "post": {
         "operationId": "addNoteReaction",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "comment:{id}"
+          }
+        ],
         "summary": "addNoteReaction",
         "description": "Adds an emoji reaction to a note",
         "tags": [
@@ -509,6 +591,12 @@
     "/v1/note/{id}/reaction/{emoji_shortcode}": {
       "delete": {
         "operationId": "removeNoteReaction",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "comment:{id}"
+          }
+        ],
         "summary": "removeNoteReaction",
         "description": "Removes an emoji reaction from a note",
         "tags": [
@@ -553,6 +641,12 @@
     "/v1/note/{id}/reactions/toggle": {
       "post": {
         "operationId": "toggleNoteReactions",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "comment:{id}"
+          }
+        ],
         "summary": "toggleNoteReactions",
         "description": "Toggles multiple emoji reactions on a note. If a user has already reacted with an emoji, it removes the reaction. If a user hasn't reacted with an emoji, it adds the reaction.",
         "tags": [
@@ -806,6 +900,13 @@
             },
             "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
           },
+          "reactions_notified": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Users (as `{org_id}_{user_id}`) already notified for reacting to this note"
+          },
           "_archived_at": {
             "type": "string",
             "nullable": true,
@@ -1013,6 +1114,13 @@
             },
             "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
           },
+          "reactions_notified": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Users (as `{org_id}_{user_id}`) already notified for reacting to this note"
+          },
           "_archived_at": {
             "type": "string",
             "nullable": true,
@@ -1143,11 +1251,23 @@
             },
             "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
           },
+          "reactions_notified": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Users (as `{org_id}_{user_id}`) already notified for reacting to this note"
+          },
           "_archived_at": {
             "type": "string",
             "nullable": true,
             "description": "The timestamp of when this Note was archived. Absent or null means the Note is active.",
             "format": "date-time"
+          },
+          "annotation": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Visual annotation data attached to the Note, e.g. the anchor position of a file annotation. Stored as-is."
           }
         }
       },
@@ -1291,6 +1411,13 @@
               }
             },
             "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
+          },
+          "reactions_notified": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Users (as `{org_id}_{user_id}`) already notified for reacting to this note"
           },
           "_archived_at": {
             "type": "string",
@@ -1525,6 +1652,13 @@
               }
             },
             "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
+          },
+          "reactions_notified": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Users (as `{org_id}_{user_id}`) already notified for reacting to this note"
           },
           "_archived_at": {
             "type": "string",

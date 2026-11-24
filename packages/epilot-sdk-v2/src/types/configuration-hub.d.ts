@@ -307,6 +307,33 @@ export declare namespace Components {
              */
             target_id: string;
         }
+        export interface CreatePreviewRequest {
+            /**
+             * Display name of the preview. Defaults to `Preview`.
+             */
+            name?: string;
+            /**
+             * Internal callers only (e.g. the admin portal, with the source org in `x-ivy-org-id`):
+             * who gets invited to the preview org as owner; `user_id` or `email` is required. Users
+             * always invite themselves; sending this with a user token is rejected with 403.
+             *
+             */
+            requester?: {
+                /**
+                 * A user of the source org (preferred). They are invited, and the copy job acts as
+                 * them (e.g. they own the copied dashboards). Email, name and language come from
+                 * their user record.
+                 *
+                 */
+                user_id?: string;
+                /**
+                 * Used when `user_id` is not given.
+                 */
+                email?: string; // email
+                display_name?: string;
+                language?: "de" | "en";
+            };
+        }
         /**
          * Bulk-delete job header surfaced by `createDeleteJob`/`getDeleteJob`.
          */
@@ -419,6 +446,10 @@ export declare namespace Components {
         export type DeleteJobStatus = "pending" | "in_progress" | "succeeded" | "partial" | "failed" | "cancelled";
         export interface ErrorResponse {
             status: number;
+            /**
+             * Machine-readable reason, where the operation documents one
+             */
+            code?: string;
             error: string;
         }
         export interface HealthFinding {
@@ -426,7 +457,7 @@ export declare namespace Components {
              * Stable finding identity — unchanged across rescans.
              */
             id: string;
-            code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration";
+            code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration" | "source_org_reference" | "secret_value_missing" | "env_value_missing";
             severity: "error" | "warning" | "info";
             /**
              * Config type carrying the problem.
@@ -535,6 +566,11 @@ export declare namespace Components {
             status: "scanning" | "failed";
             error?: string;
         }
+        export interface HealthSeverityCounts {
+            error: number;
+            warning: number;
+            info: number;
+        }
         /**
          * Result of an index rebuild operation
          */
@@ -588,6 +624,63 @@ export declare namespace Components {
                 title?: string;
             } | null;
         }
+        export interface Preview {
+            id: string;
+            name: string;
+            status: /**
+             * - creating_org: the preview org is being created
+             * - copying_configuration: the sync job copying this org's configuration is running
+             * - inviting: the requester is being invited to the preview org
+             * - ready: the requester got the "your preview org is ready" email
+             * - failed: see `error`
+             *
+             */
+            PreviewStatus;
+            /**
+             * The org the preview copies (the org it was requested from).
+             */
+            source_org_id: string;
+            /**
+             * The preview org, once created.
+             */
+            preview_org_id?: string;
+            /**
+             * The sync job copying the configuration (see `getSyncJob`).
+             */
+            sync_job_id?: string;
+            /**
+             * Final status of the copy sync job (`succeeded` or `partial`).
+             */
+            sync_status?: string;
+            /**
+             * Configuration types that could not be listed in the source org (e.g. the
+             * API answered 403), so the preview has none of them.
+             *
+             */
+            skipped_types?: {
+                type: string;
+                reason: string;
+            }[];
+            requested_by: {
+                user_id?: string;
+                email?: string;
+            };
+            created_at: string; // date-time
+            updated_at: string; // date-time
+            /**
+             * Why the preview failed.
+             */
+            error?: string;
+        }
+        /**
+         * - creating_org: the preview org is being created
+         * - copying_configuration: the sync job copying this org's configuration is running
+         * - inviting: the requester is being invited to the preview org
+         * - ready: the requester got the "your preview org is ready" email
+         * - failed: see `error`
+         *
+         */
+        export type PreviewStatus = "creating_org" | "copying_configuration" | "inviting" | "ready" | "failed";
         /**
          * Configuration resource type identifier.
          * Matches blueprint-manifest-api V3 naming conventions.
@@ -724,6 +817,13 @@ export declare namespace Components {
             current_batch?: /* Position within the current topological batch for the active phase. */ SyncJobBatch;
             started_at: string; // date-time
             finished_at?: string; // date-time
+            health_check?: /**
+             * Compact state of the job's post-import health check. Full results:
+             * `getSyncJobHealth`. Absent on plans and on jobs that finished before
+             * the check existed.
+             *
+             */
+            SyncJobHealthCheck;
             /**
              * Deprecated — use `listSyncJobEvents`. Up to 10 op-log events,
              * ordered by resource index rather than recency.
@@ -1056,6 +1156,67 @@ export declare namespace Components {
             source: "events" | "op_log";
         }
         /**
+         * Targeted health check of the configs a sync job wrote into the target
+         * org. Findings carry `first_seen` = `last_seen` = `finished_at`.
+         *
+         */
+        export interface SyncJobHealth {
+            status: /**
+             * State of a sync job's post-import health check. `pending`: queued,
+             * `running`: scanning, `done`: findings available, `failed`: the check
+             * itself failed or did not finish (the import is unaffected), `skipped`:
+             * nothing to check (a plan, a job that wrote nothing, or a cancelled
+             * job), `not_run`: a finished job that never had a check (start one with
+             * `runSyncJobHealth`).
+             *
+             */
+            SyncJobHealthStatus;
+            started_at?: string; // date-time
+            finished_at?: string; // date-time
+            /**
+             * Written configs whose payload was read.
+             */
+            scanned: number;
+            counts: HealthSeverityCounts;
+            /**
+             * Why the check failed or was skipped.
+             */
+            error?: string;
+            /**
+             * Errors first, then warnings, then info. Empty unless `done`.
+             */
+            findings: HealthFinding[];
+        }
+        /**
+         * Compact state of the job's post-import health check. Full results:
+         * `getSyncJobHealth`. Absent on plans and on jobs that finished before
+         * the check existed.
+         *
+         */
+        export interface SyncJobHealthCheck {
+            status: /**
+             * State of a sync job's post-import health check. `pending`: queued,
+             * `running`: scanning, `done`: findings available, `failed`: the check
+             * itself failed or did not finish (the import is unaffected), `skipped`:
+             * nothing to check (a plan, a job that wrote nothing, or a cancelled
+             * job), `not_run`: a finished job that never had a check (start one with
+             * `runSyncJobHealth`).
+             *
+             */
+            SyncJobHealthStatus;
+            counts: HealthSeverityCounts;
+        }
+        /**
+         * State of a sync job's post-import health check. `pending`: queued,
+         * `running`: scanning, `done`: findings available, `failed`: the check
+         * itself failed or did not finish (the import is unaffected), `skipped`:
+         * nothing to check (a plan, a job that wrote nothing, or a cancelled
+         * job), `not_run`: a finished job that never had a check (start one with
+         * `runSyncJobHealth`).
+         *
+         */
+        export type SyncJobHealthStatus = "pending" | "running" | "done" | "failed" | "skipped" | "not_run";
+        /**
          * Cursor-paginated list of sync jobs.
          */
         export interface SyncJobListResponse {
@@ -1351,6 +1512,10 @@ export declare namespace Components {
              * When a partial replan (`replanSyncPlan` with `resources`) last finished.
              */
             replanned_at?: string; // date-time
+            /**
+             * When conflict detection last ran (end of planning or of a replan).
+             */
+            conflicts_checked_at?: string; // date-time
             source_org_id: string;
             target_org_id: string;
             started_at?: string; // date-time
@@ -1371,6 +1536,10 @@ export declare namespace Components {
                 skip: number;
                 failed: number;
                 not_compared: number;
+                /**
+                 * Rows with at least one conflict (`plan.conflicts`).
+                 */
+                conflicts?: number;
                 type: string;
             }[];
             /**
@@ -1397,9 +1566,17 @@ export declare namespace Components {
             /**
              * Machine-readable reason, for clients that show their own message.
              */
-            code?: "target_auth_token_missing" | "empty_selection" | "invalid_resources" | "plan_not_ready" | "plan_expired" | "nothing_to_apply" | "missing_dependencies";
+            code?: "target_auth_token_missing" | "empty_selection" | "invalid_resources" | "plan_not_ready" | "plan_expired" | "nothing_to_apply" | "missing_dependencies" | "unresolved_conflicts";
+            /**
+             * Same as `error` (set with `unresolved_conflicts`).
+             */
+            message?: string;
             invalid_resources?: SyncJobResourceRef[];
             missing_dependencies?: SyncPlanMissingDependency[];
+            /**
+             * With `unresolved_conflicts`, the applied rows with undecided conflicts.
+             */
+            resources?: SyncPlanUnresolvedConflict[];
         }
         export interface SyncPlanApplyRequest {
             /**
@@ -1422,6 +1599,13 @@ export declare namespace Components {
              * Rows of the plan to leave out.
              */
             exclude?: SyncJobResourceRef[];
+            /**
+             * Rows with conflicts to apply anyway, overwriting the target's
+             * changes. Applied rows with conflicts that are not listed here
+             * make the request fail with `unresolved_conflicts`.
+             *
+             */
+            overwrite_conflicts?: SyncJobResourceRef[];
             /**
              * Apply even when left-out resources that would be created are
              * referenced by applied ones. Those references then keep pointing
@@ -1467,6 +1651,177 @@ export declare namespace Components {
             after?: any;
         }
         /**
+         * Target edits since the last sync that applying the row would
+         * overwrite. Detection compares normalized plan views (the projection
+         * `getSyncPlanDiff` uses: no own ids, org ids, timestamps or audit
+         * fields; references rewritten through lineage; array items matched by
+         * identity), never edit dates alone.
+         *
+         * With a stored **base** (the target as the last sync left it):
+         * three-way, `certainty: exact`. Without one: two-way target vs
+         * source, `certainty: possible`; values only the target has are
+         * `target_only_removed`, other differences count as `target_edited`
+         * only when the target was written after the last sync (plus a short
+         * grace for the sync's own writes). On a first sync (never synced)
+         * only target-only content is flagged. These three codes are never
+         * set on heuristic matches.
+         *
+         * `mostly_replaced` is independent of match, lineage and base: the
+         * update would change or remove at least half of the target's leaf
+         * fields (see `replaced_ratio`), on a target of at least 10 fields.
+         * Typically a heuristic match to a different resource. It sorts first
+         * and can come with the other codes on the same row.
+         *
+         */
+        export interface SyncPlanConflict {
+            /**
+             * `mostly_replaced`: applying the row replaces most of the target
+             * (`replaced_ratio` >= 0.5); check the counterpart is the right
+             * one. `certainty` is always `exact`, `paths` empty.
+             * `target_edited`: the target changed these paths since the last
+             * sync and the source did not; the update reverts them.
+             * `both_edited`: both changed the same paths, to different values.
+             * `target_only_removed`: the update removes items only the target
+             * has (added there since the last sync, or, without a base, not in
+             * the source).
+             *
+             */
+            code: "mostly_replaced" | "target_edited" | "both_edited" | "target_only_removed";
+            /**
+             * `exact`: decided from a stored base. `possible`: no base yet.
+             */
+            certainty: "exact" | "possible";
+            /**
+             * Always true for now. `applySyncPlan` refuses the row until it is overwritten or left out.
+             */
+            requires_decision: boolean;
+            /**
+             * The affected paths (at most 50). Values are plan-view values; a
+             * value whose JSON is over 1 KB is replaced by
+             * `{ "__truncated": true, "json_bytes": <size> }`. Empty when the
+             * target changed but the copies could not be compared.
+             *
+             */
+            paths: [
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?
+            ];
+            /**
+             * True when paths or values were left out. `total_paths` is still exact.
+             */
+            paths_truncated: boolean;
+            total_paths: number;
+            /**
+             * When Config Hub last synced the resource (lineage), when known.
+             */
+            last_synced_at?: string; // date-time
+            target_updated_at?: string; // date-time
+            /**
+             * User id of the target's last editor, when its API exposes one.
+             */
+            target_updated_by?: string;
+            /**
+             * Display name of `target_updated_by`, when resolvable cheaply. Not set yet.
+             */
+            target_updated_by_name?: string;
+            source_updated_at?: string; // date-time
+            /**
+             * `mostly_replaced` only: `replaced_fields / total_fields`, rounded
+             * to two decimals. Show as a percentage, `round(ratio * 100)`.
+             *
+             * example:
+             * 0.92
+             */
+            replaced_ratio?: number;
+            /**
+             * `mostly_replaced` only: leaf fields of the target the apply
+             * changes or removes (fields only the source has don't count).
+             *
+             * example:
+             * 198
+             */
+            replaced_fields?: number;
+            /**
+             * `mostly_replaced` only: leaf fields of the target's normalized
+             * plan view. A scalar array is one field; per-org ids (UUIDs
+             * lineage doesn't know, the org's own id) are not fields.
+             *
+             * example:
+             * 214
+             */
+            total_fields?: number;
+        }
+        export interface SyncPlanConflictPath {
+            /**
+             * Same notation as `SyncPlanChange.path`.
+             */
+            path: string;
+            /**
+             * The change applying the row would make to the target.
+             */
+            kind: "added" | "removed" | "changed" | "reordered";
+            /**
+             * The value at the last sync. Absent when unknown (always for `possible`).
+             */
+            base?: any;
+            /**
+             * The value applying writes. Absent for `removed`.
+             */
+            source?: any;
+            /**
+             * The target's current value. Absent for `added`.
+             */
+            target?: any;
+        }
+        /**
          * Planned resources by action. `not_compared` counts the `update`
          * resources whose copies could not be compared (it is part of
          * `update`, not in addition to it). `failed` counts resources planning
@@ -1481,6 +1836,10 @@ export declare namespace Components {
             skip: number;
             failed: number;
             not_compared: number;
+            /**
+             * Rows with at least one conflict (`plan.conflicts`).
+             */
+            conflicts?: number;
         }
         export interface SyncPlanDiff {
             type: string;
@@ -1592,6 +1951,12 @@ export declare namespace Components {
              */
             resources?: SyncJobResourceRef[];
         }
+        export interface SyncPlanUnresolvedConflict {
+            type: string;
+            source_id: string;
+            title?: string;
+            codes: ("target_edited" | "both_edited" | "target_only_removed")[];
+        }
         /**
          * The resource that referenced the dependency.
          */
@@ -1670,6 +2035,46 @@ export declare namespace Components {
              * Other resources of the plan this resource references.
              */
             depends_on?: SyncJobResourceRef[];
+            /**
+             * Changes made in the target since the last sync that applying
+             * this `update` would overwrite, or (`mostly_replaced`) an update
+             * that would replace most of the target. Absent when there are
+             * none. Detected while planning from normalized diffs (see
+             * `SyncPlanConflict`); heuristic matches only get
+             * `mostly_replaced`.
+             *
+             */
+            conflicts?: /**
+             * Target edits since the last sync that applying the row would
+             * overwrite. Detection compares normalized plan views (the projection
+             * `getSyncPlanDiff` uses: no own ids, org ids, timestamps or audit
+             * fields; references rewritten through lineage; array items matched by
+             * identity), never edit dates alone.
+             *
+             * With a stored **base** (the target as the last sync left it):
+             * three-way, `certainty: exact`. Without one: two-way target vs
+             * source, `certainty: possible`; values only the target has are
+             * `target_only_removed`, other differences count as `target_edited`
+             * only when the target was written after the last sync (plus a short
+             * grace for the sync's own writes). On a first sync (never synced)
+             * only target-only content is flagged. These three codes are never
+             * set on heuristic matches.
+             *
+             * `mostly_replaced` is independent of match, lineage and base: the
+             * update would change or remove at least half of the target's leaf
+             * fields (see `replaced_ratio`), on a target of at least 10 fields.
+             * Typically a heuristic match to a different resource. It sorts first
+             * and can come with the other codes on the same row.
+             *
+             */
+            SyncPlanConflict[];
+            /**
+             * On rows of a job applying a plan, for rows with conflicts:
+             * `overwrite` when the row was applied anyway (listed in
+             * `overwrite_conflicts`), `keep_target` when it was left out.
+             *
+             */
+            conflict_resolution?: "overwrite" | "keep_target";
         }
     }
 }
@@ -1753,6 +2158,14 @@ export declare namespace Paths {
         namespace Responses {
             export type $201 = /* Bulk-delete job header surfaced by `createDeleteJob`/`getDeleteJob`. */ Components.Schemas.DeleteJob;
             export type $400 = Components.Schemas.ErrorResponse;
+        }
+    }
+    namespace CreatePreview {
+        export type RequestBody = Components.Schemas.CreatePreviewRequest;
+        namespace Responses {
+            export type $202 = Components.Schemas.Preview;
+            export interface $409 {
+            }
         }
     }
     namespace CreateSyncJob {
@@ -1848,6 +2261,19 @@ export declare namespace Paths {
             export type $200 = /* Current index build state */ Components.Schemas.IndexStatusResponse;
         }
     }
+    namespace GetPreview {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Preview;
+            export interface $404 {
+            }
+        }
+    }
     namespace GetSyncJob {
         namespace Parameters {
             export type Id = string;
@@ -1862,6 +2288,23 @@ export declare namespace Paths {
              *
              */
             Components.Schemas.SyncJob;
+            export type $404 = Components.Schemas.ErrorResponse;
+        }
+    }
+    namespace GetSyncJobHealth {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * Targeted health check of the configs a sync job wrote into the target
+             * org. Findings carry `first_seen` = `last_seen` = `finished_at`.
+             *
+             */
+            Components.Schemas.SyncJobHealth;
             export type $404 = Components.Schemas.ErrorResponse;
         }
     }
@@ -1975,6 +2418,13 @@ export declare namespace Paths {
             export type $200 = /* Cursor-paginated list of delete jobs. */ Components.Schemas.DeleteJobListResponse;
         }
     }
+    namespace ListPreviews {
+        namespace Responses {
+            export interface $200 {
+                results: Components.Schemas.Preview[];
+            }
+        }
+    }
     namespace ListSyncJobEvents {
         namespace Parameters {
             export type After = string;
@@ -2008,6 +2458,7 @@ export declare namespace Paths {
     namespace ListSyncJobResources {
         namespace Parameters {
             export type Cursor = string;
+            export type HasConflicts = boolean;
             export type Id = string;
             export type PlanAction = /**
              * What a real run would do with a planned resource:
@@ -2039,6 +2490,7 @@ export declare namespace Paths {
             status?: Parameters.Status;
             type?: Parameters.Type;
             plan_action?: Parameters.PlanAction;
+            has_conflicts?: Parameters.HasConflicts;
         }
         namespace Responses {
             export type $200 = /* Cursor-paginated list of sync job resources. */ Components.Schemas.SyncJobResourceListResponse;
@@ -2181,6 +2633,24 @@ export declare namespace Paths {
             Components.Schemas.SyncJob;
             export type $400 = Components.Schemas.SyncJobRetryErrorResponse;
             export type $404 = Components.Schemas.ErrorResponse;
+        }
+    }
+    namespace RunSyncJobHealth {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $202 = /**
+             * Targeted health check of the configs a sync job wrote into the target
+             * org. Findings carry `first_seen` = `last_seen` = `finished_at`.
+             *
+             */
+            Components.Schemas.SyncJobHealth;
+            export type $404 = Components.Schemas.ErrorResponse;
+            export type $409 = Components.Schemas.ErrorResponse;
         }
     }
     namespace SetHealthFindingsIgnored {
@@ -2495,6 +2965,50 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSyncJob.Responses.$200>
   /**
+   * getSyncJobHealth - getSyncJobHealth
+   * 
+   * Targeted health check of an applied (non-dry-run) sync job. When the job
+   * reaches its terminal status, the target org is scanned asynchronously
+   * for the configs the job wrote — rows with status `created` or
+   * `patched` and a `target_id` — using the same finding logic as
+   * `getHealthReport`, plus `source_org_reference` for written payloads
+   * that still carry a source-org id, and `secret_value_missing` (warning)
+   * for a referenced SecretString variable the job created: a sync copies
+   * a variable's key, never its value, so setting it is a manual step. It runs for `succeeded` and
+   * `partial` jobs, and for `failed` jobs that wrote at least one config;
+   * otherwise it is `skipped`. Best-effort: it never changes the job's own
+   * status, and its results never replace the org-wide health report.
+   * Readable from both the source and the target org.
+   * 
+   * A finished job that never had a check (it finished before checks
+   * existed) reports `not_run`. A check left `pending` or `running` for
+   * longer than the scan can take is reported as `failed`; both can be
+   * started again with `runSyncJobHealth`.
+   * 
+   */
+  'getSyncJobHealth'(
+    parameters?: Parameters<Paths.GetSyncJobHealth.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSyncJobHealth.Responses.$200>
+  /**
+   * runSyncJobHealth - runSyncJobHealth
+   * 
+   * Start the targeted health check of a finished, applied sync job again:
+   * for jobs that finished before checks existed (`not_run`), checks that
+   * failed or got stuck, or to re-check after fixing something. Same scope
+   * and rules as the automatic check after every import. Callable from the
+   * source or the target org; the scan runs in the target org. Answers with
+   * the check's new state (`pending`) and runs asynchronously; poll
+   * `getSyncJobHealth`.
+   * 
+   */
+  'runSyncJobHealth'(
+    parameters?: Parameters<Paths.RunSyncJobHealth.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RunSyncJobHealth.Responses.$202>
+  /**
    * retrySyncJob - retrySyncJob
    * 
    * Retry the unresolved resources from a prior sync job: `failed` rows, plus
@@ -2649,6 +3163,15 @@ export interface OperationMethods {
    * rejected with 409 and `missing_dependencies`, unless
    * `allow_missing_dependencies` is set.
    * 
+   * Rows whose plan has conflicts (`plan.conflicts`: the target was
+   * changed since the last sync, and applying would overwrite that, or
+   * applying would replace most of the target) need a decision: list them in `overwrite_conflicts` to apply them anyway,
+   * or leave them out (`exclude`, or a `resources` list without them) to
+   * keep the target's version. Applying one without a decision is
+   * rejected with 409 and `unresolved_conflicts`; nothing is applied.
+   * The decision is recorded on the apply job's rows
+   * (`plan.conflict_resolution`).
+   * 
    * Applied resources go through the normal sync phases, so a change in
    * the target since planning is handled like in any sync. A plan can be
    * applied up to 24 hours after it finished (`expires_at`); plan again
@@ -2766,6 +3289,42 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetConfigInventory.Responses.$200>
+  /**
+   * listPreviews - listPreviews
+   * 
+   * Lists the previews requested from the caller's current org, newest first (max 50).
+   */
+  'listPreviews'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListPreviews.Responses.$200>
+  /**
+   * createPreview - createPreview
+   * 
+   * Starts a preview of the caller's current org (internal callers: the org in `x-ivy-org-id`,
+   * plus `requester`): a new, temporary org with
+   * `organization_use: Preview` (parent = this org) that receives a copy of all of
+   * this org's configuration through a sync job. When the copy is done, the
+   * requesting user is invited to the preview org as owner with a
+   * "your preview org is ready" email. Runs asynchronously; poll `getPreview`.
+   * 
+   */
+  'createPreview'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreatePreview.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreatePreview.Responses.$202>
+  /**
+   * getPreview - getPreview
+   * 
+   * Returns a preview requested from the caller's current org, with its progress.
+   */
+  'getPreview'(
+    parameters?: Parameters<Paths.GetPreview.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPreview.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -3063,6 +3622,54 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSyncJob.Responses.$200>
   }
+  ['/v1/configs/sync-jobs/{id}/health']: {
+    /**
+     * getSyncJobHealth - getSyncJobHealth
+     * 
+     * Targeted health check of an applied (non-dry-run) sync job. When the job
+     * reaches its terminal status, the target org is scanned asynchronously
+     * for the configs the job wrote — rows with status `created` or
+     * `patched` and a `target_id` — using the same finding logic as
+     * `getHealthReport`, plus `source_org_reference` for written payloads
+     * that still carry a source-org id, and `secret_value_missing` (warning)
+     * for a referenced SecretString variable the job created: a sync copies
+     * a variable's key, never its value, so setting it is a manual step. It runs for `succeeded` and
+     * `partial` jobs, and for `failed` jobs that wrote at least one config;
+     * otherwise it is `skipped`. Best-effort: it never changes the job's own
+     * status, and its results never replace the org-wide health report.
+     * Readable from both the source and the target org.
+     * 
+     * A finished job that never had a check (it finished before checks
+     * existed) reports `not_run`. A check left `pending` or `running` for
+     * longer than the scan can take is reported as `failed`; both can be
+     * started again with `runSyncJobHealth`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSyncJobHealth.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSyncJobHealth.Responses.$200>
+  }
+  ['/v1/configs/sync-jobs/{id}/health:run']: {
+    /**
+     * runSyncJobHealth - runSyncJobHealth
+     * 
+     * Start the targeted health check of a finished, applied sync job again:
+     * for jobs that finished before checks existed (`not_run`), checks that
+     * failed or got stuck, or to re-check after fixing something. Same scope
+     * and rules as the automatic check after every import. Callable from the
+     * source or the target org; the scan runs in the target org. Answers with
+     * the check's new state (`pending`) and runs asynchronously; poll
+     * `getSyncJobHealth`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.RunSyncJobHealth.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RunSyncJobHealth.Responses.$202>
+  }
   ['/v1/configs/sync-jobs/{id}/retry']: {
     /**
      * retrySyncJob - retrySyncJob
@@ -3235,6 +3842,15 @@ export interface PathsDictionary {
      * rejected with 409 and `missing_dependencies`, unless
      * `allow_missing_dependencies` is set.
      * 
+     * Rows whose plan has conflicts (`plan.conflicts`: the target was
+     * changed since the last sync, and applying would overwrite that, or
+     * applying would replace most of the target) need a decision: list them in `overwrite_conflicts` to apply them anyway,
+     * or leave them out (`exclude`, or a `resources` list without them) to
+     * keep the target's version. Applying one without a decision is
+     * rejected with 409 and `unresolved_conflicts`; nothing is applied.
+     * The decision is recorded on the apply job's rows
+     * (`plan.conflict_resolution`).
+     * 
      * Applied resources go through the normal sync phases, so a change in
      * the target since planning is handled like in any sync. A plan can be
      * applied up to 24 hours after it finished (`expires_at`); plan again
@@ -3365,6 +3981,46 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetConfigInventory.Responses.$200>
   }
+  ['/v1/previews']: {
+    /**
+     * createPreview - createPreview
+     * 
+     * Starts a preview of the caller's current org (internal callers: the org in `x-ivy-org-id`,
+     * plus `requester`): a new, temporary org with
+     * `organization_use: Preview` (parent = this org) that receives a copy of all of
+     * this org's configuration through a sync job. When the copy is done, the
+     * requesting user is invited to the preview org as owner with a
+     * "your preview org is ready" email. Runs asynchronously; poll `getPreview`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreatePreview.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreatePreview.Responses.$202>
+    /**
+     * listPreviews - listPreviews
+     * 
+     * Lists the previews requested from the caller's current org, newest first (max 50).
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListPreviews.Responses.$200>
+  }
+  ['/v1/previews/{id}']: {
+    /**
+     * getPreview - getPreview
+     * 
+     * Returns a preview requested from the caller's current org, with its progress.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPreview.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPreview.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -3382,6 +4038,7 @@ export type ConfigListResponse = Components.Schemas.ConfigListResponse;
 export type ConfigNode = Components.Schemas.ConfigNode;
 export type ConfigTypeInfo = Components.Schemas.ConfigTypeInfo;
 export type ConfirmLineageRequest = Components.Schemas.ConfirmLineageRequest;
+export type CreatePreviewRequest = Components.Schemas.CreatePreviewRequest;
 export type DeleteJob = Components.Schemas.DeleteJob;
 export type DeleteJobCounts = Components.Schemas.DeleteJobCounts;
 export type DeleteJobListResponse = Components.Schemas.DeleteJobListResponse;
@@ -3394,10 +4051,13 @@ export type ErrorResponse = Components.Schemas.ErrorResponse;
 export type HealthFinding = Components.Schemas.HealthFinding;
 export type HealthReportResponse = Components.Schemas.HealthReportResponse;
 export type HealthScanStartResponse = Components.Schemas.HealthScanStartResponse;
+export type HealthSeverityCounts = Components.Schemas.HealthSeverityCounts;
 export type IndexRebuildResponse = Components.Schemas.IndexRebuildResponse;
 export type IndexStatusResponse = Components.Schemas.IndexStatusResponse;
 export type LineageEntryResponse = Components.Schemas.LineageEntryResponse;
 export type MatchSuggestion = Components.Schemas.MatchSuggestion;
+export type Preview = Components.Schemas.Preview;
+export type PreviewStatus = Components.Schemas.PreviewStatus;
 export type ResourceType = Components.Schemas.ResourceType;
 export type SnapshotInventoryItem = Components.Schemas.SnapshotInventoryItem;
 export type SnapshotInventorySkippedType = Components.Schemas.SnapshotInventorySkippedType;
@@ -3411,6 +4071,9 @@ export type SyncJobCounts = Components.Schemas.SyncJobCounts;
 export type SyncJobEvent = Components.Schemas.SyncJobEvent;
 export type SyncJobEventDependency = Components.Schemas.SyncJobEventDependency;
 export type SyncJobEventListResponse = Components.Schemas.SyncJobEventListResponse;
+export type SyncJobHealth = Components.Schemas.SyncJobHealth;
+export type SyncJobHealthCheck = Components.Schemas.SyncJobHealthCheck;
+export type SyncJobHealthStatus = Components.Schemas.SyncJobHealthStatus;
 export type SyncJobListResponse = Components.Schemas.SyncJobListResponse;
 export type SyncJobRequest = Components.Schemas.SyncJobRequest;
 export type SyncJobResource = Components.Schemas.SyncJobResource;
@@ -3428,6 +4091,8 @@ export type SyncPlanAction = Components.Schemas.SyncPlanAction;
 export type SyncPlanApplyErrorResponse = Components.Schemas.SyncPlanApplyErrorResponse;
 export type SyncPlanApplyRequest = Components.Schemas.SyncPlanApplyRequest;
 export type SyncPlanChange = Components.Schemas.SyncPlanChange;
+export type SyncPlanConflict = Components.Schemas.SyncPlanConflict;
+export type SyncPlanConflictPath = Components.Schemas.SyncPlanConflictPath;
 export type SyncPlanCounts = Components.Schemas.SyncPlanCounts;
 export type SyncPlanDiff = Components.Schemas.SyncPlanDiff;
 export type SyncPlanDiffListResponse = Components.Schemas.SyncPlanDiffListResponse;
@@ -3435,5 +4100,6 @@ export type SyncPlanDiffStatus = Components.Schemas.SyncPlanDiffStatus;
 export type SyncPlanMatch = Components.Schemas.SyncPlanMatch;
 export type SyncPlanMissingDependency = Components.Schemas.SyncPlanMissingDependency;
 export type SyncPlanReplanRequest = Components.Schemas.SyncPlanReplanRequest;
+export type SyncPlanUnresolvedConflict = Components.Schemas.SyncPlanUnresolvedConflict;
 export type SyncRequiredBy = Components.Schemas.SyncRequiredBy;
 export type SyncResourcePlan = Components.Schemas.SyncResourcePlan;

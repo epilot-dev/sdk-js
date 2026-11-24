@@ -27,7 +27,13 @@ import {
 } from '@epilot/agent-auth';
 import { type Credentials, saveCredentials } from './auth-store.js';
 import type { Environment } from './environment.js';
-import { getConfigDir, getResolvedProfile, resolveProfileName } from './profiles.js';
+import {
+  agentRecordPath,
+  explicitProfileName,
+  getConfigDir,
+  getResolvedProfile,
+  resolveProfileName,
+} from './profiles.js';
 import { BOLD, DIM, RESET, YELLOW } from './utils.js';
 
 export type HostRecord = {
@@ -65,12 +71,11 @@ export const REFRESH_WINDOW_MS = 2 * 60 * 1000;
 
 const agentAuthDir = (): string => join(getConfigDir(), 'agent-auth');
 const hostPath = (): string => join(agentAuthDir(), 'host.json');
-const agentsDir = (): string => join(agentAuthDir(), 'agents');
 
 /** Storage key for the agent of a profile. */
 export const agentProfileKey = (profileName?: string): string => resolveProfileName(profileName) ?? 'default';
 
-export const agentPath = (profileName?: string): string => join(agentsDir(), `${agentProfileKey(profileName)}.json`);
+export const agentPath = (profileName?: string): string => agentRecordPath(agentProfileKey(profileName));
 
 const readJson = <T>(path: string): T | null => {
   if (!existsSync(path)) return null;
@@ -253,7 +258,8 @@ export const refreshTokenIfNeeded = async (flagProfile?: string): Promise<string
   if (!loaded) return null;
 
   const profile = getResolvedProfile(flagProfile);
-  const current = profile?.token ? profile : loadStoredCredentials();
+  // A named profile never borrows credentials.json (the default login), not even its org id.
+  const current = profile?.token ? profile : explicitProfileName(flagProfile) ? null : loadStoredCredentials();
   if (current?.token && !expiresSoon(current.expires_at)) return current.token;
 
   const orgId = current?.org_id ?? loaded.record.org_id;

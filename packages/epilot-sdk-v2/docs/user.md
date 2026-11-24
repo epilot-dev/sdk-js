@@ -55,6 +55,7 @@ const { data } = await userClient.signUpUser(...)
 - [`listPasskeys`](#listpasskeys)
 - [`deletePasskey`](#deletepasskey)
 - [`switchOrganization`](#switchorganization)
+- [`leaveOrganization`](#leaveorganization)
 
 **Group**
 - [`getGroups`](#getgroups)
@@ -108,6 +109,14 @@ const { data } = await userClient.signUpUser(...)
 - [`CognitoDetails`](#cognitodetails)
 - [`UserDetail`](#userdetail)
 - [`Organization`](#organization)
+- [`OrgActivity`](#orgactivity)
+- [`OrgActivitySummary`](#orgactivitysummary)
+- [`OrgActivityHeatmap`](#orgactivityheatmap)
+- [`LoginAsAuditPage`](#loginasauditpage)
+- [`LoginAsAuditEvent`](#loginasauditevent)
+- [`OrgActivityByHour`](#orgactivitybyhour)
+- [`PlatformActivitySummary`](#platformactivitysummary)
+- [`UserActivity`](#useractivity)
 - [`DataPointsResponse`](#datapointsresponse)
 - [`DataPoint`](#datapoint)
 - [`UserSettingScope`](#usersettingscope)
@@ -213,7 +222,7 @@ const { data } = await client.signUpUser(
 
 ### `getMeV2`
 
-Get currently logged in user
+Get currently logged in user.
 
 `GET /v2/users/me`
 
@@ -226,21 +235,34 @@ const { data } = await client.getMeV2()
 
 ```json
 {
+  "actor": {
+    "type": "agent",
+    "token_id": "string",
+    "token_name": "string",
+    "agent_id": "string",
+    "agent_name": "string",
+    "host_name": "string",
+    "client": "string"
+  },
   "id": "string",
   "organization_id": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "activated_at": "1970-01-01T00:00:00.000Z",
   "display_name": "Example User",
   "status": "Active",
+  "deactivated_at": "1970-01-01T00:00:00.000Z",
+  "deactivated_by": "string",
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
   "password_reset_token_hash": "string",
   "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+  "sso_required": false,
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
   "mfa_enabled": false,
+  "totp_enabled": false,
   "has_passkeys": false,
   "phone_verified": true,
   "token": "string",
@@ -284,6 +306,7 @@ const { data } = await client.getMeV2()
     "assigned_opportunity": true,
     "assigned_task": true
   },
+  "in_app_notification_popups": false,
   "properties": [
     {
       "name": "profileImageName",
@@ -455,21 +478,34 @@ const { data } = await client.listUsersV2({
 {
   "results": [
     {
+      "actor": {
+        "type": "agent",
+        "token_id": "string",
+        "token_name": "string",
+        "agent_id": "string",
+        "agent_name": "string",
+        "host_name": "string",
+        "client": "string"
+      },
       "id": "string",
       "organization_id": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "activated_at": "1970-01-01T00:00:00.000Z",
       "display_name": "Example User",
       "status": "Active",
+      "deactivated_at": "1970-01-01T00:00:00.000Z",
+      "deactivated_by": "string",
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
       "password_reset_token_hash": "string",
       "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+      "sso_required": false,
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
       "mfa_enabled": false,
+      "totp_enabled": false,
       "has_passkeys": false,
       "phone_verified": true,
       "token": "string",
@@ -513,6 +549,7 @@ const { data } = await client.listUsersV2({
         "assigned_opportunity": true,
         "assigned_task": true
       },
+      "in_app_notification_popups": false,
       "properties": [
         {
           "name": "profileImageName",
@@ -546,21 +583,34 @@ const { data } = await client.getUserV2({
 
 ```json
 {
+  "actor": {
+    "type": "agent",
+    "token_id": "string",
+    "token_name": "string",
+    "agent_id": "string",
+    "agent_name": "string",
+    "host_name": "string",
+    "client": "string"
+  },
   "id": "string",
   "organization_id": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "activated_at": "1970-01-01T00:00:00.000Z",
   "display_name": "Example User",
   "status": "Active",
+  "deactivated_at": "1970-01-01T00:00:00.000Z",
+  "deactivated_by": "string",
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
   "password_reset_token_hash": "string",
   "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+  "sso_required": false,
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
   "mfa_enabled": false,
+  "totp_enabled": false,
   "has_passkeys": false,
   "phone_verified": true,
   "token": "string",
@@ -604,6 +654,7 @@ const { data } = await client.getUserV2({
     "assigned_opportunity": true,
     "assigned_task": true
   },
+  "in_app_notification_popups": false,
   "properties": [
     {
       "name": "profileImageName",
@@ -620,7 +671,7 @@ const { data } = await client.getUserV2({
 
 ### `updateUserV2`
 
-Update user details
+Update user details.
 
 `PATCH /v2/users/{id}`
 
@@ -630,21 +681,34 @@ const { data } = await client.updateUserV2(
     id: '123e4567-e89b-12d3-a456-426614174000',
   },
   {
+    actor: {
+      type: 'agent',
+      token_id: 'string',
+      token_name: 'string',
+      agent_id: 'string',
+      agent_name: 'string',
+      host_name: 'string',
+      client: 'string'
+    },
     id: 'string',
     organization_id: 'string',
     created_at: '1970-01-01T00:00:00.000Z',
     activated_at: '1970-01-01T00:00:00.000Z',
     display_name: 'Example User',
     status: 'Active',
+    deactivated_at: '1970-01-01T00:00:00.000Z',
+    deactivated_by: 'string',
     email: 'user@example.com',
     draft_email: 'user@example.com',
     draft_email_expires_at: '1970-01-01T00:00:00.000Z',
     password_reset_token_hash: 'string',
     password_reset_token_expires_at: '1970-01-01T00:00:00.000Z',
+    sso_required: false,
     department: 'Sales',
     phone: 1234567890,
     secondary_phone: 1234567890,
     mfa_enabled: false,
+    totp_enabled: false,
     has_passkeys: false,
     phone_verified: true,
     token: 'string',
@@ -688,6 +752,7 @@ const { data } = await client.updateUserV2(
       assigned_opportunity: true,
       assigned_task: true
     },
+    in_app_notification_popups: false,
     properties: [
       {
         name: 'profileImageName',
@@ -704,21 +769,34 @@ const { data } = await client.updateUserV2(
 
 ```json
 {
+  "actor": {
+    "type": "agent",
+    "token_id": "string",
+    "token_name": "string",
+    "agent_id": "string",
+    "agent_name": "string",
+    "host_name": "string",
+    "client": "string"
+  },
   "id": "string",
   "organization_id": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "activated_at": "1970-01-01T00:00:00.000Z",
   "display_name": "Example User",
   "status": "Active",
+  "deactivated_at": "1970-01-01T00:00:00.000Z",
+  "deactivated_by": "string",
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
   "password_reset_token_hash": "string",
   "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+  "sso_required": false,
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
   "mfa_enabled": false,
+  "totp_enabled": false,
   "has_passkeys": false,
   "phone_verified": true,
   "token": "string",
@@ -762,6 +840,7 @@ const { data } = await client.updateUserV2(
     "assigned_opportunity": true,
     "assigned_task": true
   },
+  "in_app_notification_popups": false,
   "properties": [
     {
       "name": "profileImageName",
@@ -778,7 +857,7 @@ const { data } = await client.updateUserV2(
 
 ### `deleteUserV2`
 
-Delete user by user id
+Delete user by user id.
 
 `DELETE /v2/users/{id}`
 
@@ -821,7 +900,7 @@ const { data } = await client.deleteUserV2({
 
 ### `inviteUser`
 
-Creates a new user in the caller's organization and sends an invite email to activate the user
+Creates a new user in the caller's organization and sends an invite email to activate the user.
 
 `POST /v2/users/invite`
 
@@ -831,7 +910,13 @@ const { data } = await client.inviteUser(
   {
     email: 'test@example.com',
     language: 'en',
-    roles: ['123:owner']
+    roles: ['123:owner'],
+    invitation_type: 'default',
+    invitation_context: {
+      preview_org_name: 'epilot GmbH (Preview)',
+      source_org_name: 'epilot GmbH'
+    },
+    send_email: true
   },
 )
 ```
@@ -841,21 +926,34 @@ const { data } = await client.inviteUser(
 
 ```json
 {
+  "actor": {
+    "type": "agent",
+    "token_id": "string",
+    "token_name": "string",
+    "agent_id": "string",
+    "agent_name": "string",
+    "host_name": "string",
+    "client": "string"
+  },
   "id": "string",
   "organization_id": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "activated_at": "1970-01-01T00:00:00.000Z",
   "display_name": "Example User",
   "status": "Active",
+  "deactivated_at": "1970-01-01T00:00:00.000Z",
+  "deactivated_by": "string",
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
   "password_reset_token_hash": "string",
   "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+  "sso_required": false,
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
   "mfa_enabled": false,
+  "totp_enabled": false,
   "has_passkeys": false,
   "phone_verified": true,
   "token": "string",
@@ -899,6 +997,7 @@ const { data } = await client.inviteUser(
     "assigned_opportunity": true,
     "assigned_task": true
   },
+  "in_app_notification_popups": false,
   "properties": [
     {
       "name": "profileImageName",
@@ -934,21 +1033,34 @@ const { data } = await client.resendUserInvitation(
 
 ```json
 {
+  "actor": {
+    "type": "agent",
+    "token_id": "string",
+    "token_name": "string",
+    "agent_id": "string",
+    "agent_name": "string",
+    "host_name": "string",
+    "client": "string"
+  },
   "id": "string",
   "organization_id": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "activated_at": "1970-01-01T00:00:00.000Z",
   "display_name": "Example User",
   "status": "Active",
+  "deactivated_at": "1970-01-01T00:00:00.000Z",
+  "deactivated_by": "string",
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
   "password_reset_token_hash": "string",
   "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+  "sso_required": false,
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
   "mfa_enabled": false,
+  "totp_enabled": false,
   "has_passkeys": false,
   "phone_verified": true,
   "token": "string",
@@ -992,6 +1104,7 @@ const { data } = await client.resendUserInvitation(
     "assigned_opportunity": true,
     "assigned_task": true
   },
+  "in_app_notification_popups": false,
   "properties": [
     {
       "name": "profileImageName",
@@ -1060,21 +1173,26 @@ const { data } = await client.getGroupsForUser({
     "updated_at": "2024-02-08T04:44:32.246Z",
     "created_by": "123",
     "crt_assignee": {
+      "actor": {},
       "id": "string",
       "organization_id": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "activated_at": "1970-01-01T00:00:00.000Z",
       "display_name": "Example User",
       "status": "Active",
+      "deactivated_at": "1970-01-01T00:00:00.000Z",
+      "deactivated_by": "string",
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
       "password_reset_token_hash": "string",
       "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+      "sso_required": false,
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
       "mfa_enabled": false,
+      "totp_enabled": false,
       "has_passkeys": false,
       "phone_verified": true,
       "token": "string",
@@ -1089,6 +1207,7 @@ const { data } = await client.getGroupsForUser({
       "favorites": {},
       "email_notification_setting": {},
       "in_app_notification_setting": {},
+      "in_app_notification_popups": false,
       "properties": [],
       "tags": ["non-billable"],
       "crt_index": 3
@@ -1182,21 +1301,34 @@ const { data } = await client.createGroup(
   "updated_at": "2024-02-08T04:44:32.246Z",
   "created_by": "123",
   "crt_assignee": {
+    "actor": {
+      "type": "agent",
+      "token_id": "string",
+      "token_name": "string",
+      "agent_id": "string",
+      "agent_name": "string",
+      "host_name": "string",
+      "client": "string"
+    },
     "id": "string",
     "organization_id": "string",
     "created_at": "1970-01-01T00:00:00.000Z",
     "activated_at": "1970-01-01T00:00:00.000Z",
     "display_name": "Example User",
     "status": "Active",
+    "deactivated_at": "1970-01-01T00:00:00.000Z",
+    "deactivated_by": "string",
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
     "password_reset_token_hash": "string",
     "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+    "sso_required": false,
     "department": "Sales",
     "phone": 1234567890,
     "secondary_phone": 1234567890,
     "mfa_enabled": false,
+    "totp_enabled": false,
     "has_passkeys": false,
     "phone_verified": true,
     "token": "string",
@@ -1237,6 +1369,7 @@ const { data } = await client.createGroup(
       "assigned_opportunity": true,
       "assigned_task": true
     },
+    "in_app_notification_popups": false,
     "properties": [
       {}
     ],
@@ -1245,21 +1378,26 @@ const { data } = await client.createGroup(
   },
   "users": [
     {
+      "actor": {},
       "id": "string",
       "organization_id": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "activated_at": "1970-01-01T00:00:00.000Z",
       "display_name": "Example User",
       "status": "Active",
+      "deactivated_at": "1970-01-01T00:00:00.000Z",
+      "deactivated_by": "string",
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
       "password_reset_token_hash": "string",
       "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+      "sso_required": false,
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
       "mfa_enabled": false,
+      "totp_enabled": false,
       "has_passkeys": false,
       "phone_verified": true,
       "token": "string",
@@ -1274,6 +1412,7 @@ const { data } = await client.createGroup(
       "favorites": {},
       "email_notification_setting": {},
       "in_app_notification_setting": {},
+      "in_app_notification_popups": false,
       "properties": [],
       "tags": ["non-billable"]
     }
@@ -1314,21 +1453,34 @@ const { data } = await client.getGroup({
   "updated_at": "2024-02-08T04:44:32.246Z",
   "created_by": "123",
   "crt_assignee": {
+    "actor": {
+      "type": "agent",
+      "token_id": "string",
+      "token_name": "string",
+      "agent_id": "string",
+      "agent_name": "string",
+      "host_name": "string",
+      "client": "string"
+    },
     "id": "string",
     "organization_id": "string",
     "created_at": "1970-01-01T00:00:00.000Z",
     "activated_at": "1970-01-01T00:00:00.000Z",
     "display_name": "Example User",
     "status": "Active",
+    "deactivated_at": "1970-01-01T00:00:00.000Z",
+    "deactivated_by": "string",
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
     "password_reset_token_hash": "string",
     "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+    "sso_required": false,
     "department": "Sales",
     "phone": 1234567890,
     "secondary_phone": 1234567890,
     "mfa_enabled": false,
+    "totp_enabled": false,
     "has_passkeys": false,
     "phone_verified": true,
     "token": "string",
@@ -1369,6 +1521,7 @@ const { data } = await client.getGroup({
       "assigned_opportunity": true,
       "assigned_task": true
     },
+    "in_app_notification_popups": false,
     "properties": [
       {}
     ],
@@ -1377,21 +1530,26 @@ const { data } = await client.getGroup({
   },
   "users": [
     {
+      "actor": {},
       "id": "string",
       "organization_id": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "activated_at": "1970-01-01T00:00:00.000Z",
       "display_name": "Example User",
       "status": "Active",
+      "deactivated_at": "1970-01-01T00:00:00.000Z",
+      "deactivated_by": "string",
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
       "password_reset_token_hash": "string",
       "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+      "sso_required": false,
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
       "mfa_enabled": false,
+      "totp_enabled": false,
       "has_passkeys": false,
       "phone_verified": true,
       "token": "string",
@@ -1406,6 +1564,7 @@ const { data } = await client.getGroup({
       "favorites": {},
       "email_notification_setting": {},
       "in_app_notification_setting": {},
+      "in_app_notification_popups": false,
       "properties": [],
       "tags": ["non-billable"]
     }
@@ -1455,21 +1614,34 @@ const { data } = await client.updateGroup(
   "updated_at": "2024-02-08T04:44:32.246Z",
   "created_by": "123",
   "crt_assignee": {
+    "actor": {
+      "type": "agent",
+      "token_id": "string",
+      "token_name": "string",
+      "agent_id": "string",
+      "agent_name": "string",
+      "host_name": "string",
+      "client": "string"
+    },
     "id": "string",
     "organization_id": "string",
     "created_at": "1970-01-01T00:00:00.000Z",
     "activated_at": "1970-01-01T00:00:00.000Z",
     "display_name": "Example User",
     "status": "Active",
+    "deactivated_at": "1970-01-01T00:00:00.000Z",
+    "deactivated_by": "string",
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
     "password_reset_token_hash": "string",
     "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+    "sso_required": false,
     "department": "Sales",
     "phone": 1234567890,
     "secondary_phone": 1234567890,
     "mfa_enabled": false,
+    "totp_enabled": false,
     "has_passkeys": false,
     "phone_verified": true,
     "token": "string",
@@ -1510,6 +1682,7 @@ const { data } = await client.updateGroup(
       "assigned_opportunity": true,
       "assigned_task": true
     },
+    "in_app_notification_popups": false,
     "properties": [
       {}
     ],
@@ -1518,21 +1691,26 @@ const { data } = await client.updateGroup(
   },
   "users": [
     {
+      "actor": {},
       "id": "string",
       "organization_id": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "activated_at": "1970-01-01T00:00:00.000Z",
       "display_name": "Example User",
       "status": "Active",
+      "deactivated_at": "1970-01-01T00:00:00.000Z",
+      "deactivated_by": "string",
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
       "password_reset_token_hash": "string",
       "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+      "sso_required": false,
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
       "mfa_enabled": false,
+      "totp_enabled": false,
       "has_passkeys": false,
       "phone_verified": true,
       "token": "string",
@@ -1547,6 +1725,7 @@ const { data } = await client.updateGroup(
       "favorites": {},
       "email_notification_setting": {},
       "in_app_notification_setting": {},
+      "in_app_notification_popups": false,
       "properties": [],
       "tags": ["non-billable"]
     }
@@ -1600,21 +1779,34 @@ const { data } = await client.advanceUserAssignment({
   "updated_at": "2024-02-08T04:44:32.246Z",
   "created_by": "123",
   "crt_assignee": {
+    "actor": {
+      "type": "agent",
+      "token_id": "string",
+      "token_name": "string",
+      "agent_id": "string",
+      "agent_name": "string",
+      "host_name": "string",
+      "client": "string"
+    },
     "id": "string",
     "organization_id": "string",
     "created_at": "1970-01-01T00:00:00.000Z",
     "activated_at": "1970-01-01T00:00:00.000Z",
     "display_name": "Example User",
     "status": "Active",
+    "deactivated_at": "1970-01-01T00:00:00.000Z",
+    "deactivated_by": "string",
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
     "password_reset_token_hash": "string",
     "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+    "sso_required": false,
     "department": "Sales",
     "phone": 1234567890,
     "secondary_phone": 1234567890,
     "mfa_enabled": false,
+    "totp_enabled": false,
     "has_passkeys": false,
     "phone_verified": true,
     "token": "string",
@@ -1655,6 +1847,7 @@ const { data } = await client.advanceUserAssignment({
       "assigned_opportunity": true,
       "assigned_task": true
     },
+    "in_app_notification_popups": false,
     "properties": [
       {}
     ],
@@ -1663,21 +1856,26 @@ const { data } = await client.advanceUserAssignment({
   },
   "users": [
     {
+      "actor": {},
       "id": "string",
       "organization_id": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "activated_at": "1970-01-01T00:00:00.000Z",
       "display_name": "Example User",
       "status": "Active",
+      "deactivated_at": "1970-01-01T00:00:00.000Z",
+      "deactivated_by": "string",
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
       "password_reset_token_hash": "string",
       "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+      "sso_required": false,
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
       "mfa_enabled": false,
+      "totp_enabled": false,
       "has_passkeys": false,
       "phone_verified": true,
       "token": "string",
@@ -1692,6 +1890,7 @@ const { data } = await client.advanceUserAssignment({
       "favorites": {},
       "email_notification_setting": {},
       "in_app_notification_setting": {},
+      "in_app_notification_popups": false,
       "properties": [],
       "tags": ["non-billable"]
     }
@@ -1943,7 +2142,13 @@ const { data } = await client.checkInviteToken({
   "invitation_org_logo_url": "string",
   "invitation_org_logo_thumbnail_url": "string",
   "invitee_user_id": "string",
-  "invitee_primary_org_id": "string"
+  "invitee_primary_org_id": "string",
+  "login_methods": {
+    "password": true,
+    "passwordless": true,
+    "sso": true,
+    "passkey": true
+  }
 }
 ```
 
@@ -1968,6 +2173,39 @@ const { data } = await client.activateUser(
   },
 )
 ```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "user": {
+    "id": "string",
+    "organization_id": "string",
+    "email": "user@example.com",
+    "display_name": "Example user",
+    "name": "Example user",
+    "preferred_language": "de",
+    "signature": "<p>Thanks</p>",
+    "custom_navigation": "5gbe4nkp6jsfq",
+    "roles": ["Owner"],
+    "image_uri": {
+      "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
+      "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
+    },
+    "properties": [
+      {
+        "name": "profileImageName",
+        "value": "avatar.png"
+      }
+    ]
+  },
+  "email": "string",
+  "login_token": "string"
+}
+```
+
+</details>
 
 ---
 
@@ -2019,6 +2257,8 @@ const { data } = await client.getUserLoginParametersV2({
       "organization_name": "epilot GmbH",
       "organization_type": "Vendor",
       "organization_use": "Production",
+      "parent_production_org_id": "123",
+      "is_primary_org": true,
       "cognito_region": "eu-central-1",
       "cognito_user_pool_id": "eu-central-sample",
       "cognito_user_pool_client_id": "asbkh213ehkquwhdi",
@@ -2119,6 +2359,8 @@ const { data } = await client.resolveDiscoverableCredential(
       "organization_name": "epilot GmbH",
       "organization_type": "Vendor",
       "organization_use": "Production",
+      "parent_production_org_id": "123",
+      "is_primary_org": true,
       "cognito_region": "eu-central-1",
       "cognito_user_pool_id": "eu-central-sample",
       "cognito_user_pool_client_id": "asbkh213ehkquwhdi",
@@ -2139,6 +2381,7 @@ const { data } = await client.resolveDiscoverableCredential(
 ### `beginPasskeyRegistration`
 
 Begin passkey registration flow for the authenticated user.
+Requires the user's own login session; API, agent and assumed (CLI) tokens are refused.
 
 `POST /v2/users/me/passkeys:registerBegin`
 
@@ -2168,6 +2411,7 @@ const { data } = await client.beginPasskeyRegistration(
 ### `completePasskeyRegistration`
 
 Complete passkey registration by verifying the attestation response.
+Requires the user's own login session; API, agent and assumed (CLI) tokens are refused.
 
 `POST /v2/users/me/passkeys:registerComplete`
 
@@ -2233,6 +2477,7 @@ const { data } = await client.listPasskeys()
 ### `deletePasskey`
 
 Delete a passkey by credential ID.
+Requires the user's own login session; API, agent and assumed (CLI) tokens are refused.
 
 `DELETE /v2/users/me/passkeys/{credentialId}`
 
@@ -2269,6 +2514,21 @@ const { data } = await client.switchOrganization(
 ```
 
 </details>
+
+---
+
+### `leaveOrganization`
+
+Leave an organization the calling user is a member of. The user's membership in that organization is
+deactivated (status `Deactivated`), so it no longer shows up in the org switcher and can't be logge
+
+`POST /v2/users/me/organizations/{org_id}/leave`
+
+```ts
+const { data } = await client.leaveOrganization({
+  org_id: 'example',
+})
+```
 
 ---
 
@@ -2429,6 +2689,8 @@ const { data } = await client.getUserLoginParameters({
       "organization_name": "epilot GmbH",
       "organization_type": "Vendor",
       "organization_use": "Production",
+      "parent_production_org_id": "123",
+      "is_primary_org": true,
       "cognito_region": "eu-central-1",
       "cognito_user_pool_id": "eu-central-sample",
       "cognito_user_pool_client_id": "asbkh213ehkquwhdi",
@@ -2626,8 +2888,14 @@ type Username = string
 ```ts
 type UserInvitationPayload = {
   email?: string
-  language?: "en" | "de"
+  language?: string
   roles?: string[]
+  invitation_type?: "default" | "preview_org_ready"
+  invitation_context?: {
+    preview_org_name?: string
+    source_org_name?: string
+  }
+  send_email?: boolean
 }
 ```
 
@@ -2652,21 +2920,34 @@ type UserVerificationPayload = {
 
 ```ts
 type UserV2 = {
+  actor?: {
+    type: "agent" | "api_token"
+    token_id?: string
+    token_name?: string
+    agent_id?: string
+    agent_name?: string
+    host_name?: string
+    client?: string
+  }
   id?: string
   organization_id?: string
   created_at?: string // date-time
   activated_at?: string // date-time
   display_name?: string
   status?: "Active" | "Pending" | "Deactivated" | "Deleted"
+  deactivated_at?: string // date-time
+  deactivated_by?: string
   email?: string // email
   draft_email?: string // email
   draft_email_expires_at?: string // date-time
   password_reset_token_hash?: string
   password_reset_token_expires_at?: string // date-time
+  sso_required?: boolean
   department?: string
   phone?: string
   secondary_phone?: string
   mfa_enabled?: boolean
+  totp_enabled?: boolean
   has_passkeys?: boolean
   phone_verified?: boolean
   token?: string
@@ -2684,6 +2965,7 @@ type UserV2 = {
   favorites?: Record<string, unknown>
   email_notification_setting?: Record<string, unknown>
   in_app_notification_setting?: Record<string, unknown>
+  in_app_notification_popups?: boolean
   properties?: Array<{
     name: string
     value: string
@@ -2724,6 +3006,8 @@ type LoginParameters = {
   organization_name?: string
   organization_type?: string
   organization_use?: string
+  parent_production_org_id?: string
+  is_primary_org?: boolean
   cognito_region?: string
   cognito_user_pool_id?: string
   cognito_user_pool_client_id?: string
@@ -2791,21 +3075,34 @@ type Group = {
   updated_at: string
   created_by?: string
   crt_assignee?: {
+    actor?: {
+      type: { ... }
+      token_id?: { ... }
+      token_name?: { ... }
+      agent_id?: { ... }
+      agent_name?: { ... }
+      host_name?: { ... }
+      client?: { ... }
+    }
     id?: string
     organization_id?: string
     created_at?: string // date-time
     activated_at?: string // date-time
     display_name?: string
     status?: "Active" | "Pending" | "Deactivated" | "Deleted"
+    deactivated_at?: string // date-time
+    deactivated_by?: string
     email?: string // email
     draft_email?: string // email
     draft_email_expires_at?: string // date-time
     password_reset_token_hash?: string
     password_reset_token_expires_at?: string // date-time
+    sso_required?: boolean
     department?: string
     phone?: string
     secondary_phone?: string
     mfa_enabled?: boolean
+    totp_enabled?: boolean
     has_passkeys?: boolean
     phone_verified?: boolean
     token?: string
@@ -2823,6 +3120,7 @@ type Group = {
     favorites?: Record<string, unknown>
     email_notification_setting?: Record<string, unknown>
     in_app_notification_setting?: Record<string, unknown>
+    in_app_notification_popups?: boolean
     properties?: Array<{
       name: { ... }
       value: { ... }
@@ -2831,21 +3129,34 @@ type Group = {
     crt_index?: number
   }
   users?: Array<{
+    actor?: {
+      type: { ... }
+      token_id?: { ... }
+      token_name?: { ... }
+      agent_id?: { ... }
+      agent_name?: { ... }
+      host_name?: { ... }
+      client?: { ... }
+    }
     id?: string
     organization_id?: string
     created_at?: string // date-time
     activated_at?: string // date-time
     display_name?: string
     status?: "Active" | "Pending" | "Deactivated" | "Deleted"
+    deactivated_at?: string // date-time
+    deactivated_by?: string
     email?: string // email
     draft_email?: string // email
     draft_email_expires_at?: string // date-time
     password_reset_token_hash?: string
     password_reset_token_expires_at?: string // date-time
+    sso_required?: boolean
     department?: string
     phone?: string
     secondary_phone?: string
     mfa_enabled?: boolean
+    totp_enabled?: boolean
     has_passkeys?: boolean
     phone_verified?: boolean
     token?: string
@@ -2856,26 +3167,7 @@ type Group = {
     custom_navigation?: string
     override_release_channel?: "canary" | "rc" | "stable" | null
     feature_preferences?: Record<string, unknown>
-    image_uri?: {
-      original?: { ... }
-      thumbnail_32?: { ... }
-    }
-    favorites?: Record<string, unknown>
-    email_notification_setting?: Record<string, unknown>
-    in_app_notification_setting?: Record<string, unknown>
-    properties?: Array<{
-      name: { ... }
-      value: { ... }
-    }>
-    tags?: string[]
-  }>
-  image_uri?: {
-    original?: string // uri
-    thumbnail_32?: string // uri
-    thumbnail_64?: string // uri
-    gradient_colors?: string[]
-  }
-  abbreviation?: string
+  // ...
 }
 ```
 
@@ -2898,7 +3190,7 @@ type SignupUserPayload = {
     email: string // email
     password: string
   }
-  language?: "en" | "de"
+  language?: string
 }
 ```
 
@@ -2970,6 +3262,215 @@ type Organization = {
 }
 ```
 
+### `OrgActivity`
+
+Internal-only activity overview of an organization
+
+```ts
+type OrgActivity = {
+  org_id: string
+  generated_at: string // date-time
+  granularity: "day" | "week" | "month"
+  from: string // date
+  to: string // date
+  summary: {
+    members: number
+    billable_members: number
+    deactivated_members?: number
+    included_seats: number
+    included_seats_source: "override" | "tier" | null
+    seats: number
+    paid_seats: number
+    activation_rate_30d: number
+    member_activation_rate_30d: number
+    active_now: number
+    active_today: number
+    active_7d: number
+    active_prev_7d: number
+    active_30d: number
+    active_prev_30d: number
+    dormant_30d: number
+    never_seen: number
+  }
+  series: Array<{
+    period_start: string // date
+    active_users: number
+  }>
+  top_users: Array<{
+    user_id: string
+    name: string
+    email: string
+    active_days: number
+    last_seen_at: string // date-time
+  }>
+  attention: Array<{
+    user_id: string
+    name: string
+    email: string
+    status: string
+    created_at: string // date-time
+    last_login_at: string // date-time
+    last_seen_at: string // date-time
+    reason: "dormant" | "never_seen"
+  }>
+}
+```
+
+### `OrgActivitySummary`
+
+Internal-only activity counters of an organization. Windows are calendar days in Europe/Berlin ending today.
+
+```ts
+type OrgActivitySummary = {
+  members: number
+  billable_members: number
+  deactivated_members?: number
+  included_seats: number
+  included_seats_source: "override" | "tier" | null
+  seats: number
+  paid_seats: number
+  activation_rate_30d: number
+  member_activation_rate_30d: number
+  active_now: number
+  active_today: number
+  active_7d: number
+  active_prev_7d: number
+  active_30d: number
+  active_prev_30d: number
+  dormant_30d: number
+  never_seen: number
+}
+```
+
+### `OrgActivityHeatmap`
+
+Internal-only daily activity heatmap. Only days with value > 0 are included.
+
+```ts
+type OrgActivityHeatmap = {
+  org_id: string
+  user_id: string
+  from: string // date
+  to: string // date
+  days: Array<{
+    day: string // date
+    value: number
+  }>
+}
+```
+
+### `LoginAsAuditPage`
+
+Internal-only page of "login as" audit events, newest first.
+
+```ts
+type LoginAsAuditPage = {
+  org_id: string
+  events: Array<{
+    id: string
+    created_at: string // date-time
+    admin_email?: string
+    user_email?: string
+    user_id?: string
+    purpose?: {
+      name?: { ... }
+      description?: { ... }
+    }
+  }>
+  next_cursor?: string
+}
+```
+
+### `LoginAsAuditEvent`
+
+```ts
+type LoginAsAuditEvent = {
+  id: string
+  created_at: string // date-time
+  admin_email?: string
+  user_email?: string
+  user_id?: string
+  purpose?: {
+    name?: string
+    description?: string
+  }
+}
+```
+
+### `OrgActivityByHour`
+
+Internal-only average active users by weekday and hour (Europe/Berlin). Only non-zero cells are included.
+
+```ts
+type OrgActivityByHour = {
+  org_id: string
+  from: string // date
+  to: string // date
+  cells: Array<{
+    weekday: number
+    hour: number
+    avg_active_users: number
+  }>
+}
+```
+
+### `PlatformActivitySummary`
+
+Internal-only platform-wide activity summary
+
+```ts
+type PlatformActivitySummary = {
+  generated_at: string // date-time
+  granularity: "day" | "week" | "month"
+  from: string // date
+  to: string // date
+  summary: {
+    dau: number
+    dau_prev: number
+    wau: number
+    wau_prev: number
+    mau: number
+    mau_prev: number
+    active_now: number
+    active_orgs_30d: number
+  }
+  series: Array<{
+    period_start: string // date
+    active_users: number
+    active_orgs: number
+  }>
+  orgs_total?: number
+  orgs: Array<{
+    org_id: string
+    name: string
+    mau: number
+    wau: number
+    members: number
+    billable_members: number
+    deactivated_members?: number
+    included_seats: number
+    included_seats_source: "override" | "tier" | null
+    seats: number
+    paid_seats: number
+    activation_rate_30d: number
+  }>
+}
+```
+
+### `UserActivity`
+
+Internal-only login / activity signals of a user in an organization
+
+```ts
+type UserActivity = {
+  org_id: string
+  user_id: string
+  first_seen_at: string // date-time
+  last_login_at: string // date-time
+  last_seen_at: string // date-time
+}
+```
+
 ### `DataPointsResponse`
 
 ```ts
@@ -2978,6 +3479,10 @@ type DataPointsResponse = Array<{
   actual_users?: number
   max_users_last_month?: number
   non_billable_users_last_month?: number
+  deactivated_users_last_month?: number
+  deactivated_users?: number
+  free_user_quota?: number
+  free_user_quota_source?: "override" | "tier" | null
 }>
 ```
 
@@ -2989,12 +3494,20 @@ type DataPoint = {
   actual_users?: number
   max_users_last_month?: number
   non_billable_users_last_month?: number
+  deactivated_users_last_month?: number
+  deactivated_users?: number
+  free_user_quota?: number
+  free_user_quota_source?: "override" | "tier" | null
 }
 ```
 
 ### `UserSettingScope`
 
 User setting scope. Values are limited to 64 characters.
+
+Settings are per org membership, except the login-wide `account` scope: it is stored
+on the user's primary org record (like their login and MFA) and so is the same in every
+org the user belongs to, e.g. `account` / `org_order` for the org swi
 
 ```ts
 type UserSettingScope = string

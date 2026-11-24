@@ -48,6 +48,7 @@ export const main = defineCommand({
     'email-template': () => import('./commands/apis/email-template.js').then((m) => m.default),
     entity: () => import('./commands/apis/entity.js').then((m) => m.default),
     'entity-mapping': () => import('./commands/apis/entity-mapping.js').then((m) => m.default),
+    'entity-ui': () => import('./commands/apis/entity-ui.js').then((m) => m.default),
     environments: () => import('./commands/apis/environments.js').then((m) => m.default),
     'event-catalog': () => import('./commands/apis/event-catalog.js').then((m) => m.default),
     file: () => import('./commands/apis/file.js').then((m) => m.default),

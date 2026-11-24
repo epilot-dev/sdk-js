@@ -65,8 +65,13 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 **Product Recommendations API**
 - [`$productRecommendations`](#$productrecommendations)
 
+**Grid Operators API**
+- [`$searchGridOperators`](#$searchgridoperators)
+- [`$lookupGridOperators`](#$lookupgridoperators)
+
 **Conditional Pricing API**
 - [`$getConditionSets`](#$getconditionsets)
+- [`$getConditionUsage`](#$getconditionusage)
 - [`$getConditionalPricingOrganization`](#$getconditionalpricingorganization)
 - [`$resolveConditionalEntity`](#$resolveconditionalentity)
 - [`$createConditionalVariant`](#$createconditionalvariant)
@@ -89,10 +94,15 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`IntegrationId`](#integrationid)
 - [`ConditionalEntitySlug`](#conditionalentityslug)
 - [`ConditionType`](#conditiontype)
+- [`LocationFormat`](#locationformat)
 - [`ConditionDefinition`](#conditiondefinition)
 - [`ConditionSet`](#conditionset)
 - [`ConditionSetCatalog`](#conditionsetcatalog)
 - [`ConditionalPricingOptIn`](#conditionalpricingoptin)
+- [`ConditionUsage`](#conditionusage)
+- [`DeclaredConditionUsage`](#declaredconditionusage)
+- [`UndeclaredConditionUsage`](#undeclaredconditionusage)
+- [`ConditionOptionUsage`](#conditionoptionusage)
 - [`ConditionalPricingOrganization`](#conditionalpricingorganization)
 - [`ConditionalPricingErrorCode`](#conditionalpricingerrorcode)
 - [`ResolveConditionalEntityRequest`](#resolveconditionalentityrequest)
@@ -107,6 +117,7 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`VariantConditions`](#variantconditions)
 - [`PinnedConditions`](#pinnedconditions)
 - [`PinnedConditionValue`](#pinnedconditionvalue)
+- [`PinnedGridOperator`](#pinnedgridoperator)
 - [`PostalCodeFilter`](#postalcodefilter)
 - [`ConditionDateRange`](#conditiondaterange)
 - [`PostalCodeCity`](#postalcodecity)
@@ -150,6 +161,11 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`BatchDeleteCounts`](#batchdeletecounts)
 - [`BatchUpsertResultEntry`](#batchupsertresultentry)
 - [`BatchDeleteResultEntry`](#batchdeleteresultentry)
+- [`GridOperatorCommodity`](#gridoperatorcommodity)
+- [`GridOperatorSearchRequest`](#gridoperatorsearchrequest)
+- [`GridOperatorLookupRequest`](#gridoperatorlookuprequest)
+- [`GridOperatorResults`](#gridoperatorresults)
+- [`GridOperator`](#gridoperator)
 - [`Error`](#error)
 - [`RefusedLineItem`](#refusedlineitem)
 - [`ReportedError`](#reportederror)
@@ -314,6 +330,9 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`ProductRecommendationResponse`](#productrecommendationresponse)
 - [`OfferHighlightConfig`](#offerhighlightconfig)
 - [`Offer`](#offer)
+- [`ProductRecommendationRuleSource`](#productrecommendationrulesource)
+- [`ProductRecommendationOfferGroup`](#productrecommendationoffergroup)
+- [`ProductRecommendationRule`](#productrecommendationrule)
 - [`ProductRecommendation`](#productrecommendation)
 
 ### `$calculatePricingDetails`
@@ -1528,7 +1547,8 @@ const { data } = await client.$searchProviders(
     postal_code: 'string',
     city: 'string',
     street: 'string',
-    street_number: 'string'
+    street_number: 'string',
+    grid_filter: 'all'
   },
 )
 ```
@@ -1910,6 +1930,7 @@ const { data } = await client.$productRecommendations(
       price_id: 'string'
     },
     contract_id: 'string',
+    campaign_id: '3f1c7d2e-9a4b-4c6d-8e2f-1a2b3c4d5e6f',
     filters: {
       location: {
         street: 'string',
@@ -1975,6 +1996,79 @@ const { data } = await client.$productRecommendations(
 
 ---
 
+### `$searchGridOperators`
+
+Finds the active grid operators of one commodity whose name contains every word of `name`,
+ignoring case, and answers the first 10 by name. Type more of the name to narrow the results.
+A retired code 
+
+`POST /v1/grid-operators:search`
+
+```ts
+const { data } = await client.$searchGridOperators(
+  null,
+  {
+    commodity: 'power',
+    name: 'westnetz'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "code_number": "4045458000000",
+      "name": "Westnetz GmbH",
+      "closed_distribution_grid": true
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$lookupGridOperators`
+
+Answers the grid operator each code number is assigned to, retired code numbers included,
+in the order asked and each once. A code number the list doesn't hold is missing from `results`.
+
+`POST /v1/grid-operators:lookup`
+
+```ts
+const { data } = await client.$lookupGridOperators(
+  null,
+  {
+    commodity: 'power',
+    code_numbers: ['4045458000000']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "code_number": "4045458000000",
+      "name": "Westnetz GmbH",
+      "closed_distribution_grid": true
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `$getConditionSets`
 
 Returns the condition sets built in for one conditional entity type, ready to copy into that schema's `conditions` array. Read-only, and the same for every organization.
@@ -2011,6 +2105,73 @@ const { data } = await client.$getConditionSets({
             }
           ],
           "format": "postal_code"
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$getConditionUsage`
+
+Returns, for each condition the schema declares and each option a `select` condition
+declares, how many variants pin it, and for the schema as a whole how many conditional
+entities and variants it has
+
+`GET /v1/conditional-pricing/{slug}/conditions:usage`
+
+```ts
+const { data } = await client.$getConditionUsage({
+  slug: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "total": {
+    "variants": 1252,
+    "entities": 38
+  },
+  "conditions": [
+    {
+      "name": "delivery_area",
+      "variants": 1240,
+      "entities": 37
+    },
+    {
+      "name": "customer_type",
+      "variants": 12,
+      "entities": 3,
+      "options": [
+        {
+          "value": "private",
+          "variants": 12
+        },
+        {
+          "value": "business",
+          "variants": 0
+        }
+      ],
+      "undeclared_options": []
+    }
+  ],
+  "undeclared": [
+    {
+      "name": "legacy_customer_type",
+      "type": "select",
+      "variants": 1,
+      "entities": 1,
+      "options": [
+        {
+          "value": "private",
+          "variants": 1
         }
       ]
     }
@@ -2998,10 +3159,23 @@ resolve context.
 - `string`: an arbitrary string, matched exactly and case-sensitively
 - `number`: a numeric value
 - `date`: a single date
-- `daterange`: a window with a from and an until timestamp; either en
+- `daterange`: a window from a `from` to an `until`, both included; e
 
 ```ts
 type ConditionType = "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location"
+```
+
+### `LocationFormat`
+
+The value shape of a `location` condition. Absent for every other type.
+
+- `postal_code`: a postal code
+- `postal_code_city`: a postal code and a city
+- `power_grid_operator`: the code number of the power grid operator an address is connected to
+- `gas_grid_operator`: the code number of the gas grid
+
+```ts
+type LocationFormat = "postal_code" | "postal_code_city" | "power_grid_operator" | "gas_grid_operator"
 ```
 
 ### `ConditionDefinition`
@@ -3018,7 +3192,7 @@ type ConditionDefinition = {
     value: string
     title?: string
   }>
-  format?: "postal_code" | "postal_code_city"
+  format?: "postal_code" | "postal_code_city" | "power_grid_operator" | "gas_grid_operator"
 }
 ```
 
@@ -3040,7 +3214,7 @@ type ConditionSet = {
       value: { ... }
       title?: { ... }
     }>
-    format?: "postal_code" | "postal_code_city"
+    format?: "postal_code" | "postal_code_city" | "power_grid_operator" | "gas_grid_operator"
   }>
 }
 ```
@@ -3070,6 +3244,92 @@ type ConditionSetCatalog = {
 ```ts
 type ConditionalPricingOptIn = {
   status: "PROVISIONING" | "ACTIVE"
+}
+```
+
+### `ConditionUsage`
+
+```ts
+type ConditionUsage = {
+  total: {
+    variants: number
+    entities: number
+  }
+  conditions: Array<{
+    name: string
+    variants: number
+    entities: number
+    options?: Array<{
+      value: { ... }
+      variants: { ... }
+    }>
+    undeclared_options?: Array<{
+      value: { ... }
+      variants: { ... }
+    }>
+  }>
+  undeclared: Array<{
+    name: string
+    type: "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location"
+    format?: "postal_code" | "postal_code_city" | "power_grid_operator" | "gas_grid_operator"
+    variants: number
+    entities: number
+    options?: Array<{
+      value: { ... }
+      variants: { ... }
+    }>
+  }>
+}
+```
+
+### `DeclaredConditionUsage`
+
+A `select` condition always carries `options` and `undeclared_options`. A condition of any
+other type carries neither.
+
+
+```ts
+type DeclaredConditionUsage = {
+  name: string
+  variants: number
+  entities: number
+  options?: Array<{
+    value: string
+    variants: number
+  }>
+  undeclared_options?: Array<{
+    value: string
+    variants: number
+  }>
+}
+```
+
+### `UndeclaredConditionUsage`
+
+A condition variants pin under this name and type that the schema does not declare. A name
+pinned under two types is listed once for each.
+
+
+```ts
+type UndeclaredConditionUsage = {
+  name: string
+  type: "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location"
+  format?: "postal_code" | "postal_code_city" | "power_grid_operator" | "gas_grid_operator"
+  variants: number
+  entities: number
+  options?: Array<{
+    value: string
+    variants: number
+  }>
+}
+```
+
+### `ConditionOptionUsage`
+
+```ts
+type ConditionOptionUsage = {
+  value: string
+  variants: number
 }
 ```
 
@@ -3119,7 +3379,15 @@ type ResolveConditionalEntityRequest = {
   } | {
     gte: number | string
   } | {
-    in: string | number[]
+    in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
+  } | {
+    not_in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
   } | {
     between: string
   } | {
@@ -3163,7 +3431,15 @@ type ResolveByContextRequest = {
   } | {
     gte: number | string
   } | {
-    in: string | number[]
+    in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
+  } | {
+    not_in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
   } | {
     between: string
   } | {
@@ -3214,7 +3490,15 @@ type ResolveContext = Record<string, string | number | boolean | {
 } | {
   gte: number | string
 } | {
-  in: string | number[]
+  in: Array<string | number | {
+    postal_code?: string
+    city?: string
+  }>
+} | {
+  not_in: Array<string | number | {
+    postal_code?: string
+    city?: string
+  }>
 } | {
   between: string
 } | {
@@ -3295,6 +3579,10 @@ type CreateVariantRequest = {
   } | {
     postal_code: string
     city: string
+  } | {
+    code_number: string
+    name?: string
+    closed_distribution_grid?: boolean
   }>
   default?: boolean
   valid_from?: string // date
@@ -3330,14 +3618,19 @@ type PinnedConditions = Record<string, string | number | boolean | {
 } | {
   postal_code: string
   city: string
+} | {
+  code_number: string
+  name?: string
+  closed_distribution_grid?: boolean
 }>
 ```
 
 ### `PinnedConditionValue`
 
 One condition's exact value. Which of these shapes a condition takes is set by its type in the
-entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
-
+entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+`location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+`PinnedGridOperator`, and written as one
 
 ```ts
 type PinnedConditionValue = string | number | boolean | {
@@ -3346,28 +3639,49 @@ type PinnedConditionValue = string | number | boolean | {
 } | {
   postal_code: string
   city: string
+} | {
+  code_number: string
+  name?: string
+  closed_distribution_grid?: boolean
+}
+```
+
+### `PinnedGridOperator`
+
+The value of a `location` condition of format `power_grid_operator` or `gas_grid_operator`:
+the grid operator's code number, with the name and closed distribution grid flag the list
+Pricing API bundles assigns it, retired or not. A write reads only `code_number` and ignores
+the rest.
+
+
+```ts
+type PinnedGridOperator = {
+  code_number: string
+  name?: string
+  closed_distribution_grid?: boolean
 }
 ```
 
 ### `PostalCodeFilter`
 
-A listing filter on a `location` of format `postal_code_city` by its postal code alone: it
-matches the variants pinned to that postal code, whatever their city. Only a listing filter
-takes it; a resolve context must name the city too.
-
+A `location` of format `postal_code` or `postal_code_city` named in a variant listing filter.
+As the filter's value, it may name part of the location: `postal_code` alone matches every
+postal code starting with it, so `66` matches `66636` and a whole postal code matches only
+itself; `city` alone, on
 
 ```ts
 type PostalCodeFilter = {
-  postal_code: string
+  postal_code?: string
+  city?: string
 }
 ```
 
 ### `ConditionDateRange`
 
-The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and a date
-is midnight of that day in the organization's timezone. A bound that is absent, `null` or an
-empty string is an open end; stored, an open end is an empty string.
-
+The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and both
+are included. A date names the whole day in the organization's timezone: as `from` it starts
+at midnight, as `until` it runs to the day's last millisecond. So
+`{ "from": "2026-10-01", "until": "2026-10-31" }`
 
 ```ts
 type ConditionDateRange = {
@@ -3409,7 +3723,15 @@ type ContextConditionValue = string | number | boolean | {
 } | {
   gte: number | string
 } | {
-  in: string | number[]
+  in: Array<string | number | {
+    postal_code?: string
+    city?: string
+  }>
+} | {
+  not_in: Array<string | number | {
+    postal_code?: string
+    city?: string
+  }>
 } | {
   between: string
 } | {
@@ -3431,7 +3753,15 @@ type ConditionPredicate = {
 } | {
   gte: number | string
 } | {
-  in: string | number[]
+  in: Array<string | number | {
+    postal_code?: string
+    city?: string
+  }>
+} | {
+  not_in: Array<string | number | {
+    postal_code?: string
+    city?: string
+  }>
 } | {
   between: string
 } | {
@@ -3742,6 +4072,10 @@ type AppendVersionRequest = {
   } | {
     postal_code: string
     city: string
+  } | {
+    code_number: string
+    name?: string
+    closed_distribution_grid?: boolean
   }>
 }
 ```
@@ -3759,6 +4093,10 @@ type ReplaceVersionRequest = {
   } | {
     postal_code: string
     city: string
+  } | {
+    code_number: string
+    name?: string
+    closed_distribution_grid?: boolean
   }>
 }
 ```
@@ -3776,6 +4114,10 @@ type PatchVersionRequest = {
   } | {
     postal_code: string
     city: string
+  } | {
+    code_number: string
+    name?: string
+    closed_distribution_grid?: boolean
   }>
 }
 ```
@@ -3801,13 +4143,22 @@ type ListVariantsRequest = {
   } | {
     gte: number | string
   } | {
-    in: string | number[]
+    in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
+  } | {
+    not_in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
   } | {
     between: string
   } | {
     exists: boolean
   } | {
-    postal_code: string
+    postal_code?: string
+    city?: string
   }>
   search?: string
   sort?: string
@@ -3837,13 +4188,22 @@ type VariantTreeRequest = {
   } | {
     gte: number | string
   } | {
-    in: string | number[]
+    in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
+  } | {
+    not_in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
   } | {
     between: string
   } | {
     exists: boolean
   } | {
-    postal_code: string
+    postal_code?: string
+    city?: string
   }>
   search?: string
   sort?: string
@@ -3857,10 +4217,10 @@ type VariantTreeRequest = {
 ### `VariantConditionFilter`
 
 Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the
-same exact values and predicates a resolve context does. A condition left out is not
-filtered on. An `in` list carries at most 50,000 values.
+same exact values and predicates a resolve context does, plus `not_in`. A condition left
+out is not filtered on. An `in` or `not_in` list carries at most 50,000 values.
 
-A variant matches only where it pins the condition — unlike `:re
+A variant matches only where it pins 
 
 ```ts
 type VariantConditionFilter = Record<string, string | number | boolean | {
@@ -3875,13 +4235,22 @@ type VariantConditionFilter = Record<string, string | number | boolean | {
 } | {
   gte: number | string
 } | {
-  in: string | number[]
+  in: Array<string | number | {
+    postal_code?: string
+    city?: string
+  }>
+} | {
+  not_in: Array<string | number | {
+    postal_code?: string
+    city?: string
+  }>
 } | {
   between: string
 } | {
   exists: boolean
 } | {
-  postal_code: string
+  postal_code?: string
+  city?: string
 }>
 ```
 
@@ -4042,6 +4411,10 @@ type BatchUpsertVariantsRequest = {
     } | {
       postal_code: { ... }
       city: { ... }
+    } | {
+      code_number: { ... }
+      name?: { ... }
+      closed_distribution_grid?: { ... }
     }>
     default?: boolean
     valid_from?: string // date
@@ -4065,6 +4438,10 @@ type BatchUpsertItem = {
   } | {
     postal_code: string
     city: string
+  } | {
+    code_number: string
+    name?: string
+    closed_distribution_grid?: boolean
   }>
   default?: boolean
   valid_from?: string // date
@@ -4091,6 +4468,10 @@ type BatchDeleteVariantsRequest = {
     } | {
       postal_code: { ... }
       city: { ... }
+    } | {
+      code_number: { ... }
+      name?: { ... }
+      closed_distribution_grid?: { ... }
     }>
     default?: boolean
     valid_from?: string // date
@@ -4118,6 +4499,10 @@ type BatchDeleteItem = {
   } | {
     postal_code: string
     city: string
+  } | {
+    code_number: string
+    name?: string
+    closed_distribution_grid?: boolean
   }>
   default?: boolean
   valid_from?: string // date
@@ -4153,6 +4538,10 @@ type BatchDeleteByConditions = {
   } | {
     postal_code: string
     city: string
+  } | {
+    code_number: string
+    name?: string
+    closed_distribution_grid?: boolean
   }>
   default?: boolean
   valid_from?: string // date
@@ -4416,6 +4805,58 @@ type BatchDeleteResultEntry = {
     cause?: string
     error?: string | Record<string, unknown>[]
   }
+}
+```
+
+### `GridOperatorCommodity`
+
+The commodity whose grid operators to search or look up. Power and gas code numbers are separate lists.
+
+```ts
+type GridOperatorCommodity = "power" | "gas"
+```
+
+### `GridOperatorSearchRequest`
+
+```ts
+type GridOperatorSearchRequest = {
+  commodity: "power" | "gas"
+  name: string
+}
+```
+
+### `GridOperatorLookupRequest`
+
+```ts
+type GridOperatorLookupRequest = {
+  commodity: "power" | "gas"
+  code_numbers: string[]
+}
+```
+
+### `GridOperatorResults`
+
+```ts
+type GridOperatorResults = {
+  results: Array<{
+    code_number: string
+    name: string
+    closed_distribution_grid?: boolean
+  }>
+}
+```
+
+### `GridOperator`
+
+A grid operator as the list Pricing API bundles names it, built from the Marktstammdatenregister,
+bdew-codes.de (power) and DVGW (gas).
+
+
+```ts
+type GridOperator = {
+  code_number: string
+  name: string
+  closed_distribution_grid?: boolean
 }
 ```
 
@@ -5409,6 +5850,8 @@ type ResolveCatalogRequest = {
     } | {
       in: { ... }
     } | {
+      not_in: { ... }
+    } | {
       between: { ... }
     } | {
       exists: { ... }
@@ -5427,6 +5870,8 @@ type ResolveCatalogRequest = {
     } | {
       in: { ... }
     } | {
+      not_in: { ... }
+    } | {
       between: { ... }
     } | {
       exists: { ... }
@@ -5444,6 +5889,8 @@ type ResolveCatalogRequest = {
       gte: { ... }
     } | {
       in: { ... }
+    } | {
+      not_in: { ... }
     } | {
       between: { ... }
     } | {
@@ -5475,7 +5922,15 @@ type CatalogContext = {
   } | {
     gte: number | string
   } | {
-    in: string | number[]
+    in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
+  } | {
+    not_in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
   } | {
     between: string
   } | {
@@ -5493,7 +5948,15 @@ type CatalogContext = {
   } | {
     gte: number | string
   } | {
-    in: string | number[]
+    in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
+  } | {
+    not_in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
   } | {
     between: string
   } | {
@@ -5511,7 +5974,15 @@ type CatalogContext = {
   } | {
     gte: number | string
   } | {
-    in: string | number[]
+    in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
+  } | {
+    not_in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
   } | {
     between: string
   } | {
@@ -5922,6 +6393,7 @@ type SearchProvidersParams = {
   city?: string
   street?: string
   street_number?: string
+  grid_filter?: "all" | "exclude_closed" | "only_closed"
 }
 ```
 
@@ -9533,6 +10005,7 @@ type ProductRecommendationSearch = {
     price_id?: string
   }
   contract_id?: string
+  campaign_id?: string
   filters?: {
     location: {
       street?: { ... }
@@ -9600,7 +10073,7 @@ type OfferHighlightConfig = {
   unique_selling_point_icon?: string
   total?: {
     enabled?: boolean
-    format?: "absolute" | "relative"
+    format?: "absolute" | "percentage"
     only_if_better?: boolean
   }
 }
@@ -9619,6 +10092,67 @@ type Offer = {
       unique_selling_point_icon?: { ... }
       total?: { ... }
     }
+  }>
+}
+```
+
+### `ProductRecommendationRuleSource`
+
+The source tariff (product + price) of a product recommendation rule.
+
+```ts
+type ProductRecommendationRuleSource = {
+  product_id: string
+  price_id: string
+}
+```
+
+### `ProductRecommendationOfferGroup`
+
+A group of offers within a product recommendation rule: an `Offer` with an `id` and required `items`.
+Without `target_id`, the offers of the group are for everyone on the rule's source tariff;
+with `target_id`, only for members of that target group.
+
+
+```ts
+type ProductRecommendationOfferGroup = {
+  target_id?: string
+  items: Array<{
+    price_id: string
+    product_id: string
+    highlight_config?: {
+      unique_selling_point?: { ... }
+      unique_selling_point_icon?: { ... }
+      total?: { ... }
+    }
+  }>
+  id: string
+}
+```
+
+### `ProductRecommendationRule`
+
+A row of the rule table of a product recommendation: customers whose contract is on the `source`
+tariff are offered the items of the rule's `offer_groups`.
+
+There is at most one rule per source tariff.
+
+
+```ts
+type ProductRecommendationRule = {
+  id: string
+  source: {
+    product_id: string
+    price_id: string
+  }
+  offer_groups: Array<{
+    target_id?: string
+    items: Array<{
+      price_id: { ... }
+      product_id: { ... }
+      highlight_config?: { ... }
+    }>
+    id: string
   }>
 }
 ```

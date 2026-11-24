@@ -16,6 +16,53 @@ export declare namespace Components {
         export type Unauthorized = Schemas.ErrorResponse;
     }
     namespace Schemas {
+        /**
+         * The phone call a user is on right now.
+         */
+        export interface ActiveCall {
+            /**
+             * Whether the user is on an answered call. The other fields are present only when true.
+             */
+            on_call: boolean;
+            /**
+             * The phone system's conversation id: the same on every leg of a transferred or conferenced
+             * call, and the `external_id` of the `call` entity created after the call.
+             *
+             * example:
+             * 01KW704DAM1PM5SDGKFDY9BNK0
+             */
+            conversation_id?: string;
+            /**
+             * When the user's part of the call started
+             */
+            started_at?: string; // date-time
+            /**
+             * `softphone`: reported by the epilot 360 phone. `provider`: read from the phone system's
+             * live state because no current report exists.
+             *
+             */
+            source?: "softphone" | "provider";
+            /**
+             * Until when the report is valid unless renewed (`softphone` only)
+             */
+            expires_at?: string; // date-time
+        }
+        export interface ActiveCallReport {
+            /**
+             * The phone system's conversation id of the call (not the id of the user's own leg)
+             * example:
+             * 01KW704DAM1PM5SDGKFDY9BNK0
+             */
+            conversation_id: string;
+            /**
+             * When the user's part of the call started, as an ISO 8601 time. Without one (or with a
+             * time that is not one, or lies in the future) it is the first report of the conversation.
+             *
+             * example:
+             * 2026-11-10T10:00:00.000Z
+             */
+            started_at?: string;
+        }
         export interface AgentActivity {
             provider_agent_id: string;
             from: string; // date-time
@@ -129,6 +176,9 @@ export declare namespace Components {
              * A skill as the phone system holds it (Babelforce: an agent tag). epilot's convention for skills is
              * `<skill category>:<label>` (e.g. `language:german`), which the control center shows as
              * "Category · Label"; a skill without a colon has no category.
+             * Skills are case-insensitive and stored lowercased, in epilot's catalogue as in the phone system
+             * (Babelforce lowercases the tags it stores): a skill sent in any letter case (`Language:German`,
+             * in a body or a path) is the skill `language:german`, and every answer lists skills lowercased.
              *
              */
             Skill /* ^\S(.*\S)?$ */[];
@@ -162,6 +212,9 @@ export declare namespace Components {
              * A skill as the phone system holds it (Babelforce: an agent tag). epilot's convention for skills is
              * `<skill category>:<label>` (e.g. `language:german`), which the control center shows as
              * "Category · Label"; a skill without a colon has no category.
+             * Skills are case-insensitive and stored lowercased, in epilot's catalogue as in the phone system
+             * (Babelforce lowercases the tags it stores): a skill sent in any letter case (`Language:German`,
+             * in a body or a path) is the skill `language:german`, and every answer lists skills lowercased.
              *
              */
             Skill /* ^\S(.*\S)?$ */[];
@@ -246,7 +299,7 @@ export declare namespace Components {
         }
         export interface CreateSkillRequest {
             /**
-             * The skill; trimmed, then 1 to 100 characters
+             * The skill; trimmed, then 1 to 100 characters, stored lowercased (see `Skill`)
              */
             tag: string;
         }
@@ -361,6 +414,9 @@ export declare namespace Components {
              * A skill as the phone system holds it (Babelforce: an agent tag). epilot's convention for skills is
              * `<skill category>:<label>` (e.g. `language:german`), which the control center shows as
              * "Category · Label"; a skill without a colon has no category.
+             * Skills are case-insensitive and stored lowercased, in epilot's catalogue as in the phone system
+             * (Babelforce lowercases the tags it stores): a skill sent in any letter case (`Language:German`,
+             * in a body or a path) is the skill `language:german`, and every answer lists skills lowercased.
              *
              */
             Skill /* ^\S(.*\S)?$ */[];
@@ -424,6 +480,9 @@ export declare namespace Components {
              * A skill as the phone system holds it (Babelforce: an agent tag). epilot's convention for skills is
              * `<skill category>:<label>` (e.g. `language:german`), which the control center shows as
              * "Category · Label"; a skill without a colon has no category.
+             * Skills are case-insensitive and stored lowercased, in epilot's catalogue as in the phone system
+             * (Babelforce lowercases the tags it stores): a skill sent in any letter case (`Language:German`,
+             * in a body or a path) is the skill `language:german`, and every answer lists skills lowercased.
              *
              */
             Skill /* ^\S(.*\S)?$ */[];
@@ -934,6 +993,9 @@ export declare namespace Components {
              * A skill as the phone system holds it (Babelforce: an agent tag). epilot's convention for skills is
              * `<skill category>:<label>` (e.g. `language:german`), which the control center shows as
              * "Category · Label"; a skill without a colon has no category.
+             * Skills are case-insensitive and stored lowercased, in epilot's catalogue as in the phone system
+             * (Babelforce lowercases the tags it stores): a skill sent in any letter case (`Language:German`,
+             * in a body or a path) is the skill `language:german`, and every answer lists skills lowercased.
              *
              */
             Skill /* ^\S(.*\S)?$ */[];
@@ -1011,6 +1073,9 @@ export declare namespace Components {
          * A skill as the phone system holds it (Babelforce: an agent tag). epilot's convention for skills is
          * `<skill category>:<label>` (e.g. `language:german`), which the control center shows as
          * "Category · Label"; a skill without a colon has no category.
+         * Skills are case-insensitive and stored lowercased, in epilot's catalogue as in the phone system
+         * (Babelforce lowercases the tags it stores): a skill sent in any letter case (`Language:German`,
+         * in a body or a path) is the skill `language:german`, and every answer lists skills lowercased.
          *
          */
         export type Skill = string; // ^\S(.*\S)?$
@@ -1019,7 +1084,7 @@ export declare namespace Components {
         }
         export interface SkillCatalogueEntry {
             /**
-             * The skill as the phone system stores it (see `Skill`)
+             * The skill as the phone system stores it, lowercased (see `Skill`)
              */
             tag: string;
             /**
@@ -1117,6 +1182,21 @@ export declare namespace Paths {
             export type $403 = Components.Schemas.ErrorResponse;
         }
     }
+    namespace ClearActiveCall {
+        namespace Parameters {
+            export type ConversationId = string;
+        }
+        export interface QueryParameters {
+            conversation_id?: Parameters.ConversationId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+        }
+    }
     namespace CreateSkill {
         export type RequestBody = Components.Schemas.CreateSkillRequest;
         namespace Responses {
@@ -1136,6 +1216,12 @@ export declare namespace Paths {
             export type $403 = Components.Responses.Forbidden;
             export type $409 = Components.Schemas.ErrorResponse;
             export type $502 = Components.Responses.BadGateway;
+        }
+    }
+    namespace GetActiveCall {
+        namespace Responses {
+            export type $200 = /* The phone call a user is on right now. */ Components.Schemas.ActiveCall;
+            export type $401 = Components.Responses.Unauthorized;
         }
     }
     namespace GetAgentActivity {
@@ -1412,6 +1498,15 @@ export declare namespace Paths {
             export type $502 = Components.Responses.BadGateway;
         }
     }
+    namespace ReportActiveCall {
+        export type RequestBody = Components.Schemas.ActiveCallReport;
+        namespace Responses {
+            export type $200 = /* The phone call a user is on right now. */ Components.Schemas.ActiveCall;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+        }
+    }
     namespace RequestMissedCallCallback {
         export type RequestBody = Components.Schemas.MissedCallCallbackRequest;
         namespace Responses {
@@ -1625,6 +1720,56 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.BatchSearchCustomers.Responses.$200>
   /**
+   * getActiveCall - getActiveCall
+   * 
+   * Whether the signed-in user is on a phone call right now, and which conversation it is. The
+   * answer is about the caller only (the user of the bearer token).
+   * 
+   * The epilot 360 phone reports the call while it lasts (reportActiveCall); without a current
+   * report the phone system's live state is asked instead, so a call taken outside the epilot 360
+   * phone is still found. `conversation_id` is the phone system's conversation id: every leg of a
+   * transferred or conferenced call has the same one, and it is the `external_id` of the `call`
+   * entity created after the call (ingestCallArtifacts).
+   * 
+   * To relate what an agent does during a call to that call, put the id into the record as
+   * `phone_conversation_id`: the epilot 360 sidebar passes it in the context of a journey opened
+   * during a call, so the submission holds `journey_context.phone_conversation_id`.
+   * 
+   */
+  'getActiveCall'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetActiveCall.Responses.$200>
+  /**
+   * reportActiveCall - reportActiveCall
+   * 
+   * Reports the call the signed-in user is on. Sent by the epilot 360 phone when a call is
+   * answered and again every 30 seconds while it lasts: a report is valid for 2 minutes
+   * (`expires_at`), so a phone that disappears mid-call does not leave the user on a call.
+   * One call per user: a report for another conversation replaces the previous one.
+   * Requires `phone:use`.
+   * 
+   */
+  'reportActiveCall'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ReportActiveCall.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ReportActiveCall.Responses.$200>
+  /**
+   * clearActiveCall - clearActiveCall
+   * 
+   * Clears the signed-in user's reported call, when their part of it ended (hung up, or handed
+   * over to another agent). With `conversation_id`, only a report of that conversation is
+   * cleared, so a late "call ended" never clears the next call. Idempotent.
+   * 
+   */
+  'clearActiveCall'(
+    parameters?: Parameters<Paths.ClearActiveCall.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ClearActiveCall.Responses.$204>
+  /**
    * getManagerStatus - getManagerStatus
    * 
    * Whether the caller's organization is ready for phone agents: the telephony provider tenant
@@ -1709,9 +1854,9 @@ export interface OperationMethods {
    * setAgentRouting - setAgentRouting
    * 
    * Sets an agent's skills and direct queue membership (full sets, not deltas), in this order:
-   * 1. Skills: the agent's skills in the phone system are replaced by `skills`, so the phone system
-   *    routes on them right away. The phone system is the source of truth for phone skills; they are
-   *    independent of the skills in epilot's Access Management.
+   * 1. Skills: the agent's skills in the phone system are replaced by `skills` (lowercased, see
+   *    `Skill`), so the phone system routes on them right away. The phone system is the source of
+   *    truth for phone skills; they are independent of the skills in epilot's Access Management.
    * 2. Direct queue membership: each listed queue the agent is not yet named in gets the agent in its
    *    epilot-managed routing step (created on first use, lowest precedence). Every other queue drops
    *    the agent's direct entries from its epilot-managed step and, with `include_own_steps`, from
@@ -1961,8 +2106,9 @@ export interface OperationMethods {
    * 
    * The organization's skill catalogue: the skills epilot keeps for it (created in the control
    * center, `source: epilot`) together with every skill the phone system already uses on an agent or
-   * in a queue's routing step (`source: provider`), each once, sorted by skill. The phone system has
-   * no skill list of its own, so a skill nobody has yet exists only here. Requires `phone:manage`.
+   * in a queue's routing step (`source: provider`), each once, lowercased (see `Skill`), sorted by
+   * skill. The phone system has no skill list of its own, so a skill nobody has yet exists only here.
+   * Requires `phone:manage`.
    * 
    */
   'listSkills'(
@@ -1974,8 +2120,10 @@ export interface OperationMethods {
    * createSkill - createSkill
    * 
    * Adds a skill to the organization's catalogue (epilot only: nothing is written to the phone
-   * system until an agent gets the skill or a queue accepts it). The skill is trimmed and must then
-   * be 1 to 100 characters. Requires `phone:manage`.
+   * system until an agent gets the skill or a queue accepts it). The skill is trimmed, must then be
+   * 1 to 100 characters, and is stored lowercased (see `Skill`): `Mixed Case` creates and answers
+   * `mixed case`, and is `skill_exists` when `mixed case` exists in any letter case. Requires
+   * `phone:manage`.
    * 
    */
   'createSkill'(
@@ -1986,7 +2134,7 @@ export interface OperationMethods {
   /**
    * deleteSkill - deleteSkill
    * 
-   * Deletes a skill everywhere: it is taken from every agent that has it and from every routing step
+   * Deletes a skill everywhere (in any letter case, see `Skill`): it is taken from every agent that has it and from every routing step
    * of every queue that accepts it in the phone system, then removed from the catalogue.
    * Idempotent: a skill nobody has answers zero counts. On a phone-system failure the answer is 502
    * and its message says how many agents and queues were already updated; deleting again completes
@@ -2099,6 +2247,58 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.BatchSearchCustomers.Responses.$200>
   }
+  ['/v1/calls/active']: {
+    /**
+     * getActiveCall - getActiveCall
+     * 
+     * Whether the signed-in user is on a phone call right now, and which conversation it is. The
+     * answer is about the caller only (the user of the bearer token).
+     * 
+     * The epilot 360 phone reports the call while it lasts (reportActiveCall); without a current
+     * report the phone system's live state is asked instead, so a call taken outside the epilot 360
+     * phone is still found. `conversation_id` is the phone system's conversation id: every leg of a
+     * transferred or conferenced call has the same one, and it is the `external_id` of the `call`
+     * entity created after the call (ingestCallArtifacts).
+     * 
+     * To relate what an agent does during a call to that call, put the id into the record as
+     * `phone_conversation_id`: the epilot 360 sidebar passes it in the context of a journey opened
+     * during a call, so the submission holds `journey_context.phone_conversation_id`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetActiveCall.Responses.$200>
+    /**
+     * reportActiveCall - reportActiveCall
+     * 
+     * Reports the call the signed-in user is on. Sent by the epilot 360 phone when a call is
+     * answered and again every 30 seconds while it lasts: a report is valid for 2 minutes
+     * (`expires_at`), so a phone that disappears mid-call does not leave the user on a call.
+     * One call per user: a report for another conversation replaces the previous one.
+     * Requires `phone:use`.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ReportActiveCall.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ReportActiveCall.Responses.$200>
+    /**
+     * clearActiveCall - clearActiveCall
+     * 
+     * Clears the signed-in user's reported call, when their part of it ended (hung up, or handed
+     * over to another agent). With `conversation_id`, only a report of that conversation is
+     * cleared, so a late "call ended" never clears the next call. Idempotent.
+     * 
+     */
+    'delete'(
+      parameters?: Parameters<Paths.ClearActiveCall.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ClearActiveCall.Responses.$204>
+  }
   ['/v1/manager/status']: {
     /**
      * getManagerStatus - getManagerStatus
@@ -2195,9 +2395,9 @@ export interface PathsDictionary {
      * setAgentRouting - setAgentRouting
      * 
      * Sets an agent's skills and direct queue membership (full sets, not deltas), in this order:
-     * 1. Skills: the agent's skills in the phone system are replaced by `skills`, so the phone system
-     *    routes on them right away. The phone system is the source of truth for phone skills; they are
-     *    independent of the skills in epilot's Access Management.
+     * 1. Skills: the agent's skills in the phone system are replaced by `skills` (lowercased, see
+     *    `Skill`), so the phone system routes on them right away. The phone system is the source of
+     *    truth for phone skills; they are independent of the skills in epilot's Access Management.
      * 2. Direct queue membership: each listed queue the agent is not yet named in gets the agent in its
      *    epilot-managed routing step (created on first use, lowest precedence). Every other queue drops
      *    the agent's direct entries from its epilot-managed step and, with `include_own_steps`, from
@@ -2477,8 +2677,9 @@ export interface PathsDictionary {
      * 
      * The organization's skill catalogue: the skills epilot keeps for it (created in the control
      * center, `source: epilot`) together with every skill the phone system already uses on an agent or
-     * in a queue's routing step (`source: provider`), each once, sorted by skill. The phone system has
-     * no skill list of its own, so a skill nobody has yet exists only here. Requires `phone:manage`.
+     * in a queue's routing step (`source: provider`), each once, lowercased (see `Skill`), sorted by
+     * skill. The phone system has no skill list of its own, so a skill nobody has yet exists only here.
+     * Requires `phone:manage`.
      * 
      */
     'get'(
@@ -2490,8 +2691,10 @@ export interface PathsDictionary {
      * createSkill - createSkill
      * 
      * Adds a skill to the organization's catalogue (epilot only: nothing is written to the phone
-     * system until an agent gets the skill or a queue accepts it). The skill is trimmed and must then
-     * be 1 to 100 characters. Requires `phone:manage`.
+     * system until an agent gets the skill or a queue accepts it). The skill is trimmed, must then be
+     * 1 to 100 characters, and is stored lowercased (see `Skill`): `Mixed Case` creates and answers
+     * `mixed case`, and is `skill_exists` when `mixed case` exists in any letter case. Requires
+     * `phone:manage`.
      * 
      */
     'post'(
@@ -2504,7 +2707,7 @@ export interface PathsDictionary {
     /**
      * deleteSkill - deleteSkill
      * 
-     * Deletes a skill everywhere: it is taken from every agent that has it and from every routing step
+     * Deletes a skill everywhere (in any letter case, see `Skill`): it is taken from every agent that has it and from every routing step
      * of every queue that accepts it in the phone system, then removed from the catalogue.
      * Idempotent: a skill nobody has answers zero counts. On a phone-system failure the answer is 502
      * and its message says how many agents and queues were already updated; deleting again completes
@@ -2598,6 +2801,8 @@ export interface PathsDictionary {
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type ActiveCall = Components.Schemas.ActiveCall;
+export type ActiveCallReport = Components.Schemas.ActiveCallReport;
 export type AgentActivity = Components.Schemas.AgentActivity;
 export type AgentActivityEvent = Components.Schemas.AgentActivityEvent;
 export type AgentPerformance = Components.Schemas.AgentPerformance;

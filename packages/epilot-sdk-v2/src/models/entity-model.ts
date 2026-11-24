@@ -55,7 +55,12 @@ export const OVERRIDABLE_ATTRIBUTE_TYPES: ReadonlySet<string> = new Set(OVERRIDA
 export type LocationFormat = NonNullable<LocationConditionDefinition['format']>;
 
 /** Every location format, in the order a picker should offer them. */
-export const LOCATION_FORMAT_LIST = ['postal_code', 'postal_code_city'] as const satisfies readonly LocationFormat[];
+export const LOCATION_FORMAT_LIST = [
+  'postal_code',
+  'postal_code_city',
+  'power_grid_operator',
+  'gas_grid_operator',
+] as const satisfies readonly LocationFormat[];
 
 /** `satisfies` rejects a stale entry; this rejects a missing one, so the list cannot lag the spec. */
 const _everyLocationFormatListed: [Exclude<LocationFormat, (typeof LOCATION_FORMAT_LIST)[number]>] extends [never]

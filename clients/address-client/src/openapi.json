@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "version": "2.0.0",
+    "version": "5.0.0",
     "title": "Address API",
     "description": "API for address based operations on the Epilot platform",
     "termsOfService": "https://epilot.cloud/agb",
@@ -19,17 +19,15 @@
       "EpilotPublicAuth": []
     }
   ],
-  "servers": [
-    {
-      "url": "https://address.sls.epilot.io"
-    }
-  ],
   "tags": [
     {
       "name": "Availability"
     },
     {
       "name": "Address Suggestion"
+    },
+    {
+      "name": "Location"
     }
   ],
   "paths": {
@@ -225,6 +223,83 @@
         }
       }
     },
+    "/v1/public/location-service/resolve": {
+      "post": {
+        "description": "Resolve or create the canonical Location for a raw address (find-or-create by canonical address_hash) and return its id. This is the dedup-safe way to create a Location — direct entity creation of `location` is forbidden. If the address has no valid street address but carries valid `latitude`/`longitude` (e.g. a field asset dropped as a map pin), a coordinate-anchored Location is created instead, deduplicated on a ~1 m coordinate grid.",
+        "operationId": "resolveLocation",
+        "summary": "resolveLocation",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "tags": [
+          "Location"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveLocationParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The resolved (existing) or newly-created Location",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolveLocationResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The address has neither a valid street address nor valid coordinates.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/availability/{id}/validate": {
       "get": {
         "description": "Validates an already uploaded availability file, it returns an array of errors if any errors are found in the file.",
@@ -318,6 +393,89 @@
       }
     },
     "schemas": {
+      "ResolveLocationParams": {
+        "type": "object",
+        "required": [
+          "address"
+        ],
+        "properties": {
+          "address": {
+            "$ref": "#/components/schemas/AddressValue"
+          },
+          "entityId": {
+            "description": "Entity to seed the new Location's back-reference with. Required when the Location has to be created (the location schema requires at least one relation).",
+            "type": "string",
+            "maxLength": 36,
+            "format": "uuid"
+          },
+          "entitySlug": {
+            "description": "Schema slug of `entityId` (e.g. \"asset\").",
+            "type": "string",
+            "maxLength": 255
+          }
+        }
+      },
+      "ResolveLocationResult": {
+        "type": "object",
+        "required": [
+          "locationId",
+          "created"
+        ],
+        "properties": {
+          "locationId": {
+            "type": "string",
+            "maxLength": 36,
+            "format": "uuid"
+          },
+          "created": {
+            "type": "boolean",
+            "description": "true when a new Location was created, false when an existing one was reused."
+          }
+        }
+      },
+      "AddressValue": {
+        "type": "object",
+        "description": "A raw address. Provide EITHER a street address (`street` + `street_number` + (`postal_code` or `city`)) OR coordinates (`latitude` + `longitude`). Only the string fields drive the canonical address hash; for a street address the coordinates are stored as-is on the Location, while a coordinate-only address is anchored and deduplicated by its coordinates (rounded to ~1 m).",
+        "additionalProperties": true,
+        "properties": {
+          "street": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "street_number": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "postal_code": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "suburb": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "state": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "country": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "latitude": {
+            "description": "WGS84 latitude (-90..90). With longitude, sufficient to create a coordinate-anchored Location.",
+            "type": "number"
+          },
+          "longitude": {
+            "description": "WGS84 longitude (-180..180). With latitude, sufficient to create a coordinate-anchored Location.",
+            "type": "number"
+          }
+        }
+      },
       "AvailabilityCheckParams": {
         "properties": {
           "entities": {
@@ -574,5 +732,10 @@
         ]
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://address.sls.epilot.io"
+    }
+  ]
 }

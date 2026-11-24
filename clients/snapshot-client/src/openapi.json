@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Snapshot API",
-    "description": "Point-in-time backups of epilot configuration with restore.\n\nProvides a safety net for configuration changes: every blueprint install,\nevery Configuration Hub sync, and every manual config change can be preceded\nby a snapshot — giving operators a rollback point if something breaks.\n\nSee `docs/rfcs/RFC-snapshot-api.md` in the `blueprint-manifest-api` repo\nfor the full design.\n",
+    "description": "Point-in-time backups of epilot configuration with restore.\n\nProvides a safety net for configuration changes: every blueprint install,\nevery Configuration Hub sync, and every manual config change can be preceded\nby a snapshot — giving operators a rollback point if something breaks.\n\nSnapshots are taken automatically before blueprint installs and restores\n(see the [Blueprint Manifest API](https://docs.epilot.io/api/blueprints)),\nand can be created and restored directly through this API.\n\nEach operation lists the `configuration_hub` grant it requires. A blueprint\ninstall's own snapshot (`trigger: blueprint_install`) is also covered by\n`blueprint:install` for create, get, restore, restore outcomes and the\nresource reads. A restore under that grant must name the snapshot's own\n`blueprint_instance_id`. Deleting it always needs\n`configuration_hub:snapshot:delete`.\n",
     "version": "0.1.0"
   },
   "servers": [
@@ -37,8 +37,13 @@
     "/v1/snapshots": {
       "post": {
         "operationId": "createSnapshot",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:snapshot:create"
+          }
+        ],
         "summary": "createSnapshot",
-        "description": "Create a new snapshot of the given resources. Async — returns immediately\nwith a snapshot ID; client polls `getSnapshot` until `create.status`\nmoves from `in_progress` to `completed` or `failed`.\n",
+        "description": "Create a new snapshot of the given resources. Async — returns immediately\nwith a snapshot ID; client polls `getSnapshot` until `create.status`\nmoves from `in_progress` to `completed` or `failed`.\n\nSensitive types and types with no engine adapter are dropped before\ncapture. A `blueprint_install` snapshot instead rejects a type with no\nengine adapter (400), so an install never runs with resources it cannot\nroll back.\n",
         "tags": [
           "Snapshots"
         ],
@@ -68,11 +73,19 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "$ref": "#/components/responses/RestoreConflict"
           }
         }
       },
       "get": {
         "operationId": "listSnapshots",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "listSnapshots",
         "description": "List snapshots for the caller's organization, newest first.\n\nPass `resource=<type>:<id>` one or more times to filter to snapshots\ncontaining **any** of the listed resources (OR semantics). Each returned\nsnapshot includes a `matched_count` indicating how many of the filter\npairs are present in it. Hard cap of 50 filter pairs per request. When\nfiltered, pagination is not applied — the result set is bounded.\n",
         "tags": [
@@ -111,14 +124,15 @@
           {
             "in": "query",
             "name": "trigger",
-            "description": "Filter to snapshots with a specific trigger. Uses the `byTrigger` GSI\nfor an efficient indexed query — no table scan. Only snapshots created\nafter the GSI was added carry this index entry; pre-existing rows will\nnot appear in trigger-filtered results.\n",
+            "description": "Filter to snapshots with a specific trigger. Uses the `byTrigger` GSI\nfor an efficient indexed query — no table scan. Only snapshots created\nafter the GSI was added carry this index entry; pre-existing rows will\nnot appear in trigger-filtered results.\n\nInternal `analytics` captures (configuration analytics) are hidden\nfrom the unfiltered list and only returned with `trigger=analytics`.\n",
             "schema": {
               "type": "string",
               "enum": [
                 "manual",
                 "sync",
                 "blueprint_install",
-                "scheduled"
+                "scheduled",
+                "analytics"
               ]
             }
           }
@@ -163,8 +177,13 @@
     "/v1/snapshots:capture-org": {
       "post": {
         "operationId": "captureOrgSnapshot",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:snapshot:create"
+          }
+        ],
         "summary": "captureOrgSnapshot",
-        "description": "Snapshot the caller's whole organization now. Creates a `scope: \"org\"`\nsnapshot row and starts a chunked capture Step Function, then returns\nimmediately. The capture asynchronously fetches a fresh inventory of the\norg's configuration resources from configuration-hub-api, persists it as\nan inventory artifact, and captures each resource. Client polls\n`getSnapshot` and watches `capture_summary` fill in until `create.status`\nmoves from `in_progress` to `completed` or `failed`. An org with no\ncapturable resources finalizes as a completed 0-resource snapshot.\n\nSensitive types (`access_token`, `environment_variable`), types with no\nengine adapter, and any `excluded_types` are dropped from the capture and\nrecorded in the snapshot's coverage report.\n",
+        "description": "Snapshot the caller's whole organization now. Creates a `scope: \"org\"`\nsnapshot row and starts a chunked capture Step Function, then returns\nimmediately. The capture asynchronously fetches a fresh inventory of the\norg's configuration resources from configuration-hub-api, persists it as\nan inventory artifact, and captures each resource. Client polls\n`getSnapshot` and watches `capture_summary` fill in until `create.status`\nmoves from `in_progress` to `completed`, `partial`, or `failed`. An empty\ninventory finalizes as a completed 0-resource snapshot. A nonempty\ninventory with zero captured resources fails.\n\nSensitive types (`access_token`, `environment_variable`), types with no\nengine adapter, and any `excluded_types` are dropped from the capture and\nrecorded in the snapshot's coverage report.\n",
         "tags": [
           "Snapshots"
         ],
@@ -191,6 +210,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "$ref": "#/components/responses/RestoreConflict"
           }
         }
       }
@@ -208,6 +230,11 @@
       ],
       "get": {
         "operationId": "getSnapshot",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "getSnapshot",
         "description": "Fetch a snapshot's metadata. Poll this endpoint to track create/restore progress.",
         "tags": [
@@ -234,14 +261,136 @@
       },
       "delete": {
         "operationId": "deleteSnapshot",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:snapshot:delete"
+          }
+        ],
         "summary": "deleteSnapshot",
-        "description": "Delete a snapshot's metadata and S3 manifest.",
+        "description": "Delete a snapshot's metadata and S3 manifest. Refused with 409 while the\nsnapshot is still being created, while one of its restores is in progress,\nor while the organization holds a restore lease.\n",
         "tags": [
           "Snapshots"
         ],
         "responses": {
           "204": {
             "description": "Deleted"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/RestoreConflict"
+          }
+        }
+      }
+    },
+    "/v1/snapshots/{id}/restores/{index}": {
+      "get": {
+        "operationId": "getRestore",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
+        "summary": "getRestore",
+        "description": "Fetch a restore operation and a page of per-resource outcomes in manifest order.\nPagination bounds response size for org snapshots; the compressed artifact is\nread in full for each page. Outcomes are immutable once published. Historical,\nin-progress, or early-failed operations may have no artifact: outcomes_available\nis false and outcomes is empty. A published but missing artifact returns 404.\n",
+        "tags": [
+          "Snapshots"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "index",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            }
+          },
+          {
+            "in": "query",
+            "name": "action",
+            "description": "Comma-separated outcome actions to keep (created, updated, unchanged,\nfailed, skipped). Filtering happens before pagination, so a selective\nrevert's applied resources page without walking every skipped one.\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Restore operation and outcomes page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "operation",
+                    "outcomes",
+                    "outcomes_available"
+                  ],
+                  "properties": {
+                    "operation": {
+                      "$ref": "#/components/schemas/Operation"
+                    },
+                    "outcomes": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/RestoreOutcome"
+                      }
+                    },
+                    "outcomes_available": {
+                      "type": "boolean"
+                    },
+                    "total": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Resources the restore covers — the selection, or everything captured."
+                    },
+                    "progress": {
+                      "$ref": "#/components/schemas/RestoreProgress"
+                    },
+                    "next_offset": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Omitted on the last page."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -265,8 +414,13 @@
       ],
       "post": {
         "operationId": "restoreSnapshot",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:snapshot:restore"
+          }
+        ],
         "summary": "restoreSnapshot",
-        "description": "Restore a snapshot to the org. Async — returns immediately; client polls\n`getSnapshot` until the latest entry in `restores` moves from\n`in_progress` to one of `completed | partial | failed`.\n\nv1: full restore only. Cherry-pick (`resources?` body filter) is an open\nquestion — see RFC OQ #1.\n",
+        "description": "Restore a snapshot to the org. Async — returns immediately; client polls\n`getSnapshot` until `restores[restore_index]` (using the index returned by this POST) moves from\n`in_progress` to one of `completed | partial | failed`.\n\nCompleted captures and partial org captures can be restored. A partial\norg capture restores only the resources that were captured.\n\nPass `include_target_ids` to restore only the chosen resources; every\nother captured resource is left as it is now. A selection that names\nno captured resource is rejected with 400 before a restore is started.\n",
         "tags": [
           "Snapshots"
         ],
@@ -291,11 +445,17 @@
               }
             }
           },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/RestoreConflict"
           }
         }
       }
@@ -313,6 +473,11 @@
       ],
       "get": {
         "operationId": "listSnapshotResources",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "listSnapshotResources",
         "description": "List the resources captured in this snapshot. Returns lightweight\nidentity fields per resource — payloads are fetched via the\nsingle-resource endpoint when needed.\n\nUsed by Config Hub UI to render snapshot contents, and by\nblueprint-manifest-api to partition lineage rows during a restore\nsweep (resources in this list are touched; others are net-new).\n",
         "tags": [
@@ -359,6 +524,11 @@
       ],
       "get": {
         "operationId": "getSnapshotResource",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "getSnapshotResource",
         "description": "Fetch one captured resource with its full payload. For UI views\nthat diff the captured state against the current destination.\n",
         "tags": [
@@ -387,8 +557,13 @@
     "/v1/org-snapshot-schedule": {
       "get": {
         "operationId": "getOrgSnapshotSchedule",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "getOrgSnapshotSchedule",
-        "description": "Return the scheduled-snapshot enrollment config for the caller's org.\nReturns 404 when the org has not yet enrolled.\n",
+        "description": "Return the scheduled-snapshot enrollment config for the caller's org,\nwith `blocked` while no scheduled capture can start and `stale_since`\nwhile scheduled captures have stopped succeeding.\nReturns 404 when the org has never been enrolled; an org that opted\nout returns its disabled enrollment with `opted_out_at`.\n",
         "tags": [
           "ScheduledSnapshots"
         ],
@@ -413,8 +588,13 @@
       },
       "put": {
         "operationId": "putOrgSnapshotSchedule",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:snapshot:create"
+          }
+        ],
         "summary": "putOrgSnapshotSchedule",
-        "description": "Create or update the scheduled-snapshot enrollment config for the\ncaller's org (upsert). The cron expression and retention window are\nvalidated server-side; invalid values are rejected with 400.\n\nDefaults applied when a field is omitted on first create:\n  - `cron_expression`: `cron(0 2 * * ? *)` (daily at 02:00)\n  - `timezone`: `Europe/Berlin`\n  - `retention`: `{ value: 90, unit: \"days\" }`\n  - `enabled`: `true`\n\n**Note:** this call persists the row only. EventBridge schedule\nmaterialization is performed by a subsequent reconcile step (Task 6).\nThe row is the authoritative source of truth for the UI.\n",
+        "description": "Create or update the scheduled-snapshot enrollment config for the\ncaller's org (upsert). The cron expression, timezone and retention\nwindow are validated server-side; invalid values are rejected with 400.\n\nDefaults applied when a field is omitted on first create:\n  - `cron_expression`: `cron(0 2 * * ? *)` (daily at 02:00)\n  - `timezone`: `Europe/Berlin`\n  - `retention`: `{ value: 90, unit: \"days\" }`\n  - `enabled`: `true`\n\nThe EventBridge schedule is created, updated or (when `enabled` is\nfalse) removed first; the row is persisted only after that succeeds.\nA Scheduler failure returns 502 and leaves the stored config unchanged.\nA daily reconcile repairs any remaining drift between rows and schedules.\n",
         "tags": [
           "ScheduledSnapshots"
         ],
@@ -444,25 +624,36 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "502": {
+            "description": "The EventBridge schedule could not be updated; the stored config is unchanged."
           }
         }
       },
       "delete": {
         "operationId": "deleteOrgSnapshotSchedule",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:snapshot:create"
+          }
+        ],
         "summary": "deleteOrgSnapshotSchedule",
-        "description": "Remove the scheduled-snapshot enrollment for the caller's org.\nReturns 404 when no schedule exists.\nThe corresponding EventBridge schedule is removed by a reconcile\nstep (Task 6).\n",
+        "description": "Opt the caller's org out of scheduled snapshots. The EventBridge\nschedule is removed and the enrollment is kept, disabled, with\n`opted_out_at` and `opted_out_by`, so no scheduled snapshot is taken\nand automatic enrollment never enrolls the org again. A PUT with\n`enabled: true` enrolls it again and clears the opt-out.\nReturns 404 when the org has no enrollment.\nThe EventBridge schedule is removed first; the row is disabled only\nafter that succeeds. A Scheduler failure returns 502 and leaves the\nenrollment unchanged so the call can be retried.\n",
         "tags": [
           "ScheduledSnapshots"
         ],
         "responses": {
           "204": {
-            "description": "Deleted"
+            "description": "Opted out"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "502": {
+            "description": "The EventBridge schedule could not be removed; the enrollment is unchanged."
           }
         }
       }
@@ -470,6 +661,11 @@
     "/v1/snapshots:list-dependencies": {
       "post": {
         "operationId": "listDependencies",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "listDependencies",
         "description": "Walk the dependency tree for a set of resources and return the full\ntransitive closure, topologically sorted.\n\n**Not implemented in v1.** Returns 501. Callers should pass an explicit\nresource list to `createSnapshot`. See RFC Phase 5.\n",
         "tags": [
@@ -544,6 +740,49 @@
       }
     },
     "responses": {
+      "RestoreConflict": {
+        "description": "An organization restore is in progress. Capture and restore requests are\nrefused while its lease is held. The response identifies the lease holder;\nRetry-After is the remaining lease duration in seconds, not a completion estimate.\nRestore also returns 409 when the requested snapshot capture is not completed;\nin that case holder fields and Retry-After are absent.\nIf a legacy execution took the reserved operation index, the response identifies\nthat operation; Retry-After is absent because it has no restore lease expiry.\n",
+        "headers": {
+          "Retry-After": {
+            "description": "Seconds until the current restore lease expires.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "status",
+                "error"
+              ],
+              "properties": {
+                "status": {
+                  "type": "integer",
+                  "enum": [
+                    409
+                  ]
+                },
+                "error": {
+                  "type": "string"
+                },
+                "snapshot_id": {
+                  "type": "string",
+                  "description": "Snapshot targeted by the active restore lease."
+                },
+                "restore_index": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Operation index reserved by the active restore lease."
+                }
+              }
+            }
+          }
+        }
+      },
       "BadRequest": {
         "description": "Bad request",
         "content": {
@@ -556,6 +795,16 @@
       },
       "Unauthorized": {
         "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden",
         "content": {
           "application/json": {
             "schema": {
@@ -792,6 +1041,17 @@
               "type": "string"
             },
             "description": "Target ids the caller has decided not to restore. snapshot-api\napplies the manifest minus these ids. Drops are silent — the\ncaller supplied the list and already knows.\n"
+          },
+          "include_target_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Restore only these target ids. Every other captured resource is\nskipped with reason `not_selected` and left as it is now. Omit to\nrestore the whole snapshot. Applied before `exclude_target_ids`.\nMust hold at least one id, and at least one id must match a\ncaptured resource's target id (not its lineage id), otherwise the\nrequest is rejected with 400 and no restore is recorded. Ids that\nmatch nothing in the snapshot are ignored and not counted in\n`selected_target_count`. There is no upper bound beyond the\nrequest body size: the list reaches the worker through S3.\n"
+          },
+          "blueprint_instance_id": {
+            "type": "string",
+            "description": "The blueprint instance being reverted. Required when the caller\nrestores with `blueprint:install` instead of\n`configuration_hub:snapshot:restore`, and must match the snapshot's\nown `blueprint_instance_id`.\n"
           }
         }
       },
@@ -799,9 +1059,15 @@
         "type": "object",
         "required": [
           "id",
-          "status"
+          "status",
+          "restore_index"
         ],
         "properties": {
+          "restore_index": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Index of the created restore operation in the snapshot restores array."
+          },
           "id": {
             "type": "string"
           },
@@ -843,7 +1109,8 @@
               "manual",
               "sync",
               "blueprint_install",
-              "scheduled"
+              "scheduled",
+              "analytics"
             ]
           },
           "blueprint_instance_id": {
@@ -885,7 +1152,7 @@
           },
           "capture_summary": {
             "type": "object",
-            "description": "Per-snapshot coverage report set by the capture worker on completion.\nRecords how many resources were attempted, captured, skipped\n(unsupported type or explicitly excluded), and failed.\n",
+            "description": "Per-snapshot coverage report set by the capture worker on completion.\nRecords how many resources were attempted, captured, skipped\n(not found, not archivable, or a user-scoped resource the capturing\nidentity is not permitted to read), and failed. A blueprint_install capture\nfails if any resource fetch throws. Org captures are partial when resources\nwere skipped or failed, and failed when a nonempty inventory captured nothing.\nExcluded, sensitive, or unsupported types do not count as resource skips.\n",
             "required": [
               "total",
               "captured",
@@ -903,13 +1170,70 @@
               },
               "skipped": {
                 "type": "integer",
-                "description": "Resources skipped — type not supported by config-engine or\nexcluded from capture (e.g. access_token, environment_variable).\n"
+                "description": "Resources not found, not archivable, or (for user-scoped types such as\nkanban, dashboard and insight) not readable by the capturing identity,\nexcluding thrown fetch errors.\n"
               },
               "failed": {
                 "type": "integer",
                 "description": "Resources where the fetch call returned an error."
               }
             }
+          },
+          "skipped_resources": {
+            "type": "array",
+            "maxItems": 20,
+            "description": "Bounded sample of skipped identities (at most 20 entries and 2 KiB of JSON).\nComplete identities are retained in internal S3 capture artifacts.\nPresent on finalized captures; absent on older snapshots.\n",
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "id",
+                "reason"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string",
+                  "description": "Why the resource is not in the snapshot. `not found` when it no longer\nresolves; `permission_denied` when a user-scoped resource (kanban,\ndashboard, insight) is owned by another user and the capturing identity\ncannot read it, which also means it cannot be changed by that identity,\nor when a manual org snapshot's user is not allowed to read the resource;\n`owned_by_other_org` when the inventory lists a resource owned by another\norganization (a partner role or shared resource), which is not this\norganization's configuration; otherwise the content-archive reason.\n"
+                }
+              }
+            }
+          },
+          "skipped_resources_truncated": {
+            "type": "boolean",
+            "description": "True when skipped_resources contains fewer identities than capture_summary.skipped."
+          },
+          "failed_resources": {
+            "type": "array",
+            "maxItems": 20,
+            "description": "Bounded sample of identities whose fetch threw (at most 20 entries and 2 KiB of JSON),\neach with the error message as `reason`. Complete identities are retained in internal\nS3 capture artifacts. Present on finalized captures; absent on older snapshots.\n",
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "id",
+                "reason"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "failed_resources_truncated": {
+            "type": "boolean",
+            "description": "True when failed_resources contains fewer identities than capture_summary.failed."
           }
         }
       },
@@ -945,13 +1269,226 @@
               "partial",
               "failed"
             ],
-            "description": "`partial` indicates `engine.apply` reported a partial success\n(one or more resources failed individually) but the operation\nas a whole did not fail.\n"
+            "description": "For org creation, `partial` means at least one resource was captured\nand at least one was skipped or failed. A nonempty inventory with\nzero captured resources is `failed`; an empty inventory is `completed`.\nBlueprint-install captures continue to fail on any fetch failure.\nRestore status is the worse of engine status and outcome-derived status\n(failed > partial > completed). Unreported resources count as failed,\nexcept explicit pre-apply exclusions. Failed resources mixed with created, updated, or unchanged\nresources produce partial; failures without successful resources produce\nfailed. Missing archived content also produces partial unless failed.\nExplicit caller/type exclusions alone do not make a restore partial.\n"
           },
           "error": {
             "type": "string"
           },
+          "summary": {
+            "$ref": "#/components/schemas/RestoreSummary"
+          },
+          "outcomes_s3_key": {
+            "type": "string",
+            "description": "Restore outcomes artifact key. Read outcomes through getRestore; this is not a download URL."
+          },
           "triggered_by": {
             "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "selected_target_count": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Restore only. How many target ids the caller selected with\n`include_target_ids`. Absent on a full restore.\n"
+          }
+        }
+      },
+      "RestoreSummary": {
+        "type": "object",
+        "description": "One outcome per captured manifest resource, including exclusions.",
+        "required": [
+          "total",
+          "created",
+          "updated",
+          "unchanged",
+          "failed",
+          "skipped"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "created": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "updated": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "unchanged": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "failed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "skipped": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "RestoreOutcome": {
+        "type": "object",
+        "required": [
+          "type",
+          "id",
+          "action"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "description": "Engine result identity when available, otherwise captured identity. Re-created resources may have a new id."
+          },
+          "captured_id": {
+            "type": "string",
+            "description": "The id the resource was captured under. Absent on outcomes written before this field existed."
+          },
+          "lineage_id": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "created",
+              "updated",
+              "unchanged",
+              "failed",
+              "skipped"
+            ],
+            "description": "unchanged maps the engine no-op impact. Engine 0.5.3 does not distinguish\nunchanged payloads from every internal skip; reason engine_no_op preserves\nthat limitation. Explicit pre-apply exclusions are skipped.\n"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "RestoreProgress": {
+        "type": "object",
+        "description": "Live progress of a running restore (present only while the operation is\nin_progress), read from config-engine's operation log. A resource is\n\"matched\" once found or created, \"applied\" once its full payload is written.\n",
+        "required": [
+          "started",
+          "matched",
+          "applied",
+          "failed",
+          "phase",
+          "by_type",
+          "recent"
+        ],
+        "properties": {
+          "started": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "matched": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "applied": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "failed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "phase": {
+            "type": "string",
+            "enum": [
+              "preparing",
+              "matching",
+              "applying"
+            ]
+          },
+          "by_type": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "started",
+                "applied",
+                "failed"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "started": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "applied": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "failed": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "recent": {
+            "type": "array",
+            "description": "Latest activity first, at most 20.",
+            "items": {
+              "$ref": "#/components/schemas/RestoreResourceProgress"
+            }
+          },
+          "resources": {
+            "type": "array",
+            "description": "Every resource started so far, when there are at most 500.",
+            "items": {
+              "$ref": "#/components/schemas/RestoreResourceProgress"
+            }
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RestoreResourceProgress": {
+        "type": "object",
+        "required": [
+          "type",
+          "id",
+          "state"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "description": "The captured id."
+          },
+          "target_id": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "working",
+              "matched",
+              "applied",
+              "failed"
+            ]
+          },
+          "error": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -969,6 +1506,41 @@
           },
           "token_id": {
             "type": "string"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/CallerActor"
+          }
+        }
+      },
+      "CallerActor": {
+        "type": "object",
+        "description": "Present when an agent made the call with a token carrying an `actor`\nclaim (e.g. the epilot Admin MCP via a login-as token). `user_id`/`name`\non the enclosing CallerIdentity are then the agent's token identity;\n`on_behalf_of` is the user the agent acted for.\n",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "agent"
+            ]
+          },
+          "agent_id": {
+            "type": "string"
+          },
+          "agent_name": {
+            "type": "string"
+          },
+          "on_behalf_of": {
+            "type": "object",
+            "required": [
+              "user_id"
+            ],
+            "properties": {
+              "user_id": {
+                "type": "string"
+              }
+            }
           }
         }
       },
@@ -1082,11 +1654,43 @@
             "enum": [
               "completed",
               "partial",
-              "failed"
+              "failed",
+              "skipped"
             ]
           },
+          "last_succeeded_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the last completed or partial scheduled snapshot finished."
+          },
+          "last_status_reason": {
+            "type": "string",
+            "enum": [
+              "restore_in_progress",
+              "attempts_exhausted",
+              "window_closed"
+            ],
+            "description": "Why the last run ended as it did. With `skipped`: a restore held the org\n(`restore_in_progress`), and the run is retried. With `failed`: the schedule\nday ended without a capture, because every attempt failed\n(`attempts_exhausted`), a restore held the org until the day's window\nclosed (`restore_in_progress`), or the window closed before an attempt\ncould succeed (`window_closed`).\n"
+          },
+          "enrolled_by": {
+            "type": "string",
+            "enum": [
+              "auto"
+            ],
+            "description": "`auto` when the org was enrolled automatically as a paying customer or\na sandbox of one; absent when a person enrolled it.\n"
+          },
+          "opted_out_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the org was opted out (DELETE). Present while the enrollment is\ndisabled by an opt-out; cleared when it is enabled again.\n"
+          },
+          "opted_out_by": {
+            "type": "string",
+            "description": "The user who opted the org out."
+          },
           "created_by": {
-            "type": "string"
+            "type": "string",
+            "description": "The user who enrolled the org, or `system:auto-enroll` for an\nautomatic enrollment.\n"
           },
           "created_at": {
             "type": "string",
@@ -1095,6 +1699,37 @@
           "updated_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "blocked": {
+            "$ref": "#/components/schemas/ScheduleBlocked"
+          },
+          "stale_since": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Present when no completed or partial scheduled snapshot followed an owed\nschedule slot for longer than the stale threshold (48 hours by default):\nthe time of that slot. Absent while the `run-daily-snapshots` flag is off\nfor the org.\n"
+          }
+        }
+      },
+      "ScheduleBlocked": {
+        "type": "object",
+        "required": [
+          "since",
+          "reason"
+        ],
+        "description": "No scheduled capture starts for the org until this is resolved. The admitted\nexecution cannot be verified; epilot resolves it.\n",
+        "properties": {
+          "since": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "execution_unverifiable"
+            ]
+          },
+          "execution_arn": {
+            "type": "string"
           }
         }
       }

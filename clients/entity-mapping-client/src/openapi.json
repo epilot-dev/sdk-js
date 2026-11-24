@@ -122,6 +122,9 @@
                 }
               }
             }
+          },
+          "429": {
+            "description": "Storage stayed throttled, nothing is lost. Repeat the request after `Retry-After` seconds."
           }
         }
       }
@@ -289,6 +292,140 @@
         }
       }
     },
+    "/v1/mappings:validate": {
+      "post": {
+        "operationId": "validateMapping",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "x-epilot-agent": {
+          "effect": "read"
+        },
+        "summary": "validateMapping",
+        "description": "Analyse a stored map-entity action config (engine JSON) line by line: a verdict per line (form, json, broken), issues on the engine line they belong to, suggested rewrites and a sentence each. `valid` is false when an issue is an error; a save gate rejects the config then. Never persists anything. The smallest request is `{ config, source: { journey_id } }`. Send `source` (the trigger's journey or entity schema) instead of `roots.source`, and leave out `target_root` when `config.target_schema` is set: the server loads those descriptions with the caller's authorization. The response is about 1.1 KB per line: from about 5000 lines in one request it exceeds the inline limit (413, see there).",
+        "tags": [
+          "mappings"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateMappingReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The analysis",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingAnalysis"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body is malformed: missing fields, a `roots` or `target_root` of the wrong shape, a mapping line without a text `target`, a line or relation target that names `__proto__`, `constructor` or `prototype`, or a config the validator cannot read (for example nested too deeply). Malformed operations and relations are not a 400: they come back as issues. Caller input never yields a 500.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "messages": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/MappingCheckUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/MappingCheckForbidden"
+          },
+          "413": {
+            "$ref": "#/components/responses/MappingCheckTooLarge"
+          }
+        }
+      }
+    },
+    "/v1/mappings:validate-flow": {
+      "post": {
+        "operationId": "validateMappingFlow",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "x-epilot-agent": {
+          "effect": "read"
+        },
+        "summary": "validateMappingFlow",
+        "description": "Analyse every mapping action (`map-entity`, `cart-checkout`) of an automation, each in its place: against the trigger's source, the entities the earlier actions create and its target schema. The source and every target schema are loaded by id with the caller's authorization. `blocking` lists what a save gate rejects: errors, issues on broken lines and values that are not an option of their attribute. With `previous_actions` (the automation as stored) only issues this change introduced block. Never persists anything. Responses above the inline limit are a 413 (see there).",
+        "tags": [
+          "mappings"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateMappingFlowReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The analyses and what blocks a save",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateMappingFlowResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body is malformed: no `actions`, duplicate action ids, a `source` of the wrong shape, a mapping line without a text `target` or one naming `__proto__`, `constructor` or `prototype`, or a config the validator cannot read. Caller input never yields a 500.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "messages": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/MappingCheckUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/MappingCheckForbidden"
+          },
+          "413": {
+            "$ref": "#/components/responses/MappingCheckTooLarge"
+          }
+        }
+      }
+    },
     "/v1/mappings:search": {
       "post": {
         "operationId": "searchConfigs",
@@ -313,74 +450,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MappingConfig"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/mappings/history": {
-      "get": {
-        "operationId": "queryMappingHistory",
-        "summary": "queryMappingHistory",
-        "description": "Get the Mapping History",
-        "tags": [
-          "mappings"
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "schema": {
-              "type": "string",
-              "format": "datetime"
-            },
-            "required": false,
-            "description": "filter the history from this date on"
-          },
-          {
-            "in": "query",
-            "name": "to",
-            "schema": {
-              "type": "string",
-              "format": "datetime"
-            },
-            "required": false,
-            "description": "filter the history to this date on"
-          },
-          {
-            "in": "query",
-            "name": "targetEntityId",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "in": "query",
-            "name": "sourceEntityId",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Query result of mapping history",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/MappingHistoryResp"
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/MappingConfigsResp"
                 }
               }
             }
@@ -455,7 +525,7 @@
       "put": {
         "operationId": "putMappingConfig",
         "summary": "putMappingConfig",
-        "description": "Stores new version of entity mapping config",
+        "description": "Stores new version of entity mapping config. The targets are not checked on store: check them first with `POST /v1/mappings:validate-flow` (`{ source: { journey_id }, actions: [{ id, type: map-entity, config: <target> }] }`, one action per target) and fix every `blocking` issue.",
         "tags": [
           "mappings"
         ],
@@ -497,6 +567,55 @@
     }
   },
   "components": {
+    "responses": {
+      "MappingCheckUnauthorized": {
+        "description": "No `Authorization` header. Sent by the API Gateway authorizer.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      },
+      "MappingCheckForbidden": {
+        "description": "The token is not valid (unsigned, expired, malformed, or sent without the `Bearer ` prefix). Sent by the API Gateway authorizer.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Forbidden"
+                }
+              }
+            }
+          }
+        }
+      },
+      "MappingCheckTooLarge": {
+        "description": "The request or the response is too large. Requests above 6 MB are rejected by the gateway. A response of more than about 5.4 MB is not sent inline: the analysis returns about 1.1 KB per line, so this happens from about 5000 lines in one config. Send `Accept: application/large-response.vnd+json` to get a `$payload_ref` URL to the full response instead, or validate fewer lines per request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "securitySchemes": {
       "EpilotAuth": {
         "type": "http",
@@ -505,6 +624,568 @@
       }
     },
     "schemas": {
+      "MappingCheckContext": {
+        "type": "object",
+        "description": "Where the action sits in its automation or flow",
+        "required": [
+          "sourceSchema",
+          "taskOrder",
+          "taskSchemas",
+          "producersBySchema"
+        ],
+        "properties": {
+          "sourceSchema": {
+            "type": "string",
+            "description": "Root of the source entity, `submission` for journeys, the trigger schema otherwise"
+          },
+          "taskOrder": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Every action id of the automation in execution order, the ones after the current action included. An action left out is reported as missing (`task-missing`); with validator 0.4.4, an action listed in `taskSchemas` but not here counts as a later one (`task-not-earlier`)."
+          },
+          "current": {
+            "type": "string",
+            "description": "The action being analysed; must be one of `taskOrder`. Defaults to the last id in `taskOrder`. References to `current` itself or to an action after it are reported as `task-not-earlier`."
+          },
+          "taskSchemas": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "producersBySchema": {
+            "type": "object",
+            "description": "Earlier action ids per schema they create, in execution order",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "linkbackTags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "linkbackTagsByTask": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "configIdsByTask": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "MappingIssue": {
+        "type": "object",
+        "required": [
+          "code",
+          "severity",
+          "path",
+          "key",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "ambiguous-producer"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "description": "JSON pointer into the config, e.g. `/mapping_attributes/3`; empty for the whole action"
+          },
+          "key": {
+            "type": "string",
+            "description": "Translation key"
+          },
+          "message": {
+            "type": "string"
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "MappingAnalysis": {
+        "type": "object",
+        "required": [
+          "valid",
+          "lines",
+          "issues",
+          "counts",
+          "skipped_checks"
+        ],
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "description": "False when an issue is an error. Only covers the checks that ran: see `skipped_checks`."
+          },
+          "skipped_checks": {
+            "type": "array",
+            "description": "Checks that did not run because the request lacks the description they need; `[]` when every check ran. `blocks`: no `roots.source`, so journey blocks and source paths are not checked (`block-removed`, `path-not-in-root`). `attributes`: no `target_root`, so target attributes are not checked (`attribute-not-on-target`). `types`: no `target_root`, so no value is checked against the attribute it fills (`type-mismatch`, `type-converts`, `value-type-mismatch`, `value-not-an-option`). `source-types`: a `target_root` but no `roots.source`, so values copied from the source are not type-checked; fixed values, texts and copies from actions with a `roots.tasks[].description` still are. A description the server loaded (`source`, `config.target_schema`) counts as sent. A `valid: true` with skipped checks does not vouch for those.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "attributes",
+                "blocks",
+                "types",
+                "source-types"
+              ]
+            }
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "form": {
+                "type": "integer"
+              },
+              "json": {
+                "type": "integer"
+              },
+              "broken": {
+                "type": "integer"
+              }
+            }
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MappingIssue"
+            }
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "identity",
+                    "field",
+                    "relation"
+                  ]
+                },
+                "index": {
+                  "type": "integer"
+                },
+                "target": {
+                  "type": "string"
+                },
+                "verdict": {
+                  "type": "string",
+                  "enum": [
+                    "form",
+                    "json",
+                    "broken"
+                  ]
+                },
+                "reason": {
+                  "type": "string",
+                  "description": "Why the line has no form, e.g. `op:_each`"
+                },
+                "issues": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MappingIssue"
+                  }
+                },
+                "suggestions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "why": {
+                        "type": "string",
+                        "description": "What the rewrite does. `template-syntax`, `nearest-attribute`, `nearest-option` and `operation-key` come with validator 0.4.4. `fallback-producers` (validator 0.6.0): every creator of the schema runs behind a condition, so the line copies from all of them in order. Applying any suggestion adds no error to its line.",
+                        "enum": [
+                          "pick-producer",
+                          "fallback-producers",
+                          "explicit-output",
+                          "add-mode",
+                          "merge-keys",
+                          "template-syntax",
+                          "nearest-attribute",
+                          "nearest-option",
+                          "operation-key"
+                        ]
+                      },
+                      "task": {
+                        "type": "string"
+                      },
+                      "line": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ValidateMappingReq": {
+        "type": "object",
+        "required": [
+          "config"
+        ],
+        "properties": {
+          "config": {
+            "type": "object",
+            "description": "The stored map-entity action config",
+            "additionalProperties": true
+          },
+          "context": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MappingCheckContext"
+              }
+            ],
+            "description": "Where the action sits in its automation or flow. Optional: without it the config is checked as the only action of its flow, reading the journey submission (or `source.entity_schema`) and writing `config.target_schema`. Send it only to check references to other actions of the same automation."
+          },
+          "roots": {
+            "$ref": "#/components/schemas/MappingRoots"
+          },
+          "target_root": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MappingRootDescription"
+              }
+            ],
+            "description": "Optional description of the target entity's attributes, as built by `rootFromEntitySchema` of `@epilot/entity-mapping-validator`. Each field carries its attribute `type`; with it the validator checks that a source fits the attribute it is mapped to (`type-mismatch`, `type-converts`) and that `_uniq` matches the shared merge keys (`merge-keys-differ`). When left out and `config.target_schema` is set, the server loads that schema."
+          },
+          "source": {
+            "$ref": "#/components/schemas/MappingSourceRef"
+          }
+        }
+      },
+      "MappingSourceRef": {
+        "description": "What the automation's trigger provides, by id. Used when `roots.source` is not sent: the server loads the journey's mapping sources (`rootFromMappingSources`) or the entity schema (`rootFromEntitySchema`) with the caller's authorization. A journey or schema that does not exist is an error issue (`source-journey-not-found`, `source-schema-not-found`); one that could not be loaded is a warning (`source-not-loaded`) and the source checks are skipped (`skipped_checks`). Likewise for a target schema (`target-schema-not-found`, `target-schema-not-loaded`). `automation_step` (the trigger of a workflow's automation task) names no data: a warning (`source-not-fixed`) and the source checks are skipped; pass what the workflow was started with instead.",
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "journey_id"
+            ],
+            "properties": {
+              "journey_id": {
+                "type": "string",
+                "description": "The triggering journey; its source root is `submission`"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "entity_schema"
+            ],
+            "properties": {
+              "entity_schema": {
+                "type": "string",
+                "description": "The slug of the triggering entity's schema, e.g. `contact`"
+              }
+            }
+          }
+        ]
+      },
+      "MappingFlowAction": {
+        "type": "object",
+        "description": "An action of an automation (as stored in it), in execution order; only mapping actions are analysed",
+        "required": [
+          "id"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "description": "`map-entity` and `cart-checkout` are analysed; other actions only count for what they create",
+            "example": "map-entity"
+          },
+          "config": {
+            "type": "object",
+            "nullable": true,
+            "description": "The stored action config (engine JSON); `target_schema` names the schema it writes",
+            "additionalProperties": true
+          }
+        }
+      },
+      "ValidateMappingFlowReq": {
+        "type": "object",
+        "required": [
+          "actions"
+        ],
+        "properties": {
+          "actions": {
+            "type": "array",
+            "description": "Every action of the automation in execution order; ids are unique",
+            "items": {
+              "$ref": "#/components/schemas/MappingFlowAction"
+            }
+          },
+          "source": {
+            "$ref": "#/components/schemas/MappingSourceRef"
+          },
+          "previous_actions": {
+            "type": "array",
+            "description": "The automation's actions as stored. With them, only issues this change introduced block (`blocking`), matched by action id, target attribute and code.",
+            "items": {
+              "$ref": "#/components/schemas/MappingFlowAction"
+            }
+          },
+          "acknowledged": {
+            "type": "array",
+            "maxItems": 200,
+            "description": "Blocking findings the user decided to keep, after the agent explained them: they stop blocking and are listed in `acknowledged` of the response instead. Send only what the user explicitly accepted. Each matches by action id and code, and by the line's target attribute when `target` is set (without it, every finding of that code in the action).",
+            "items": {
+              "type": "object",
+              "required": [
+                "action_id",
+                "code"
+              ],
+              "properties": {
+                "action_id": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "attribute-not-on-target"
+                },
+                "target": {
+                  "type": "string",
+                  "description": "The target attribute of the line the finding is about"
+                }
+              }
+            }
+          }
+        }
+      },
+      "FlowMappingIssue": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MappingIssue"
+          },
+          {
+            "type": "object",
+            "required": [
+              "action_id"
+            ],
+            "properties": {
+              "action_id": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "ValidateMappingFlowResp": {
+        "type": "object",
+        "required": [
+          "valid",
+          "blocking",
+          "analyses"
+        ],
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "description": "True when nothing blocks a save (`blocking` is empty)"
+          },
+          "blocking": {
+            "type": "array",
+            "description": "What a save gate rejects: per action the errors, the issues on lines whose verdict is `broken` and `value-not-an-option`; with `previous_actions`, only those this change introduced",
+            "items": {
+              "$ref": "#/components/schemas/FlowMappingIssue"
+            }
+          },
+          "generated": {
+            "type": "array",
+            "description": "Findings on lines the Journey Builder generated for a journey's default mapping (`origin` `system_recommendation` or `entity_updating_system_recommendation`). The builder regenerates those lines, so these findings are reported but never block.",
+            "items": {
+              "$ref": "#/components/schemas/FlowMappingIssue"
+            }
+          },
+          "references": {
+            "type": "object",
+            "description": "Actions that only point at a target of a mapping config (`config.mapping_config`) are checked as that target. `unresolved` lists the actions whose config or target could not be found in the organization; they are left out of the check.",
+            "properties": {
+              "resolved": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "unresolved": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "acknowledged": {
+            "type": "array",
+            "description": "Only with `acknowledged` in the request; the blocking findings it matched, which did not block",
+            "items": {
+              "$ref": "#/components/schemas/FlowMappingIssue"
+            }
+          },
+          "introduced": {
+            "type": "array",
+            "description": "Only with `previous_actions`; every issue (errors and warnings) this change introduced",
+            "items": {
+              "$ref": "#/components/schemas/FlowMappingIssue"
+            }
+          },
+          "analyses": {
+            "type": "object",
+            "description": "The analysis of each mapping action, by action id; other actions have no entry",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/MappingAnalysis"
+            }
+          }
+        }
+      },
+      "MappingRoots": {
+        "type": "object",
+        "description": "Optional descriptions of the source and of each action's output (`Roots` of `@epilot/entity-mapping-validator`). A body whose `roots` does not have this shape is rejected with 400.",
+        "required": [
+          "tasks"
+        ],
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/MappingRootDescription"
+          },
+          "tasks": {
+            "type": "array",
+            "description": "Every action in execution order; `[]` when there are none",
+            "items": {
+              "type": "object",
+              "required": [
+                "id"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "schema": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string",
+                  "description": "Display name of what the action creates, e.g. \"Contact\""
+                },
+                "description": {
+                  "$ref": "#/components/schemas/MappingRootDescription"
+                }
+              }
+            }
+          }
+        }
+      },
+      "MappingRootDescription": {
+        "type": "object",
+        "description": "What the caller knows about a root (`RootDescription` of `@epilot/entity-mapping-validator`)",
+        "required": [
+          "kind",
+          "fields"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "declared",
+              "inferred"
+            ]
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MappingRootField"
+            }
+          }
+        }
+      },
+      "MappingRootField": {
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            }
+          },
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "date",
+              "object",
+              "array",
+              "entity"
+            ]
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MappingRootField"
+            }
+          },
+          "open": {
+            "type": "boolean",
+            "description": "Only partly described; a path below it that `children` does not list is unknown, not missing"
+          },
+          "targetTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "SearchMappingReq": {
         "type": "object",
         "properties": {
@@ -518,6 +1199,10 @@
         "properties": {
           "configs": {
             "$ref": "#/components/schemas/MappingConfigs"
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "the page ceiling was reached; the list is incomplete."
           }
         },
         "required": [
@@ -600,14 +1285,22 @@
             "format": "date-time"
           },
           "created_by": {
-            "$ref": "#/components/schemas/Owner",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Owner"
+              }
+            ],
             "description": "User / service who created the entity mapping config",
             "example": {
               "type": "internal_service"
             }
           },
           "last_updated_by": {
-            "$ref": "#/components/schemas/Owner",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Owner"
+              }
+            ],
             "description": "User / service who last updated entity mapping config",
             "example": {
               "type": "user",
@@ -648,14 +1341,22 @@
         "description": "Build relations between a source entity and one or more target entities, dynamically identified",
         "properties": {
           "source_ref": {
-            "$ref": "#/components/schemas/EntityRef",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityRef"
+              }
+            ],
             "description": "Entity for which to add relations."
           },
           "target": {
             "type": "object",
             "properties": {
               "main_entity_ref": {
-                "$ref": "#/components/schemas/EntityRef",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EntityRef"
+                  }
+                ],
                 "description": "Main Entity from where to locate target entities. Eg. submisssion entity"
               },
               "relation_attributes": {
@@ -697,6 +1398,16 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RelationItem"
+            }
+          },
+          "outputs": {
+            "type": "object",
+            "description": "The entities earlier actions (later: Flow tasks) of the same run produced, keyed by the\nproducing action's id, as on `ExecuteMappingReq.outputs`. `relation_attributes` select them with\n`source_filter.output_of`. An output that the main entity's relations also contain is used in\nits hydrated form; otherwise its `{ _id, _schema }` reference is enough for the relation write.\n",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/OutputEntityRef"
+              }
             }
           }
         },
@@ -760,11 +1471,19 @@
         "description": "Pass either source or source_entity",
         "properties": {
           "source_ref": {
-            "$ref": "#/components/schemas/EntityRef",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityRef"
+              }
+            ],
             "description": "A reference (id and schema) to the entity to be used as source."
           },
           "loop_ref": {
-            "$ref": "#/components/schemas/EntityRef",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityRef"
+              }
+            ],
             "description": "Reference to the current iteration's entity when running inside a flow loop.\nWhen set, its fields and relations are merged into the source context;\non schema conflicts the loop entity wins, so paths like `<schema>._id` resolve\nto the iteration entity rather than to a same-schema relation of the source.\n"
           },
           "targets": {
@@ -773,11 +1492,78 @@
               "$ref": "#/components/schemas/TargetConfig"
             },
             "description": "Mapping Configuration to apply."
+          },
+          "outputs": {
+            "type": "object",
+            "description": "The entities earlier steps of the same run produced, keyed by the id of the automation action\n(later: Flow task) that produced them, in execution order. The executor passes what it recorded\nas each action's `outputs`. A key with an empty list says the action is known to the run but\nproduced nothing (skipped, failed, or no entity); a mapping that reads it is an ordinary empty\ncopy. A referenced id with no key at all is reported as an `unresolved_output_reference`\nwarning, so send every preceding action's id, including the ones that ran nothing.\n\nMapping attributes read them as `$outputOf['<id>']` (the last entity of that id, so a loop\naction yields its latest iteration) and `$outputsOf['<id>']` (every entity of that id);\nrelation attributes select them with `source_filter.output_of`. An entity is taken from the\nsource entity's hydrated relations when the producing action linked it back, otherwise it is\nfetched by id when a target references the id. Without an entry for an id, the engine falls\nback to the relations tagged `_hidden_<id>` (the convention existing configs use).\n",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/OutputEntityRef"
+              }
+            },
+            "example": {
+              "9ec3711b-db63-449c-b894-54d5bb622a8f": [
+                {
+                  "entity_id": "4c7a6d2e-1f3b-4b8e-9c21-0d5e6f7a8b9c",
+                  "entity_schema": "contact"
+                }
+              ]
+            }
+          },
+          "output_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "One id per entry in `targets`, in the same order: the id that target's result is published under,\nthe same key as in `outputs` (the automation action or Flow task that runs the target). Read in preview mode\nonly: each target's would-be entity becomes the output of its id for the targets after it\n(`$outputOf['<id>']`, `source_filter.output_of`), so a chain of actions is previewed as it would\nrun, instead of reading what an earlier run stored. The response then lists the entities per target\nin `preview_targets`.\n"
           }
         },
         "required": [
           "source_ref",
           "targets"
+        ]
+      },
+      "PreviewTarget": {
+        "type": "object",
+        "description": "What one target would write, in preview mode with `output_ids`",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "description": "Position of the target in the request"
+          },
+          "output_id": {
+            "type": "string",
+            "description": "The id from `output_ids` at this position, which the target's entities were published under"
+          },
+          "mapped_entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entity"
+            }
+          },
+          "failure": {
+            "$ref": "#/components/schemas/MappingFailure"
+          }
+        },
+        "required": [
+          "index",
+          "mapped_entities"
+        ]
+      },
+      "OutputEntityRef": {
+        "type": "object",
+        "description": "One entity an earlier action or task produced",
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "entity_schema": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_id"
         ]
       },
       "ExecuteMappingResp": {
@@ -799,6 +1585,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/MappingWarning"
+            }
+          },
+          "preview_targets": {
+            "type": "array",
+            "description": "In preview mode with `output_ids`, the entities and failure of each target, in order",
+            "items": {
+              "$ref": "#/components/schemas/PreviewTarget"
             }
           }
         },
@@ -873,15 +1666,15 @@
           "_updated_at": {
             "type": "string",
             "nullable": true
-          },
-          "required": [
-            "_id",
-            "_schema",
-            "_org",
-            "_created_at",
-            "_updated_at"
-          ]
+          }
         },
+        "required": [
+          "_id",
+          "_schema",
+          "_org",
+          "_created_at",
+          "_updated_at"
+        ],
         "additionalProperties": true
       },
       "EntityRef": {
@@ -1160,6 +1953,10 @@
                 "type": "string",
                 "description": "Filter by relation tag (label) on the main entity"
               },
+              "output_of": {
+                "type": "string",
+                "description": "Pick the entities the automation action (later: Flow task) with this id produced in the same run,\nas passed in `ExecuteMappingReq.outputs`. Combinable with `schema`, `tag` and `limit`. When the\nrequest carries no entry for the id, the relations tagged `_hidden_<id>` are used instead.\n"
+              },
               "tag": {
                 "type": "string",
                 "description": "Filter by a specific tag on the related entity"
@@ -1289,7 +2086,7 @@
           },
           "optional": {
             "type": "boolean",
-            "description": "Only meaningful for a node expected to resolve to a single entity (the seed node, or\n\"cardinality: one\"). When true, finding zero matching entities is not an error - the\nmapping proceeds without this node's data instead of failing. Finding more than one\nmatch still fails regardless of this flag; ambiguity is never silently accepted.\n"
+            "description": "Only meaningful for a node expected to resolve to a single entity (the seed node, or\n\"cardinality: one\"). When true, finding zero matching entities is not an error - the\nmapping proceeds without this node's data instead of failing. Finding more than one\nmatch still fails regardless of this flag; ambiguity is never silently accepted.\nOn the seed node it also covers an empty seed: when `seed.entity_id` resolves to an\nempty value (e.g. an optional source field is missing), the whole graph_context entry\nis skipped and none of its nodes are added to the mapping context.\n"
           }
         },
         "required": [
@@ -1451,7 +2248,11 @@
           },
           "_random": {
             "description": "Generate random ids / numbers",
-            "$ref": "#/components/schemas/RandomOperation"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RandomOperation"
+              }
+            ]
           },
           "_each": {
             "description": "Iterate over a source array. Use with _as and _map.\nThe value is a path to resolve from the source entity context.\nExample: \"submission.meterReadings\"\n",
@@ -1465,7 +2266,11 @@
           },
           "_map": {
             "description": "Operation to evaluate per _each iteration item.\nCan be any OperationNode, typically an object with _copy\nreferences to the $<_as name> alias.\n",
-            "$ref": "#/components/schemas/OperationNode"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OperationNode"
+              }
+            ]
           }
         },
         "additionalProperties": true
@@ -1487,7 +2292,8 @@
             "additionalProperties": true
           },
           {
-            "type": "array"
+            "type": "array",
+            "items": {}
           }
         ]
       },
@@ -1630,61 +2436,16 @@
           "value_json"
         ]
       },
-      "MappingHistoryResp": {
-        "type": "object",
-        "properties": {
-          "results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MappingHistoryEntry"
-            }
-          }
-        },
-        "required": [
-          "results"
-        ]
-      },
-      "MappingHistoryEntry": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "example": "70542580-2b38-4bfc-af8d-bb90102f9f47"
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "ISO datetime"
-          },
-          "source_entity_snapshot": {
-            "$ref": "#/components/schemas/Entity"
-          },
-          "mapped_entities_snapshot": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Entity"
-            }
-          },
-          "target_configs_snapshot": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TargetConfig"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "timestamp",
-          "source_entity_snapshot",
-          "target_configs_snapshot",
-          "mapped_entities_snapshot"
-        ]
-      },
       "MappingSource": {
         "type": "object",
         "properties": {
           "key": {
             "type": "string",
             "description": "Key aiming to identify source"
+          },
+          "block_id": {
+            "type": "string",
+            "description": "The journey block's id, the key of its value in `_block_values` of the submission"
           },
           "sub_properties": {
             "description": "Each item describes a property under the main source and a possibly, a default value for its target attribute",
@@ -1710,7 +2471,11 @@
           },
           "initial_relation": {
             "description": "Initial value of a relation to be added",
-            "$ref": "#/components/schemas/RelationAttribute"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RelationAttribute"
+              }
+            ]
           },
           "title": {
             "type": "string",
@@ -1841,6 +2606,128 @@
           "relation",
           "array"
         ]
+      },
+      "JourneyContextUsagesReq": {
+        "type": "object",
+        "required": [
+          "journey_id",
+          "param_keys"
+        ],
+        "properties": {
+          "journey_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "param_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Context parameter keys to look for, as plain strings."
+          },
+          "param_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Accepted and ignored. This service stores context references by name only; the field keeps one request shape across every adapter.\n"
+          }
+        }
+      },
+      "JourneyContextUsage": {
+        "type": "object",
+        "required": [
+          "kind",
+          "resource",
+          "matched_as"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "entity-mapping"
+            ]
+          },
+          "resource": {
+            "type": "object",
+            "required": [
+              "type",
+              "id"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "mapping"
+                ]
+              },
+              "id": {
+                "type": "string"
+              }
+            }
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "target_schema": {
+                "type": "string"
+              },
+              "attribute": {
+                "type": "string"
+              }
+            }
+          },
+          "matched_as": {
+            "type": "object",
+            "required": [
+              "dialect",
+              "token",
+              "at"
+            ],
+            "properties": {
+              "dialect": {
+                "type": "string",
+                "enum": [
+                  "name"
+                ]
+              },
+              "token": {
+                "type": "string"
+              },
+              "at": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "JourneyContextUsagesResp": {
+        "type": "object",
+        "required": [
+          "usages",
+          "status",
+          "scanned"
+        ],
+        "properties": {
+          "usages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JourneyContextUsage"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "partial"
+            ],
+            "description": "partial means the row cap was reached and rows were dropped, or that scanning stopped\nearly and entire configs - some of which may reference the parameter - were never\nscanned.\n"
+          },
+          "scanned": {
+            "type": "integer",
+            "description": "The number of configs actually scanned, not the number found. May be less than the\ntotal number of matching configs when status is partial.\n"
+          }
+        }
       }
     }
   },

@@ -1,6 +1,8 @@
 /**
- * Lazy-loaded help system — returns markdown docs for SDK APIs.
- * Each doc is loaded via dynamic import() so only the requested doc affects bundle size.
+ * Lazy-loaded help system — returns markdown docs for SDK APIs, looked up by name.
+ *
+ * The import() below is a glob, so a bundler emits one lazy chunk per doc. Only the root entry
+ * may reach this module; `@epilot/sdk/<api>` entries pass their own docs via lazyApiDocs().
  */
 
 const kebabCase = (str: string) => str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();

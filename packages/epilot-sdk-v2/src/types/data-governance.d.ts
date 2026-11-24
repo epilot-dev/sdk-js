@@ -825,7 +825,7 @@ export declare namespace Paths {
 
 export interface OperationMethods {
   /**
-   * queryEntities - Query entities matching a data lifecycle config
+   * queryEntities - queryEntities
    * 
    * Executes a query against the specified entity schema using a saved view
    * definition, optionally combined with additional data governance filters.
@@ -843,7 +843,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.QueryEntities.Responses.$200>
   /**
-   * createJob - Create a new job run
+   * createJob - createJob
    * 
    * Creates a new job run for the given entity schema. The job is associated
    * with an existing config and records the scheduled execution date.
@@ -859,7 +859,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateJob.Responses.$201>
   /**
-   * updateJob - Update an existing job run
+   * updateJob - updateJob
    * 
    * Partially updates an existing job run. Typically used to record
    * progress or finalize a job by setting its status to `success` or
@@ -872,7 +872,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateJob.Responses.$200>
   /**
-   * getJob - Get a job by ID
+   * getJob - getJob
    * 
    * Returns full details of a single job run, including its current status,
    * execution timestamps, type-specific details, and report reference
@@ -885,7 +885,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetJob.Responses.$200>
   /**
-   * getJobReportUrl - Get report download URL for a job
+   * getJobReportUrl - getJobReportUrl
    * 
    * Returns a short-lived, pre-signed S3 URL to download the CSV report
    * file for the given job. The URL expires after the number of seconds
@@ -901,7 +901,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetJobReportUrl.Responses.$200>
   /**
-   * getConfig - Get a config by ID
+   * getConfig - getConfig
    * 
    * Returns a single data data lifecycle config by its unique identifier,
    * including its query definition, schedule, and current enabled state.
@@ -913,7 +913,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetConfig.Responses.$200>
   /**
-   * createJobForConfig - Trigger a manual job run for a config
+   * createJobForConfig - createJobForConfig
    * 
    * Manually triggers a new job run for the specified config. The job is
    * created and queued for asynchronous execution.
@@ -931,7 +931,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateJobForConfig.Responses.$201>
   /**
-   * upsertConfig - Create or update a data lifecycle config
+   * upsertConfig - upsertConfig
    * 
    * Creates a new data lifecycle config or updates an existing one for the
    * given entity schema. The config defines:
@@ -952,7 +952,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpsertConfig.Responses.$200 | Paths.UpsertConfig.Responses.$201>
   /**
-   * listConfigs - List data lifecycle configs
+   * listConfigs - listConfigs
    * 
    * Returns a cursor-paginated list of data lifecycle configs. Results can be
    * filtered by entity schema, config type, scheduled run date, or
@@ -965,7 +965,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListConfigs.Responses.$200>
   /**
-   * listJobs - List job runs
+   * listJobs - listJobs
    * 
    * Returns a cursor-paginated list of job runs. Results can be filtered
    * by entity schema, action type, execution status, or parent config.
@@ -981,7 +981,7 @@ export interface OperationMethods {
 export interface PathsDictionary {
   ['/data-governance/v1/{entity_schema}/query']: {
     /**
-     * queryEntities - Query entities matching a data lifecycle config
+     * queryEntities - queryEntities
      * 
      * Executes a query against the specified entity schema using a saved view
      * definition, optionally combined with additional data governance filters.
@@ -1001,7 +1001,7 @@ export interface PathsDictionary {
   }
   ['/data-governance/v1/{entity_schema}/jobs']: {
     /**
-     * createJob - Create a new job run
+     * createJob - createJob
      * 
      * Creates a new job run for the given entity schema. The job is associated
      * with an existing config and records the scheduled execution date.
@@ -1019,7 +1019,7 @@ export interface PathsDictionary {
   }
   ['/data-governance/v1/{entity_schema}/jobs/{job_id}']: {
     /**
-     * updateJob - Update an existing job run
+     * updateJob - updateJob
      * 
      * Partially updates an existing job run. Typically used to record
      * progress or finalize a job by setting its status to `success` or
@@ -1034,7 +1034,7 @@ export interface PathsDictionary {
   }
   ['/data-governance/v1/jobs/{job_id}']: {
     /**
-     * getJob - Get a job by ID
+     * getJob - getJob
      * 
      * Returns full details of a single job run, including its current status,
      * execution timestamps, type-specific details, and report reference
@@ -1049,7 +1049,7 @@ export interface PathsDictionary {
   }
   ['/data-governance/v1/jobs/{job_id}/report-url']: {
     /**
-     * getJobReportUrl - Get report download URL for a job
+     * getJobReportUrl - getJobReportUrl
      * 
      * Returns a short-lived, pre-signed S3 URL to download the CSV report
      * file for the given job. The URL expires after the number of seconds
@@ -1067,7 +1067,7 @@ export interface PathsDictionary {
   }
   ['/data-governance/v1/configs/{config_id}']: {
     /**
-     * getConfig - Get a config by ID
+     * getConfig - getConfig
      * 
      * Returns a single data data lifecycle config by its unique identifier,
      * including its query definition, schedule, and current enabled state.
@@ -1081,7 +1081,7 @@ export interface PathsDictionary {
   }
   ['/data-governance/v1/configs/{config_id}/jobs']: {
     /**
-     * createJobForConfig - Trigger a manual job run for a config
+     * createJobForConfig - createJobForConfig
      * 
      * Manually triggers a new job run for the specified config. The job is
      * created and queued for asynchronous execution.
@@ -1101,7 +1101,7 @@ export interface PathsDictionary {
   }
   ['/data-governance/v1/{entity_schema}/configs']: {
     /**
-     * upsertConfig - Create or update a data lifecycle config
+     * upsertConfig - upsertConfig
      * 
      * Creates a new data lifecycle config or updates an existing one for the
      * given entity schema. The config defines:
@@ -1124,7 +1124,7 @@ export interface PathsDictionary {
   }
   ['/data-governance/v1/configs']: {
     /**
-     * listConfigs - List data lifecycle configs
+     * listConfigs - listConfigs
      * 
      * Returns a cursor-paginated list of data lifecycle configs. Results can be
      * filtered by entity schema, config type, scheduled run date, or
@@ -1139,7 +1139,7 @@ export interface PathsDictionary {
   }
   ['/data-governance/v1/jobs']: {
     /**
-     * listJobs - List job runs
+     * listJobs - listJobs
      * 
      * Returns a cursor-paginated list of job runs. Results can be filtered
      * by entity schema, action type, execution status, or parent config.

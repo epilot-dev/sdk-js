@@ -31,9 +31,11 @@ const { data } = await auditLogsClient.getLogs(...)
 - [`getLogById`](#getlogbyid)
 
 **Schemas**
+- [`CallerType`](#callertype)
 - [`SearchOptions`](#searchoptions)
 - [`HttpContext`](#httpcontext)
 - [`Caller`](#caller)
+- [`AgentCaller`](#agentcaller)
 - [`Event`](#event)
 
 ### `getLogs`
@@ -48,11 +50,19 @@ const { data } = await client.getLogs(
   {
     limit: 50,
     page: 0,
-    timestamp: '2021-06-01T12:00:00Z',
+    timestamp: {
+      from: '2021-06-01T12:00:00Z',
+      to: '2021-06-30T23:59:59Z'
+    },
     service_name: 'workflows',
     event_name: 'deleteWorkflow',
     outcome: 'success',
     method: 'POST',
+    caller_type: 'user',
+    visibility: 'customer',
+    resource_id: '550e8400-e29b-41d4-a716-446655440000',
+    resource_type: 'blueprint',
+    action: 'blueprint.resource_added',
     user: {
       email: 'max.mustermann@mail.com',
       user_id: 123456
@@ -77,7 +87,21 @@ const { data } = await client.getLogs(
       "caller": {
         "user_email": "max.mustermann@mail.com",
         "user_id": 123456,
-        "trigger_type": "user"
+        "trigger_type": "user",
+        "token_id": "agent_V1StGXR8Z5jdHi6B",
+        "token_type": "api",
+        "token_name": "Agent: Claude · Contract review",
+        "agent": {
+          "agent_id": "string",
+          "host_id": "string",
+          "agent_name": "Claude",
+          "host_name": "string",
+          "client": "string",
+          "purpose": "Contract review",
+          "user_id": "string",
+          "run_id": "string",
+          "channel": "chat"
+        }
       },
       "http": {
         "method": "GET",
@@ -97,7 +121,11 @@ const { data } = await client.getLogs(
       },
       "detail": "{\"workflow_id\": \"123456\"}",
       "activity": "Workflow with ID 123456 was deleted",
-      "source_url": "string"
+      "source_url": "string",
+      "resource_id": "550e8400-e29b-41d4-a716-446655440000",
+      "resource_type": "blueprint",
+      "action": "blueprint.resource_added",
+      "visibility": "customer"
     }
   ],
   "total": 1
@@ -117,6 +145,7 @@ Retrieve Audit Log events
 ```ts
 const { data } = await client.getLogById({
   logId: 'example',
+  visibility: 'example',
 })
 ```
 
@@ -135,7 +164,21 @@ const { data } = await client.getLogById({
     "caller": {
       "user_email": "max.mustermann@mail.com",
       "user_id": 123456,
-      "trigger_type": "user"
+      "trigger_type": "user",
+      "token_id": "agent_V1StGXR8Z5jdHi6B",
+      "token_type": "api",
+      "token_name": "Agent: Claude · Contract review",
+      "agent": {
+        "agent_id": "string",
+        "host_id": "string",
+        "agent_name": "Claude",
+        "host_name": "string",
+        "client": "string",
+        "purpose": "Contract review",
+        "user_id": "string",
+        "run_id": "string",
+        "channel": "chat"
+      }
     },
     "http": {
       "method": "GET",
@@ -155,7 +198,11 @@ const { data } = await client.getLogById({
     },
     "detail": "{\"workflow_id\": \"123456\"}",
     "activity": "Workflow with ID 123456 was deleted",
-    "source_url": "string"
+    "source_url": "string",
+    "resource_id": "550e8400-e29b-41d4-a716-446655440000",
+    "resource_type": "blueprint",
+    "action": "blueprint.resource_added",
+    "visibility": "customer"
   }
 }
 ```
@@ -165,6 +212,12 @@ const { data } = await client.getLogById({
 ---
 
 ## Schemas
+
+### `CallerType`
+
+```ts
+type CallerType = "user" | "api" | "automation" | "agent"
+```
 
 ### `SearchOptions`
 
@@ -180,6 +233,11 @@ type SearchOptions = {
   event_name?: string
   outcome?: "success" | "failure"
   method?: string
+  caller_type?: "user" | "api" | "automation" | "agent" | "user" | "api" | "automation" | "agent"[]
+  visibility?: "customer" | "internal" | "all"
+  resource_id?: string
+  resource_type?: string
+  action?: string
   user?: {
     email?: string
     user_id?: string
@@ -207,7 +265,39 @@ type HttpContext = {
 type Caller = {
   user_email?: string
   user_id?: string
-  trigger_type?: "user" | "api" | "automation"
+  trigger_type?: "user" | "api" | "automation" | "agent"
+  token_id?: string
+  token_type?: string
+  token_name?: string
+  agent?: {
+    agent_id?: string
+    host_id?: string
+    agent_name?: string
+    host_name?: string
+    client?: string
+    purpose?: string
+    user_id?: string
+    run_id?: string
+    channel?: string
+  }
+}
+```
+
+### `AgentCaller`
+
+AI agent that made the call. Only present when trigger_type is `agent`.
+
+```ts
+type AgentCaller = {
+  agent_id?: string
+  host_id?: string
+  agent_name?: string
+  host_name?: string
+  client?: string
+  purpose?: string
+  user_id?: string
+  run_id?: string
+  channel?: string
 }
 ```
 
@@ -224,7 +314,21 @@ type Event = {
   caller?: {
     user_email?: string
     user_id?: string
-    trigger_type?: "user" | "api" | "automation"
+    trigger_type?: "user" | "api" | "automation" | "agent"
+    token_id?: string
+    token_type?: string
+    token_name?: string
+    agent?: {
+      agent_id?: { ... }
+      host_id?: { ... }
+      agent_name?: { ... }
+      host_name?: { ... }
+      client?: { ... }
+      purpose?: { ... }
+      user_id?: { ... }
+      run_id?: { ... }
+      channel?: { ... }
+    }
   }
   http?: {
     method?: string
@@ -238,5 +342,9 @@ type Event = {
   detail?: string
   activity?: string
   source_url?: string
+  resource_id?: string
+  resource_type?: string
+  action?: string
+  visibility?: "customer" | "internal"
 }
 ```

@@ -376,10 +376,13 @@ const mockJsonExample = (schema: Schema): string | null => {
 
 const generateApiFile = (client: ClientInfo): string => {
   const clientType = client.hasTypes ? 'Client' : 'AxiosInstance';
+  // openapi() serves the full spec checked into src/definitions; not every API has one
+  const hasFullDefinition = existsSync(resolve(DEFS_DIR, `${client.kebabName}.json`));
 
   const lines = [
     `import type { Document } from 'openapi-client-axios'`,
     ``,
+    `import { lazyApiDocs } from '../api-docs'`,
     `import { createApiClient } from '../client-factory'`,
     `import { expand } from '../compact'`,
     `import type { CompactDefinition } from '../compact'`,
@@ -421,19 +424,26 @@ const generateApiFile = (client: ClientInfo): string => {
     `  return _definition`,
     `}`,
     ``,
+    `// Literal paths: a bundler emits lazy chunks for this API's docs only, not for every API.`,
+    `const docs = lazyApiDocs({`,
+    `  apiName: '${client.apiName}',`,
+    `  help: () => import('../docs/${client.kebabName}.json'),`,
+    ...(hasFullDefinition ? [`  openapi: () => import('../definitions/${client.kebabName}.json'),`] : []),
+    `})`,
+    ``,
     `let _instance: ${clientType} | null = null`,
     ``,
     `const resolve = (): ${clientType} => {`,
     `  if (!_instance) {`,
     `    const def = loadDefinition()`,
-    `    _instance = createApiClient<${clientType}>({ definition: def, apiName: '${client.apiName}' })`,
+    `    _instance = createApiClient<${clientType}>({ definition: def, docs })`,
     `  }`,
     `  return _instance`,
     `}`,
     ``,
     `const _handle: ApiHandle<${clientType}> = createApiHandle({`,
     `  resolveClient: resolve,`,
-    `  createClient: () => createApiClient<${clientType}>({ definition: loadDefinition(), apiName: '${client.apiName}' }),`,
+    `  createClient: () => createApiClient<${clientType}>({ definition: loadDefinition(), docs }),`,
     `  apiName: '${client.apiName}',`,
     `})`,
     ``,
@@ -592,8 +602,15 @@ type OperationInfo = {
 
 type Schema = Record<string, unknown>;
 
-const formatSchemaType = (schema: Schema | undefined, indent = 0, maxDepth = 3): string => {
+const formatSchemaType = (
+  schema: Schema | undefined,
+  indent = 0,
+  maxDepth = 3,
+  ancestors: ReadonlySet<Schema> = new Set(),
+): string => {
   if (!schema) return 'unknown';
+  if (ancestors.has(schema)) return '{ ... }';
+  const branch = new Set(ancestors).add(schema);
   if (indent > maxDepth) return '{ ... }';
 
   const pad = '  '.repeat(indent);
@@ -617,7 +634,7 @@ const formatSchemaType = (schema: Schema | undefined, indent = 0, maxDepth = 3):
   // Arrays
   if (schema.type === 'array') {
     const items = schema.items as Schema | undefined;
-    const itemType = formatSchemaType(items, indent, maxDepth);
+    const itemType = formatSchemaType(items, indent, maxDepth, branch);
     if (itemType.includes('\n')) return `Array<${itemType}>`;
     return `${itemType}[]`;
   }
@@ -625,20 +642,20 @@ const formatSchemaType = (schema: Schema | undefined, indent = 0, maxDepth = 3):
   // Union types
   if (schema.oneOf || schema.anyOf) {
     const variants = (schema.oneOf || schema.anyOf) as Schema[];
-    return variants.map((v) => formatSchemaType(v, indent, maxDepth)).join(' | ');
+    return variants.map((v) => formatSchemaType(v, indent, maxDepth, branch)).join(' | ');
   }
 
   // allOf — merge or unwrap single-item
   if (schema.allOf) {
     const items = schema.allOf as Schema[];
-    if (items.length === 1) return formatSchemaType(items[0], indent, maxDepth);
+    if (items.length === 1) return formatSchemaType(items[0], indent, maxDepth, branch);
     // Merge object schemas
     const merged: Schema = { type: 'object', properties: {}, required: [] };
     for (const item of items) {
       Object.assign(merged.properties as Record<string, unknown>, (item.properties || {}) as Record<string, unknown>);
       (merged.required as string[]).push(...((item.required as string[]) || []));
     }
-    return formatSchemaType(merged, indent, maxDepth);
+    return formatSchemaType(merged, indent, maxDepth, branch);
   }
 
   // Objects with properties
@@ -647,7 +664,7 @@ const formatSchemaType = (schema: Schema | undefined, indent = 0, maxDepth = 3):
     const required = new Set((schema.required as string[]) || []);
     const propLines = Object.entries(properties).map(([key, propSchema]) => {
       const opt = required.has(key) ? '' : '?';
-      const propType = formatSchemaType(propSchema, indent + 1, maxDepth);
+      const propType = formatSchemaType(propSchema, indent + 1, maxDepth, branch);
       return `${innerPad}${key}${opt}: ${propType}`;
     });
     return `{\n${propLines.join('\n')}\n${pad}}`;
@@ -656,7 +673,7 @@ const formatSchemaType = (schema: Schema | undefined, indent = 0, maxDepth = 3):
   // additionalProperties (Record types)
   if (schema.type === 'object' && schema.additionalProperties) {
     if (schema.additionalProperties === true) return 'Record<string, unknown>';
-    const valType = formatSchemaType(schema.additionalProperties as Schema, indent, maxDepth);
+    const valType = formatSchemaType(schema.additionalProperties as Schema, indent, maxDepth, branch);
     return `Record<string, ${valType}>`;
   }
 

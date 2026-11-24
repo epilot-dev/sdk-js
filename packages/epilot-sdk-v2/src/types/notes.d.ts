@@ -154,6 +154,10 @@ export declare namespace Components {
                 [name: string]: string[];
             };
             /**
+             * Users (as `{org_id}_{user_id}`) already notified for reacting to this note
+             */
+            reactions_notified?: string[];
+            /**
              * The timestamp of when this Note was archived. Absent or null means the Note is active.
              */
             _archived_at?: string | null; // date-time
@@ -249,6 +253,10 @@ export declare namespace Components {
             reactions?: {
                 [name: string]: string[];
             };
+            /**
+             * Users (as `{org_id}_{user_id}`) already notified for reacting to this note
+             */
+            reactions_notified?: string[];
             /**
              * The timestamp of when this Note was archived. Absent or null means the Note is active.
              */
@@ -347,6 +355,10 @@ export declare namespace Components {
                 [name: string]: string[];
             };
             /**
+             * Users (as `{org_id}_{user_id}`) already notified for reacting to this note
+             */
+            reactions_notified?: string[];
+            /**
              * The timestamp of when this Note was archived. Absent or null means the Note is active.
              */
             _archived_at?: string | null; // date-time
@@ -404,9 +416,19 @@ export declare namespace Components {
                 [name: string]: string[];
             };
             /**
+             * Users (as `{org_id}_{user_id}`) already notified for reacting to this note
+             */
+            reactions_notified?: string[];
+            /**
              * The timestamp of when this Note was archived. Absent or null means the Note is active.
              */
             _archived_at?: string | null; // date-time
+            /**
+             * Visual annotation data attached to the Note, e.g. the anchor position of a file annotation. Stored as-is.
+             */
+            annotation?: {
+                [name: string]: any;
+            };
         }
         export interface NotePostRequestBody {
             /**
@@ -543,6 +565,10 @@ export declare namespace Components {
             reactions?: {
                 [name: string]: string[];
             };
+            /**
+             * Users (as `{org_id}_{user_id}`) already notified for reacting to this note
+             */
+            reactions_notified?: string[];
             /**
              * The timestamp of when this Note was archived. Absent or null means the Note is active.
              */
@@ -836,6 +862,7 @@ export declare namespace Paths {
         }
     }
 }
+
 
 export interface OperationMethods {
   /**
@@ -1148,6 +1175,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type ContextType = Components.Schemas.ContextType;
 export type CreatedByType = Components.Schemas.CreatedByType;

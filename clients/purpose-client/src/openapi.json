@@ -3,7 +3,7 @@
   "info": {
     "title": "Purpose API",
     "version": "1.0.0",
-    "description": "Purpose API - enables the management of purposes for the epilot platform. \n\nepilot 'Purposes' are a special system taxonomy used to tag and organize resources (entities, attributes, groups, automations, templates, etc.) across the platform.\nIn essence, purposes are deeply connected to what information users can see or not on epilot360 UIs based on the \"purpose\" of the tasks they have at hand.\n",
+    "description": "The Purpose API manages epilot **Purposes** – a special system taxonomy used to tag and organize resources across the platform (entities, attributes, groups, automations, templates, and more).\n\nPurposes control what information is visible in the epilot 360 UI depending on the task a user is performing. For example, tagging an entity attribute with the \"Electricity Contract\" purpose means that attribute is shown only in electricity-related workflows and hidden elsewhere.\n\n**Key concepts**\n\n- **Purpose** – A named label (UUID + name) that can be attached to any epilot resource.\n- **Tagging** – Resources are tagged by storing purpose IDs in a `_purposes` array field. Hydrate them with `batchGetPurposes`.\n- **Discovery** – Use `searchPurposes` to find purposes by name for autocomplete UIs or user-driven selection.\n",
     "contact": {
       "name": "Support",
       "email": "info@epilot.cloud",
@@ -13,7 +13,7 @@
   "tags": [
     {
       "name": "Purpose",
-      "description": "Purpose operations"
+      "description": "CRUD operations and search for epilot Purposes.\n\nPurposes are system-level taxonomy entries that drive conditional visibility of entities, attributes, and UI components in epilot 360. They are referenced by UUID across the platform and resolved to full objects on demand.\n\n**Typical flows**\n\n- **Create** a new purpose for a product line or business domain.\n- **Search** purposes to populate autocomplete / picker components in the UI.\n- **Batch-get** purposes when hydrating `_purposes` arrays on entities.\n- **Update** or **delete** purposes as business requirements evolve.\n"
     },
     {
       "name": "purpose_schema",
@@ -43,21 +43,17 @@
       "EpilotOrg": []
     }
   ],
-  "servers": [
-    {
-      "url": "https://purpose.sls.epilot.io"
-    },
-    {
-      "url": "https://purpose.sls.epilot.io",
-      "description": "Production server"
-    }
-  ],
   "paths": {
     "/v1/purpose": {
       "post": {
         "operationId": "createPurpose",
-        "summary": "Create Purpose",
-        "description": "Create a new purpose",
+        "x-epilot-permissions": [
+          {
+            "action": "label_builder:create"
+          }
+        ],
+        "summary": "createPurpose",
+        "description": "Create a new purpose.\n\nPurpose names must be unique within an organization. Attempting to create a purpose with a name that already exists returns `409 Conflict`.\n",
         "tags": [
           "Purpose"
         ],
@@ -89,8 +85,13 @@
     "/v1/purpose:search": {
       "get": {
         "operationId": "searchPurposes",
-        "summary": "Search Purposes",
-        "description": "Search purposes using fuzzy matching.\n",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "searchPurposes",
+        "description": "Search purposes using fuzzy matching against the purpose name.\n\nUse this endpoint for autocomplete inputs and user-driven purpose pickers. For resolving known purpose IDs to full objects, use `batchGetPurposes` instead.\n",
         "tags": [
           "Purpose"
         ],
@@ -118,7 +119,12 @@
     "/v1/purpose:batchGet": {
       "post": {
         "operationId": "batchGetPurposes",
-        "summary": "Batch Get Purposes",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "batchGetPurposes",
         "description": "Fetch multiple purposes by their known IDs in a single request.\n\n**Use this for:**\n- Hydrating purpose references from entities\n- Resolving a list of purpose IDs to full objects\n\n**Do NOT use this for:**\n- Browsing/discovering purposes (use `searchPurposes` instead)\n- Autocomplete (use `searchPurposes` instead)\n\n**Examples:**\n- Entity has `_purposes: [\"uuid-1\", \"uuid-2\"]` → fetch full purpose objects\n- Display purpose names for a list of tagged entities\n",
         "tags": [
           "Purpose"
@@ -145,8 +151,13 @@
     "/v1/purpose/{purposeId}": {
       "get": {
         "operationId": "getPurpose",
-        "summary": "Get Purpose",
-        "description": "Get a single purpose by ID",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "getPurpose",
+        "description": "Get a single purpose by its UUID.",
         "tags": [
           "Purpose"
         ],
@@ -172,8 +183,13 @@
       },
       "put": {
         "operationId": "updatePurpose",
-        "summary": "Update Purpose",
-        "description": "Update an existing purpose",
+        "x-epilot-permissions": [
+          {
+            "action": "label_builder:edit"
+          }
+        ],
+        "summary": "updatePurpose",
+        "description": "Update an existing purpose.\n\nOnly the `name` field can be updated. The `id`, `created_at`, and `updated_at` fields are managed by the server.\n",
         "tags": [
           "Purpose"
         ],
@@ -208,8 +224,13 @@
       },
       "delete": {
         "operationId": "deletePurpose",
-        "summary": "Delete Purpose",
-        "description": "Permanently delete a purpose",
+        "x-epilot-permissions": [
+          {
+            "action": "label_builder:delete"
+          }
+        ],
+        "summary": "deletePurpose",
+        "description": "Permanently delete a purpose by its UUID.\n\nDeleting a purpose does not automatically remove it from resources that reference it. Clients should handle stale purpose IDs gracefully.\n",
         "tags": [
           "Purpose"
         ],
@@ -268,7 +289,7 @@
         "name": "query",
         "in": "query",
         "required": false,
-        "description": "Search query string",
+        "description": "Fuzzy search query string matched against the purpose name",
         "schema": {
           "type": "string"
         },
@@ -290,7 +311,7 @@
     "schemas": {
       "Purpose": {
         "type": "object",
-        "description": "A purpose used to tag and organize entities",
+        "description": "An epilot Purpose – a named taxonomy label used to tag and organize resources across the platform",
         "required": [
           "id",
           "name"
@@ -299,23 +320,25 @@
           "id": {
             "type": "string",
             "format": "uuid",
-            "description": "Unique identifier",
+            "description": "Unique identifier for the purpose",
             "example": "123e4567-e89b-12d3-a456-426614174000"
           },
           "name": {
             "type": "string",
-            "description": "Human-readable name",
+            "description": "Human-readable name of the purpose",
             "example": "Electricity Contract"
           },
           "created_at": {
             "type": "string",
             "format": "date-time",
-            "description": "ISO timestamp of creation"
+            "description": "ISO 8601 timestamp of when the purpose was created",
+            "example": "2024-01-15T10:30:00.000Z"
           },
           "updated_at": {
             "type": "string",
             "format": "date-time",
-            "description": "ISO timestamp of last update"
+            "description": "ISO 8601 timestamp of the last update",
+            "example": "2024-06-01T08:00:00.000Z"
           }
         }
       },
@@ -328,9 +351,12 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "Human-readable name",
+            "description": "Human-readable name for the purpose. Must be unique within the organization.",
             "example": "Electricity Contract"
           }
+        },
+        "example": {
+          "name": "Electricity Contract"
         }
       },
       "UpdatePurposeInput": {
@@ -339,13 +365,17 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "Human-readable name"
+            "description": "New human-readable name for the purpose",
+            "example": "Electricity & Gas Contract"
           }
+        },
+        "example": {
+          "name": "Electricity & Gas Contract"
         }
       },
       "BatchGetPurposesInput": {
         "type": "object",
-        "description": "Input for batch getting purposes",
+        "description": "Input for batch-fetching purposes by their IDs",
         "required": [
           "purposeIds"
         ],
@@ -353,13 +383,21 @@
           "purposeIds": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             },
-            "description": "List of purpose IDs to fetch",
+            "description": "List of purpose UUIDs to fetch",
             "example": [
-              "123e4567-e89b-12d3-a456-426614174000"
+              "123e4567-e89b-12d3-a456-426614174000",
+              "987fcdeb-51a2-43f7-9012-345678901234"
             ]
           }
+        },
+        "example": {
+          "purposeIds": [
+            "123e4567-e89b-12d3-a456-426614174000",
+            "987fcdeb-51a2-43f7-9012-345678901234"
+          ]
         }
       },
       "Error": {
@@ -367,11 +405,18 @@
         "properties": {
           "status": {
             "type": "integer",
-            "description": "HTTP status code"
+            "description": "HTTP status code",
+            "example": 400
           },
           "error": {
             "type": "string",
-            "description": "Error message"
+            "description": "Short error label",
+            "example": "Bad Request"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable description of the error",
+            "example": "name is a required field"
           }
         }
       }
@@ -383,6 +428,9 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/CreatePurposeInput"
+            },
+            "example": {
+              "name": "Electricity Contract"
             }
           }
         }
@@ -393,6 +441,9 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/UpdatePurposeInput"
+            },
+            "example": {
+              "name": "Electricity & Gas Contract"
             }
           }
         }
@@ -403,6 +454,12 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/BatchGetPurposesInput"
+            },
+            "example": {
+              "purposeIds": [
+                "123e4567-e89b-12d3-a456-426614174000",
+                "987fcdeb-51a2-43f7-9012-345678901234"
+              ]
             }
           }
         }
@@ -410,17 +467,23 @@
     },
     "responses": {
       "PurposeResponse": {
-        "description": "Single purpose response",
+        "description": "Single purpose object",
         "content": {
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/Purpose"
+            },
+            "example": {
+              "id": "123e4567-e89b-12d3-a456-426614174000",
+              "name": "Electricity Contract",
+              "created_at": "2024-01-15T10:30:00.000Z",
+              "updated_at": "2024-06-01T08:00:00.000Z"
             }
           }
         }
       },
       "PurposeListResponse": {
-        "description": "List of purposes",
+        "description": "List of purposes matching the requested IDs",
         "content": {
           "application/json": {
             "schema": {
@@ -434,15 +497,33 @@
                 },
                 "hits": {
                   "type": "integer",
-                  "description": "Total number of results"
+                  "description": "Total number of results returned",
+                  "example": 2
                 }
               }
+            },
+            "example": {
+              "hits": 2,
+              "results": [
+                {
+                  "id": "123e4567-e89b-12d3-a456-426614174000",
+                  "name": "Electricity Contract",
+                  "created_at": "2024-01-15T10:30:00.000Z",
+                  "updated_at": "2024-06-01T08:00:00.000Z"
+                },
+                {
+                  "id": "987fcdeb-51a2-43f7-9012-345678901234",
+                  "name": "Gas Contract",
+                  "created_at": "2024-02-01T09:00:00.000Z",
+                  "updated_at": "2024-05-15T12:00:00.000Z"
+                }
+              ]
             }
           }
         }
       },
       "PurposeSearchResponse": {
-        "description": "Search results",
+        "description": "Search results matching the query",
         "content": {
           "application/json": {
             "schema": {
@@ -455,70 +536,115 @@
                   }
                 }
               }
+            },
+            "example": {
+              "results": [
+                {
+                  "id": "123e4567-e89b-12d3-a456-426614174000",
+                  "name": "Electricity Contract",
+                  "created_at": "2024-01-15T10:30:00.000Z",
+                  "updated_at": "2024-06-01T08:00:00.000Z"
+                }
+              ]
             }
           }
         }
       },
       "ClientErrorResponse": {
-        "description": "Client error",
+        "description": "Bad request – invalid or missing parameters",
         "content": {
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "status": 400,
+              "error": "Bad Request",
+              "message": "name is a required field"
             }
           }
         }
       },
       "UnauthorizedResponse": {
-        "description": "Unauthorized",
+        "description": "Unauthorized – missing or invalid authentication credentials",
         "content": {
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "status": 401,
+              "error": "Unauthorized",
+              "message": "Missing or invalid authorization token"
             }
           }
         }
       },
       "ForbiddenResponse": {
-        "description": "Forbidden",
+        "description": "Forbidden – caller does not have permission to perform this action",
         "content": {
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "status": 403,
+              "error": "Forbidden",
+              "message": "Insufficient permissions to manage purposes"
             }
           }
         }
       },
       "NotFoundResponse": {
-        "description": "Not found",
+        "description": "Not found – the requested purpose does not exist",
         "content": {
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "status": 404,
+              "error": "Not Found",
+              "message": "Purpose with ID '1fdc8f66-0e2b-4e20-a347-9cbdbf6a7217' not found"
             }
           }
         }
       },
       "ConflictResponse": {
-        "description": "Conflict - resource already exists",
+        "description": "Conflict – a purpose with this name already exists in the organization",
         "content": {
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "status": 409,
+              "error": "Conflict",
+              "message": "A purpose named 'Electricity Contract' already exists"
             }
           }
         }
       },
       "ServerErrorResponse": {
-        "description": "Server error",
+        "description": "Internal server error",
         "content": {
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "status": 500,
+              "error": "Internal Server Error",
+              "message": "An unexpected error occurred"
             }
           }
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://purpose.sls.epilot.io"
+    }
+  ]
 }

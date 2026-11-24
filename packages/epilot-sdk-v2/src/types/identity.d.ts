@@ -556,6 +556,20 @@ export declare namespace Paths {
             export type $404 = Components.Responses.NotFound;
         }
     }
+    namespace GetSectorIdentifier {
+        namespace Parameters {
+            export interface Extra {
+                [name: string]: any;
+            }
+        }
+        export interface QueryParameters {
+            extra?: Parameters.Extra;
+        }
+        namespace Responses {
+            export type $200 = string /* uri */[];
+            export type $404 = Components.Responses.NotFound;
+        }
+    }
     namespace GetUserSubject {
         namespace Responses {
             export type $200 = Components.Schemas.UserSubject;
@@ -745,6 +759,11 @@ export declare namespace Paths {
         }
     }
     namespace V1IdentityOperatorClients$ClientIdSuspend {
+        namespace Parameters {
+            export type $0 = Components.Parameters.ClientIdPath;
+        }
+    }
+    namespace V1IdentitySectorIdentifier$ClientId {
         namespace Parameters {
             export type $0 = Components.Parameters.ClientIdPath;
         }
@@ -943,6 +962,10 @@ export interface OperationMethods {
    * (checked live against user-api). Every read is written to the audit trail: the value is a partner-facing
    * identifier.
    * 
+   * Two callers are accepted: an admin-portal operator (`OperatorAuth`, through the API Gateway) and an allowed
+   * epilot backend (`ServiceAuth`, typically a direct Lambda invoke from phone-integration-api while it
+   * provisions a Babelforce agent). This is the only operation that accepts `ServiceAuth`.
+   * 
    */
   'getUserSubject'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -992,6 +1015,30 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<any>
+  /**
+   * getSectorIdentifier - getSectorIdentifier
+   * 
+   * The client's managed sector identifier document: a JSON array of its registered `redirect_uris`
+   * (OpenID Connect Registration §5). Public, like every sector identifier document.
+   * 
+   * Register it on the client as `sector_identifier_uri` **through the portal origin** that proxies
+   * `/v1/identity/sector-identifier/*` to this service, i.e. `https://portal.<stage>.epilot.cloud/v1/identity/sector-identifier/{client_id}`.
+   * The pairwise `sub` is derived from the sector identifier's host; the portal host is already every
+   * client's sector (its first redirect URI is the portal relay), so registering the managed document keeps
+   * every existing `sub` while allowing redirect URIs on other hosts, such as a partner's own login page.
+   * A client whose `sector_identifier_uri` is its own managed document is not fetched at save time: the
+   * document is the registration itself.
+   * 
+   * Retired or unknown clients answer `404` (through the portal proxy, CloudFront rewrites every origin
+   * `404` to the portal page, so verify a missing client on the issuer host directly). Query parameters
+   * are ignored. Never cached.
+   * 
+   */
+  'getSectorIdentifier'(
+    parameters?: Parameters<Paths.GetSectorIdentifier.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSectorIdentifier.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1204,6 +1251,10 @@ export interface PathsDictionary {
      * (checked live against user-api). Every read is written to the audit trail: the value is a partner-facing
      * identifier.
      * 
+     * Two callers are accepted: an admin-portal operator (`OperatorAuth`, through the API Gateway) and an allowed
+     * epilot backend (`ServiceAuth`, typically a direct Lambda invoke from phone-integration-api while it
+     * provisions a Babelforce agent). This is the only operation that accepts `ServiceAuth`.
+     * 
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1259,6 +1310,32 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<any>
+  }
+  ['/v1/identity/sector-identifier/{client_id}']: {
+    /**
+     * getSectorIdentifier - getSectorIdentifier
+     * 
+     * The client's managed sector identifier document: a JSON array of its registered `redirect_uris`
+     * (OpenID Connect Registration §5). Public, like every sector identifier document.
+     * 
+     * Register it on the client as `sector_identifier_uri` **through the portal origin** that proxies
+     * `/v1/identity/sector-identifier/*` to this service, i.e. `https://portal.<stage>.epilot.cloud/v1/identity/sector-identifier/{client_id}`.
+     * The pairwise `sub` is derived from the sector identifier's host; the portal host is already every
+     * client's sector (its first redirect URI is the portal relay), so registering the managed document keeps
+     * every existing `sub` while allowing redirect URIs on other hosts, such as a partner's own login page.
+     * A client whose `sector_identifier_uri` is its own managed document is not fetched at save time: the
+     * document is the registration itself.
+     * 
+     * Retired or unknown clients answer `404` (through the portal proxy, CloudFront rewrites every origin
+     * `404` to the portal page, so verify a missing client on the issuer host directly). Query parameters
+     * are ignored. Never cached.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSectorIdentifier.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSectorIdentifier.Responses.$200>
   }
 }
 

@@ -38,7 +38,7 @@
       "post": {
         "operationId": "changeCampaignStatus",
         "summary": "changeCampaignStatus",
-        "description": "Change the status of a campaign to a desired status.\n\nThe status can be one of the following: active, inactive.\n\nStatus transition is accompanied by side effects, e.g., automation execution.\n",
+        "description": "Moves a campaign to its next status, depending on its current one:\n\n- `draft`: launches the campaign. With a `start_date` still in the future it becomes `scheduled` and\n  starts on its own at that time; otherwise it starts now (`activating`, then `active`). Rejected with\n  400 if the dates are invalid: `INVALID_CAMPAIGN_DATES` (unparsable), `CAMPAIGN_END_BEFORE_START`\n  or `CAMPAIGN_END_IN_PAST`.\n- `scheduled`: cancels the schedule; the campaign goes back to `draft` and keeps its dates.\n- `active`: stops the campaign (`inactive`) and sets `end_date` to now.\n- `inactive`: resets the campaign to `draft` and clears its `start_date` and `end_date`: they\n  recorded the previous run, and a past end date would block launching it again.\n\nOnly launching needs a target and a delivery method (an automation flow, a portal block or a valid\nNext Best Action); otherwise it is rejected with 409 `CAMPAIGN_HAS_NO_TARGET` or\n`CAMPAIGN_HAS_NO_DELIVERY_METHOD`. A `tariff_change` campaign also needs at least one linked product\nrecommendation (409 `CAMPAIGN_HAS_NO_PRODUCT_RECOMMENDATIONS`), checked again when a scheduled campaign\nstarts on its own. Cancelling, stopping and resetting work without them.\n\nStatus transition is accompanied by side effects, e.g., automation execution.\n",
         "tags": [
           "Campaign"
         ],
@@ -57,6 +57,12 @@
             "$ref": "#/components/responses/CampaignResponse"
           },
           "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "409": {
             "$ref": "#/components/responses/ClientErrorResponse"
           },
           "500": {
@@ -127,11 +133,47 @@
         }
       }
     },
+    "/v1/campaigns:summary": {
+      "post": {
+        "operationId": "getCampaignsSummary",
+        "summary": "getCampaignsSummary",
+        "description": "Returns the automation job progress and portal usage of up to 100 campaigns in one call.\n\n- `job` is `null` when the campaign has no automation job or its job could not be loaded.\n- `portal_blocks` and `portals` are `null` when the portal configurations could not be loaded.\n\nCampaigns that do not exist in the organization (or are deleted) are left out of `results`.\n",
+        "tags": [
+          "Campaign"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampaignsSummaryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/CampaignsSummaryResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
     "/v1/campaign/{campaign_id}/automations:retrigger": {
       "post": {
         "operationId": "retriggerCampaignAutomations",
         "summary": "retriggerCampaignAutomations",
-        "description": "Retrigger automation executions for specific campaign recipients that have failed.\n\nThis endpoint starts new automation executions for the specified recipients\nusing the campaign's associated automation flow. Only recipients with\nautomation_status 'failed' will be processed. Recipients with other statuses\n(success, pending, in_progress, cancelled) will be skipped to prevent\naccidentally retriggering successful or ongoing automations.\n",
+        "description": "Retrigger automation executions for specific campaign recipients that have failed.\n\nThis endpoint starts new automation executions for the specified recipients\nusing the campaign's associated automation flow. Only recipients with\nautomation_status 'failed' will be processed. Recipients with other statuses\n(success, pending, in_progress, cancelled) will be skipped to prevent\naccidentally retriggering successful or ongoing automations.\n\nA campaign that has ended (at its `end_date`, or stopped by hand) starts no new\nautomation runs: the request is rejected with 400 and message `Campaign has ended`.\n",
         "tags": [
           "Campaign Delivery"
         ],
@@ -175,7 +217,7 @@
       "post": {
         "operationId": "setupCampaign",
         "summary": "setupCampaign",
-        "description": "Creates a `campaign` entity together with its related entities and configurations in a single call.\nUsed by the campaign wizard UI, but not restricted to it.\n",
+        "description": "Creates a `campaign` entity together with its related entities and configurations in a single call.\nUsed by the campaign wizard UI, but not restricted to it.\n\nThe campaign is created as a `draft`. Its optional `start_date` and `end_date` take effect when it is\nlaunched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,\n`CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and\nnothing is created.\n\nA campaign has exactly one audience: `campaign.target_ids` must contain exactly one target ID.\nA request with no or more than one entry fails request validation with 400 (the error points at\n`/requestBody/campaign/target_ids`), and nothing is created.\nRequest validation errors (400) are returned before anything is created.\n\nWith `channels.portal_widget`, the portal block must exist: otherwise the request fails with 400\n`PORTAL_BLOCK_NOT_FOUND` before anything is created. Setup points the block at the new campaign; if a\nlater step fails, the block is pointed back at the campaign it pointed at before.\n\nA new product recommendation can carry a rule table (`rules`). It is validated before anything is created.\nIts offer products and prices must exist and not be archived (otherwise 400 `PRODUCT_OR_PRICE_UNAVAILABLE`);\nits sources (the current product and price) may be archived or missing.\n",
         "tags": [
           "Campaign"
         ],
@@ -199,6 +241,23 @@
             "$ref": "#/components/responses/SetupCampaignResponse"
           },
           "400": {
+            "description": "Invalid request; nothing was created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ClientError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SetupCampaignRuleError"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
             "$ref": "#/components/responses/ClientErrorResponse"
           },
           "500": {
@@ -276,7 +335,13 @@
           "400": {
             "$ref": "#/components/responses/ClientErrorResponse"
           },
+          "403": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
           "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          },
+          "503": {
             "$ref": "#/components/responses/ServerErrorResponse"
           }
         }
@@ -527,6 +592,9 @@
           "400": {
             "$ref": "#/components/responses/ClientErrorResponse"
           },
+          "403": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
           "404": {
             "$ref": "#/components/responses/ClientErrorResponse"
           },
@@ -534,6 +602,9 @@
             "$ref": "#/components/responses/ClientErrorResponse"
           },
           "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          },
+          "503": {
             "$ref": "#/components/responses/ServerErrorResponse"
           }
         }
@@ -564,6 +635,9 @@
           "200": {
             "$ref": "#/components/responses/RecipientResponse"
           },
+          "403": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
           "404": {
             "$ref": "#/components/responses/ClientErrorResponse"
           },
@@ -571,6 +645,9 @@
             "$ref": "#/components/responses/ClientErrorResponse"
           },
           "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          },
+          "503": {
             "$ref": "#/components/responses/ServerErrorResponse"
           }
         }
@@ -642,9 +719,25 @@
           {
             "name": "email_status",
             "in": "query",
-            "description": "Filter by email delivery status (e.g. bounced, delivered). The response total reflects the count for the filtered status.",
+            "description": "Filter by email delivery status (e.g. bounced, delivered). The response total reflects the count for the filtered status. `delivered` also matches recipients still at `sent` with an open or click, the same as the delivered count in the email stats.",
             "schema": {
               "$ref": "#/components/schemas/EmailStatus"
+            }
+          },
+          {
+            "name": "email_engagement",
+            "in": "query",
+            "description": "Filter by email engagement. Combines with email_status and the other filters; the\nresponse total and next cursor reflect the filtered set.\n",
+            "schema": {
+              "$ref": "#/components/schemas/EmailEngagement"
+            }
+          },
+          {
+            "name": "entity_ui_status",
+            "in": "query",
+            "description": "Filter by Entity UI (Next Best Action) status",
+            "schema": {
+              "$ref": "#/components/schemas/EntityUiStatus"
             }
           }
         ],
@@ -936,9 +1029,11 @@
       },
       "CampaignStatus": {
         "type": "string",
+        "description": "Lifecycle status of a campaign.\n\n- `draft`: not launched yet.\n- `scheduled`: launched with a `start_date` still in the future. It collects no recipients and\n  appears through no delivery method until it starts on its own at `start_date`.\n- `activating`: launching; recipients are being collected.\n- `active`: running.\n- `inactive`: stopped, by hand or on its own at `end_date`.\n",
         "default": "draft",
         "enum": [
           "draft",
+          "scheduled",
           "activating",
           "active",
           "inactive"
@@ -955,20 +1050,23 @@
           }
         }
       },
+      "BulkJobStatus": {
+        "type": "string",
+        "description": "The status of the automation job",
+        "enum": [
+          "queued",
+          "processing",
+          "finished",
+          "failed",
+          "cancelled",
+          "send_report"
+        ]
+      },
       "JobStatus": {
         "type": "object",
         "properties": {
           "status": {
-            "type": "string",
-            "description": "The status of the automation job",
-            "enum": [
-              "queued",
-              "processing",
-              "finished",
-              "failed",
-              "cancelled",
-              "send_report"
-            ]
+            "$ref": "#/components/schemas/BulkJobStatus"
           },
           "execution_summary": {
             "type": "array",
@@ -976,6 +1074,107 @@
               "$ref": "#/components/schemas/ExecutionSummaryItem"
             }
           }
+        }
+      },
+      "CampaignsSummaryRequest": {
+        "type": "object",
+        "properties": {
+          "campaign_ids": {
+            "type": "array",
+            "description": "IDs of the campaigns to summarize.",
+            "items": {
+              "$ref": "#/components/schemas/BaseUUID"
+            },
+            "minItems": 1,
+            "maxItems": 100,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "campaign_ids"
+        ]
+      },
+      "CampaignSummary": {
+        "type": "object",
+        "properties": {
+          "campaign_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          },
+          "job": {
+            "description": "The campaign's automation job. `null` when it has none or it could not be loaded.",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CampaignJobSummary"
+              }
+            ]
+          },
+          "portal_blocks": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Number of portal page blocks showing the campaign, across all portals of the organization.\n`null` when the portal configurations could not be loaded.\n",
+            "example": 3
+          },
+          "portals": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Number of portals with at least one block showing the campaign.\n`null` when the portal configurations could not be loaded.\n",
+            "example": 2
+          }
+        },
+        "required": [
+          "campaign_id",
+          "job",
+          "portal_blocks",
+          "portals"
+        ]
+      },
+      "CampaignJobSummary": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BulkJobStatus"
+          },
+          "execution_stats": {
+            "$ref": "#/components/schemas/CampaignJobExecutionStats"
+          },
+          "last_error": {
+            "type": "string",
+            "description": "Error that moved the job into the `failed` status."
+          },
+          "report_file_entity_id": {
+            "type": "string",
+            "description": "Entity ID of the job's report file."
+          }
+        },
+        "required": [
+          "job_id",
+          "status",
+          "execution_stats"
+        ]
+      },
+      "CampaignJobExecutionStats": {
+        "type": "object",
+        "description": "Number of the job's automation executions in total and per execution status\n(e.g. `success`, `failed`, `in_progress`, `pending`). Statuses without executions may be left out.\n",
+        "properties": {
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total"
+        ],
+        "additionalProperties": {
+          "type": "integer"
+        },
+        "example": {
+          "total": 4820,
+          "success": 3046,
+          "failed": 14,
+          "in_progress": 10
         }
       },
       "Campaign": {
@@ -997,11 +1196,13 @@
               },
               "start_date": {
                 "type": "string",
-                "format": "date"
+                "format": "date-time",
+                "description": "When the campaign starts. Optional: if set to a future time when the campaign is launched,\nthe campaign is `scheduled` and starts on its own at this time. Otherwise it is set to the\ntime the campaign is launched.\n"
               },
               "end_date": {
                 "type": "string",
-                "format": "date"
+                "format": "date-time",
+                "description": "When the campaign ends. Optional: if set, the running campaign stops on its own at this\ntime. Otherwise it is set to the time the campaign is stopped by hand.\n"
               },
               "flow_id": {
                 "type": "string"
@@ -1011,9 +1212,22 @@
               },
               "target": {
                 "$ref": "#/components/schemas/BaseRelation"
+              },
+              "product_recommendations": {
+                "$ref": "#/components/schemas/BaseRelation"
+              },
+              "type": {
+                "$ref": "#/components/schemas/CampaignType"
               }
             }
           }
+        ]
+      },
+      "CampaignType": {
+        "type": "string",
+        "description": "Use case of a campaign. Set by campaign setup.",
+        "enum": [
+          "tariff_change"
         ]
       },
       "Target": {
@@ -1051,7 +1265,7 @@
           },
           "search": {
             "type": "string",
-            "description": "Free text search entered in the target builder.\nNot applied when resolving the target, e.g. by `getTargetQueries` or `matchTargets`.\n"
+            "description": "Free text search entered in the target builder.\nApplied when resolving the target like the search of entity views: matched against all fields and combined with `filter` using AND.\n"
           },
           "sort": {
             "type": "array",
@@ -1358,7 +1572,7 @@
           },
           "sort": {
             "type": "array",
-            "description": "Elasticsearch sort fields for the target's sort order, ready to be passed to entity search.\nEnds with an `_id` tie-breaker so the order is stable. Omitted when the target has no sort.\n",
+            "description": "Elasticsearch sort fields for the target's sort order, ready to be passed to entity search.\nEnds with an `_id` tie-breaker so the order is stable. A target with a limit but no sort returns\n`_created_at:desc` and `_id:desc` (newest first). Omitted when the target has neither.\n",
             "items": {
               "type": "string"
             },
@@ -1417,6 +1631,15 @@
           "bounced",
           "complained",
           "failed"
+        ]
+      },
+      "EmailEngagement": {
+        "type": "string",
+        "description": "Engagement filter for listing a campaign's recipients, independent of the stored\n`email_status`.\n- `opened`: at least one open or one click (a click proves the email was opened even when\n  the tracking pixel was blocked).\n- `clicked`: at least one link click.\n- `unsubscribed`: the recipient opted out of email marketing.\n",
+        "enum": [
+          "opened",
+          "clicked",
+          "unsubscribed"
         ]
       },
       "EmailBounceType": {
@@ -1549,6 +1772,11 @@
                 }
               }
             }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the entity became a recipient of the campaign: at launch, when it first saw the\ncampaign in a portal or as a Next Best Action, or when the daily recipient check added it\n(campaigns with `auto_add_recipients` on).\n"
           },
           "updated_at": {
             "type": "string",
@@ -1750,77 +1978,10 @@
         "properties": {
           "type": {
             "type": "string",
+            "description": "The `CampaignType` of this variant.",
             "enum": [
               "tariff_change"
             ]
-          },
-          "product_recommendation": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string",
-                "description": "Optional name of the product recommendation. Defaults to the campaign name."
-              },
-              "source_product_id": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/BaseUUID"
-                  }
-                ],
-                "description": "Optional source product entity ID for the recommendation."
-              },
-              "source_price_id": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/BaseUUID"
-                  }
-                ],
-                "description": "Optional source price entity ID for the recommendation."
-              },
-              "offers": {
-                "type": "array",
-                "description": "Offer blocks for the product_recommendation entity.",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "target_id": {
-                      "$ref": "#/components/schemas/BaseUUID",
-                      "description": "Optional per-offer target entity ID."
-                    },
-                    "items": {
-                      "type": "array",
-                      "description": "Product/price pairs within this offer.",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "product_id": {
-                            "$ref": "#/components/schemas/BaseUUID"
-                          },
-                          "price_id": {
-                            "$ref": "#/components/schemas/BaseUUID"
-                          },
-                          "highlight_config": {
-                            "type": "object",
-                            "description": "Opaque per-item highlight/comparison config persisted as-is on the entity.",
-                            "additionalProperties": true
-                          }
-                        },
-                        "required": [
-                          "product_id",
-                          "price_id"
-                        ],
-                        "additionalProperties": false
-                      }
-                    }
-                  },
-                  "required": [
-                    "items"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            },
-            "additionalProperties": false
           },
           "campaign": {
             "type": "object",
@@ -1833,10 +1994,22 @@
               },
               "target_ids": {
                 "type": "array",
-                "description": "List of target entity IDs to attach to the campaign. Today only a single\nentry is supported (campaign.target is has_one) but the array shape is kept\nfor forward-compatibility — only `target_ids[0]` is used.\n",
+                "description": "The campaign's audience as a list with exactly one target entity ID. A campaign has\nexactly one audience (`campaign.target` is has_one); the array shape is kept for\ncompatibility. A request with no or more than one entry is rejected with 400 and\nnothing is created; extra entries are never silently dropped.\n",
                 "items": {
                   "$ref": "#/components/schemas/BaseUUID"
-                }
+                },
+                "minItems": 1,
+                "maxItems": 1
+              },
+              "start_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Optional start of the campaign. Launching the campaign before this time schedules it, and\nit starts on its own at this time. Without it, the campaign starts when it is launched.\n"
+              },
+              "end_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Optional end of the campaign. Must be after `start_date` and in the future. The campaign\nstops on its own at this time. Without it, the campaign runs until it is stopped.\n"
               }
             },
             "required": [
@@ -1844,6 +2017,22 @@
               "target_ids"
             ],
             "additionalProperties": false
+          },
+          "product_recommendations": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "description": "The campaign's product recommendation (exactly one): an existing one or a new one.\n",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/SetupExistingProductRecommendation"
+                },
+                {
+                  "$ref": "#/components/schemas/SetupNewProductRecommendation"
+                }
+              ]
+            }
           },
           "journey": {
             "type": "object",
@@ -1903,8 +2092,251 @@
         },
         "required": [
           "type",
-          "product_recommendation",
-          "campaign"
+          "campaign",
+          "product_recommendations"
+        ],
+        "additionalProperties": false
+      },
+      "SetupExistingProductRecommendation": {
+        "type": "object",
+        "description": "Reuses an existing `product_recommendation` entity. It is linked, never modified.",
+        "properties": {
+          "product_recommendation_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          }
+        },
+        "required": [
+          "product_recommendation_id"
+        ],
+        "additionalProperties": false
+      },
+      "SetupNewProductRecommendation": {
+        "type": "object",
+        "description": "Creates a new `product_recommendation` entity of type `change`, either with a rule table (`rules`) or\nwith a single source (`source_product_id` + `source_price_id`) and `offers`. Not both.\n",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Optional name of the product recommendation. Defaults to the campaign name."
+          },
+          "source_product_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BaseUUID"
+              }
+            ],
+            "description": "Source product entity ID. Requires `source_price_id`."
+          },
+          "source_price_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BaseUUID"
+              }
+            ],
+            "description": "Source price entity ID. Requires `source_product_id`."
+          },
+          "offers": {
+            "type": "array",
+            "description": "Offer blocks for the product_recommendation entity.",
+            "items": {
+              "$ref": "#/components/schemas/ProductRecommendationOffer"
+            }
+          },
+          "rules": {
+            "type": "array",
+            "description": "The rule table. Excludes `source_product_id`, `source_price_id` and `offers`.\n",
+            "items": {
+              "$ref": "#/components/schemas/ProductRecommendationRule"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProductRecommendationRule": {
+        "type": "object",
+        "description": "Mirrors `ProductRecommendationRule` of the pricing API.\n",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique id of the rule within its product recommendation"
+          },
+          "source": {
+            "type": "object",
+            "nullable": true,
+            "description": "Current tariff the rule applies to. `null` = fallback rule.",
+            "properties": {
+              "product_id": {
+                "$ref": "#/components/schemas/BaseUUID"
+              },
+              "price_id": {
+                "$ref": "#/components/schemas/BaseUUID"
+              }
+            },
+            "required": [
+              "product_id",
+              "price_id"
+            ],
+            "additionalProperties": false
+          },
+          "offer_groups": {
+            "type": "array",
+            "description": "The offers of the rule, grouped by target group",
+            "items": {
+              "$ref": "#/components/schemas/ProductRecommendationOfferGroup"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "offer_groups"
+        ],
+        "additionalProperties": false
+      },
+      "ProductRecommendationOfferGroup": {
+        "type": "object",
+        "description": "Mirrors `ProductRecommendationOfferGroup` of the pricing API. No `target_id` = everyone.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique id of the offer group within its rule"
+          },
+          "target_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          },
+          "items": {
+            "type": "array",
+            "description": "Product/price pairs within this offer group.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product_id": {
+                  "$ref": "#/components/schemas/BaseUUID"
+                },
+                "price_id": {
+                  "$ref": "#/components/schemas/BaseUUID"
+                },
+                "highlight_config": {
+                  "type": "object",
+                  "description": "Opaque per-item highlight/comparison config persisted as-is on the entity.",
+                  "additionalProperties": true
+                }
+              },
+              "required": [
+                "product_id",
+                "price_id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "SetupCampaignRuleError": {
+        "type": "object",
+        "description": "Setup 400 for an invalid rule table.",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "PRODUCT_RECOMMENDATION_RULES_MIXED",
+              "INVALID_PRODUCT_RECOMMENDATION_RULES",
+              "PRODUCT_OR_PRICE_UNAVAILABLE"
+            ]
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "RULES_REQUIRED",
+                    "RULE_SOURCE_REQUIRED",
+                    "DUPLICATE_SOURCE",
+                    "MULTIPLE_FALLBACKS",
+                    "OFFERS_REQUIRED",
+                    "OFFER_IS_OWN_SOURCE",
+                    "DUPLICATE_RULE_ID"
+                  ]
+                },
+                "rule_id": {
+                  "type": "string"
+                },
+                "offer_group_id": {
+                  "type": "string"
+                },
+                "item_index": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          },
+          "product_ids": {
+            "type": "array",
+            "description": "Offer products that do not exist or are archived. Sources (the current product) may be archived or\nmissing and are not listed.\n",
+            "items": {
+              "type": "string"
+            }
+          },
+          "price_ids": {
+            "type": "array",
+            "description": "Offer prices that do not exist or are archived. Sources (the current price) may be archived or\nmissing and are not listed.\n",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "ProductRecommendationOffer": {
+        "type": "object",
+        "properties": {
+          "target_id": {
+            "$ref": "#/components/schemas/BaseUUID",
+            "description": "Optional per-offer target entity ID. An offer without a target is shown to everyone."
+          },
+          "items": {
+            "type": "array",
+            "description": "Product/price pairs within this offer.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product_id": {
+                  "$ref": "#/components/schemas/BaseUUID"
+                },
+                "price_id": {
+                  "$ref": "#/components/schemas/BaseUUID"
+                },
+                "highlight_config": {
+                  "type": "object",
+                  "description": "Opaque per-item highlight/comparison config persisted as-is on the entity.",
+                  "additionalProperties": true
+                }
+              },
+              "required": [
+                "product_id",
+                "price_id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "items"
         ],
         "additionalProperties": false
       },
@@ -1913,18 +2345,25 @@
         "properties": {
           "type": {
             "type": "string",
+            "description": "The `CampaignType` of this variant.",
             "enum": [
               "tariff_change"
             ]
           },
-          "product_recommendation_id": {
-            "$ref": "#/components/schemas/BaseUUID"
-          },
           "campaign_id": {
-            "$ref": "#/components/schemas/BaseUUID"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BaseUUID"
+              }
+            ],
+            "description": "The created campaign."
           },
-          "journey_id": {
-            "$ref": "#/components/schemas/BaseUUID"
+          "product_recommendation_ids": {
+            "type": "array",
+            "description": "All product recommendations linked to the campaign, created and reused, in request order.\n",
+            "items": {
+              "$ref": "#/components/schemas/BaseUUID"
+            }
           },
           "portal_widget_id": {
             "$ref": "#/components/schemas/BaseUUID"
@@ -1932,8 +2371,8 @@
         },
         "required": [
           "type",
-          "product_recommendation_id",
-          "campaign_id"
+          "campaign_id",
+          "product_recommendation_ids"
         ],
         "additionalProperties": false
       }
@@ -2076,11 +2515,12 @@
                   "description": "Recipients with a recorded email status (the KPI denominator)."
                 },
                 "sent": {
-                  "type": "integer"
+                  "type": "integer",
+                  "description": "Recipients still at email_status `sent` with no open or click recorded."
                 },
                 "delivered": {
                   "type": "integer",
-                  "description": "Recipients whose SES Delivery event was recorded (needs Delivery publishing enabled)."
+                  "description": "Recipients whose SES Delivery event was recorded, plus recipients still at\nemail_status `sent` that opened or clicked (engagement proves delivery).\n"
                 },
                 "bounced": {
                   "type": "integer"
@@ -2105,7 +2545,7 @@
                 },
                 "opened": {
                   "type": "integer",
-                  "description": "Unique recipients with at least one open (only where open tracking is on)."
+                  "description": "Unique recipients with at least one open or click (only where tracking is on). A\nclick counts as an open even when no open was recorded.\n"
                 },
                 "clicked": {
                   "type": "integer",
@@ -2303,6 +2743,27 @@
                   "widgets"
                 ]
               }
+            }
+          }
+        }
+      },
+      "CampaignsSummaryResponse": {
+        "description": "Automation job progress and portal usage per campaign",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CampaignSummary"
+                  }
+                }
+              },
+              "required": [
+                "results"
+              ]
             }
           }
         }

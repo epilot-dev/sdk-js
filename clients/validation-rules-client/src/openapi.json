@@ -1055,7 +1055,11 @@
               },
               "placeholder": {
                 "type": "string",
-                "description": "Placeholder for the validation rule."
+                "description": "Placeholder shown to end customers in the input field the rule is applied to."
+              },
+              "description": {
+                "type": "string",
+                "description": "Internal note describing the rule. Only shown to users configuring rules, never to end customers."
               },
               "used_by": {
                 "type": "array",
@@ -2064,9 +2068,16 @@
             "$ref": "#/components/schemas/AppliesWhen"
           },
           "allow_failure": {
-            "type": "boolean",
             "default": false,
-            "description": "When true, the condition is advisory: it is always evaluated and reported\nwhen it fails, but it never takes part in the validity verdict.\nThe input is valid when every blocking (non-advisory) condition passes.\nA rule whose conditions are all advisory is always valid (warnings only).\n"
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "$ref": "#/components/schemas/ParameterValue"
+              }
+            ],
+            "description": "When true, the condition is advisory: it is always evaluated and reported\nwhen it fails, but it never takes part in the validity verdict.\nThe input is valid when every blocking (non-advisory) condition passes.\nA rule whose conditions are all advisory is always valid (warnings only).\n\nA parameter (e.g. `{ \"source\": \"parameter\", \"name\": \"warn_only\" }`) lets the consumer\ndecide at evaluation time, e.g. blocking for end customers but advisory for service agents.\nThe condition is advisory only when the consumer binds the parameter to the boolean `true`;\nan unbound, empty or any other value keeps it blocking. The parameter must not carry an\nadjustment.\n"
           }
         }
       },
@@ -2244,7 +2255,7 @@
       },
       "ParameterValue": {
         "type": "object",
-        "description": "A comparison value supplied by the consumer that evaluates the rule, identified by a name\nthe rule chooses (e.g. `start_date`). The rule stores the name only. The consumer binds the\nname to a source of its own - a journey binds it to the value of another block - and\nresolves it at evaluation time, so the rule never references the consumer's objects and\nstays reusable across journeys and forms.\n\nA parameter's kind is determined by the field it is used in: `number`, `text` or `date`\nfor comparison values, range bounds, adjustment amounts and relative date offsets, or a\nnumber, string or boolean as an `applies_when` value, or the `value_type` of the External\nValues hook input it supplies (`ExternalValue.inputs`). One name is compared as one kind\nthroughout a rule; a rule using a name as two kinds is rejected at write time. A parameter\nthe consumer leaves unbound or empty leaves the comparison unresolved.\n",
+        "description": "A comparison value supplied by the consumer that evaluates the rule, identified by a name\nthe rule chooses (e.g. `start_date`). The rule stores the name only. The consumer binds the\nname to a source of its own - a journey binds it to the value of another block - and\nresolves it at evaluation time, so the rule never references the consumer's objects and\nstays reusable across journeys and forms.\n\nA parameter's kind is determined by the field it is used in: `number`, `text` or `date`\nfor comparison values, range bounds, adjustment amounts and relative date offsets, a\nnumber, string or boolean as an `applies_when` value, a boolean as a condition's\n`allow_failure`, or the `value_type` of the External Values hook input it supplies\n(`ExternalValue.inputs`). One name is compared as one kind\nthroughout a rule; a rule using a name as two kinds is rejected at write time. A parameter\nthe consumer leaves unbound or empty leaves the comparison unresolved.\n",
         "required": [
           "source",
           "name"

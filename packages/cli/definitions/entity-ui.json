@@ -1,0 +1,551 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Entity UI API",
+    "version": "1.0.0",
+    "description": "Stores the definitions of AI widgets rendered on entity pages.\n\nA widget definition is **immutable** and **content-addressed**: its `ref` is the lowercase hex SHA-256 of the\ndefinition's RFC 8785 (JCS) canonical JSON, scoped to the caller's organization. Storing the same definition\ntwice returns the same `ref`. Definitions are never updated or deleted, so every schema version that ever\nreferenced a `ref` keeps resolving it.\n"
+  },
+  "tags": [
+    {
+      "name": "Widget Definitions",
+      "description": "Immutable, content-addressed AI widget definitions"
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://entity-ui.sls.epilot.io"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/entity-ui/widget-definitions": {
+      "put": {
+        "operationId": "putWidgetDefinition",
+        "summary": "putWidgetDefinition",
+        "description": "Stores a widget definition and returns its `ref`.\n\nThe server canonicalizes the body with RFC 8785 (JCS) and hashes the canonical UTF-8 bytes with SHA-256.\nStoring a definition that already exists in the organization is a no-op that returns `200` with the same\n`ref`; the stored item is never overwritten.\n\nRequires `schema:update` in the organization.\n",
+        "tags": [
+          "Widget Definitions"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "schema:update"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WidgetDefinition"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The definition was already stored",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WidgetDefinitionRefResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "The definition was stored",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WidgetDefinitionRefResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          }
+        }
+      }
+    },
+    "/v1/entity-ui/widget-definitions/{ref}": {
+      "get": {
+        "operationId": "getWidgetDefinition",
+        "summary": "getWidgetDefinition",
+        "description": "Returns a stored widget definition in its canonical form.\n\nThe response never changes for a given `ref`, so it is cacheable forever.\n\nRequires `entity:view` in the organization of the token.\n",
+        "tags": [
+          "Widget Definitions"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WidgetDefinitionRefPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The widget definition",
+            "headers": {
+              "Cache-Control": {
+                "description": "Always `private, max-age=31536000, immutable`",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "description": "The quoted `ref`",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "Always `Authorization, x-epilot-org-id, x-ivy-org-id, Origin`",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WidgetDefinition"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/entity-ui/widget-definitions/batch-get": {
+      "post": {
+        "operationId": "batchGetWidgetDefinitions",
+        "summary": "batchGetWidgetDefinitions",
+        "description": "Returns up to 20 stored widget definitions by `ref`. Refs that are not stored in the organization are\nlisted in `missing`.\n\nThe limit keeps the largest possible response under Lambda's 6MB synchronous response limit: 20 definitions\nat the 131072-byte canonical cap, with every byte escaped a second time inside the Lambda response.\n\nRequires `entity:view` in the organization of the token.\n",
+        "tags": [
+          "Widget Definitions"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchGetWidgetDefinitionsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The requested definitions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchGetWidgetDefinitionsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authentication using epilot OAuth2 bearer token.\nInclude the JWT token in the Authorization header: `Authorization: Bearer <token>`\n",
+        "bearerFormat": "JWT"
+      }
+    },
+    "parameters": {
+      "WidgetDefinitionRefPathParam": {
+        "name": "ref",
+        "in": "path",
+        "required": true,
+        "description": "Lowercase hex SHA-256 of the definition's RFC 8785 canonical JSON",
+        "schema": {
+          "$ref": "#/components/schemas/WidgetDefinitionRef"
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "The request is malformed or fails validation",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Missing or invalid authentication",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "The caller lacks the permission this operation requires",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "No definition with this ref is stored in the organization",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "PayloadTooLarge": {
+        "description": "The canonical definition exceeds 131072 bytes",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "ServiceUnavailable": {
+        "description": "Some definitions could not be read before the retry budget ran out; the request can be retried",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "WidgetDefinitionRef": {
+        "type": "string",
+        "description": "Lowercase hex SHA-256 of the definition's RFC 8785 canonical JSON",
+        "pattern": "^[a-f0-9]{64}$",
+        "example": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      },
+      "WidgetDefinitionRefResponse": {
+        "type": "object",
+        "required": [
+          "ref"
+        ],
+        "properties": {
+          "ref": {
+            "$ref": "#/components/schemas/WidgetDefinitionRef"
+          }
+        }
+      },
+      "WidgetDefinition": {
+        "type": "object",
+        "description": "Version 1 of an AI widget definition. Unknown keys are rejected at every level, because any extra key would\nproduce a different `ref` for an otherwise identical definition.\n",
+        "additionalProperties": false,
+        "required": [
+          "version",
+          "prompt",
+          "manifest",
+          "html",
+          "strings"
+        ],
+        "properties": {
+          "version": {
+            "type": "integer",
+            "enum": [
+              1
+            ]
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The admin's own words",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "manifest": {
+            "$ref": "#/components/schemas/WidgetManifest"
+          },
+          "html": {
+            "type": "string",
+            "description": "Body fragment rendered inside the sandboxed frame",
+            "minLength": 1,
+            "maxLength": 65536
+          },
+          "strings": {
+            "$ref": "#/components/schemas/WidgetStrings"
+          },
+          "suggestions": {
+            "$ref": "#/components/schemas/WidgetSuggestions"
+          }
+        }
+      },
+      "WidgetManifest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "relations",
+          "libs"
+        ],
+        "properties": {
+          "relations": {
+            "$ref": "#/components/schemas/WidgetRelations"
+          },
+          "libs": {
+            "type": "array",
+            "description": "Host-injected libraries, `[]` for none",
+            "items": {
+              "type": "string",
+              "enum": [
+                "echarts"
+              ]
+            }
+          },
+          "icons": {
+            "type": "array",
+            "description": "Icon names the widget renders",
+            "maxItems": 40,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "WidgetRelations": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "mode",
+          "schemas",
+          "size"
+        ],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "none",
+              "direct",
+              "reverse",
+              "both"
+            ]
+          },
+          "schemas": {
+            "type": "array",
+            "description": "Related schemas to load; empty means every related schema, and must be empty when mode is none",
+            "items": {
+              "type": "string"
+            }
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "anyOf": [
+          {
+            "properties": {
+              "mode": {
+                "enum": [
+                  "direct",
+                  "reverse",
+                  "both"
+                ]
+              }
+            }
+          },
+          {
+            "properties": {
+              "mode": {
+                "enum": [
+                  "none"
+                ]
+              },
+              "schemas": {
+                "maxItems": 0
+              }
+            }
+          }
+        ]
+      },
+      "WidgetStrings": {
+        "type": "object",
+        "description": "Localized string tables; both include `title`",
+        "additionalProperties": false,
+        "required": [
+          "de",
+          "en"
+        ],
+        "properties": {
+          "de": {
+            "$ref": "#/components/schemas/WidgetStringTable"
+          },
+          "en": {
+            "$ref": "#/components/schemas/WidgetStringTable"
+          }
+        }
+      },
+      "WidgetStringTable": {
+        "type": "object",
+        "description": "String table of one locale. Keys are what the widget passes to `t()`; both tables include `title`.\n\nEvery key must match `^[a-z0-9_]{1,64}$` (snake_case, at most 64 characters) and may not be `__proto__`. The\nserver enforces this and answers `400` naming the offending key; OpenAPI 3.0 has no keyword to express it.\n",
+        "required": [
+          "title"
+        ],
+        "maxProperties": 200,
+        "additionalProperties": {
+          "type": "string",
+          "maxLength": 1000
+        }
+      },
+      "WidgetSuggestions": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "de",
+          "en"
+        ],
+        "properties": {
+          "de": {
+            "type": "array",
+            "maxItems": 6,
+            "items": {
+              "type": "string"
+            }
+          },
+          "en": {
+            "type": "array",
+            "maxItems": 6,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "BatchGetWidgetDefinitionsRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "refs"
+        ],
+        "properties": {
+          "refs": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/components/schemas/WidgetDefinitionRef"
+            }
+          }
+        }
+      },
+      "BatchGetWidgetDefinitionsResponse": {
+        "type": "object",
+        "required": [
+          "definitions",
+          "missing"
+        ],
+        "properties": {
+          "definitions": {
+            "type": "object",
+            "description": "Stored definitions keyed by ref",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/WidgetDefinition"
+            }
+          },
+          "missing": {
+            "type": "array",
+            "description": "Requested refs that are not stored in the organization",
+            "items": {
+              "$ref": "#/components/schemas/WidgetDefinitionRef"
+            }
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "description": "Standard error response format for all API errors",
+        "required": [
+          "error",
+          "status"
+        ],
+        "properties": {
+          "error": {
+            "description": "Error message, or the list of validation errors for a 400",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            ]
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the error"
+          }
+        }
+      }
+    }
+  }
+}

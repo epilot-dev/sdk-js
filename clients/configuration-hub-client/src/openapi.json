@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Configuration Hub API",
-    "description": "Lightweight index API for exploring epilot organization configurations.\n\nProvides a unified tree view across all config types. Returns summary metadata only —\nthe frontend calls individual epilot APIs directly (via @epilot/sdk) for full config payloads.\n\n## Source APIs per resource type\n\nEach resource type maps to a specific epilot API. The frontend should use the corresponding\n@epilot/sdk client to fetch full config details (e.g., for the side panel JSON view).\n\n| Resource Type | Source API | SDK Client |\n|---|---|---|\n| `journey` | journey.sls.epilot.io | `@epilot/sdk/journey` |\n| `datasource` | epilot360-native-journeys.sls.epilot.io | – (plain HTTP client) |\n| `automation_flow` | automation.sls.epilot.io | `@epilot/sdk/automation` |\n| `workflow_definition` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `closing_reason` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `flow_template` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `schema` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `taxonomy` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `taxonomy_classification` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `emailtemplate` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `product` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `price` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `tax` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `coupon` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `file` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `document_template` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `webhook` | webhooks.sls.epilot.io | `@epilot/sdk/webhooks` |\n| `saved_view` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `dashboard` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `kanban` | kanban.sls.epilot.io | `@epilot/sdk/kanban` |\n| `role` | permissions.sls.epilot.io | `@epilot/sdk/permissions` |\n| `usergroup` | user.sls.epilot.io | `@epilot/sdk/user` |\n| `validation_rule` | entity.sls.epilot.io | `@epilot/sdk/validation-rules` |\n| `integration` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `app` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `designbuilder` | design-builder-api.sls.epilot.io | `@epilot/sdk/design` |\n| `notification_template` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `custom_variable` | entity.sls.epilot.io | `@epilot/sdk/template-variables` |\n| `environment_variable` | environments.sls.epilot.io | `@epilot/sdk/environments` |\n| `entity_mapping` | entity-mapping.sls.epilot.io | `@epilot/sdk/entity-mapping` |\n| `portal_config` | customer-portal.sls.epilot.io | `@epilot/sdk/customer-portal` |\n| `target` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `product_recommendation` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `access_token` | access-token.sls.epilot.io | `@epilot/sdk/access-token` |\n| `email_signature` | email-settings.sls.epilot.io | `@epilot/sdk/email-settings` |\n| `shared_inbox` | email-settings.sls.epilot.io | `@epilot/sdk/email-settings` |\n| `org_setting` | organization-v2.sls.epilot.io | `@epilot/sdk/organization` |\n",
-    "version": "0.2.0"
+    "description": "Lightweight index API for exploring epilot organization configurations.\n\nProvides a unified tree view across all config types. Returns summary metadata only —\nthe frontend calls individual epilot APIs directly (via @epilot/sdk) for full config payloads.\n\n## Source APIs per resource type\n\nEach resource type maps to a specific epilot API. The frontend should use the corresponding\n@epilot/sdk client to fetch full config details (e.g., for the side panel JSON view).\n\n| Resource Type | Source API | SDK Client |\n|---|---|---|\n| `journey` | journey.sls.epilot.io | `@epilot/sdk/journey` |\n| `datasource` | epilot360-native-journeys.sls.epilot.io | – (plain HTTP client) |\n| `automation_flow` | automation.sls.epilot.io | `@epilot/sdk/automation` |\n| `workflow_definition` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `closing_reason` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `flow_template` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `schema` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `taxonomy` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `taxonomy_classification` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `emailtemplate` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `product` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `price` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `tax` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `coupon` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `file` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `document_template` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `webhook` | webhooks.sls.epilot.io | `@epilot/sdk/webhooks` |\n| `saved_view` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `dashboard` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `kanban` | kanban.sls.epilot.io | `@epilot/sdk/kanban` |\n| `role` | permissions.sls.epilot.io | `@epilot/sdk/permissions` |\n| `usergroup` | user.sls.epilot.io | `@epilot/sdk/user` |\n| `validation_rule` | entity.sls.epilot.io | `@epilot/sdk/validation-rules` |\n| `integration` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `app` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `designbuilder` | design-builder-api.sls.epilot.io | `@epilot/sdk/design` |\n| `notification_template` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `custom_variable` | entity.sls.epilot.io | `@epilot/sdk/template-variables` |\n| `environment_variable` | environments.sls.epilot.io | `@epilot/sdk/environments` |\n| `entity_mapping` | entity-mapping.sls.epilot.io | `@epilot/sdk/entity-mapping` |\n| `portal_config` | customer-portal.sls.epilot.io | `@epilot/sdk/customer-portal` |\n| `target` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `product_recommendation` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `access_token` | access-token.sls.epilot.io | `@epilot/sdk/access-token` |\n| `email_signature` | email-settings.sls.epilot.io | `@epilot/sdk/email-settings` |\n| `shared_inbox` | email-settings.sls.epilot.io | `@epilot/sdk/email-settings` |\n| `event_catalog_event` | event-catalog.sls.epilot.io | `@epilot/sdk/event-catalog` |\n| `org_setting` | organization-v2.sls.epilot.io | `@epilot/sdk/organization` |\n",
+    "version": "0.4.0"
   },
   "servers": [
     {
@@ -39,6 +39,10 @@
     {
       "name": "Health",
       "description": "Configuration health scans, reports, coverage requests, cleanup and ignored findings"
+    },
+    {
+      "name": "Previews",
+      "description": "Preview orgs — temporary copies of an org's configuration"
     }
   ],
   "paths": {
@@ -51,9 +55,20 @@
           }
         ],
         "summary": "listConfigTypes",
-        "description": "Returns the static list of available configuration types with display metadata.\nThis is a cheap call — no fan-out to downstream APIs. Returns all known types\nwith labels and icons. The frontend should then call `listConfigs` separately\nfor each type it wants to load.\n",
+        "description": "Returns the static list of available configuration types with display metadata.\nThis is a cheap call — no fan-out to downstream APIs. Returns all known types\nwith labels and icons. The frontend should then call `listConfigs` separately\nfor each type it wants to load.\n\nDependency-only types (entity mappings, validation rules, product\nrecommendations, files) are normally pulled in only as dependencies of\nother configs. Pass `include_dependency_only=true` to list them too,\nmarked `dependency_only: true`.\n",
         "tags": [
           "Configs"
+        ],
+        "parameters": [
+          {
+            "name": "include_dependency_only",
+            "in": "query",
+            "description": "Also return dependency-only types, appended after the top-level types.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -140,7 +155,7 @@
           {
             "name": "blueprint_ids",
             "in": "query",
-            "description": "Filter by installed-blueprint IDs (comma-separated). Only configs installed by one of the listed blueprints are returned.",
+            "description": "Filter by installed-blueprint IDs (comma-separated). Only configs installed by one of the listed blueprints are returned.\nTypes flagged `requires_blueprint_filter` (files) are never indexed and list only through this filter,\nread from the blueprints' manifests.\n",
             "schema": {
               "type": "string"
             }
@@ -278,6 +293,41 @@
         }
       }
     },
+    "/v1/configs/{type}/{id}/connections": {
+      "get": {
+        "operationId": "getConfigConnections",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
+        "summary": "getConfigConnections",
+        "description": "What a config needs and what uses it, from the org's config index.\nSame connection graph as the `connections`, `connections_needs` and\n`connections_used_by` counts on index rows, so the two always agree\nfor the same index build. `used_by` never repeats a config in `needs`.\n",
+        "tags": [
+          "Configs"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ConfigType"
+          },
+          {
+            "$ref": "#/components/parameters/ConfigId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The config's connections",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigConnectionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/configs/index": {
       "get": {
         "operationId": "getIndex",
@@ -351,7 +401,7 @@
           }
         ],
         "summary": "getHealthReport",
-        "description": "Return the caller org's current health report: scan status, summary\ncounts by severity, new/resolved deltas vs the previous scan, and the\nfull finding list (errors first, then most recently appeared).\nFindings carry `first_seen`/`last_seen` so the UI can correlate new\nfindings with recent imports and installs.\n",
+        "description": "Return the caller org's current health report: scan status, summary\ncounts by severity, new/resolved deltas vs the previous scan, and the\nfull finding list (errors first, then most recently appeared).\nFindings carry `first_seen`/`last_seen` so the UI can correlate new\nfindings with recent syncs and installs.\n",
         "tags": [
           "Health"
         ],
@@ -475,7 +525,7 @@
           }
         ],
         "summary": "startHealthCleanup",
-        "description": "Remove references that are already inert: dangling `$relation` entries\non products and prices (a price selling with a deleted tax, a product\nlinking a deleted price, …), automation triggers pointed at a deleted\njourney (they can never fire), and the journey attached to a workflow\ntask when that journey is deleted (the task itself stays). Only\nfindings flagged `cleanable` are touched; live wiring — an action's\nemail template, a task's automation, a webhook target — is never\nmodified, because removing it would change what runs. Without\na body every cleanable finding is cleaned; `finding_ids` narrows the\nset (e.g. one row's Clean up button). Fire-and-forget: poll\n`getHealthReport` — status `cleaning` until done.\n",
+        "description": "Remove references that are already inert: dangling `$relation` entries\non products and prices (a price selling with a deleted tax, a product\nlinking a deleted price, …), automation triggers pointed at a deleted\njourney (they can never fire), and the journey attached to a workflow\ntask when that journey is deleted (the task itself stays). Only\nfindings flagged `cleanable` are touched; live wiring — an action's\nemail template, a task's automation, a webhook target — is never\nmodified, because removing it would change what runs. Without\na body every cleanable finding is cleaned; `finding_ids` narrows the\nset (e.g. one row's Clean up button). Fire-and-forget: poll\n`getHealthReport` — status `cleaning` until done.\nA scoped token (an `allowed_actions` claim, e.g. a `config:write` agent\ntoken) may only clean up its own organization (403 otherwise).\n",
         "tags": [
           "Health"
         ],
@@ -635,7 +685,7 @@
           }
         ],
         "summary": "compareConfigs",
-        "description": "Compare the caller org's configs of a single type against another\n(source) org, side by side. Rows are paired via the lineage registry in\nboth sync directions (caller imported from source, or source imported\nfrom caller); configs without a counterpart come back as `only_current`\nor `only_source`.\n\n`source_auth_token` must be a valid token for `source_org_id` — the\nfrontend mints one via the pipeline pairing, mirroring `createSyncJob`'s\n`target_auth_token`. The token is verified against `source_org_id`\nbefore any source-org data is read.\n\nPOST because the request carries a token; the operation reads only.\n",
+        "description": "Compare the caller org's configs of a single type against another\n(source) org, side by side. Rows are paired via the lineage registry in\nboth sync directions (caller pulled from source, or source pulled\nfrom caller); configs without a counterpart come back as `only_current`\nor `only_source`.\n\n`source_auth_token` must be a valid token for `source_org_id` — the\nfrontend mints one via the pipeline pairing, mirroring `createSyncJob`'s\n`target_auth_token`. The token is verified against `source_org_id`\nbefore any source-org data is read.\n\nPOST because the request carries a token; the operation reads only.\n",
         "tags": [
           "Compare"
         ],
@@ -851,7 +901,7 @@
           }
         ],
         "summary": "createSyncJob",
-        "description": "Create a new cross-org sync job. The job is enqueued for asynchronous execution\nby the worker Lambda; the response returns the persisted job header with status\n`pending`.\n\nSee `docs/sync/INTERFACES.md` for the locked request/response contract.\n",
+        "description": "Create a new cross-org sync job. The job is enqueued for asynchronous execution\nby the worker Lambda; the response returns the persisted job header with status\n`pending`.\nA scoped token (an `allowed_actions` claim, e.g. a `config:write` agent token)\nmay only start a live job whose `target_org_id` is its own organization (403\notherwise); plans (`dry_run`) into any org stay allowed.\n\nSee `docs/sync/INTERFACES.md` for the locked request/response contract.\n",
         "tags": [
           "Sync"
         ],
@@ -972,6 +1022,102 @@
         }
       }
     },
+    "/v1/configs/sync-jobs/{id}/health": {
+      "get": {
+        "operationId": "getSyncJobHealth",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
+        "summary": "getSyncJobHealth",
+        "description": "Targeted health check of an applied (non-dry-run) sync job. When the job\nreaches its terminal status, the target org is scanned asynchronously\nfor the configs the job wrote — rows with status `created` or\n`patched` and a `target_id` — using the same finding logic as\n`getHealthReport`, plus `source_org_reference` for written payloads\nthat still carry a source-org id, and `secret_value_missing` (warning)\nfor a referenced SecretString variable the job created: a sync copies\na variable's key, never its value, so setting it is a manual step. It runs for `succeeded` and\n`partial` jobs, and for `failed` jobs that wrote at least one config;\notherwise it is `skipped`. Best-effort: it never changes the job's own\nstatus, and its results never replace the org-wide health report.\nReadable from both the source and the target org.\n\nA finished job that never had a check (it finished before checks\nexisted) reports `not_run`. A check left `pending` or `running` for\nlonger than the scan can take is reported as `failed`; both can be\nstarted again with `runSyncJobHealth`.\n",
+        "tags": [
+          "Sync",
+          "Health"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Health check of the job's written configs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJobHealth"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sync job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/health:run": {
+      "post": {
+        "operationId": "runSyncJobHealth",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
+        "summary": "runSyncJobHealth",
+        "description": "Start the targeted health check of a finished, applied sync job again:\nfor jobs that finished before checks existed (`not_run`), checks that\nfailed or got stuck, or to re-check after fixing something. Same scope\nand rules as the automatic check after every sync. Callable from the\nsource or the target org; the scan runs in the target org. Answers with\nthe check's new state (`pending`) and runs asynchronously; poll\n`getSyncJobHealth`.\n",
+        "tags": [
+          "Sync",
+          "Health"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Health check started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJobHealth"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sync job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`job_not_applied` (a plan: nothing was written), `job_not_finished`\n(the job is still running), or `health_check_running` (a check is\nalready pending or running)\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/configs/sync-jobs/{id}/retry": {
       "post": {
         "operationId": "retrySyncJob",
@@ -981,7 +1127,7 @@
           }
         ],
         "summary": "retrySyncJob",
-        "description": "Retry the unresolved resources from a prior sync job: `failed` rows, plus\nrows the original run left at `pending`/`in_progress` because it stopped\nearly. Creates a new job whose scope is that `(type, source_id)` set and\nenqueues it for execution. Optionally accepts inline payload overrides.\n\nWith `resources`, only those rows are retried, plus the unresolved rows\nof the original job they depend on (transitively). The new job carries\n`retry_of`; the original job's `retried_by` gains the new job's id.\n",
+        "description": "Retry the unresolved resources from a prior sync job: `failed` rows, plus\nrows the original run left at `pending`/`in_progress` because it stopped\nearly. Creates a new job whose scope is that `(type, source_id)` set and\nenqueues it for execution. Optionally accepts inline payload overrides.\nA scoped token (an `allowed_actions` claim, e.g. a `config:write` agent\ntoken) may only retry a live job whose stored target is its own\norganization (403 otherwise).\n\nWith `resources`, only those rows are retried, plus the unresolved rows\nof the original job they depend on (transitively). The new job carries\n`retry_of`; the original job's `retried_by` gains the new job's id.\n",
         "tags": [
           "Sync"
         ],
@@ -1275,6 +1421,14 @@
             "schema": {
               "$ref": "#/components/schemas/SyncPlanAction"
             }
+          },
+          {
+            "name": "has_conflicts",
+            "in": "query",
+            "description": "`true`: only rows whose plan has conflicts (`plan.conflicts`), so\na client can load every conflict without paging through the plan.\n",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -1514,7 +1668,7 @@
           }
         ],
         "summary": "applySyncPlan",
-        "description": "Run a finished plan for real. Creates a new sync job (it carries\n`applied_from_plan`; the plan's `applied_by` gets the new job's id)\nand enqueues it.\n\nBy default the job applies every resource the plan would `create` or\n`update`. `no_change` and `skip` resources are not written. Change\nthe selection with:\n- `resources`: apply exactly these rows of the plan. Can include\n  `no_change` rows to write them anyway.\n- `exclude`: leave these rows out (applied after `resources`).\n\nRows that are not applied are still listed on the new job, as\n`skipped` with `excluded_from_apply`. Their existing targets keep\nresolving references from the applied resources.\n\nLeaving out a resource the plan would create, while an applied\nresource references it, would leave that reference pointing at a\nresource that does not exist in the target. The request is then\nrejected with 409 and `missing_dependencies`, unless\n`allow_missing_dependencies` is set.\n\nApplied resources go through the normal sync phases, so a change in\nthe target since planning is handled like in any sync. A plan can be\napplied up to 24 hours after it finished (`expires_at`); plan again\nafter that. A plan can be applied more than once; each apply job is\nadded to the plan's `applied_by`.\n\nErrors carry a machine-readable `code`.\n",
+        "description": "A scoped token (an `allowed_actions` claim, e.g. a `config:write`\nagent token) may only apply a plan whose target is its own\norganization (403 otherwise).\n\nRun a finished plan for real. Creates a new sync job (it carries\n`applied_from_plan`; the plan's `applied_by` gets the new job's id)\nand enqueues it.\n\nBy default the job applies every resource the plan would `create` or\n`update`. `no_change` and `skip` resources are not written. Change\nthe selection with:\n- `resources`: apply exactly these rows of the plan. Can include\n  `no_change` rows to write them anyway.\n- `exclude`: leave these rows out (applied after `resources`).\n\nRows that are not applied are still listed on the new job, as\n`skipped` with `excluded_from_apply`. Their existing targets keep\nresolving references from the applied resources.\n\nLeaving out a resource the plan would create, while an applied\nresource references it, would leave that reference pointing at a\nresource that does not exist in the target. The request is then\nrejected with 409 and `missing_dependencies`, unless\n`allow_missing_dependencies` is set.\n\nRows whose plan has conflicts (`plan.conflicts`: the target was\nchanged since the last sync, and applying would overwrite that, or\napplying would replace most of the target) need a decision, one of\nthree: list them in `overwrite_conflicts` to apply them anyway (the\ntarget's changes are lost), list them in `merge_conflicts` to apply\nthem and keep the target's own changes, or leave them out (`exclude`,\nor a `resources` list without them) to keep the target's version.\nApplying one without a decision is rejected with 409 and\n`unresolved_conflicts`; nothing is applied.\n\nA merged row is written as the source's version with the target's\nown changes put back on the conflicting paths: `target_edited` and\n`target_only_removed` paths keep the target's value, and each\n`both_edited` path gets the side its decision names (a missing\ndecision: 409 `unresolved_conflicts`, with the row's\n`undecided_paths`). Only rows with an empty `plan.merge_blockers` can\nbe merged (409 `merge_not_possible` otherwise). An entity schema is\nmerged by its own merge, which matches attributes by name and groups\nby id: it needs a decision for each of its `plan.merge_choices`\ninstead of for the `both_edited` paths. The merge is computed\nagain when the row is written, from the target as it is then; a row\nthat cannot be merged safely at that point fails with an error that\nsays so and is not written.\nOne apply of a plan runs at a time: while one runs, another is\nrejected with 409 and `apply_in_progress` (its `job_id`).\nThe decision is recorded on the apply job's rows\n(`plan.conflict_resolution`).\n\nApplied resources go through the normal sync phases, so a change in\nthe target since planning is handled like in any sync. A plan can be\napplied up to 24 hours after it finished (`expires_at`); plan again\nafter that. A plan can be applied more than once; each apply job is\nadded to the plan's `applied_by`.\n\nA rejected plan (`rejectSyncPlan`) cannot be applied: 409\n`plan_rejected`.\n\nErrors carry a machine-readable `code`.\n",
         "tags": [
           "Sync"
         ],
@@ -1555,7 +1709,7 @@
             }
           },
           "403": {
-            "description": "The caller is not the plan's source org",
+            "description": "The caller is not the plan's source org, nor (for a plan into a\npreview org) that preview org; or `add_resources` on a plan it\nmay not extend (`add_resources_not_allowed`)\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -1575,7 +1729,7 @@
             }
           },
           "409": {
-            "description": "The job is not a finished plan, it finished more than 24 hours ago,\nthe selection applies nothing, or it leaves out resources that\napplied ones depend on (listed in `missing_dependencies`)\n",
+            "description": "The job is not a finished plan, it was rejected (`plan_rejected`),\nit finished more than 24 hours ago, the selection applies nothing, it applies rows with undecided\nconflicts (listed in `resources`, code `unresolved_conflicts`), it\nasks to merge rows that cannot be merged (listed in `resources`,\ncode `merge_not_possible`), or it leaves out resources that applied ones depend on (listed in\n`missing_dependencies`)\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -1596,7 +1750,7 @@
           }
         ],
         "summary": "replanSyncPlan",
-        "description": "Plan some rows of a plan again, in place, e.g. after fixing a\nresource in the source org because its plan showed an unexpected\nchange. The listed resources are fetched from the source again,\ntheir dependencies are expanded again (a newly referenced resource\nis added to the plan), and their targets are read and diffed again.\nAll other rows keep their plan and diff.\n\nWithout `resources` every row is planned again; that also renews the\nplan's 24-hour window (`expires_at`). A partial replan does not,\nbecause the other rows were planned earlier.\n\nThe plan job goes back to `pending` / `in_progress` and is `ready`\nagain when it finishes (`replanned_at` / `planned_at` updated). Poll\n`getSyncPlan`.\n",
+        "description": "Plan some rows of a plan again, in place, e.g. after fixing a\nresource in the source org because its plan showed an unexpected\nchange. The listed resources are fetched from the source again,\ntheir dependencies are expanded again (a newly referenced resource\nis added to the plan), and their targets are read and diffed again.\nAll other rows keep their plan and diff.\n\nWithout `resources` every row is planned again; that also renews the\nplan's 24-hour window (`expires_at`). A partial replan does not,\nbecause the other rows were planned earlier.\n\nThe plan job goes back to `pending` / `in_progress` and is `ready`\nagain when it finishes (`replanned_at` / `planned_at` updated). Poll\n`getSyncPlan`. A rejected plan (`rejectSyncPlan`) cannot be replanned:\n409 `plan_rejected`.\n",
         "tags": [
           "Sync"
         ],
@@ -1637,7 +1791,7 @@
             }
           },
           "403": {
-            "description": "The caller is not the plan's source org",
+            "description": "The caller is not the plan's source org, nor (for a plan into a\npreview org) that preview org; or `add_resources` on a plan it\nmay not extend (`add_resources_not_allowed`)\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -1657,7 +1811,7 @@
             }
           },
           "409": {
-            "description": "The job is not a plan, or it is still running (`plan_not_ready`)",
+            "description": "The job is not a plan, it is still running (`plan_not_ready`), or\nit was rejected (`plan_rejected`)\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -1665,6 +1819,287 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/plan/reject": {
+      "post": {
+        "operationId": "rejectSyncPlan",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
+        "summary": "rejectSyncPlan",
+        "description": "Reject a plan that was not applied: it can no longer be applied or\nreplanned (`applySyncPlan` / `replanSyncPlan` answer 409\n`plan_rejected`), `getSyncPlan` reports it as not `applicable`, and\nthe job carries `rejected_at` / `rejected_by`. Called from the plan's\nsource or target org. No request body.\n\nIdempotent: rejecting a rejected plan returns it unchanged (the first\nrejection's time and user are kept).\n\nErrors carry a machine-readable `code`:\n- `plan_already_applied`: the plan has apply jobs (`applied_by`).\n- `plan_not_ready`: the plan is still running; cancel it with\n  `cancelSyncJob` instead.\n",
+        "tags": [
+          "Sync"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The rejected plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJob"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sync job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The job is not a plan, it was applied (`plan_already_applied`), or\nit is still running (`plan_not_ready`)\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncPlanApplyErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/agent-tasks": {
+      "get": {
+        "operationId": "listAgentTasks",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
+        "summary": "listAgentTasks",
+        "description": "The agent tasks of the caller's org, most recently changed first (at\nmost 500), without their items and changes. An agent task is what a\nConfiguration Agent session did in the org: see `putAgentTask`.\n",
+        "tags": [
+          "Agent tasks"
+        ],
+        "responses": {
+          "200": {
+            "description": "The org's agent tasks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AgentTaskSummary"
+                      }
+                    }
+                  },
+                  "required": [
+                    "results"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/agent-tasks/{session_id}": {
+      "get": {
+        "operationId": "getAgentTask",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
+        "summary": "getAgentTask",
+        "description": "The agent task of a Configuration Agent session in the caller's org.",
+        "tags": [
+          "Agent tasks"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AgentTaskSessionId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentTask"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The session has no task in this org"
+          }
+        }
+      },
+      "put": {
+        "operationId": "putAgentTask",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
+        "summary": "putAgentTask",
+        "description": "Written by the Configuration Agent, in the org its session works in:\nwhat the session did there, for the user to review and sign off. One\ntask per session; the whole task each time (`version` goes up by one).\n\nWrite it as soon as the session changes configuration, and again\nwhenever something is added: `state: working` while there is more to\ndo, `state: done` once everything is. `items` is the task list:\n`done` (something the agent did), `decision` (a choice the agent\nmade that the user should know about), `check` (something it\nverified) and `open_item` (something only the user can decide; give\nit `options` when there are clear choices). `changes` lists every\nresource the session created, updated or deleted.\n\nItems that keep their `id` and `title` keep what the user did with\nthem (status, choice). A task that was signed off and is written\nagain needs a new sign-off. Only the user whose session first wrote\nthe task writes it again (`403` for anyone else).\n",
+        "tags": [
+          "Agent tasks"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AgentTaskSessionId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentTaskInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The stored task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentTask"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid task"
+          },
+          "403": {
+            "description": "The task belongs to another user's session"
+          },
+          "409": {
+            "description": "The task was changed concurrently; read it and try again"
+          }
+        }
+      }
+    },
+    "/v1/configs/agent-tasks/{session_id}/items/{item_id}": {
+      "patch": {
+        "operationId": "updateAgentTaskItem",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
+        "summary": "updateAgentTaskItem",
+        "description": "Answers an open item of the task: picks one of its `options`\n(`choice`, which marks it done; `choice: null` opens it again), or\nmarks it done or open without a choice (`status`). Records who and\nwhen. Other kinds of items are a record and can't be changed. `409`\nonce the task is signed off.\n",
+        "tags": [
+          "Agent tasks"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AgentTaskSessionId"
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "$ref": "#/components/schemas/SyncJobReportItemStatus"
+                  },
+                  "choice": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "An option id of the item; null takes the choice back."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentTask"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Not an open item, or not one of its options"
+          },
+          "404": {
+            "description": "Task or item not found"
+          },
+          "409": {
+            "description": "The task is signed off, or was changed concurrently"
+          }
+        }
+      }
+    },
+    "/v1/configs/agent-tasks/{session_id}/sign-off": {
+      "post": {
+        "operationId": "signOffAgentTask",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
+        "summary": "signOffAgentTask",
+        "description": "The user has reviewed what the session did and accepts it. Only a\ntask that is `awaiting_signoff` (the agent is done and no open item\nis open); signing off a signed-off task changes nothing. The changes\nthemselves are already in the org: signing off records the review,\nit applies nothing. No request body.\n",
+        "tags": [
+          "Agent tasks"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AgentTaskSessionId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The signed-off task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentTask"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task not found"
+          },
+          "409": {
+            "description": "The agent is still working, or the task has open items"
           }
         }
       }
@@ -1678,7 +2113,7 @@
           }
         ],
         "summary": "createDeleteJob",
-        "description": "Create a bulk-delete job for the caller's organization. The selected\nresources are deleted asynchronously by a worker Lambda; the response\nreturns the persisted job header with status `pending`.\n\nRaw delete — no dependency checks are performed. On completion the\nworker auto-triggers an index rebuild so the config list reflects the\ndeletions.\n",
+        "description": "Create a bulk-delete job for the caller's organization. The selected\nresources are deleted asynchronously by a worker Lambda; the response\nreturns the persisted job header with status `pending`.\nA scoped token (an `allowed_actions` claim, e.g. a `config:write` agent\ntoken) may only delete in its own organization (403 otherwise).\n\nRaw delete — no dependency checks are performed. On completion the\nworker auto-triggers an index rebuild so the config list reflects the\ndeletions.\n",
         "tags": [
           "Delete"
         ],
@@ -1848,9 +2283,21 @@
           }
         ],
         "summary": "rebuildIndex",
-        "description": "Rebuild the configuration index for the caller's organization.\nFire-and-forget: invokes the async worker and returns immediately.\nA new rebuild will cancel any in-flight build (see `build_token`).\n",
+        "description": "Rebuild the configuration index for the caller's organization.\nFire-and-forget: invokes the async worker and returns immediately.\nA new rebuild will cancel any in-flight build (see `build_token`).\n\nBy default, types that support it list only the configs changed since\nthe last build (with a full listing at least daily). `force=true` lists\nevery type in full: the UI sets it when someone clicks Refresh again\nwhile a rebuild is running or right after one was requested.\n",
         "tags": [
           "Configs"
+        ],
+        "parameters": [
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "description": "List every config type in full instead of only what changed since the last build.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -1903,6 +2350,189 @@
           }
         }
       }
+    },
+    "/v1/previews": {
+      "post": {
+        "operationId": "createPreview",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
+        "summary": "createPreview",
+        "description": "Starts a preview of the caller's current org (internal callers: the org in `x-ivy-org-id`,\nplus `requester`): a new, temporary org with\n`organization_use: Preview` (parent = this org) that receives a copy of all of\nthis org's configuration through a sync job. When the copy is done, the\nrequesting user is made an owner of the preview org: someone with an\nepilot account becomes a member right away (no email; the org shows up\nin their org list), someone invited by email alone gets a \"your preview\norg is ready\" invitation email. Runs asynchronously; poll `getPreview`.\n",
+        "tags": [
+          "Previews"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePreviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Preview creation started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Preview"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Too many previews are being created for this org at the same time"
+          }
+        }
+      },
+      "get": {
+        "operationId": "listPreviews",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
+        "summary": "listPreviews",
+        "description": "Lists the previews requested from the caller's current org, newest first (max 50).",
+        "tags": [
+          "Previews"
+        ],
+        "responses": {
+          "200": {
+            "description": "Previews of this org",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Preview"
+                      }
+                    }
+                  },
+                  "required": [
+                    "results"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/previews/{id}": {
+      "get": {
+        "operationId": "getPreview",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
+        "summary": "getPreview",
+        "description": "Returns a preview requested from the caller's current org, with its progress. Called from a\npreview org, it also returns that org's own preview (stored under the previewed org).\n",
+        "tags": [
+          "Previews"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The preview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Preview"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Preview not found in this org"
+          }
+        }
+      }
+    },
+    "/v1/previews/{id}/cancel": {
+      "post": {
+        "operationId": "cancelPreview",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
+        "summary": "cancelPreview",
+        "description": "Cancels a preview that is still being made, or discards a `ready` one.\nCalled from the previewed org (the org `listPreviews` lists it in);\nneeds `organization:edit` there, like `createPreview`. No request body.\n\nThe preview becomes `cancelled` (`cancelled_at`, `cancelled_by`) at\nonce and never changes status again. Then, in the background: its\nstate machine is stopped; the copy job is cancelled if it still runs;\nand the preview org is queued for deletion.\n\nCancelling a `cancelled` preview returns it unchanged (and retries the\nclean-up). `failed` and `superseded` previews answer 409 with code\n`preview_not_cancellable`.\n",
+        "tags": [
+          "Previews"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The cancelled preview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Preview"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller lacks `organization:edit` in this org",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Preview not found in this org",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The preview failed or was superseded (`preview_not_cancellable`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1914,6 +2544,16 @@
       }
     },
     "parameters": {
+      "AgentTaskSessionId": {
+        "name": "session_id",
+        "in": "path",
+        "required": true,
+        "description": "The id of the Configuration Agent session; also the task's id.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,100}$"
+        }
+      },
       "ConfigType": {
         "name": "type",
         "in": "path",
@@ -2011,6 +2651,7 @@
           "access_token",
           "email_signature",
           "shared_inbox",
+          "event_catalog_event",
           "org_setting"
         ]
       },
@@ -2045,6 +2686,16 @@
             "type": "boolean",
             "description": "Whether resources of this type can be deleted via the bulk-delete API",
             "example": true
+          },
+          "dependency_only": {
+            "type": "boolean",
+            "description": "The type is normally reached only as a dependency of other configs.\nReturned only when `include_dependency_only=true` is requested.\n",
+            "example": false
+          },
+          "requires_blueprint_filter": {
+            "type": "boolean",
+            "description": "The type is not indexed: `listConfigs` returns its resources only\nwith a `blueprint_ids` filter, read from the blueprints' manifests.\n",
+            "example": false
           }
         },
         "required": [
@@ -2199,6 +2850,35 @@
           "results"
         ]
       },
+      "ConfigConnectionsResponse": {
+        "type": "object",
+        "description": "A config's connections in the org's config index",
+        "properties": {
+          "needs": {
+            "type": "array",
+            "description": "Configs this config needs (references)",
+            "items": {
+              "$ref": "#/components/schemas/ConfigNode"
+            }
+          },
+          "used_by": {
+            "type": "array",
+            "description": "Other configs that use (reference) this config",
+            "items": {
+              "$ref": "#/components/schemas/ConfigNode"
+            }
+          },
+          "indexed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the index these connections come from was built"
+          }
+        },
+        "required": [
+          "needs",
+          "used_by"
+        ]
+      },
       "IndexRebuildResponse": {
         "type": "object",
         "description": "Result of an index rebuild operation",
@@ -2278,12 +2958,19 @@
               "orphaned_group_reference",
               "uuid_group_label",
               "duplicate_attribute_name",
+              "duplicate_attribute_in_group",
+              "duplicate_attribute_id",
+              "duplicate_group_id",
+              "summary_attribute_missing",
               "duplicate_headline",
               "unreachable_attribute_purpose",
               "orphaned_price",
               "duplicate_price",
               "inactive_price_in_use",
-              "incomplete_configuration"
+              "incomplete_configuration",
+              "source_org_reference",
+              "secret_value_missing",
+              "env_value_missing"
             ]
           },
           "severity": {
@@ -2544,7 +3231,7 @@
               "pull",
               "push"
             ],
-            "description": "`pull` — the caller org imported this config from the source org\n(entry lives in the caller's lineage partition). `push` — the\nsource org imported it from the caller (entry lives in the source\norg's partition).\n"
+            "description": "`pull` — the caller org pulled this config from the source org\n(entry lives in the caller's lineage partition). `push` — the\nsource org pulled it from the caller (entry lives in the source\norg's partition).\n"
           },
           "last_synced_at": {
             "type": "string",
@@ -2792,6 +3479,10 @@
         "properties": {
           "status": {
             "type": "integer"
+          },
+          "code": {
+            "type": "string",
+            "description": "Machine-readable reason, where the operation documents one"
           },
           "error": {
             "type": "string"
@@ -3229,6 +3920,157 @@
           "level"
         ]
       },
+      "SyncJobHealthStatus": {
+        "type": "string",
+        "description": "State of a sync job's post-sync health check. `pending`: queued,\n`running`: scanning, `done`: findings available, `failed`: the check\nitself failed or did not finish (the sync is unaffected), `skipped`:\nnothing to check (a plan, a job that wrote nothing, or a cancelled\njob), `not_run`: a finished job that never had a check (start one with\n`runSyncJobHealth`).\n",
+        "enum": [
+          "pending",
+          "running",
+          "done",
+          "failed",
+          "skipped",
+          "not_run"
+        ]
+      },
+      "HealthSeverityCounts": {
+        "type": "object",
+        "required": [
+          "error",
+          "warning",
+          "info"
+        ],
+        "properties": {
+          "error": {
+            "type": "integer"
+          },
+          "warning": {
+            "type": "integer"
+          },
+          "info": {
+            "type": "integer"
+          }
+        }
+      },
+      "SyncJobHealthCheck": {
+        "type": "object",
+        "description": "Compact state of the job's post-sync health check. Full results:\n`getSyncJobHealth`. Absent on plans and on jobs that finished before\nthe check existed.\n",
+        "required": [
+          "status",
+          "counts"
+        ],
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/SyncJobHealthStatus"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/HealthSeverityCounts"
+          }
+        }
+      },
+      "SyncJobHealth": {
+        "type": "object",
+        "description": "Targeted health check of the configs a sync job wrote into the target\norg. Findings carry `first_seen` = `last_seen` = `finished_at`.\n",
+        "required": [
+          "status",
+          "scanned",
+          "counts",
+          "findings"
+        ],
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/SyncJobHealthStatus"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finished_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "scanned": {
+            "type": "integer",
+            "description": "Written configs whose payload was read."
+          },
+          "counts": {
+            "$ref": "#/components/schemas/HealthSeverityCounts"
+          },
+          "error": {
+            "type": "string",
+            "description": "Why the check failed or was skipped."
+          },
+          "baseline": {
+            "$ref": "#/components/schemas/SyncJobHealthBaseline"
+          },
+          "findings": {
+            "type": "array",
+            "description": "Errors first, then warnings, then info. Empty unless `done`.",
+            "items": {
+              "$ref": "#/components/schemas/SyncHealthFinding"
+            }
+          }
+        }
+      },
+      "SyncHealthFinding": {
+        "description": "A finding of the post-sync health check: a `HealthFinding` plus\nwhether the source config the job copied has it too.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/HealthFinding"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "baseline": {
+                "type": "string",
+                "enum": [
+                  "new",
+                  "in_source"
+                ],
+                "description": "`in_source`: the same check reports the same thing on the\nsource version of the config (same code, config, reference\nmapped back to the source, and path) — the sync copied it.\n`new`: everything else, always for `source_org_reference`,\n`secret_value_missing`, `env_value_missing` and\n`unreadable_config`, and for every finding when the baseline\nis `unavailable`. Absent on results computed before the\nbaseline existed.\n"
+              }
+            }
+          }
+        ]
+      },
+      "SyncJobHealthBaseline": {
+        "type": "object",
+        "description": "Comparison of the findings with the same checks run on the source\nversions of the written configs, with the source org as context.\nPresent on `done` results computed since the baseline exists. The\ntop-level `counts` keep counting every finding.\n",
+        "required": [
+          "status",
+          "counts",
+          "in_source_counts"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "compared",
+              "unavailable"
+            ],
+            "description": "`unavailable`: the source could not be checked (see `reason`);\nevery finding is `new`.\n"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the baseline is unavailable, e.g. `source_token_unavailable`,\n`source_index_unavailable`, `source_unreadable`,\n`source_reads_failed`, `source_check_failed`,\n`source_check_timed_out`.\n"
+          },
+          "counts": {
+            "description": "New findings per severity.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HealthSeverityCounts"
+              }
+            ]
+          },
+          "in_source_counts": {
+            "description": "Findings the source configs already have, per severity.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HealthSeverityCounts"
+              }
+            ]
+          }
+        }
+      },
       "SyncJob": {
         "type": "object",
         "description": "Sync job header as surfaced by `getSyncJob` and the create response. The\ncanonical persistence shape is described in `docs/sync/INTERFACES.md`.\n",
@@ -3270,6 +4112,9 @@
           "finished_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "health_check": {
+            "$ref": "#/components/schemas/SyncJobHealthCheck"
           },
           "events": {
             "type": "array",
@@ -3353,6 +4198,15 @@
                 "approved_at"
               ]
             }
+          },
+          "rejected_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "On a plan, when it was rejected (`rejectSyncPlan`). Absent on plans that were not rejected and on\nother jobs.\n"
+          },
+          "rejected_by": {
+            "type": "string",
+            "description": "The user who rejected the plan. Present with `rejected_at` when a user rejected it."
           },
           "errors_sample": {
             "type": "array",
@@ -3574,11 +4428,258 @@
             "items": {
               "$ref": "#/components/schemas/SyncJobResourceRef"
             }
+          },
+          "conflicts": {
+            "type": "array",
+            "description": "Changes made in the target since the last sync that applying\nthis `update` would overwrite, or (`mostly_replaced`) an update\nthat would replace most of the target. Absent when there are\nnone. Detected while planning from normalized diffs (see\n`SyncPlanConflict`); heuristic matches only get\n`mostly_replaced`.\n",
+            "items": {
+              "$ref": "#/components/schemas/SyncPlanConflict"
+            }
+          },
+          "merge_blockers": {
+            "type": "array",
+            "description": "With `conflicts`: why the resource cannot be merged on apply\n(`merge_conflicts`). Empty when it can be.\n",
+            "items": {
+              "$ref": "#/components/schemas/SyncMergeBlocker"
+            }
+          },
+          "merge_choices": {
+            "type": "array",
+            "description": "Entity schemas only: the choices its merge needs, each to be\nanswered with a decision in `merge_conflicts`. Empty: it merges\nwithout any.\n",
+            "items": {
+              "$ref": "#/components/schemas/SyncMergeChoice"
+            }
+          },
+          "merge_refusal": {
+            "type": "string",
+            "description": "With `not_mergeable` in `merge_blockers`, why the merge refused the resource."
+          },
+          "conflict_resolution": {
+            "type": "string",
+            "description": "On rows of a job applying a plan, for rows with conflicts:\n`overwrite` when the row was applied anyway (listed in\n`overwrite_conflicts`), `merge` when it was applied with the\ntarget's own changes kept (listed in `merge_conflicts`),\n`keep_target` when it was left out.\n",
+            "enum": [
+              "overwrite",
+              "keep_target",
+              "merge"
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "description": "Reasons the write is likely to be rejected, or to leave a broken\nreference, found while planning. Advice only: the row can still\nbe applied. Absent when there are none; at most 10 per row.\n",
+            "items": {
+              "$ref": "#/components/schemas/SyncPlanWarning"
+            }
           }
         },
         "required": [
           "action",
           "match"
+        ]
+      },
+      "SyncPlanWarning": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "- `unresolved_reference`: the resource names a source-org\n  resource (`ref`) that is not part of the sync and has no\n  counterpart in the target org.\n- `invalid_request`: the request Config Hub would send violates\n  the target API's OpenAPI definition at `path`.\n- `target_capability`: the target org lacks something the\n  resource needs that a sync cannot bring.\n",
+            "enum": [
+              "unresolved_reference",
+              "invalid_request",
+              "target_capability"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string",
+            "description": "JSON Pointer into the source payload or the request body."
+          },
+          "ref": {
+            "type": "object",
+            "required": [
+              "type",
+              "source_id"
+            ],
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "source_id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "SyncPlanConflict": {
+        "type": "object",
+        "description": "Target edits since the last sync that applying the row would\noverwrite. Detection compares normalized plan views (the projection\n`getSyncPlanDiff` uses: no own ids, org ids, timestamps or audit\nfields; references rewritten through lineage; array items matched by\nidentity), never edit dates alone.\n\nWith a stored **base** (the target as the last sync left it):\nthree-way, `certainty: exact`. Without one: two-way target vs\nsource, `certainty: possible`; values only the target has are\n`target_only_removed`, other differences count as `target_edited`\nonly when the target was written after the last sync (plus a short\ngrace for the sync's own writes). On a first sync (never synced)\nonly target-only content is flagged. These three codes are never\nset on heuristic matches.\n\n`mostly_replaced` is independent of match, lineage and base: the\nupdate would change or remove at least half of the target's leaf\nfields (see `replaced_ratio`), on a target of at least 10 fields.\nTypically a heuristic match to a different resource. It sorts first\nand can come with the other codes on the same row.\n",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "`mostly_replaced`: applying the row replaces most of the target\n(`replaced_ratio` >= 0.5); check the counterpart is the right\none. `certainty` is always `exact`, `paths` empty.\n`target_edited`: the target changed these paths since the last\nsync and the source did not; the update reverts them.\n`both_edited`: both changed the same paths, to different values.\n`target_only_removed`: the update removes items only the target\nhas (added there since the last sync, or, without a base, not in\nthe source).\n",
+            "enum": [
+              "mostly_replaced",
+              "target_edited",
+              "both_edited",
+              "target_only_removed"
+            ]
+          },
+          "certainty": {
+            "type": "string",
+            "description": "`exact`: decided from a stored base. `possible`: no base yet.",
+            "enum": [
+              "exact",
+              "possible"
+            ]
+          },
+          "requires_decision": {
+            "type": "boolean",
+            "description": "Always true for now. `applySyncPlan` refuses the row until it is\noverwritten (`overwrite_conflicts`), merged (`merge_conflicts`)\nor left out.\n"
+          },
+          "paths": {
+            "type": "array",
+            "description": "The affected paths (at most 50). Values are plan-view values; a\nvalue whose JSON is over 1 KB is replaced by\n`{ \"__truncated\": true, \"json_bytes\": <size> }`. Empty when the\ntarget changed but the copies could not be compared.\n",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/SyncPlanConflictPath"
+            }
+          },
+          "paths_truncated": {
+            "type": "boolean",
+            "description": "True when paths or values were left out. `total_paths` is still exact."
+          },
+          "total_paths": {
+            "type": "integer"
+          },
+          "last_synced_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When Config Hub last synced the resource (lineage), when known."
+          },
+          "target_updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "target_updated_by": {
+            "type": "string",
+            "description": "User id of the target's last editor, when its API exposes one."
+          },
+          "target_updated_by_name": {
+            "type": "string",
+            "description": "Display name of `target_updated_by`, when resolvable cheaply. Not set yet."
+          },
+          "source_updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "replaced_ratio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "`mostly_replaced` only: `replaced_fields / total_fields`, rounded\nto two decimals. Show as a percentage, `round(ratio * 100)`.\n",
+            "example": 0.92
+          },
+          "replaced_fields": {
+            "type": "integer",
+            "description": "`mostly_replaced` only: leaf fields of the target the apply\nchanges or removes (fields only the source has don't count).\n",
+            "example": 198
+          },
+          "total_fields": {
+            "type": "integer",
+            "description": "`mostly_replaced` only: leaf fields of the target's normalized\nplan view. A scalar array is one field; per-org ids (UUIDs\nlineage doesn't know, the org's own id) are not fields.\n",
+            "example": 214
+          }
+        },
+        "required": [
+          "code",
+          "certainty",
+          "requires_decision",
+          "paths",
+          "paths_truncated",
+          "total_paths"
+        ]
+      },
+      "SyncPlanConflictPath": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Same notation as `SyncPlanChange.path`."
+          },
+          "kind": {
+            "type": "string",
+            "description": "The change applying the row would make to the target.",
+            "enum": [
+              "added",
+              "removed",
+              "changed",
+              "reordered"
+            ]
+          },
+          "base": {
+            "description": "The value at the last sync. Absent when unknown (always for `possible`)."
+          },
+          "source": {
+            "description": "The value applying writes. Absent for `removed`."
+          },
+          "target": {
+            "description": "The target's current value. Absent for `added`."
+          }
+        },
+        "required": [
+          "path",
+          "kind"
+        ]
+      },
+      "SyncMergeBlocker": {
+        "type": "string",
+        "description": "Why a conflicted resource cannot be named in `merge_conflicts`:\n`type_not_supported` (only flat records are merged: email templates,\nsignatures, notification templates, products, prices, taxes, coupons,\nwebhooks, custom and environment variables, closing reasons,\ntaxonomies and their classifications, designs, org settings. Entity\nschemas, journeys, automations, workflows and the like are not: their\nparts refer to each other), `not_exact` (a conflict of certainty\n`possible`), `mostly_replaced`, `paths_truncated` (the plan does not\nhold all of the resource's conflicting paths), `list_changes` (a\nconflict is inside a list). An entity schema has a merge of its own\nthat tells attributes and groups apart, so the type and list reasons\ndo not apply to it; it gets `not_mergeable` when that merge refuses\nthe schema (why: `merge_refusal`).\n",
+        "enum": [
+          "type_not_supported",
+          "not_exact",
+          "mostly_replaced",
+          "paths_truncated",
+          "list_changes",
+          "not_mergeable"
+        ]
+      },
+      "SyncMergeChoice": {
+        "type": "object",
+        "description": "A choice the merge of an entity schema needs before it can write.\nAnswer it with a decision on `path` in `merge_conflicts`.\n",
+        "properties": {
+          "path": {
+            "type": "string",
+            "example": "attributes[name=tax].label"
+          },
+          "reason": {
+            "type": "string",
+            "description": "`both_edited` (both sides changed one property to different\nvalues), `both_added` (both added an item under one name, not the\nsame), `removed_and_edited` (one side removed an item the other\nchanged), `probable_duplicate` (each side added an attribute with\na different name but the same label and type: `source` keeps\nboth, `target` only the target's).\n",
+            "enum": [
+              "both_edited",
+              "both_added",
+              "removed_and_edited",
+              "probable_duplicate"
+            ]
+          },
+          "source": {
+            "description": "What `take: source` writes. Absent when the item is left out, or\ntoo large to show.\n"
+          },
+          "target": {
+            "description": "What `take: target` writes. Absent when the item is left out, or\ntoo large to show.\n"
+          }
+        },
+        "required": [
+          "path",
+          "reason"
         ]
       },
       "SyncPlanCounts": {
@@ -3605,6 +4706,14 @@
           },
           "not_compared": {
             "type": "integer"
+          },
+          "conflicts": {
+            "type": "integer",
+            "description": "Rows with at least one conflict (`plan.conflicts`)."
+          },
+          "warnings": {
+            "type": "integer",
+            "description": "Rows with at least one warning (`plan.warnings`)."
           }
         },
         "required": [
@@ -3632,7 +4741,7 @@
           },
           "applicable": {
             "type": "boolean",
-            "description": "True while `applySyncPlan` accepts the plan: it is `ready` and\n`expires_at` has not passed. A plan can be applied more than once\n(e.g. one part now, another later); each apply is listed in\n`applied_by`.\n"
+            "description": "True while `applySyncPlan` accepts the plan: it is `ready`, not\nrejected (`rejected_at`) and `expires_at` has not passed. A plan can be applied more than once\n(e.g. one part now, another later); each apply is listed in\n`applied_by`.\n"
           },
           "expires_at": {
             "type": "string",
@@ -3648,6 +4757,11 @@
             "type": "string",
             "format": "date-time",
             "description": "When a partial replan (`replanSyncPlan` with `resources`) last finished."
+          },
+          "conflicts_checked_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When conflict detection last ran (end of planning or of a replan)."
           },
           "source_org_id": {
             "type": "string"
@@ -3693,6 +4807,15 @@
             "items": {
               "type": "string"
             }
+          },
+          "rejected_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the plan was rejected (`rejectSyncPlan`). Absent unless rejected."
+          },
+          "rejected_by": {
+            "type": "string",
+            "description": "The user who rejected the plan. Absent unless a user rejected it."
           }
         },
         "required": [
@@ -3813,14 +4936,11 @@
       },
       "SyncPlanApplyRequest": {
         "type": "object",
-        "required": [
-          "target_auth_token"
-        ],
         "properties": {
           "target_auth_token": {
             "type": "string",
             "writeOnly": true,
-            "description": "Destination-org auth token, as on `createSyncJob`. Never returned\nin responses and never logged.\n"
+            "description": "Destination-org auth token, as on `createSyncJob`. Never returned\nin responses and never logged. Required (400\n`target_auth_token_missing` without it).\n"
           },
           "name": {
             "type": "string",
@@ -3840,6 +4960,56 @@
               "$ref": "#/components/schemas/SyncJobResourceRef"
             }
           },
+          "overwrite_conflicts": {
+            "type": "array",
+            "description": "Rows with conflicts to apply anyway, overwriting the target's\nchanges. Applied rows with conflicts that are listed neither\nhere nor in `merge_conflicts` make the request fail with\n`unresolved_conflicts`.\n",
+            "items": {
+              "$ref": "#/components/schemas/SyncJobResourceRef"
+            }
+          },
+          "merge_conflicts": {
+            "type": "array",
+            "description": "Rows with conflicts to apply merged: the source's version, with\nthe target's own changes kept on the conflicting paths. Each must\nbe applied and must not be in `overwrite_conflicts` (400\n`invalid_resources`). A row without conflicts is applied as\nusual.\n",
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "source_id"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "source_id": {
+                  "type": "string"
+                },
+                "decisions": {
+                  "type": "array",
+                  "description": "One per `both_edited` path of the row: whose value the\nmerged row gets there. Other conflict paths need none (the\ntarget's value is kept) and decisions for them are ignored.\n",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "path",
+                      "take"
+                    ],
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "description": "A `path` of the row's `both_edited` conflict."
+                      },
+                      "take": {
+                        "type": "string",
+                        "enum": [
+                          "source",
+                          "target"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
           "allow_missing_dependencies": {
             "type": "boolean",
             "default": false,
@@ -3849,18 +5019,23 @@
       },
       "SyncPlanReplanRequest": {
         "type": "object",
-        "required": [
-          "target_auth_token"
-        ],
         "properties": {
           "target_auth_token": {
             "type": "string",
             "writeOnly": true,
-            "description": "Destination-org auth token (planning reads the target). Never returned or logged."
+            "description": "Destination-org auth token (planning reads the target). Never returned or logged. Required (400\n`target_auth_token_missing` without it).\n"
           },
           "resources": {
             "type": "array",
             "description": "Rows of the plan to plan again. Omit to plan every row again.",
+            "items": {
+              "$ref": "#/components/schemas/SyncJobResourceRef"
+            }
+          },
+          "add_resources": {
+            "type": "array",
+            "maxItems": 100,
+            "description": "Source-org resources to add to the plan, then plan (with their\ndependencies, when the plan includes dependencies) together with any\nlisted `resources`; the other rows keep their plan. Resources the\nplan already holds are just planned again.\n\nOnly for a plan into a preview org, replanned from that preview\norg: the Configuration Agent adds what the selection misses (e.g. a\ndocument template an email template references) and applies the\nplan again. Otherwise 403 `add_resources_not_allowed`.\n",
             "items": {
               "$ref": "#/components/schemas/SyncJobResourceRef"
             }
@@ -3927,8 +5102,18 @@
               "plan_not_ready",
               "plan_expired",
               "nothing_to_apply",
-              "missing_dependencies"
+              "missing_dependencies",
+              "unresolved_conflicts",
+              "merge_not_possible",
+              "plan_rejected",
+              "plan_already_applied",
+              "add_resources_not_allowed",
+              "apply_in_progress"
             ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Same as `error` (set with `unresolved_conflicts` and `merge_not_possible`)."
           },
           "invalid_resources": {
             "type": "array",
@@ -3941,8 +5126,64 @@
             "items": {
               "$ref": "#/components/schemas/SyncPlanMissingDependency"
             }
+          },
+          "resources": {
+            "type": "array",
+            "description": "With `unresolved_conflicts`, the applied rows with undecided\nconflicts. With `merge_not_possible`, the rows of\n`merge_conflicts` that cannot be merged.\n",
+            "items": {
+              "$ref": "#/components/schemas/SyncPlanUnresolvedConflict"
+            }
           }
         }
+      },
+      "SyncPlanUnresolvedConflict": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "codes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "mostly_replaced",
+                "target_edited",
+                "both_edited",
+                "target_only_removed"
+              ]
+            }
+          },
+          "undecided_paths": {
+            "type": "array",
+            "description": "With `unresolved_conflicts`, on a row of `merge_conflicts`: its\n`both_edited` paths without a decision.\n",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reasons": {
+            "type": "array",
+            "description": "With `merge_not_possible`, why the row cannot be merged (see\n`SyncMergeBlocker`).\n",
+            "items": {
+              "$ref": "#/components/schemas/SyncMergeBlocker"
+            }
+          },
+          "message": {
+            "type": "string",
+            "description": "With `merge_not_possible`, the reasons in words."
+          }
+        },
+        "required": [
+          "type",
+          "source_id",
+          "codes"
+        ]
       },
       "DeleteJobStatus": {
         "type": "string",
@@ -4068,6 +5309,10 @@
           "rebuild_triggered": {
             "type": "boolean",
             "description": "True once the worker has kicked the index rebuild on completion."
+          },
+          "created_by": {
+            "type": "string",
+            "description": "Id of the user who started the job. Absent on jobs started with a token that has no user."
           }
         },
         "required": [
@@ -4225,6 +5470,589 @@
           "resources_count",
           "resources",
           "skipped_types"
+        ]
+      },
+      "CreatePreviewRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Display name of the preview. Defaults to `Preview`."
+          },
+          "requester": {
+            "type": "object",
+            "description": "Internal callers only (e.g. the admin portal, with the source org in `x-ivy-org-id`):\nwho gets invited to the preview org as owner; `user_id` or `email` is required. Users\nalways invite themselves; sending this with a user token is rejected with 403.\n",
+            "properties": {
+              "user_id": {
+                "type": "string",
+                "description": "A user of the source org (preferred). They are invited, and the copy job acts as\nthem (e.g. they own the copied dashboards). Email, name and language come from\ntheir user record.\n"
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "description": "Used when `user_id` is not given."
+              },
+              "display_name": {
+                "type": "string"
+              },
+              "language": {
+                "type": "string",
+                "enum": [
+                  "de",
+                  "en"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "SyncJobReportItemStatus": {
+        "type": "string",
+        "enum": [
+          "open",
+          "done"
+        ]
+      },
+      "SyncJobReportItemInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable id; keep it (and the title) to keep the user's status."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "open_item",
+              "decision",
+              "check"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "detail": {
+            "type": "string",
+            "maxLength": 5000
+          },
+          "resource": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "id"
+            ]
+          },
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "merged",
+              "kept_target",
+              "took_source"
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/SyncJobReportItemStatus"
+          },
+          "options": {
+            "type": "array",
+            "maxItems": 6,
+            "description": "Choices for an open item the user decides (e.g. \"Sync the missing\ntemplate\" / \"Use template X\"). The user picks one with\n`updateAgentTaskItem` (`choice`). Keep option ids stable: a\ntask written again keeps the user's choice while the option is\nstill offered.\n",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "detail": {
+                  "type": "string",
+                  "maxLength": 5000
+                }
+              },
+              "required": [
+                "id",
+                "label"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title"
+        ]
+      },
+      "AgentTaskStatus": {
+        "type": "string",
+        "description": "`working`: the agent has more to do. `needs_input`: an open item\nwaits for the user. `awaiting_signoff`: the agent is done and\nnothing is open. `signed_off`: the user accepted it.\n",
+        "enum": [
+          "working",
+          "needs_input",
+          "awaiting_signoff",
+          "signed_off"
+        ]
+      },
+      "AgentTaskItemInput": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SyncJobReportItemInput"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "description": "`done`: something the agent did. `decision`: a choice the\nagent made. `check`: something it verified. `open_item`:\nsomething only the user can decide.\n",
+                "enum": [
+                  "done",
+                  "decision",
+                  "check",
+                  "open_item"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "AgentTaskItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AgentTaskItemInput"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "resolved_by": {
+                "type": "string"
+              },
+              "resolved_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "choice": {
+                "type": "string",
+                "description": "The id of the option the user picked."
+              }
+            },
+            "required": [
+              "status"
+            ]
+          }
+        ]
+      },
+      "AgentTaskChange": {
+        "type": "object",
+        "description": "A resource of the org the session changed.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Configuration resource type (e.g. journey, automation_flow)."
+          },
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "change": {
+            "type": "string",
+            "enum": [
+              "created",
+              "updated",
+              "deleted"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "What changed, in a sentence."
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "change"
+        ]
+      },
+      "AgentTaskInput": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "What the session is doing, as a short imperative (\"Install the Blueprint X\")."
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 20000
+          },
+          "state": {
+            "type": "string",
+            "description": "`working` while the agent has more to do, `done` once everything is.",
+            "enum": [
+              "working",
+              "done"
+            ]
+          },
+          "plan_job_id": {
+            "type": "string",
+            "description": "The plan (a dry-run sync job) the task works for, e.g. resolving its conflicts."
+          },
+          "items": {
+            "type": "array",
+            "maxItems": 500,
+            "items": {
+              "$ref": "#/components/schemas/AgentTaskItemInput"
+            }
+          },
+          "changes": {
+            "type": "array",
+            "maxItems": 500,
+            "items": {
+              "$ref": "#/components/schemas/AgentTaskChange"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "state",
+          "items"
+        ]
+      },
+      "AgentTaskSummary": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AgentTaskStatus"
+          },
+          "plan_job_id": {
+            "type": "string"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "open_items": {
+            "type": "integer",
+            "description": "Open items still waiting for the user."
+          },
+          "changes": {
+            "type": "integer",
+            "description": "How many resources the session changed."
+          }
+        },
+        "required": [
+          "session_id",
+          "title",
+          "status",
+          "created_at",
+          "updated_at",
+          "open_items",
+          "changes"
+        ]
+      },
+      "AgentTask": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string"
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AgentTaskStatus"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "working",
+              "done"
+            ]
+          },
+          "plan_job_id": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "signed_off_by": {
+            "type": "string"
+          },
+          "signed_off_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentTaskItem"
+            }
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentTaskChange"
+            }
+          }
+        },
+        "required": [
+          "session_id",
+          "org_id",
+          "title",
+          "summary",
+          "status",
+          "state",
+          "version",
+          "created_at",
+          "updated_at",
+          "items",
+          "changes"
+        ]
+      },
+      "PreviewStatus": {
+        "type": "string",
+        "enum": [
+          "creating_org",
+          "copying_configuration",
+          "inviting",
+          "ready",
+          "failed",
+          "superseded",
+          "cancelled"
+        ],
+        "description": "- creating_org: the preview org is being created\n- copying_configuration: the sync job copying this org's configuration is running\n- inviting: the requester is being invited to the preview org\n- ready: the requester is a member of the preview org (or, invited by email alone, got the\n  invitation email)\n- failed: see `error`\n- superseded: a newer preview of this org replaced it (`superseded_by`); its org is queued for deletion\n- cancelled: cancelled or discarded with `cancelPreview` (`cancelled_at`, `cancelled_by`); its org is\n  queued for deletion\n"
+      },
+      "Preview": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PreviewStatus"
+          },
+          "source_org_id": {
+            "type": "string",
+            "description": "The org the preview copies (the org it was requested from)."
+          },
+          "preview_org_id": {
+            "type": "string",
+            "description": "The preview org, once created."
+          },
+          "sync_job_id": {
+            "type": "string",
+            "description": "The sync job copying the configuration (see `getSyncJob`)."
+          },
+          "sync_status": {
+            "type": "string",
+            "description": "Final status of the copy sync job (`succeeded` or `partial`)."
+          },
+          "skipped_types": {
+            "type": "array",
+            "description": "Configuration types that could not be listed in the source org (e.g. the\nAPI answered 403), so the preview has none of them.\n",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "reason"
+              ]
+            }
+          },
+          "requested_by": {
+            "type": "object",
+            "properties": {
+              "user_id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              }
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "error": {
+            "type": "string",
+            "description": "Why the preview failed."
+          },
+          "superseded_by": {
+            "type": "string",
+            "description": "The newer preview that superseded this one."
+          },
+          "cancelled_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the preview was cancelled (`cancelPreview`). Only on `cancelled` previews."
+          },
+          "cancelled_by": {
+            "type": "string",
+            "description": "The user who cancelled the preview. Only on `cancelled` previews."
+          },
+          "org_deletion_requested_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the preview org was queued for deletion at organization-api, after the preview was replaced or\ncancelled. The org exists until organization-api's grace period has passed.\n"
+          },
+          "org_deletion_error": {
+            "type": "string",
+            "description": "Why queueing the preview org for deletion last failed. It is tried again with the next preview of the\norg; absent once it worked.\n"
+          },
+          "status_since": {
+            "type": "object",
+            "description": "When the preview entered each status (ISO 8601), keyed by status. `creating_org` is the creation\ntime. A status the preview has not reached is absent. Lets clients time the steps.\n",
+            "additionalProperties": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "example": {
+              "creating_org": "2026-11-17T07:38:58.000Z",
+              "copying_configuration": "2026-11-17T07:40:12.000Z"
+            }
+          },
+          "invited_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the requester was invited to the preview org."
+          },
+          "invite_accepted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the invite was accepted on the requester's behalf. A requester who already has an epilot account\nbecomes a member of the preview org right away; they can open it without accepting anything.\n"
+          },
+          "invite_accept_error": {
+            "type": "string",
+            "description": "Why accepting the invite on the requester's behalf last failed. It is tried again before the agent\nstarts; absent once it worked. While it is set the requester accepts the invite themselves.\n"
+          },
+          "invite_link": {
+            "type": "string",
+            "description": "The requester's invite link into the preview org, as it was when the invite was sent. Only on\n`getPreview`, and only for the requester themselves. It stops working once the invite is accepted.\n"
+          },
+          "mirror_progress": {
+            "type": "object",
+            "description": "Progress of copying the configuration into the preview org. Only on `getPreview` while the status is\n`copying_configuration`. The copy runs through the sync phases one after another, so\n`processed_count` starts again with each phase; `last_activity_at` shows that the copy is alive.\n",
+            "properties": {
+              "phase": {
+                "type": "string",
+                "description": "Current phase of the copy job.",
+                "enum": [
+                  "phase_0",
+                  "dependencies",
+                  "phase_a",
+                  "phase_a5",
+                  "phase_b",
+                  "finalize"
+                ]
+              },
+              "processed_count": {
+                "type": "integer",
+                "description": "Resources the current phase is done with."
+              },
+              "batch": {
+                "type": "object",
+                "description": "The batch the current phase is working on, when it runs in batches.",
+                "properties": {
+                  "index": {
+                    "type": "integer"
+                  },
+                  "of": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "total_count": {
+                "type": "integer",
+                "description": "Resources in the copy so far (grows while dependencies are added)."
+              },
+              "failed_count": {
+                "type": "integer"
+              },
+              "last_activity_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When a resource of the copy last changed."
+              }
+            },
+            "required": [
+              "phase",
+              "processed_count",
+              "total_count",
+              "failed_count"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "status",
+          "source_org_id",
+          "requested_by",
+          "created_at",
+          "updated_at"
         ]
       }
     }

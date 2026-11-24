@@ -41,6 +41,8 @@ const { data } = await templateVariablesClient.getCategories(...)
 - [`getBluePrintTableConfig`](#getblueprinttableconfig)
 
 **Schemas**
+- [`JourneyContextUsagesRequest`](#journeycontextusagesrequest)
+- [`JourneyContextUsagesResponse`](#journeycontextusagesresponse)
 - [`Language`](#language)
 - [`VariableParameters`](#variableparameters)
 - [`ReplacementOutput`](#replacementoutput)
@@ -144,11 +146,13 @@ const { data } = await client.getVariableContext(
         }
       ],
       context_data: {},
+      partials_only: true,
       template_name: 'string',
       template_tags: ['string'],
       template_id: 'string',
       variables_version: '2'
-    }
+    },
+    use_refs: false
   },
 )
 ```
@@ -249,6 +253,7 @@ const { data } = await client.replaceTemplates(
         }
       ],
       context_data: {},
+      partials_only: true,
       template_name: 'string',
       template_tags: ['string'],
       template_id: 'string',
@@ -273,7 +278,7 @@ const { data } = await client.replaceTemplates(
 
 ### `replaceTemplatesV2`
 
-Replace variables in templates (V2)
+Replace variables in handlebars templates with raw value preservation
 
 `POST /v2/template:replace`
 
@@ -297,6 +302,7 @@ const { data } = await client.replaceTemplatesV2(
         }
       ],
       context_data: {},
+      partials_only: true,
       template_name: 'string',
       template_tags: ['string'],
       template_id: 'string',
@@ -325,7 +331,7 @@ const { data } = await client.replaceTemplatesV2(
 
 ### `getCustomVariables`
 
-Get custom variables
+Get all custom variables of organization
 
 `GET /v1/custom-variables`
 
@@ -943,7 +949,7 @@ const { data } = await client.getCustomVariable({
 
 ### `deleteCustomVariable`
 
-Delete custom variable
+Immediately and permanently deletes a custom variable
 
 `DELETE /v1/custom-variables/{id}`
 
@@ -1025,6 +1031,42 @@ const { data } = await client.getBluePrintTableConfig()
 
 ## Schemas
 
+### `JourneyContextUsagesRequest`
+
+```ts
+type JourneyContextUsagesRequest = {
+  journey_id: string
+  param_keys: string[]
+  param_ids?: string[]
+}
+```
+
+### `JourneyContextUsagesResponse`
+
+```ts
+type JourneyContextUsagesResponse = {
+  status: "ok" | "partial"
+  scanned: number
+  usages: Array<{
+    kind: "custom-variable-journey-link" | "custom-variable-body"
+    resource: {
+      type: { ... }
+      id: { ... }
+      name?: { ... }
+    }
+    location: {
+      variable_type: { ... }
+      journey_id?: { ... }
+    }
+    matched_as: {
+      dialect: { ... }
+      token: { ... }
+      at: { ... }
+    }
+  }>
+}
+```
+
 ### `Language`
 
 2-letter language code (ISO 639-1)
@@ -1048,6 +1090,7 @@ type VariableParameters = {
     value?: string
   }>
   context_data?: object
+  partials_only?: boolean
   template_name?: string
   template_tags?: string[]
   template_id?: string

@@ -114,7 +114,7 @@
       "post": {
         "operationId": "createFlow",
         "summary": "createFlow",
-        "description": "Create new automation flow",
+        "description": "Create new automation flow. Map-entity actions hold their mappings inline: check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving (`{ source, actions }`, with `source` `{ journey_id }` for a journey_submission trigger or `{ entity_schema }` for an entity trigger; on update also `previous_actions`, the stored actions) and fix every `blocking` issue.",
         "tags": [
           "flows"
         ],
@@ -229,7 +229,7 @@
       "put": {
         "operationId": "putFlow",
         "summary": "putFlow",
-        "description": "Update automation flow by id",
+        "description": "Update automation flow by id. Map-entity actions hold their mappings inline: check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving (`{ source, actions }`, with `source` `{ journey_id }` for a journey_submission trigger or `{ entity_schema }` for an entity trigger; on update also `previous_actions`, the stored actions) and fix every `blocking` issue.",
         "tags": [
           "flows"
         ],
@@ -1051,8 +1051,9 @@
         "type": "string",
         "example": "9ec3711b-db63-449c-b894-54d5bb622a8f"
       },
-      "AutomationFlow": {
+      "AutomationFlowFields": {
         "type": "object",
+        "description": "The top-level fields of an automation flow. None is required.",
         "properties": {
           "id": {
             "$ref": "#/components/schemas/AutomationFlowId"
@@ -1197,7 +1198,7 @@
           },
           "_manifest": {
             "type": "array",
-            "description": "Source blueprint/manifest ID used when automation is created via blueprints.",
+            "description": "Source blueprint/manifest ID used when automation is created via blueprints.\nA full update (PUT) that omits this field keeps the stored value; send `null` to unlink the automation from its blueprint.\n",
             "items": {
               "type": "string",
               "format": "uuid",
@@ -1209,7 +1210,14 @@
             "type": "boolean",
             "description": "If true, automation is displayed in read-only mode in the UI to discourage changes"
           }
-        },
+        }
+      },
+      "AutomationFlow": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationFlowFields"
+          }
+        ],
         "required": [
           "flow_name",
           "triggers",
@@ -1240,6 +1248,116 @@
         "required": [
           "total",
           "results"
+        ]
+      },
+      "BatchSyncFlowsRequest": {
+        "type": "object",
+        "description": "At least one of `upsert` and `delete` needs an item. An id may appear once in the request.\nEach list has at most 100 items.\n",
+        "properties": {
+          "upsert": {
+            "type": "array",
+            "maxItems": 100,
+            "description": "Automation flows to create or update. Each item has the `id` and any other top-level fields of an automation flow.\n\nAn id that exists is updated:\n- Only the sent top-level fields that differ from the stored ones are written, with a new `updated_at`.\n- A sent field replaces the stored top-level field whole. A list or an object is not merged with the stored one.\n- If every sent field equals the stored one, the result is `unchanged` and the flow is not checked beyond the schema of the sent fields.\n- A field that is left out stays as stored. A field cannot be removed, except `disable_details` by `enabled: true`. `null` removes nothing. It is stored as `null` where the schema allows `null`, and refused with 400 elsewhere.\n- `org_id`, `created_at`, `created_by`, `runs` and `updated_at` are not written when sent. Their type is checked like that of every sent field.\n- `disable_details` are stored as sent. If the item has none, `enabled: true` removes the stored ones, and `enabled: false` sets `disabled_at` and `disabled_by: user` unless the flow is disabled already.\n\nAn id that does not exist is created as createFlow creates it, with three differences:\n- The given `id` is kept whatever its length.\n- An action without an `id` is refused. None is generated.\n- A `schedule_id` without its schedule is removed from actions and conditions.\n\nBefore any write, a flow that is created or changed must pass the request schema and the checks of createFlow as it would be stored. For a flow that is changed:\n- Every sent action needs an `id`, as for a new flow.\n- A sent action without `created_automatically` gets `false`.\n- A `loop_id` or `schedule_id` without its loop or schedule is removed from sent `actions` and `conditions`. If `actions` or `conditions` that are not sent hold one, the request is refused.\n\nA flow that another writer changes during the sync is checked again with the sent fields. If it fails then, only that item fails, with the reason `invalid`.\n",
+            "items": {
+              "$ref": "#/components/schemas/BatchSyncFlowsUpsert"
+            }
+          },
+          "delete": {
+            "type": "array",
+            "maxItems": 100,
+            "description": "Ids of automation flows to delete. An id that does not exist is ignored.",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "BatchSyncFlowsUpsert": {
+        "description": "The id and any other top-level fields of an automation flow",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationFlowFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        ]
+      },
+      "BatchSyncFlowsResponse": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "description": "One entry per upsert in request order, then one per delete in request order.\n`flow` is the automation flow as it is stored after the sync, as getFlow returns it. `created`, `updated` and `unchanged` entries have it.\nIts `runs` is the count the sync read.\n`reason` and `error` are set on `failed` entries only.\n",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "result": {
+                  "type": "string",
+                  "enum": [
+                    "created",
+                    "updated",
+                    "unchanged",
+                    "deleted",
+                    "not_found",
+                    "failed"
+                  ]
+                },
+                "flow": {
+                  "$ref": "#/components/schemas/AutomationFlow"
+                },
+                "reason": {
+                  "type": "string",
+                  "description": "Why the item is `failed`:\n- `changed`, another writer changed the flow on each of 3 attempts. The request can be sent again.\n- `no_capacity`, the database throttled the read or the write, failed on its side or was not reached. The request can be sent again.\n- `out_of_time`, the 20 seconds of the request were over. The request can be sent again.\n- `deleted`, another writer deleted the flow during the sync. It is not created again, also when the sync was about to create it and found the id taken.\n- `invalid`, the flow changed during the sync and fails a check with the sent fields, or the database refuses the flow itself, for its size or its nesting for example. The same request fails again.\n",
+                  "enum": [
+                    "changed",
+                    "no_capacity",
+                    "out_of_time",
+                    "deleted",
+                    "invalid"
+                  ]
+                },
+                "error": {
+                  "type": "string",
+                  "description": "What happened to a `failed` item, as text"
+                }
+              },
+              "required": [
+                "id",
+                "result"
+              ]
+            }
+          }
+        },
+        "required": [
+          "results"
+        ]
+      },
+      "BatchSyncFlowsFailure": {
+        "description": "The answer of a batch sync with at least one `failed` result",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ErrorObject"
+          },
+          {
+            "$ref": "#/components/schemas/BatchSyncFlowsResponse"
+          }
         ]
       },
       "JourneyContextUsagesReq": {
@@ -1313,6 +1431,10 @@
               },
               "action_type": {
                 "type": "string"
+              },
+              "action_index": {
+                "type": "integer",
+                "minimum": 0
               }
             }
           },
@@ -2092,11 +2214,101 @@
             "items": {
               "$ref": "#/components/schemas/GraphContextEntry"
             }
+          },
+          "loop_config": {
+            "type": "object",
+            "description": "Run this target once per item of an array on the source entity, as a mapping config target does. `##LOOP_INDEX##` in source paths resolves to the current item's index. Forwarded by automation-workers and evaluated in entity-mapping-api.\n",
+            "properties": {
+              "source_path": {
+                "type": "string",
+                "description": "path to the array from the entity payload"
+              },
+              "source_type": {
+                "type": "string",
+                "description": "Kind of journey block the loop iterates. 'journey-multi-select' (default) is a cards block with multi selection. 'journey-file-upload' is a file upload block: source_path points at the submission's `_files.$relation` array and `filter_tags` narrows it down to the block's files.\n",
+                "enum": [
+                  "journey-multi-select",
+                  "journey-file-upload"
+                ],
+                "default": "journey-multi-select"
+              },
+              "filter_tags": {
+                "type": "array",
+                "description": "Only iterate items of the array whose `_tags` contain every listed tag. Meant for relation arrays such as `submission._files.$relation`, where the journey tags each file relation with the upload block it came from. `##LOOP_INDEX##` keeps referring to the item's index in the unfiltered array.\n",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "length": {
+                "type": "number",
+                "description": "a hard limit of how many times the loop is allowed to run."
+              }
+            }
+          },
+          "conditionMode": {
+            "type": "string",
+            "description": "Mode of how conditions are considered valid",
+            "enum": [
+              "oneOf",
+              "anyOf",
+              "allOf"
+            ]
+          },
+          "conditions": {
+            "type": "array",
+            "description": "Conditions necessary to hold for the target entity to be mapped, as on a mapping config target. Forwarded by automation-workers and evaluated in entity-mapping-api.\n",
+            "items": {
+              "$ref": "#/components/schemas/MapCondition"
+            }
           }
         },
         "required": [
           "target_schema"
         ]
+      },
+      "MapCondition": {
+        "type": "object",
+        "properties": {
+          "_exists": {
+            "$ref": "#/components/schemas/ConditionNode"
+          },
+          "_equals": {
+            "$ref": "#/components/schemas/ConditionNode"
+          },
+          "_not_exists": {
+            "$ref": "#/components/schemas/ConditionNode"
+          },
+          "_any_of": {
+            "$ref": "#/components/schemas/ConditionNode"
+          }
+        }
+      },
+      "ConditionNode": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "object"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            ]
+          }
+        }
       },
       "GraphContextEntry": {
         "type": "object",
@@ -2577,6 +2789,46 @@
           }
         ]
       },
+      "ReopenEmailTicketsAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "reopen-email-tickets"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/ReopenEmailTicketsConfig"
+              }
+            }
+          }
+        ]
+      },
+      "MarkTicketEmailsDoneAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "mark-ticket-emails-done"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/MarkTicketEmailsDoneConfig"
+              }
+            }
+          }
+        ]
+      },
       "MoveThreadConfig": {
         "type": "object",
         "properties": {
@@ -2599,6 +2851,54 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "ReopenEmailTicketsConfig": {
+        "type": "object",
+        "description": "Runs on an email: the trigger's message, or a thread's latest received email. Finds the tickets of every email in the email's thread, through links in both directions, and sets each one whose status counts as closed to `reopen_status`. Nothing else on the ticket changes. Does nothing for our own outgoing emails and for automatic emails (auto-replies and bounces).\n",
+        "required": [
+          "closed_statuses",
+          "reopen_status"
+        ],
+        "properties": {
+          "closed_statuses": {
+            "type": "array",
+            "description": "Ticket status values that count as closed, as stored on the ticket. Compared case-sensitively after trimming surrounding spaces from both sides. Values that are not options of the ticket's status attribute are allowed, e.g. an older plain-text value.\n",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "closed",
+              "Geschlossen"
+            ]
+          },
+          "reopen_status": {
+            "type": "string",
+            "description": "The status value a closed ticket is set to",
+            "example": "in_progress"
+          }
+        }
+      },
+      "MarkTicketEmailsDoneConfig": {
+        "type": "object",
+        "description": "Runs on a ticket and marks the threads of the ticket's emails as done, whatever that ticket's own status is: when the action runs is up to the flow's trigger and conditions. A thread that also belongs to another ticket whose status is not in `ending_statuses` stays open.\n",
+        "required": [
+          "ending_statuses"
+        ],
+        "properties": {
+          "ending_statuses": {
+            "type": "array",
+            "description": "Ticket status values in which another ticket on the thread counts as closed, e.g. `closed` and `canceled`. Compared case-sensitively after trimming surrounding spaces from both sides. Values that aren't status options, e.g. ones older flows write, can be listed too.\n",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "closed",
+              "canceled"
+            ]
           }
         }
       },
@@ -2827,6 +3127,16 @@
                 }
               }
             }
+          },
+          "only_available_users": {
+            "type": "boolean",
+            "description": "Candidate condition for `sequential` and `even_distribution`: when true,\nskip users who are currently absent (out-of-office). Opt-in; defaults\nto false.\n",
+            "default": false
+          },
+          "hold_until_available": {
+            "type": "boolean",
+            "description": "Sub-option of only_available_users, for `sequential` and\n`even_distribution`: holds the entity when nobody is left after the\navailability and skill filters and at least one user the availability\nfilter removed is on a day off (weekend / whole day off) with a known\nreturn. Each retry waits until the soonest such return, at most 7 days,\nwith at most 7 retries; after that the fallback applies. Out-of-office\nor unknown absence never holds. Defaults to true; set false to skip the\nhold and fall straight through to the fallback. With write_mode replace,\na held run overwrites assignees set while it was held.\n",
+            "default": true
           },
           "match_user_skills": {
             "type": "boolean",
@@ -3081,8 +3391,8 @@
               "properties": {
                 "email": {
                   "type": "string",
-                  "format": "email",
-                  "description": "Email address to forward to"
+                  "pattern": "^([^@\\s{},;]+@[^@\\s{},;]+|\\{\\{\\s*env\\.[a-z0-9][a-z0-9_.\\-]{0,127}\\s*\\}\\})$",
+                  "description": "Either a plain email address or exactly one epilot environment variable placeholder\n(`{{env.KEY}}`, whitespace inside the braces allowed) that is resolved when the action runs.\nThe key follows the environments-api key format (lowercase letters, digits, `_`, `-`, `.`).\nMixed text such as `a@b.de, {{env.KEY}}` is rejected. Example: `{{env.support_inbox}}`\n"
                 },
                 "name": {
                   "type": "string",
@@ -4374,6 +4684,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "ephemeral": {
+            "$ref": "#/components/schemas/EphemeralExecution"
           }
         },
         "required": [
@@ -4952,6 +5265,101 @@
         "required": [
           "entity_id",
           "flow_id"
+        ]
+      },
+      "StartEphemeralExecutionRequest": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "flow_name": {
+            "type": "string",
+            "example": "Handle contact form"
+          },
+          "actions": {
+            "type": "array",
+            "description": "Every action needs an `id`. The execution keeps it as the action's `flow_action_id`.",
+            "items": {
+              "$ref": "#/components/schemas/AnyAction"
+            }
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionCondition"
+            }
+          },
+          "schedules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionSchedule"
+            }
+          },
+          "loops": {
+            "type": "array",
+            "description": "Loop scopes. Actions whose `loop_id` names a loop run once per item it resolves to.",
+            "items": {
+              "$ref": "#/components/schemas/AutomationLoop"
+            }
+          },
+          "workflow_context": {
+            "$ref": "#/components/schemas/WorkflowExecutionContext"
+          },
+          "action_inputs": {
+            "$ref": "#/components/schemas/ActionInputs"
+          },
+          "ephemeral": {
+            "$ref": "#/components/schemas/EphemeralExecution"
+          }
+        },
+        "required": [
+          "entity_id",
+          "flow_name",
+          "actions",
+          "ephemeral"
+        ]
+      },
+      "EphemeralExecution": {
+        "type": "object",
+        "description": "Present on an execution started from an automation definition sent in the request.",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/EphemeralIdentity"
+          }
+        },
+        "required": [
+          "identity"
+        ]
+      },
+      "EphemeralIdentity": {
+        "type": "object",
+        "description": "Identifies the automation of an ephemeral execution. The execution's `flow_id` is derived from the organization and this identity.\nExecutions with the same identity share the state kept per `flow_id` across runs, e.g. round-robin assignment queues.\nConfigurations that must not share this state need different identities.\n",
+        "additionalProperties": false,
+        "properties": {
+          "namespace": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The internal feature that owns the execution.",
+            "example": "flows"
+          },
+          "key": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Owner-defined parts that identify the automation within the namespace.",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "example": [
+              "7791b04a-16d2-44a2-9af9-2d59c25c512f",
+              "task-1"
+            ]
+          }
+        },
+        "required": [
+          "namespace",
+          "key"
         ]
       },
       "ActionInputs": {
@@ -5671,6 +6079,9 @@
                       ]
                     }
                   },
+                  "conditions": {
+                    "$ref": "#/components/schemas/EntityTriggerConditions"
+                  },
                   "filter_config": {
                     "type": "object",
                     "properties": {
@@ -6173,6 +6584,187 @@
           "any_of",
           "not_empty",
           "is_empty"
+        ]
+      },
+      "EntityTriggerConditions": {
+        "description": "Conditions the entity must satisfy for the trigger to start the automation, checked after\n`schema`, `operations`, the activity filters and `filter_config` have matched. An event that\ndoes not satisfy them starts nothing: no execution is created.\n\nStatements use the flows condition dialect (the `Statement` of a flow decision) and are\nevaluated against the entity of the event, never against related entities. The change\noperators (`has_changed`, `changes_to`, `changes_to_all`, `no_longer_is`, `no_longer_is_all`) compare the entity before and after\nthe update and are only accepted on a trigger whose operations are all `updateEntity`.\n",
+        "type": "object",
+        "properties": {
+          "logical_operator": {
+            "type": "string",
+            "description": "How the statements are joined. Defaults to `AND`.",
+            "enum": [
+              "AND",
+              "OR"
+            ]
+          },
+          "statements": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "$ref": "#/components/schemas/EntityTriggerStatement"
+            }
+          }
+        },
+        "required": [
+          "statements"
+        ],
+        "example": {
+          "logical_operator": "AND",
+          "statements": [
+            {
+              "id": "3f1c8c0e-6a41-4d0e-9a51-8f6f0f6f2f11",
+              "source": {
+                "schema": "order",
+                "attribute": "status",
+                "attribute_type": "status"
+              },
+              "operator": "changes_to",
+              "values": [
+                "interessent"
+              ]
+            },
+            {
+              "id": "0b6f0e1c-1a0b-4a57-9d0c-0e3c9c0c7a52",
+              "source": {
+                "schema": "order",
+                "attribute": "_purpose",
+                "attribute_type": "purpose",
+                "attribute_repeatable": true
+              },
+              "operator": "any_of",
+              "values": [
+                "commodity"
+              ]
+            }
+          ]
+        }
+      },
+      "EntityTriggerStatement": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/EntityTriggerStatementSource"
+          },
+          "operator": {
+            "$ref": "#/components/schemas/EntityTriggerOperator"
+          },
+          "values": {
+            "type": "array",
+            "description": "Not needed for `is_empty`, `is_not_empty` and `has_changed`.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "value_type": {
+            "type": "string",
+            "enum": [
+              "static",
+              "relative_date"
+            ],
+            "description": "How to interpret values. \"static\" (default) means literal values. \"relative_date\" means values[0] is a dynamic date token like \"today\"."
+          }
+        },
+        "required": [
+          "source",
+          "operator"
+        ]
+      },
+      "EntityTriggerStatementSource": {
+        "type": "object",
+        "properties": {
+          "schema": {
+            "type": "string"
+          },
+          "attribute": {
+            "type": "string"
+          },
+          "attribute_type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "text",
+              "number",
+              "boolean",
+              "date",
+              "datetime",
+              "tags",
+              "country",
+              "email",
+              "phone",
+              "status",
+              "multiselect",
+              "select",
+              "radio",
+              "purpose",
+              "label"
+            ]
+          },
+          "attribute_repeatable": {
+            "type": "boolean"
+          },
+          "attribute_sub_field": {
+            "type": "string",
+            "description": "For complex attribute types, the sub-field to compare (e.g. \"address\", \"contact.email\")."
+          },
+          "attribute_operation": {
+            "type": "string",
+            "description": "Narrows `has_changed` to one kind of change: the attribute gained a value (`added`), a value it\nhad was replaced (`updated`) or lost (`deleted`). Absent or `all` means any of them. Other\noperators ignore it.\n",
+            "enum": [
+              "all",
+              "added",
+              "updated",
+              "deleted"
+            ]
+          },
+          "date_offset": {
+            "type": "object",
+            "description": "Offset applied to the entity's date before comparison.",
+            "properties": {
+              "amount": {
+                "type": "integer"
+              },
+              "unit": {
+                "type": "string",
+                "enum": [
+                  "days",
+                  "months",
+                  "years"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "attribute"
+        ]
+      },
+      "EntityTriggerOperator": {
+        "type": "string",
+        "description": "The value operators of a flow decision, plus three change operators for update triggers:\n- `has_changed`: the update touched the attribute\n- `changes_to`: the attribute was not the value and now is; on a list, at least one of the values was not there and now is\n- `changes_to_all`: every listed value was not on the list and now is (strict: a value already there does not count)\n- `no_longer_is`: the attribute was the value and no longer is; on a list, at least one of the values was there and no longer is\n- `no_longer_is_all`: every listed value was on the list and no longer is\n",
+        "enum": [
+          "equals",
+          "not_equals",
+          "any_of",
+          "none_of",
+          "contains",
+          "not_contains",
+          "starts_with",
+          "ends_with",
+          "greater_than",
+          "less_than",
+          "greater_than_or_equals",
+          "less_than_or_equals",
+          "is_empty",
+          "is_not_empty",
+          "has_changed",
+          "changes_to",
+          "changes_to_all",
+          "no_longer_is",
+          "no_longer_is_all"
         ]
       },
       "FilterConditionOnEvent": {

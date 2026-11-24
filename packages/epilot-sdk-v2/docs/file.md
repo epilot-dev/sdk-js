@@ -50,6 +50,11 @@ const { data } = await fileClient.uploadFileV2(...)
 - [`verifyCustomDownloadUrl`](#verifycustomdownloadurl)
 - [`uploadFilePublic`](#uploadfilepublic)
 
+**Meter Reading Suggestions**
+- [`listMeterReadingSuggestions`](#listmeterreadingsuggestions)
+- [`createMeterReadingSuggestionJob`](#createmeterreadingsuggestionjob)
+- [`updateMeterReadingSuggestionStatus`](#updatemeterreadingsuggestionstatus)
+
 **Preview**
 - [`previewFile`](#previewfile)
 - [`previewS3File`](#previews3file)
@@ -94,6 +99,12 @@ const { data } = await fileClient.uploadFileV2(...)
 - [`CreateFileAttributeSuggestionJobRequest`](#createfileattributesuggestionjobrequest)
 - [`UpdateFileAttributeSuggestionStatusRequest`](#updatefileattributesuggestionstatusrequest)
 - [`FileAttributeSuggestionError`](#fileattributesuggestionerror)
+- [`MeterReadingSuggestionError`](#meterreadingsuggestionerror)
+- [`CreateMeterReadingSuggestionJobRequest`](#createmeterreadingsuggestionjobrequest)
+- [`UpdateMeterReadingSuggestionStatusRequest`](#updatemeterreadingsuggestionstatusrequest)
+- [`MeterReadingSuggestion`](#meterreadingsuggestion)
+- [`MeterReadingSuggestedAlternative`](#meterreadingsuggestedalternative)
+- [`MeterReadingSuggestionJob`](#meterreadingsuggestionjob)
 - [`FileTextStatus`](#filetextstatus)
 - [`FileValidationRequest`](#filevalidationrequest)
 - [`FileValidationFileReference`](#filevalidationfilereference)
@@ -975,6 +986,157 @@ const { data } = await client.updateFileAttributeSuggestionStatus(
 
 ---
 
+### `listMeterReadingSuggestions`
+
+List the meter reading suggestion jobs of a meter, newest first: one job per photo attached to the meter. Requires `entity:view` on the meter.
+
+`GET /v1/files:meterReadingSuggestions`
+
+```ts
+const { data } = await client.listMeterReadingSuggestions({
+  meter_id: 'example',
+  schema: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "meter_id": "string",
+      "file_id": "string",
+      "schema": "string",
+      "file_name": "string",
+      "status": "PENDING",
+      "error": "string",
+      "read_at": "1970-01-01T00:00:00.000Z",
+      "read_at_source": "exif",
+      "is_meter_photo": true,
+      "meter_number_on_image": "string",
+      "meter_number_mismatch": true,
+      "suggestions": [
+        {
+          "suggestion_id": "string",
+          "counter_id": "string",
+          "value": 0,
+          "value_raw": "string",
+          "confidence": "high",
+          "verbatim_span": "string",
+          "evidence": "string",
+          "warnings": ["below_last_reading"],
+          "status": "pending",
+          "decided_at": "1970-01-01T00:00:00.000Z",
+          "decided_by": "string",
+          "last_value": 0,
+          "last_read_at": "1970-01-01T00:00:00.000Z",
+          "suggested_alternative": {
+            "value": 0,
+            "value_raw": "string",
+            "reason": "decimal_shift"
+          },
+          "photo_attached": true
+        }
+      ],
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `createMeterReadingSuggestionJob`
+
+Start (or re-run) reading suggestions for one photo of a meter. Resets any previous job of the same meter and file. Requires `entity:edit` on the meter and `entity:view` on the file. The file must be 
+
+`POST /v1/files:meterReadingSuggestions`
+
+```ts
+const { data } = await client.createMeterReadingSuggestionJob(
+  null,
+  {
+    meter_id: 'string',
+    file_id: 'string',
+    schema: 'meter'
+  },
+)
+```
+
+---
+
+### `updateMeterReadingSuggestionStatus`
+
+Record that a suggestion was accepted or dismissed. Saving the reading itself stays with the caller. Requires `entity:edit` on the meter.
+
+`PATCH /v1/files:meterReadingSuggestions/{meter_id}/{file_id}/{suggestion_id}`
+
+```ts
+const { data } = await client.updateMeterReadingSuggestionStatus(
+  {
+    meter_id: 'example',
+    file_id: 'example',
+    suggestion_id: 'example',
+  },
+  {
+    status: 'accepted'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "meter_id": "string",
+  "file_id": "string",
+  "schema": "string",
+  "file_name": "string",
+  "status": "PENDING",
+  "error": "string",
+  "read_at": "1970-01-01T00:00:00.000Z",
+  "read_at_source": "exif",
+  "is_meter_photo": true,
+  "meter_number_on_image": "string",
+  "meter_number_mismatch": true,
+  "suggestions": [
+    {
+      "suggestion_id": "string",
+      "counter_id": "string",
+      "value": 0,
+      "value_raw": "string",
+      "confidence": "high",
+      "verbatim_span": "string",
+      "evidence": "string",
+      "warnings": ["below_last_reading"],
+      "status": "pending",
+      "decided_at": "1970-01-01T00:00:00.000Z",
+      "decided_by": "string",
+      "last_value": 0,
+      "last_read_at": "1970-01-01T00:00:00.000Z",
+      "suggested_alternative": {
+        "value": 0,
+        "value_raw": "string",
+        "reason": "decimal_shift"
+      },
+      "photo_attached": true
+    }
+  ],
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
 ### `getFileText`
 
 Get the plain-text representation of a file entity. Returns status `not_ready` while text is being prepared and `unsupported` when text is unavailable for the file or organization.
@@ -1831,6 +1993,115 @@ type FileAttributeSuggestionError = {
 }
 ```
 
+### `MeterReadingSuggestionError`
+
+```ts
+type MeterReadingSuggestionError = {
+  status?: number
+  error?: string
+  error_code?: "feature_disabled" | "file_not_found" | "not_an_image" | "schema_not_supported" | "file_not_attached" | "job_not_found" | "job_not_completed" | "suggestion_not_found" | "processing_enqueue_failed"
+}
+```
+
+### `CreateMeterReadingSuggestionJobRequest`
+
+```ts
+type CreateMeterReadingSuggestionJobRequest = {
+  meter_id: string
+  file_id: string
+  schema?: string
+}
+```
+
+### `UpdateMeterReadingSuggestionStatusRequest`
+
+```ts
+type UpdateMeterReadingSuggestionStatusRequest = {
+  status: "accepted" | "dismissed"
+}
+```
+
+### `MeterReadingSuggestion`
+
+```ts
+type MeterReadingSuggestion = {
+  suggestion_id: string
+  counter_id: string
+  value: number
+  value_raw: string
+  confidence: "high" | "medium" | "low"
+  verbatim_span: string
+  evidence: string
+  warnings: "below_last_reading" | "meter_number_mismatch" | "unusually_high" | "possible_decimal_shift" | "decimal_unverified"[]
+  status: "pending" | "accepted" | "dismissed"
+  decided_at: string // date-time
+  decided_by: string
+  last_value: number
+  last_read_at: string // date-time
+  suggested_alternative: {
+    value: number
+    value_raw: string
+    reason: "decimal_shift" | "decimal_unverified"
+  }
+  photo_attached: boolean
+}
+```
+
+### `MeterReadingSuggestedAlternative`
+
+Another reading to offer instead of `value`. `decimal_shift`: a decimal shift of `value` that is
+consistent with `last_value` (between it and twice it), offered when `value` itself is implausible and
+exactly one shift (×0.01, ×0.1 or ×10) fits. `decimal_unverified`: `value` / 10, offered when there 
+
+```ts
+type MeterReadingSuggestedAlternative = {
+  value: number
+  value_raw: string
+  reason: "decimal_shift" | "decimal_unverified"
+}
+```
+
+### `MeterReadingSuggestionJob`
+
+```ts
+type MeterReadingSuggestionJob = {
+  meter_id: string
+  file_id: string
+  schema: string
+  file_name: string
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "FAILED"
+  error: string
+  read_at: string // date-time
+  read_at_source: "exif" | "none"
+  is_meter_photo: boolean
+  meter_number_on_image: string
+  meter_number_mismatch: boolean
+  suggestions: Array<{
+    suggestion_id: string
+    counter_id: string
+    value: number
+    value_raw: string
+    confidence: "high" | "medium" | "low"
+    verbatim_span: string
+    evidence: string
+    warnings: "below_last_reading" | "meter_number_mismatch" | "unusually_high" | "possible_decimal_shift" | "decimal_unverified"[]
+    status: "pending" | "accepted" | "dismissed"
+    decided_at: string // date-time
+    decided_by: string
+    last_value: number
+    last_read_at: string // date-time
+    suggested_alternative: {
+      value: { ... }
+      value_raw: { ... }
+      reason: { ... }
+    }
+    photo_attached: boolean
+  }>
+  created_at: string // date-time
+  updated_at: string // date-time
+}
+```
+
 ### `FileTextStatus`
 
 Availability of the plain-text representation for a file entity.
@@ -2466,7 +2737,7 @@ type DownloadFilesPayload = Array<{
 
 Request payload to create a ZIP job for bulk file download.
 Provide either an explicit list of `file_entity_ids` (up to 1000) or an
-`entity_query` that resolves to file entities (up to 10000).
+`entity_query` that resolves to file entities (up to 20000).
 
 
 ```ts

@@ -1,5 +1,23 @@
 # @epilot/blueprint-manifest-client
 
+## 6.2.0
+
+### Minor Changes
+
+- Update the Blueprint Manifest client from the API specification: the
+  custom_schema_id_conflict and custom_schema_check_unavailable error codes with
+  FormattedError.data.conflictingResource, duplicateBlueprintTestCase,
+  BlueprintTestCoverage and BlueprintTestMainResource, and an optional
+  expectation on BlueprintTestCaseUpdate.
+
+## 6.1.0
+
+### Minor Changes
+
+- Update the Blueprint Manifest client from the merged API specification, including
+  V3SourceResource, V3MissingSourceResource, V3SourceDrift, hydrated source_drift
+  metadata on blueprint plans and jobs, and the source_resources_missing error code.
+
 ## 6.0.0
 
 ### Major Changes

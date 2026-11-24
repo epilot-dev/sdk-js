@@ -67,6 +67,19 @@
         "responses": {}
       }
     },
+    "/v1/journey/partials/{id}/usages": {
+      "get": {
+        "operationId": "getPartialUsages",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/journey/configuration/{id}/revisions": {
       "post": {
         "operationId": "createJourneyRevision",

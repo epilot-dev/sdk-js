@@ -127,6 +127,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   });
   registerApi({
     registry,
+    name: 'entityUi',
+    loader: () => expandDef(require('../definitions/entity-ui-runtime.json')),
+  });
+  registerApi({
+    registry,
     name: 'environments',
     loader: () => expandDef(require('../definitions/environments-runtime.json')),
   });
@@ -209,6 +214,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
     registry,
     name: 'phoneIntegration',
     loader: () => expandDef(require('../definitions/phone-integration-runtime.json')),
+  });
+  registerApi({
+    registry,
+    name: 'presence',
+    loader: () => expandDef(require('../definitions/presence-runtime.json')),
   });
   registerApi({
     registry,

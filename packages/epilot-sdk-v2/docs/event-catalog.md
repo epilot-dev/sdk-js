@@ -56,6 +56,7 @@ const { data } = await eventCatalogClient.listEvents(...)
 - [`CustomEventVersionDraft`](#customeventversiondraft)
 - [`PublishCustomEventVersionPayload`](#publishcustomeventversionpayload)
 - [`ValidationIssue`](#validationissue)
+- [`ValidationErrorResponse`](#validationerrorresponse)
 - [`PreviewEventResponse`](#previeweventresponse)
 - [`UpdateEventPayload`](#updateeventpayload)
 - [`PrimitiveField`](#primitivefield)
@@ -134,7 +135,10 @@ const { data } = await client.listEvents()
             "id": "string",
             "display_name": "string"
           }
-        ]
+        ],
+        "attribute_values": {
+          "registration_status": ["Registered"]
+        }
       },
       "enabled": true,
       "auto_trigger": true,
@@ -212,7 +216,10 @@ const { data } = await client.createCustomEvent(
           id: 'string',
           display_name: 'string'
         }
-      ]
+      ],
+      attribute_values: {
+        registration_status: ['Registered']
+      }
     },
     automation_trigger: true,
     api_trigger: true,
@@ -271,7 +278,10 @@ const { data } = await client.createCustomEvent(
         "id": "string",
         "display_name": "string"
       }
-    ]
+    ],
+    "attribute_values": {
+      "registration_status": ["Registered"]
+    }
   },
   "enabled": true,
   "auto_trigger": true,
@@ -357,7 +367,10 @@ const { data } = await client.getEvent({
         "id": "string",
         "display_name": "string"
       }
-    ]
+    ],
+    "attribute_values": {
+      "registration_status": ["Registered"]
+    }
   },
   "enabled": true,
   "auto_trigger": true,
@@ -455,7 +468,10 @@ const { data } = await client.patchEvent(
         "id": "string",
         "display_name": "string"
       }
-    ]
+    ],
+    "attribute_values": {
+      "registration_status": ["Registered"]
+    }
   },
   "enabled": true,
   "auto_trigger": true,
@@ -535,7 +551,10 @@ const { data } = await client.replaceCustomEventDraft(
           id: 'string',
           display_name: 'string'
         }
-      ]
+      ],
+      attribute_values: {
+        registration_status: ['Registered']
+      }
     },
     automation_trigger: true,
     api_trigger: true,
@@ -594,7 +613,10 @@ const { data } = await client.replaceCustomEventDraft(
         "id": "string",
         "display_name": "string"
       }
-    ]
+    ],
+    "attribute_values": {
+      "registration_status": ["Registered"]
+    }
   },
   "enabled": true,
   "auto_trigger": true,
@@ -673,8 +695,14 @@ const { data } = await client.previewCustomEvent(
   "payload": {},
   "errors": [
     {
-      "path": "string",
-      "message": "string"
+      "path": "customer_number",
+      "message": "must be string, but the value is a number"
+    }
+  ],
+  "warnings": [
+    {
+      "path": "customer_number",
+      "message": "must be string, but the value is a number"
     }
   ]
 }
@@ -742,7 +770,10 @@ const { data } = await client.publishCustomEventDefinition(
         "id": "string",
         "display_name": "string"
       }
-    ]
+    ],
+    "attribute_values": {
+      "registration_status": ["Registered"]
+    }
   },
   "enabled": true,
   "auto_trigger": true,
@@ -830,7 +861,10 @@ const { data } = await client.getCustomEventVersionDraft({
           "id": "string",
           "display_name": "string"
         }
-      ]
+      ],
+      "attribute_values": {
+        "registration_status": ["Registered"]
+      }
     },
     "enabled": true,
     "auto_trigger": true,
@@ -923,7 +957,10 @@ const { data } = await client.putCustomEventVersionDraft(
           id: 'string',
           display_name: 'string'
         }
-      ]
+      ],
+      attribute_values: {
+        registration_status: ['Registered']
+      }
     },
     automation_trigger: true,
     api_trigger: true,
@@ -983,7 +1020,10 @@ const { data } = await client.putCustomEventVersionDraft(
           "id": "string",
           "display_name": "string"
         }
-      ]
+      ],
+      "attribute_values": {
+        "registration_status": ["Registered"]
+      }
     },
     "enabled": true,
     "auto_trigger": true,
@@ -1103,7 +1143,10 @@ const { data } = await client.publishCustomEventVersion(
         "id": "string",
         "display_name": "string"
       }
-    ]
+    ],
+    "attribute_values": {
+      "registration_status": ["Registered"]
+    }
   },
   "enabled": true,
   "auto_trigger": true,
@@ -1347,7 +1390,7 @@ const { data } = await client.searchEventHistory(
   {
     limit: 10,
     cursor: {
-      event_time: '2025-10-31 12:34:56',
+      event_time: '2025-10-31T12:34:56Z',
       event_id: 'evt_1234567890abcdef'
     },
     timestamp: {
@@ -1414,7 +1457,7 @@ const { data } = await client.searchEventHistoryV2(
   {
     limit: 10,
     cursor: {
-      event_time: '2025-10-31 12:34:56',
+      event_time: '2025-10-31T12:34:56Z',
       event_id: 'evt_1234567890abcdef'
     },
     timestamp: {
@@ -1595,6 +1638,7 @@ type EventConfigBase = {
       id: { ... }
       display_name: { ... }
     }>
+    attribute_values?: Record<string, string | number | boolean[]>
   }
   enabled?: boolean
   auto_trigger?: boolean
@@ -1672,6 +1716,7 @@ type EventConfig = {
       id: { ... }
       display_name: { ... }
     }>
+    attribute_values?: Record<string, string | number | boolean[]>
   }
   enabled?: boolean
   auto_trigger?: boolean
@@ -1735,6 +1780,7 @@ type CreateCustomEventPayload = {
       id: { ... }
       display_name: { ... }
     }>
+    attribute_values?: Record<string, string | number | boolean[]>
   }
   automation_trigger?: boolean
   api_trigger?: boolean
@@ -1831,6 +1877,7 @@ type CustomEventVersionDraft = {
       attribute?: { ... }
       purpose?: { ... }
       purpose_filters?: { ... }
+      attribute_values?: { ... }
     }
     enabled?: boolean
     auto_trigger?: boolean
@@ -1885,12 +1932,34 @@ type ValidationIssue = {
 }
 ```
 
+### `ValidationErrorResponse`
+
+A rejected request. `issues` lists every problem for clients; `error` summarises them for
+people reading the response (payload and definition errors repeat each issue in it). A body
+that does not match the request schema is rejected before any of this, with `error` holding
+the request validator's ow
+
+```ts
+type ValidationErrorResponse = {
+  status: number
+  error: string | Record<string, unknown>[]
+  issues?: Array<{
+    path: string
+    message: string
+  }>
+}
+```
+
 ### `PreviewEventResponse`
 
 ```ts
 type PreviewEventResponse = {
   payload: Record<string, unknown>
   errors: Array<{
+    path: string
+    message: string
+  }>
+  warnings: Array<{
     path: string
     message: string
   }>
@@ -2149,6 +2218,7 @@ type EntityOperationTrigger = {
     id: string
     display_name: string
   }>
+  attribute_values?: Record<string, string | number | boolean[]>
 }
 ```
 

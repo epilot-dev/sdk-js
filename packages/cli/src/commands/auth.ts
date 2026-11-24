@@ -1,7 +1,14 @@
 import { defineCommand } from 'citty';
 import { ACCESS_PROFILE_INFO, AgentAuthError, isAccessProfile, organizationGrants } from '@epilot/agent-auth';
 import { deleteAgentRecord, formatExpiresIn, loadAgentIdentity } from '../lib/agent-auth.js';
-import { loadCredentials, removeCredentials } from '../lib/auth-store.js';
+import {
+  type Credentials,
+  type ResolvedToken,
+  decodeJwtPayload,
+  isTokenExpired,
+  removeCredentials,
+  resolveTokenSource,
+} from '../lib/auth-store.js';
 import { getResolvedProfile, resolveProfileName, upsertProfile } from '../lib/profiles.js';
 import { BOLD, RESET, GREEN, RED, DIM, YELLOW } from '../lib/utils.js';
 
@@ -13,6 +20,7 @@ export default defineCommand({
   subCommands: {
     login: () => import('./auth-login.js').then((m) => m.default),
     token: () => import('./auth-token.js').then((m) => m.default),
+    browser: () => import('./auth-browser.js').then((m) => m.default),
     logout: defineCommand({
       meta: { name: 'logout', description: 'Remove stored credentials' },
       args: {
@@ -47,7 +55,8 @@ export default defineCommand({
           }
         }
 
-        const removed = removeCredentials();
+        // A named profile is self-contained: clear its token and keep the default login in credentials.json.
+        const removed = profileName ? clearProfileToken(profileName) : removeCredentials();
         if (removed || loaded) {
           process.stdout.write(`${GREEN}Logged out successfully.${RESET}\n`);
         } else {
@@ -59,26 +68,35 @@ export default defineCommand({
       meta: { name: 'status', description: 'Show authentication status' },
       args: {
         profile: { type: 'string', description: 'Profile to inspect (or EPILOT_PROFILE env)' },
+        token: { type: 'string', alias: 't', description: 'Inspect this token instead of the stored one' },
       },
       run: async ({ args }) => {
         const profileName = args.profile || process.env.EPILOT_PROFILE;
+        const resolved = resolveTokenSource(args.token, profileName);
+
+        // --token / EPILOT_TOKEN win over anything stored, agent or not.
+        if (resolved && (resolved.source === 'flag' || resolved.source === 'env')) {
+          printTokenStatus(resolved);
+          return;
+        }
+
         const loaded = loadAgentIdentity(profileName);
 
         // Without an agent: exactly the status output of a plain login.
         if (!loaded) {
-          const plain = loadCredentials();
-          if (!plain) {
+          if (!resolved) {
             process.stdout.write(`${YELLOW}Not authenticated.${RESET}\n`);
             process.stdout.write(`Run ${BOLD}epilot auth login${RESET} to authenticate.\n`);
             return;
           }
-          printTokenStatus(plain, { agent: false });
+          printTokenStatus(resolved);
           return;
         }
 
-        const creds = loadCredentials() ?? profileCredentials(profileName);
-        if (creds) {
-          printTokenStatus(creds, { agent: true });
+        const valid = resolved && !isTokenExpired(resolved.creds.expires_at) ? resolved : null;
+        const creds = valid?.creds;
+        if (valid) {
+          printTokenStatus(valid);
         } else {
           process.stdout.write(`${YELLOW}No valid token stored${RESET} ${DIM}(issued on next API call)${RESET}\n`);
         }
@@ -122,36 +140,53 @@ export default defineCommand({
   },
 });
 
-const profileCredentials = (profileName?: string) => {
-  const profile = getResolvedProfile(profileName);
-  if (!profile?.token) return null;
-  if (profile.expires_at && new Date(profile.expires_at) < new Date()) return null;
-  return {
-    token: profile.token,
-    org_id: profile.org_id,
-    user_id: profile.user_id,
-    expires_at: profile.expires_at,
-    access_profile: profile.access_profile,
-  };
+const clearProfileToken = (profileName: string): boolean => {
+  if (!getResolvedProfile(profileName)?.token) return false;
+  upsertProfile(profileName, {
+    token: undefined,
+    org_id: undefined,
+    user_id: undefined,
+    expires_at: undefined,
+    access_profile: undefined,
+  });
+  return true;
 };
 
-const printTokenStatus = (
-  creds: {
-    token: string;
-    org_id?: string;
-    user_id?: string;
-    name?: string;
-    expires_at?: string;
-    access_profile?: string;
-  },
-  { agent }: { agent: boolean },
-): void => {
-  const claims = parseJwtPayload(creds.token);
+const describeTokenSource = ({ source, profileName }: ResolvedToken): string =>
+  source === 'flag'
+    ? '--token flag'
+    : source === 'env'
+      ? 'EPILOT_TOKEN env var'
+      : source === 'profile'
+        ? `profile "${profileName}"`
+        : 'credentials.json (default login)';
+
+/** "2h 5m" below a day, "3 days" above, "expired" in the past. */
+const formatRemaining = (diffMs: number): string =>
+  diffMs < 0
+    ? `${RED}expired${RESET}`
+    : diffMs < 86400000
+      ? `${Math.floor(diffMs / 3600000)}h ${Math.floor((diffMs % 3600000) / 60000)}m`
+      : `${Math.floor(diffMs / 86400000)} days`;
+
+/** Prints the decoded, non-secret claims of the effective token and where it comes from — never the token. */
+const printTokenStatus = (resolved: ResolvedToken): void => {
+  const creds: Credentials = resolved.creds;
+  const claims = decodeJwtPayload(creds.token);
   const isApiToken = claims?.token_type === 'api';
   const isCognitoToken = typeof claims?.iss === 'string' && claims.iss.includes('cognito-idp');
   const tokenType = isApiToken ? 'API Token' : isCognitoToken ? 'User Token' : 'Token';
 
-  process.stdout.write(`${GREEN}${BOLD}Authenticated${RESET} ${DIM}(${tokenType})${RESET}\n`);
+  // Stored expiry, else the token's exp claim
+  const expiresAt =
+    creds.expires_at ?? (typeof claims?.exp === 'number' ? new Date(claims.exp * 1000).toISOString() : undefined);
+  const expired = isTokenExpired(expiresAt);
+
+  process.stdout.write(
+    expired
+      ? `${RED}${BOLD}Token expired${RESET} ${DIM}(${tokenType})${RESET} — request a new one\n`
+      : `${GREEN}${BOLD}Authenticated${RESET} ${DIM}(${tokenType})${RESET}\n`,
+  );
 
   // Resolve fields from JWT claims (API token vs Cognito token vs stored creds)
   const name = (claims?.token_name || claims?.email || claims?.['cognito:username'] || creds.name) as
@@ -165,6 +200,8 @@ const printTokenStatus = (
   const roles = claims?.assume_roles as string[] | undefined;
   const readOnly = claims?.read_only === true;
   const anonymize = claims?.anonymize === true;
+  const allowedActions = Array.isArray(claims?.allowed_actions) ? (claims.allowed_actions as string[]) : undefined;
+  const actor = claims?.actor as { type?: string; client?: string; approval_id?: string } | undefined;
 
   if (name) process.stdout.write(`  Name:    ${name}\n`);
   if (adminEmail && adminEmail !== name) process.stdout.write(`  Email:   ${adminEmail}\n`);
@@ -180,49 +217,24 @@ const printTokenStatus = (
     );
   }
   if (anonymize) process.stdout.write(`  Data:    ${YELLOW}anonymized${RESET}\n`);
+  if (allowedActions?.length) {
+    const more = allowedActions.length > 5 ? ` ${DIM}(+${allowedActions.length - 5} more)${RESET}` : '';
+    process.stdout.write(`  Actions: ${allowedActions.slice(0, 5).join(', ')}${more}\n`);
+  }
+  if (actor && typeof actor === 'object') {
+    const via = [actor.type, actor.client ? `via ${actor.client}` : ''].filter(Boolean).join(' ');
+    const approval = actor.approval_id ? ` ${DIM}(approval ${actor.approval_id})${RESET}` : '';
+    process.stdout.write(`  Actor:   ${via || 'unknown'}${approval}\n`);
+  }
 
-  // Expiry
-  if (creds.expires_at) {
-    const expiry = new Date(creds.expires_at);
-    const now = new Date();
-    const diffMs = expiry.getTime() - now.getTime();
-    // Agent-issued tokens live for an hour: show hours/minutes. Plain logins keep the day count.
-    const label = agent
-      ? diffMs < 86400000
-        ? `${Math.floor(diffMs / 3600000)}h ${Math.floor((diffMs % 3600000) / 60000)}m`
-        : `${Math.floor(diffMs / 86400000)} days`
-      : `${Math.floor(diffMs / (1000 * 60 * 60 * 24))} days`;
-    process.stdout.write(`  Expires: ${creds.expires_at} ${DIM}(${label})${RESET}\n`);
-  } else if (claims?.exp) {
-    const expiry = new Date((claims.exp as number) * 1000);
-    const now = new Date();
-    const diffMs = expiry.getTime() - now.getTime();
-    const label =
-      diffMs < 0
-        ? `${RED}expired${RESET}`
-        : diffMs < 86400000
-          ? `${Math.floor(diffMs / 3600000)}h ${Math.floor((diffMs % 3600000) / 60000)}m`
-          : `${Math.floor(diffMs / 86400000)} days`;
-    process.stdout.write(`  Expires: ${expiry.toISOString()} ${DIM}(${label})${RESET}\n`);
-  } else if (claims?.iat && !claims?.exp) {
+  if (expiresAt) {
+    const diffMs = new Date(expiresAt).getTime() - Date.now();
+    process.stdout.write(`  Expires: ${expiresAt} ${DIM}(${formatRemaining(diffMs)}${DIM})${RESET}\n`);
+  } else if (claims?.iat) {
     const issued = new Date((claims.iat as number) * 1000);
     process.stdout.write(`  Issued:  ${issued.toISOString()} ${DIM}(no expiry)${RESET}\n`);
   }
 
-  process.stdout.write(`  Token:   ${creds.token.substring(0, 20)}...${RESET}\n`);
-};
-
-/**
- * Decode a JWT payload without verifying the signature.
- * Returns null if the token is not a valid JWT.
- */
-const parseJwtPayload = (token: string): Record<string, unknown> | null => {
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 3) return null;
-    const payload = Buffer.from(parts[1], 'base64url').toString('utf-8');
-    return JSON.parse(payload);
-  } catch {
-    return null;
-  }
+  // Never print the token itself, only where it comes from.
+  process.stdout.write(`  Source:  ${describeTokenSource(resolved)}\n`);
 };

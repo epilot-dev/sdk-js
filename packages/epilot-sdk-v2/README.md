@@ -63,6 +63,7 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.emailTemplate` | `@epilot/sdk/email-template` | [docs](./docs/email-template.md) |
 | `epilot.entity` | `@epilot/sdk/entity` | [docs](./docs/entity.md) |
 | `epilot.entityMapping` | `@epilot/sdk/entity-mapping` | [docs](./docs/entity-mapping.md) |
+| `epilot.entityUi` | `@epilot/sdk/entity-ui` | [docs](./docs/entity-ui.md) |
 | `epilot.environments` | `@epilot/sdk/environments` | [docs](./docs/environments.md) |
 | `epilot.eventCatalog` | `@epilot/sdk/event-catalog` | [docs](./docs/event-catalog.md) |
 | `epilot.externalValues` | `@epilot/sdk/external-values` | [docs](./docs/external-values.md) |
@@ -80,6 +81,7 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.partnerDirectory` | `@epilot/sdk/partner-directory` | [docs](./docs/partner-directory.md) |
 | `epilot.permissions` | `@epilot/sdk/permissions` | [docs](./docs/permissions.md) |
 | `epilot.phoneIntegration` | `@epilot/sdk/phone-integration` | [docs](./docs/phone-integration.md) |
+| `epilot.presence` | `@epilot/sdk/presence` | [docs](./docs/presence.md) |
 | `epilot.pricing` | `@epilot/sdk/pricing` | [docs](./docs/pricing.md) |
 | `epilot.pricingTier` | `@epilot/sdk/pricing-tier` | [docs](./docs/pricing-tier.md) |
 | `epilot.purpose` | `@epilot/sdk/purpose` | [docs](./docs/purpose.md) |

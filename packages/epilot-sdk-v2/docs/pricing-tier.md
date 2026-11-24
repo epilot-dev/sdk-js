@@ -1,5 +1,6 @@
 # Pricing Tier API
 
+- **Base URL:** `https://pricing-tier.sls.epilot.io`
 - **Full API Docs:** [https://docs.epilot.io/api/pricing-tier](https://docs.epilot.io/api/pricing-tier)
 
 ## Usage
@@ -44,7 +45,7 @@ const { data } = await client.getCurrentPricingTier()
 
 ```json
 {
-  "id": 22,
+  "id": "22",
   "created_date": "string",
   "updated_date": "string",
   "organization_id": "string",

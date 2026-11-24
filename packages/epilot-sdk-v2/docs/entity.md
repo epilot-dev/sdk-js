@@ -170,6 +170,7 @@ const { data } = await entityClient.listSchemas(...)
 - [`UserRelationAttribute`](#userrelationattribute)
 - [`PartnerOrganisationAttribute`](#partnerorganisationattribute)
 - [`PortalAccessAttribute`](#portalaccessattribute)
+- [`PortalRoleAttribute`](#portalroleattribute)
 - [`DefaultAddressFields`](#defaultaddressfields)
 - [`AddressAttribute`](#addressattribute)
 - [`AddressRelationAttribute`](#addressrelationattribute)
@@ -184,6 +185,7 @@ const { data } = await entityClient.listSchemas(...)
 - [`NumberAttribute`](#numberattribute)
 - [`TableAttribute`](#tableattribute)
 - [`ConsentAttribute`](#consentattribute)
+- [`ConsentValue`](#consentvalue)
 - [`OrderedListAttribute`](#orderedlistattribute)
 - [`EmailAttribute`](#emailattribute)
 - [`PhoneAttribute`](#phoneattribute)
@@ -5232,7 +5234,7 @@ const { data } = await client.createSchemaCapability(
         edit_mode_config: { /* ... */ },
         type: 'link'
       },
-      /* ... 33 more */
+      /* ... 34 more */
     ],
     overridable_attribute: false,
     managed_fields: ['status'],
@@ -5261,7 +5263,8 @@ const { data } = await client.createSchemaCapability(
         requiredPermission: { /* ... */ },
         default_visible: false,
         default_width: 'half_width',
-        pricing_tier_setting: 'entity_address_maps'
+        pricing_tier_setting: 'entity_address_maps',
+        insert_after: 'status'
       }
     ],
     feature_flag: 'FF_MY_FEATURE_FLAG',
@@ -5398,7 +5401,8 @@ const { data } = await client.createSchemaCapability(
       "requiredPermission": {},
       "default_visible": false,
       "default_width": "half_width",
-      "pricing_tier_setting": "entity_address_maps"
+      "pricing_tier_setting": "entity_address_maps",
+      "insert_after": "status"
     }
   ],
   "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -5550,7 +5554,8 @@ const { data } = await client.getSchemaCapability({
       "requiredPermission": {},
       "default_visible": false,
       "default_width": "half_width",
-      "pricing_tier_setting": "entity_address_maps"
+      "pricing_tier_setting": "entity_address_maps",
+      "insert_after": "status"
     }
   ],
   "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -5669,7 +5674,7 @@ const { data } = await client.putSchemaCapability(
         edit_mode_config: { /* ... */ },
         type: 'link'
       },
-      /* ... 33 more */
+      /* ... 34 more */
     ],
     overridable_attribute: false,
     managed_fields: ['status'],
@@ -5698,7 +5703,8 @@ const { data } = await client.putSchemaCapability(
         requiredPermission: { /* ... */ },
         default_visible: false,
         default_width: 'half_width',
-        pricing_tier_setting: 'entity_address_maps'
+        pricing_tier_setting: 'entity_address_maps',
+        insert_after: 'status'
       }
     ],
     feature_flag: 'FF_MY_FEATURE_FLAG',
@@ -5835,7 +5841,8 @@ const { data } = await client.putSchemaCapability(
       "requiredPermission": {},
       "default_visible": false,
       "default_width": "half_width",
-      "pricing_tier_setting": "entity_address_maps"
+      "pricing_tier_setting": "entity_address_maps",
+      "insert_after": "status"
     }
   ],
   "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -5987,7 +5994,8 @@ const { data } = await client.deleteSchemaCapability({
       "requiredPermission": {},
       "default_visible": false,
       "default_width": "half_width",
-      "pricing_tier_setting": "entity_address_maps"
+      "pricing_tier_setting": "entity_address_maps",
+      "insert_after": "status"
     }
   ],
   "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -6743,15 +6751,7 @@ type GenerateEntityTableAIFiltersRequest = {
     name?: string
     group?: string
     allowedSchemas?: string[]
-    relatedOptions?: Array<{
-      type?: { ... }
-      label: { ... }
-      label_type?: { ... }
-      name?: { ... }
-      group?: { ... }
-      allowedSchemas?: { ... }
-      relatedOptions?: { ... }
-    }>
+    relatedOptions?: { ... }[]
   }>
 }
 ```
@@ -6786,23 +6786,7 @@ type EntityTableFilterOption = {
   name?: string
   group?: string
   allowedSchemas?: string[]
-  relatedOptions?: Array<{
-    type?: "search" | "filter"
-    label: string
-    label_type?: string
-    name?: string
-    group?: string
-    allowedSchemas?: string[]
-    relatedOptions?: Array<{
-      type?: { ... }
-      label: { ... }
-      label_type?: { ... }
-      name?: { ... }
-      group?: { ... }
-      allowedSchemas?: { ... }
-      relatedOptions?: { ... }
-    }>
-  }>
+  relatedOptions?: { ... }[]
 }
 ```
 
@@ -8179,6 +8163,72 @@ type PortalAccessAttribute = {
 }
 ```
 
+### `PortalRoleAttribute`
+
+```ts
+type PortalRoleAttribute = {
+  id?: string
+  name: string
+  label: string
+  placeholder?: string
+  hidden?: boolean
+  show_in_table?: boolean
+  sortable?: boolean
+  required?: boolean
+  readonly?: boolean
+  deprecated?: boolean
+  overridable_attribute?: boolean
+  default_value?: unknown
+  group?: string
+  order?: number
+  layout?: string
+  hide_label?: boolean
+  icon?: string
+  render_condition?: string
+  data_classification?: "public" | "pii"
+  _purpose?: string[]
+  _manifest?: string // uuid[]
+  constraints?: object
+  feature_flag?: string
+  settings_flag?: Array<{
+    name?: string
+    enabled?: boolean
+  }>
+  value_formatter?: string
+  preview_value_formatter?: string
+  entity_builder_disable_edit?: boolean
+  protected?: boolean
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
+      pattern?: { ... }
+    }
+  }
+  type: "portal_role"
+}
+```
+
 ### `DefaultAddressFields`
 
 Default fields visible on addresses
@@ -9083,8 +9133,27 @@ type ConsentAttribute = {
     }
   }
   type: "consent"
-  topic: string
+  topic?: string
   identifiers?: string[]
+  definition_id?: string
+}
+```
+
+### `ConsentValue`
+
+Value of a consent attribute that belongs to a consent definition (has a `definition_id`).
+
+The stored value. Writers may send shorthand instead of the object: `true` (active), `false` (declined),
+or a status string; `null` or `""` clears it. `definition_id` is always taken from the attribute; `sour
+
+```ts
+type ConsentValue = {
+  status: "active" | "pending" | "declined" | "unknown"
+  definition_id: string
+  source: string
+  source_id?: string
+  identifier?: string
+  updated_at: string // date-time
 }
 ```
 
@@ -9666,7 +9735,7 @@ type LocationConditionDefinition = {
   name: string
   label: string
   type: "location"
-  format?: "postal_code" | "postal_code_city"
+  format?: "postal_code" | "postal_code_city" | "power_grid_operator" | "gas_grid_operator"
 }
 ```
 
@@ -9697,7 +9766,7 @@ type ConditionDefinition = {
   name: string
   label: string
   type: "location"
-  format?: "postal_code" | "postal_code_city"
+  format?: "postal_code" | "postal_code_city" | "power_grid_operator" | "gas_grid_operator"
 }
 ```
 
@@ -10540,36 +10609,9 @@ type EntityListParams = {
     exists?: {
       field: { ... }
     }
-    $and?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
-    $or?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
-    $not?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
+    $and?: { ... }
+    $or?: { ... }
+    $not?: { ... }
   }>
   allow_targeting_all_schemas?: boolean
   sort?: string | string[]
@@ -10611,90 +10653,10 @@ type SearchFilter = Array<{
   exists?: {
     field: string
   }
-  $and?: Array<{
-    term?: Record<string, string | number | boolean>
-    terms?: Record<string, string | number | boolean[]>
-    ids?: {
-      values?: { ... }
-    }
-    range?: Record<string, {
-      gt?: { ... }
-      gte?: { ... }
-      lt?: { ... }
-      lte?: { ... }
-      format?: { ... }
-      relation?: { ... }
-      time_zone?: { ... }
-    }>
-    exists?: {
-      field: { ... }
-    }
-    $and?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
-    $or?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
-    $not?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
-  }>
-  $or?: Array<{
-    term?: Record<string, string | number | boolean>
-    terms?: Record<string, string | number | boolean[]>
-    ids?: {
-      values?: { ... }
-    }
-    range?: Record<string, {
-      gt?: { ... }
-      gte?: { ... }
-      lt?: { ... }
-      lte?: { ... }
-      format?: { ... }
-      relation?: { ... }
-      time_zone?: { ... }
-    }>
-    exists?: {
-      field: { ... }
-    }
-    $and?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
-    $or?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-  // ...
-}
+  $and?: { ... }
+  $or?: { ... }
+  $not?: { ... }
+}>
 ```
 
 ### `SearchFilterValue`

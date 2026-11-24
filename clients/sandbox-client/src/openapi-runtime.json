@@ -52,6 +52,16 @@
             "name": "pipeline_id",
             "in": "path",
             "required": true
+          },
+          {
+            "name": "read_only",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "access_profile",
+            "in": "query",
+            "required": false
           }
         ],
         "responses": {}
@@ -65,12 +75,6 @@
             "application/json": {}
           }
         },
-        "responses": {}
-      }
-    },
-    "/v1/sandbox/requests": {
-      "get": {
-        "operationId": "listSandboxRequests",
         "responses": {}
       }
     }

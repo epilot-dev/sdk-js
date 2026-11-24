@@ -127,6 +127,7 @@ export declare namespace Components {
              */
             error?: string;
         }
+        export type MeterReadingSuggestionErrorResponse = /* A generic error returned by the API */ Schemas.MeterReadingSuggestionError;
         /**
          * A generic error returned by the API
          * example:
@@ -293,16 +294,30 @@ export declare namespace Components {
              */
             entity_id: string; // uuid
         }
+        export interface CreateMeterReadingSuggestionJobRequest {
+            /**
+             * The meter entity id
+             */
+            meter_id: string;
+            /**
+             * The file entity id of the photo
+             */
+            file_id: string;
+            /**
+             * Schema slug of the meter entity
+             */
+            schema?: string;
+        }
         /**
          * Request payload to create a ZIP job for bulk file download.
          * Provide either an explicit list of `file_entity_ids` (up to 1000) or an
-         * `entity_query` that resolves to file entities (up to 10000).
+         * `entity_query` that resolves to file entities (up to 20000).
          *
          */
         export type CreateZipJobPayload = /**
          * Request payload to create a ZIP job for bulk file download.
          * Provide either an explicit list of `file_entity_ids` (up to 1000) or an
-         * `entity_query` that resolves to file entities (up to 10000).
+         * `entity_query` that resolves to file entities (up to 20000).
          *
          */
         {
@@ -3215,6 +3230,134 @@ export declare namespace Components {
             warnings?: string[];
             conditions: FileValidationConditionResult[];
         }
+        /**
+         * Another reading to offer instead of `value`. `decimal_shift`: a decimal shift of `value` that is
+         * consistent with `last_value` (between it and twice it), offered when `value` itself is implausible and
+         * exactly one shift (×0.01, ×0.1 or ×10) fits. `decimal_unverified`: `value` / 10, offered when there is
+         * no last reading and `value` is a whole number of at least 6 digits. Null otherwise.
+         *
+         */
+        export type MeterReadingSuggestedAlternative = {
+            /**
+             * The shifted reading, rounded to 3 decimals
+             */
+            value: number;
+            /**
+             * The shifted reading as a string
+             */
+            value_raw: string;
+            reason: "decimal_shift" | "decimal_unverified";
+        } | null;
+        export interface MeterReadingSuggestion {
+            /**
+             * ULID of the suggestion
+             */
+            suggestion_id: string;
+            /**
+             * The meter counter the reading is for
+             */
+            counter_id: string;
+            /**
+             * The suggested reading
+             */
+            value: number;
+            /**
+             * The reading as the model returned it
+             */
+            value_raw: string;
+            confidence: "high" | "medium" | "low";
+            /**
+             * The passage of the photo's transcription the reading was taken from. May be empty when the model
+             * read the value from the photo itself (`photo_attached: true`) and it is not in the transcription.
+             *
+             */
+            verbatim_span: string;
+            /**
+             * Why the model chose this reading
+             */
+            evidence: string;
+            /**
+             * Checks against the counter's last reading. `below_last_reading`: the value is below it;
+             * `unusually_high`: the value is at least 5 times it; `possible_decimal_shift`: the value looks
+             * implausible and exactly one decimal shift of it is plausible (see `suggested_alternative`);
+             * `meter_number_mismatch`: the meter number on the photo differs from the meter's;
+             * `decimal_unverified`: there is no last reading to compare with and the value is a whole number of
+             * at least 6 digits, so the decimal position could not be checked (see `suggested_alternative`).
+             * New codes may be added; clients should ignore codes they do not know.
+             *
+             */
+            warnings: ("below_last_reading" | "meter_number_mismatch" | "unusually_high" | "possible_decimal_shift" | "decimal_unverified")[];
+            status: "pending" | "accepted" | "dismissed";
+            decided_at: string | null; // date-time
+            decided_by: string | null;
+            /**
+             * The counter's latest reading before the job ran, as sent to the model. Null when the counter has
+             * no reading or the job was stored before this field existed.
+             *
+             */
+            last_value: number | null;
+            /**
+             * Timestamp of `last_value`. Null when unknown.
+             */
+            last_read_at: string | null; // date-time
+            suggested_alternative: /**
+             * Another reading to offer instead of `value`. `decimal_shift`: a decimal shift of `value` that is
+             * consistent with `last_value` (between it and twice it), offered when `value` itself is implausible and
+             * exactly one shift (×0.01, ×0.1 or ×10) fits. `decimal_unverified`: `value` / 10, offered when there is
+             * no last reading and `value` is a whole number of at least 6 digits. Null otherwise.
+             *
+             */
+            MeterReadingSuggestedAlternative;
+            /**
+             * Whether the model saw the photo itself (not only its transcription). Null for jobs stored before
+             * this field existed.
+             *
+             */
+            photo_attached: boolean | null;
+        }
+        /**
+         * A generic error returned by the API
+         */
+        export interface MeterReadingSuggestionError {
+            /**
+             * The HTTP status code of the error
+             * example:
+             * 400
+             */
+            status?: number;
+            /**
+             * The error message
+             * example:
+             * Bad Request
+             */
+            error?: string;
+            error_code?: "feature_disabled" | "file_not_found" | "not_an_image" | "schema_not_supported" | "file_not_attached" | "job_not_found" | "job_not_completed" | "suggestion_not_found" | "processing_enqueue_failed";
+        }
+        export interface MeterReadingSuggestionJob {
+            meter_id: string;
+            file_id: string;
+            /**
+             * Schema slug of the meter entity
+             */
+            schema: string;
+            file_name: string | null;
+            status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
+            error: string | null;
+            /**
+             * When the photo was taken, from its EXIF DateTimeOriginal (or CreateDate). Interpreted as Europe/Berlin time when the photo carries no UTC offset.
+             */
+            read_at: string | null; // date-time
+            read_at_source: "exif" | "none";
+            is_meter_photo: boolean | null;
+            meter_number_on_image: string | null;
+            /**
+             * The meter number read from the photo differs from the meter's meter number
+             */
+            meter_number_mismatch: boolean;
+            suggestions: MeterReadingSuggestion[];
+            created_at: string; // date-time
+            updated_at: string; // date-time
+        }
         export interface PublicLink {
             /**
              * ID of the public link
@@ -3654,6 +3797,9 @@ export declare namespace Components {
                 })[]
             ];
         }
+        export interface UpdateMeterReadingSuggestionStatusRequest {
+            status: "accepted" | "dismissed";
+        }
         export interface UploadFilePayload {
             /**
              * example:
@@ -3920,6 +4066,51 @@ export declare namespace Paths {
             Components.Responses.InternalServerError;
         }
     }
+    namespace CreateMeterReadingSuggestionJob {
+        export type RequestBody = Components.Schemas.CreateMeterReadingSuggestionJobRequest;
+        namespace Responses {
+            export type $202 = Components.Schemas.MeterReadingSuggestionJob;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = Components.Responses.MeterReadingSuggestionErrorResponse;
+            export type $409 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 409,
+             *   "error": "Extracted file content is still being prepared"
+             * }
+             */
+            Components.Responses.ConflictError;
+            export type $422 = Components.Responses.MeterReadingSuggestionErrorResponse;
+            export type $500 = Components.Responses.MeterReadingSuggestionErrorResponse;
+        }
+    }
     namespace CreateUserSchemaFileCollection {
         namespace Parameters {
             export type Slug = string;
@@ -3963,7 +4154,7 @@ export declare namespace Paths {
         export type RequestBody = /**
          * Request payload to create a ZIP job for bulk file download.
          * Provide either an explicit list of `file_entity_ids` (up to 1000) or an
-         * `entity_query` that resolves to file entities (up to 10000).
+         * `entity_query` that resolves to file entities (up to 20000).
          *
          */
         Components.Schemas.CreateZipJobPayload;
@@ -5027,6 +5218,58 @@ export declare namespace Paths {
             Components.Responses.InternalServerError;
         }
     }
+    namespace ListMeterReadingSuggestions {
+        namespace Parameters {
+            export type MeterId = string;
+            export type Schema = string;
+        }
+        export interface QueryParameters {
+            meter_id: Parameters.MeterId;
+            schema?: Parameters.Schema;
+        }
+        namespace Responses {
+            export interface $200 {
+                results: Components.Schemas.MeterReadingSuggestionJob[];
+            }
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = Components.Responses.MeterReadingSuggestionErrorResponse;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
+        }
+    }
     namespace ListPublicLinksForFile {
         namespace Parameters {
             export type Id = string;
@@ -5568,6 +5811,68 @@ export declare namespace Paths {
              */
             Components.Responses.ForbiddenError;
             export type $404 = Components.Responses.FileAttributeSuggestionErrorResponse;
+            export type $409 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 409,
+             *   "error": "Extracted file content is still being prepared"
+             * }
+             */
+            Components.Responses.ConflictError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
+        }
+    }
+    namespace UpdateMeterReadingSuggestionStatus {
+        namespace Parameters {
+            export type FileId = string;
+            export type MeterId = string;
+            export type SuggestionId = string;
+        }
+        export interface PathParameters {
+            meter_id: Parameters.MeterId;
+            file_id: Parameters.FileId;
+            suggestion_id: Parameters.SuggestionId;
+        }
+        export type RequestBody = Components.Schemas.UpdateMeterReadingSuggestionStatusRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.MeterReadingSuggestionJob;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = Components.Responses.MeterReadingSuggestionErrorResponse;
             export type $409 = /**
              * A generic error returned by the API
              * example:
@@ -6192,6 +6497,36 @@ export interface OperationMethods {
     data?: Paths.UpdateFileAttributeSuggestionStatus.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateFileAttributeSuggestionStatus.Responses.$200>
+  /**
+   * listMeterReadingSuggestions - listMeterReadingSuggestions
+   * 
+   * List the meter reading suggestion jobs of a meter, newest first: one job per photo attached to the meter. Requires `entity:view` on the meter.
+   */
+  'listMeterReadingSuggestions'(
+    parameters?: Parameters<Paths.ListMeterReadingSuggestions.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListMeterReadingSuggestions.Responses.$200>
+  /**
+   * createMeterReadingSuggestionJob - createMeterReadingSuggestionJob
+   * 
+   * Start (or re-run) reading suggestions for one photo of a meter. Resets any previous job of the same meter and file. Requires `entity:edit` on the meter and `entity:view` on the file. The file must be attached to the meter (422 `file_not_attached` otherwise).
+   */
+  'createMeterReadingSuggestionJob'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateMeterReadingSuggestionJob.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateMeterReadingSuggestionJob.Responses.$202>
+  /**
+   * updateMeterReadingSuggestionStatus - updateMeterReadingSuggestionStatus
+   * 
+   * Record that a suggestion was accepted or dismissed. Saving the reading itself stays with the caller. Requires `entity:edit` on the meter.
+   */
+  'updateMeterReadingSuggestionStatus'(
+    parameters?: Parameters<Paths.UpdateMeterReadingSuggestionStatus.PathParameters> | null,
+    data?: Paths.UpdateMeterReadingSuggestionStatus.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateMeterReadingSuggestionStatus.Responses.$200>
   /**
    * getFileText - getFileText
    * 
@@ -6823,6 +7158,40 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateFileAttributeSuggestionStatus.Responses.$200>
   }
+  ['/v1/files:meterReadingSuggestions']: {
+    /**
+     * listMeterReadingSuggestions - listMeterReadingSuggestions
+     * 
+     * List the meter reading suggestion jobs of a meter, newest first: one job per photo attached to the meter. Requires `entity:view` on the meter.
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListMeterReadingSuggestions.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListMeterReadingSuggestions.Responses.$200>
+    /**
+     * createMeterReadingSuggestionJob - createMeterReadingSuggestionJob
+     * 
+     * Start (or re-run) reading suggestions for one photo of a meter. Resets any previous job of the same meter and file. Requires `entity:edit` on the meter and `entity:view` on the file. The file must be attached to the meter (422 `file_not_attached` otherwise).
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateMeterReadingSuggestionJob.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateMeterReadingSuggestionJob.Responses.$202>
+  }
+  ['/v1/files:meterReadingSuggestions/{meter_id}/{file_id}/{suggestion_id}']: {
+    /**
+     * updateMeterReadingSuggestionStatus - updateMeterReadingSuggestionStatus
+     * 
+     * Record that a suggestion was accepted or dismissed. Saving the reading itself stays with the caller. Requires `entity:edit` on the meter.
+     */
+    'patch'(
+      parameters?: Parameters<Paths.UpdateMeterReadingSuggestionStatus.PathParameters> | null,
+      data?: Paths.UpdateMeterReadingSuggestionStatus.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateMeterReadingSuggestionStatus.Responses.$200>
+  }
   ['/v1/files/{id}/text']: {
     /**
      * getFileText - getFileText
@@ -7159,6 +7528,7 @@ export type BaseEntityOwner = Components.Schemas.BaseEntityOwner;
 export type BatchSaveFileVersionPayload = Components.Schemas.BatchSaveFileVersionPayload;
 export type CommonSaveFilePayload = Components.Schemas.CommonSaveFilePayload;
 export type CreateFileAttributeSuggestionJobRequest = Components.Schemas.CreateFileAttributeSuggestionJobRequest;
+export type CreateMeterReadingSuggestionJobRequest = Components.Schemas.CreateMeterReadingSuggestionJobRequest;
 export type CreateZipJobPayload = Components.Schemas.CreateZipJobPayload;
 export type CustomDownloadUrl = Components.Schemas.CustomDownloadUrl;
 export type CustomDownloadUrlAuth = Components.Schemas.CustomDownloadUrlAuth;
@@ -7201,6 +7571,10 @@ export type FileValidationJudgement = Components.Schemas.FileValidationJudgement
 export type FileValidationObservation = Components.Schemas.FileValidationObservation;
 export type FileValidationRequest = Components.Schemas.FileValidationRequest;
 export type FileValidationRuleResult = Components.Schemas.FileValidationRuleResult;
+export type MeterReadingSuggestedAlternative = Components.Schemas.MeterReadingSuggestedAlternative;
+export type MeterReadingSuggestion = Components.Schemas.MeterReadingSuggestion;
+export type MeterReadingSuggestionError = Components.Schemas.MeterReadingSuggestionError;
+export type MeterReadingSuggestionJob = Components.Schemas.MeterReadingSuggestionJob;
 export type PublicLink = Components.Schemas.PublicLink;
 export type PutFileSummaryFeedbackRequest = Components.Schemas.PutFileSummaryFeedbackRequest;
 export type S3Ref = Components.Schemas.S3Ref;
@@ -7211,6 +7585,7 @@ export type SaveFilePayload = Components.Schemas.SaveFilePayload;
 export type SaveFilePayloadV2 = Components.Schemas.SaveFilePayloadV2;
 export type SaveS3FilePayload = Components.Schemas.SaveS3FilePayload;
 export type UpdateFileAttributeSuggestionStatusRequest = Components.Schemas.UpdateFileAttributeSuggestionStatusRequest;
+export type UpdateMeterReadingSuggestionStatusRequest = Components.Schemas.UpdateMeterReadingSuggestionStatusRequest;
 export type UploadFilePayload = Components.Schemas.UploadFilePayload;
 export type VerifyCustomDownloadUrlPayload = Components.Schemas.VerifyCustomDownloadUrlPayload;
 export type ZipJob = Components.Schemas.ZipJob;

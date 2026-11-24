@@ -55,6 +55,14 @@ declare namespace Components {
                  */
                 filename?: string;
                 s3ref?: S3Reference;
+                /**
+                 * The `file` entity of the template. When set, its `docgen_layout_mode` attribute selects the
+                 * layout flow unless `template_settings.layout_mode` overrides it.
+                 *
+                 * example:
+                 * 123e4567-e89b-12d3-a456-426614174000
+                 */
+                file_entity_id?: string; // uuid
             };
             /**
              * Entity to use for variable context
@@ -386,6 +394,17 @@ declare namespace Components {
          * Error details for invalid custom variables. This error will appear under 'PARSE_ERROR' error code.
          */
         export type InvalidCustomVariableErrorDetails = InvalidCustomVariableErrorDetail[];
+        /**
+         * Layout flow for this generation. Overrides the `docgen_layout_mode` attribute of the template's
+         * file entity and the organization default.
+         * - org_default - no override; use the template's setting, else the organization default
+         * - legacy - previous layout flow (no reserved-whitespace page removal, HTML page breaks placed by the template engine)
+         * - improved - improved layout flow (reserved-whitespace page removal and HTML page breaks placed by document-api)
+         *
+         * example:
+         * legacy
+         */
+        export type LayoutMode = "org_default" | "legacy" | "improved";
         export interface S3Reference {
             /**
              * example:
@@ -411,13 +430,13 @@ declare namespace Components {
              * example:
              * unopened_tag
              */
-            id?: string;
+            id: string;
             /**
              * Zip part the problem was found in
              * example:
              * xl/sharedStrings.xml
              */
-            file?: string;
+            file: string;
             /**
              * Where the user can find it — a cell reference for spreadsheets, a part label
              * (`Document body`, `Header 1`, `Slide 3`) otherwise.
@@ -431,19 +450,19 @@ declare namespace Components {
              * example:
              * …Datum: {system.date}} Unterschrift…
              */
-            context?: string;
+            context: string;
             /**
              * Why the template parser rejects it
              * example:
              * The tag is missing an opening brace.
              */
-            explanation?: string;
+            explanation: string;
             /**
              * Whether the proposed repair was applied to the fixed copy
              * example:
              * true
              */
-            fixable?: boolean;
+            fixable: boolean;
             /**
              * How sure we are that the repair is what the author meant
              */
@@ -541,6 +560,17 @@ declare namespace Components {
              * 123e4567-e89b-12d3-a456-426614174000
              */
             file_entity_id?: string; // uuid
+            layout_mode?: /**
+             * Layout flow for this generation. Overrides the `docgen_layout_mode` attribute of the template's
+             * file entity and the organization default.
+             * - org_default - no override; use the template's setting, else the organization default
+             * - legacy - previous layout flow (no reserved-whitespace page removal, HTML page breaks placed by the template engine)
+             * - improved - improved layout flow (reserved-whitespace page removal and HTML page breaks placed by document-api)
+             *
+             * example:
+             * legacy
+             */
+            LayoutMode;
         }
         export interface TemplateValidationRequest {
             /**
@@ -578,39 +608,39 @@ declare namespace Components {
              * example:
              * false
              */
-            valid?: boolean;
+            valid: boolean;
             /**
              * Whether a corrected copy of the template could be produced
              * example:
              * true
              */
-            fixed?: boolean;
+            fixed: boolean;
             /**
              * Everything found in the template, whether or not it could be repaired
              */
-            issues?: /* A single template syntax problem, and the repair proposed for it */ TemplateIssue[];
+            issues: /* A single template syntax problem, and the repair proposed for it */ TemplateIssue[];
             /**
              * Parser errors that remain after the hotfix (or the original errors when nothing was
              * fixed). Empty when the template is valid.
              *
              */
-            unresolved_errors?: /* DocxTemplater error detail */ DocxTemplaterErrorDetail[];
+            unresolved_errors: /* DocxTemplater error detail */ DocxTemplaterErrorDetail[];
             /**
              * The corrected copy, for the user to review and accept. Absent when no repair was
              * applied. The original template is left untouched.
              *
              */
             fixed_document?: {
-                s3ref?: S3Reference;
+                s3ref: S3Reference;
                 /**
                  * example:
                  * Umzugsmeldung (fixed).xlsx
                  */
-                filename?: string;
+                filename: string;
                 /**
                  * Short-lived download link for the corrected copy
                  */
-                preview_url?: string; // uri
+                preview_url: string; // uri
             };
         }
     }
@@ -664,7 +694,12 @@ declare namespace Paths {
             export type $200 = Components.Schemas.DocumentMetaResponse;
             export type $400 = Components.Schemas.ErrorOutput;
             export type $403 = Components.Schemas.ErrorOutput;
+            export type $404 = Components.Schemas.ErrorOutput;
             export type $415 = Components.Schemas.ErrorOutput;
+            export interface $422 {
+                message?: string;
+                error_output?: Components.Schemas.ErrorOutput;
+            }
         }
     }
     namespace ValidateTemplate {
@@ -870,6 +905,7 @@ export type InternalErrorDetail = Components.Schemas.InternalErrorDetail;
 export type InternalErrorDetails = Components.Schemas.InternalErrorDetails;
 export type InvalidCustomVariableErrorDetail = Components.Schemas.InvalidCustomVariableErrorDetail;
 export type InvalidCustomVariableErrorDetails = Components.Schemas.InvalidCustomVariableErrorDetails;
+export type LayoutMode = Components.Schemas.LayoutMode;
 export type S3Reference = Components.Schemas.S3Reference;
 export type TemplateIssue = Components.Schemas.TemplateIssue;
 export type TemplateSettings = Components.Schemas.TemplateSettings;

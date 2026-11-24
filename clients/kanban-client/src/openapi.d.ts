@@ -7,6 +7,12 @@ import type {
 } from 'openapi-client-axios';
 
 declare namespace Components {
+    namespace Parameters {
+        export type SharedWithFormat = "legacy" | "grants";
+    }
+    export interface QueryParameters {
+        SharedWithFormat?: Parameters.SharedWithFormat;
+    }
     namespace Schemas {
         /**
          * Full representation of a Kanban board, including swimlane layout, filter configuration, card display fields, and sorting options.
@@ -28,12 +34,31 @@ declare namespace Components {
             created_by?: string;
             org_id?: string;
             updated_by?: string;
-            shared_with?: string[];
+            shared_with?: /**
+             * Principals the board is shared with. Responses return plain principal ids (read access and above) unless the
+             * request sets `shared_with_format=grants`, in which case each entry is a `{user_id, permission}` grant.
+             * Requests accept both forms; a plain id keeps the permission the principal already has (or `view` for new shares).
+             *
+             */
+            SharedWith;
+            /**
+             * Whether the board is shared with the whole organization (equivalent to `org_access` being set)
+             */
             shared_with_org?: boolean;
+            org_access?: /**
+             * Access level of a share. `view` is read-only. `edit` can additionally change the board configuration and title,
+             * but cannot delete the board, change sharing or change owners (owners only).
+             *
+             */
+            BoardPermission;
             /**
              * Array of user IDs who have full ownership rights for this board (view, edit, delete)
              */
             owners?: string[];
+            /**
+             * Access level of the calling user. Only returned by getKanbanBoard.
+             */
+            my_access?: "owner" | "edit" | "view";
             config: {
                 /**
                  * example:
@@ -66,6 +91,12 @@ declare namespace Components {
             combination: "AND" | "OR";
         }
         /**
+         * Access level of a share. `view` is read-only. `edit` can additionally change the board configuration and title,
+         * but cannot delete the board, change sharing or change owners (owners only).
+         *
+         */
+        export type BoardPermission = "view" | "edit";
+        /**
          * Summary representation of a Kanban board, returned in list responses. Does not include swimlane and filter configuration details.
          */
         export interface BoardSummary {
@@ -85,12 +116,31 @@ declare namespace Components {
             created_by?: string;
             org_id?: string;
             updated_by?: string;
-            shared_with?: string[];
+            shared_with?: /**
+             * Principals the board is shared with. Responses return plain principal ids (read access and above) unless the
+             * request sets `shared_with_format=grants`, in which case each entry is a `{user_id, permission}` grant.
+             * Requests accept both forms; a plain id keeps the permission the principal already has (or `view` for new shares).
+             *
+             */
+            SharedWith;
+            /**
+             * Whether the board is shared with the whole organization (equivalent to `org_access` being set)
+             */
             shared_with_org?: boolean;
+            org_access?: /**
+             * Access level of a share. `view` is read-only. `edit` can additionally change the board configuration and title,
+             * but cannot delete the board, change sharing or change owners (owners only).
+             *
+             */
+            BoardPermission;
             /**
              * Array of user IDs who have full ownership rights for this board (view, edit, delete)
              */
             owners?: string[];
+            /**
+             * Access level of the calling user. Only returned by getKanbanBoard.
+             */
+            my_access?: "owner" | "edit" | "view";
         }
         /**
          * Dynamic date keywords that resolve to actual dates at runtime
@@ -220,7 +270,30 @@ declare namespace Components {
             /**
              * Property to group tasks by within each swimlane
              */
-            field: "context_entity" | "phase" | "task";
+            field: "context_entity" | "phase" | "task" | "flow_template_id";
+        }
+        /**
+         * Principals the board is shared with. Responses return plain principal ids (read access and above) unless the
+         * request sets `shared_with_format=grants`, in which case each entry is a `{user_id, permission}` grant.
+         * Requests accept both forms; a plain id keeps the permission the principal already has (or `view` for new shares).
+         *
+         */
+        export type SharedWith = (string | SharedWithGrant)[];
+        export interface SharedWithGrant {
+            /**
+             * Principal the board is shared with. One of `{userId}`, `group_{groupId}`, `{partnerOrgId}_partnerOrg`
+             * or `{partnerOrgId}_{userId}`.
+             *
+             * example:
+             * group_abc
+             */
+            user_id: string;
+            permission: /**
+             * Access level of a share. `view` is read-only. `edit` can additionally change the board configuration and title,
+             * but cannot delete the board, change sharing or change owners (owners only).
+             *
+             */
+            BoardPermission;
         }
         /**
          * Defines how query results should be sorted. Specify a field name and sort direction.
@@ -357,9 +430,13 @@ declare namespace Paths {
     namespace GetKanbanBoard {
         namespace Parameters {
             export type BoardId = string;
+            export type SharedWithFormat = "legacy" | "grants";
         }
         export interface PathParameters {
             boardId: Parameters.BoardId;
+        }
+        export interface QueryParameters {
+            shared_with_format?: Parameters.SharedWithFormat;
         }
         namespace Responses {
             export type $200 = /* Full representation of a Kanban board, including swimlane layout, filter configuration, card display fields, and sorting options. */ Components.Schemas.Board;
@@ -372,9 +449,11 @@ declare namespace Paths {
     namespace GetKanbanBoards {
         namespace Parameters {
             export type Filter = "owned" | "shared";
+            export type SharedWithFormat = "legacy" | "grants";
         }
         export interface QueryParameters {
             filter?: Parameters.Filter;
+            shared_with_format?: Parameters.SharedWithFormat;
         }
         namespace Responses {
             export type $200 = /* Summary representation of a Kanban board, returned in list responses. Does not include swimlane and filter configuration details. */ Components.Schemas.BoardSummary[];
@@ -386,9 +465,13 @@ declare namespace Paths {
     namespace PatchKanbanBoard {
         namespace Parameters {
             export type BoardId = string;
+            export type SharedWithFormat = "legacy" | "grants";
         }
         export interface PathParameters {
             boardId: Parameters.BoardId;
+        }
+        export interface QueryParameters {
+            shared_with_format?: Parameters.SharedWithFormat;
         }
         export interface RequestBody {
             /**
@@ -401,14 +484,21 @@ declare namespace Paths {
              * Board description
              */
             description?: string;
-            /**
-             * Array of user IDs to share the board with
+            shared_with?: /**
+             * Principals the board is shared with. Responses return plain principal ids (read access and above) unless the
+             * request sets `shared_with_format=grants`, in which case each entry is a `{user_id, permission}` grant.
+             * Requests accept both forms; a plain id keeps the permission the principal already has (or `view` for new shares).
+             *
              */
-            shared_with?: string[];
+            Components.Schemas.SharedWith;
             /**
-             * Whether the board is shared with the entire organization
+             * Whether the board is shared with the entire organization. Ignored when `org_access` is provided.
              */
             shared_with_org?: boolean;
+            /**
+             * Org-wide access level. `null` removes org-wide sharing.
+             */
+            org_access?: "view" | "edit" | null;
             /**
              * Array of user IDs who have full ownership rights for this board (view, edit, delete)
              */
@@ -445,9 +535,13 @@ declare namespace Paths {
     namespace UpdateKanbanBoard {
         namespace Parameters {
             export type BoardId = string;
+            export type SharedWithFormat = "legacy" | "grants";
         }
         export interface PathParameters {
             boardId: Parameters.BoardId;
+        }
+        export interface QueryParameters {
+            shared_with_format?: Parameters.SharedWithFormat;
         }
         export type RequestBody = /* Full representation of a Kanban board, including swimlane layout, filter configuration, card display fields, and sorting options. */ Components.Schemas.Board;
         namespace Responses {
@@ -498,7 +592,7 @@ export interface OperationMethods {
    * 
    */
   'getKanbanBoard'(
-    parameters?: Parameters<Paths.GetKanbanBoard.PathParameters> | null,
+    parameters?: Parameters<Paths.GetKanbanBoard.QueryParameters & Paths.GetKanbanBoard.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetKanbanBoard.Responses.$200>
@@ -511,7 +605,7 @@ export interface OperationMethods {
    * 
    */
   'updateKanbanBoard'(
-    parameters?: Parameters<Paths.UpdateKanbanBoard.PathParameters> | null,
+    parameters?: Parameters<Paths.UpdateKanbanBoard.QueryParameters & Paths.UpdateKanbanBoard.PathParameters> | null,
     data?: Paths.UpdateKanbanBoard.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateKanbanBoard.Responses.$200>
@@ -524,7 +618,7 @@ export interface OperationMethods {
    * 
    */
   'patchKanbanBoard'(
-    parameters?: Parameters<Paths.PatchKanbanBoard.PathParameters> | null,
+    parameters?: Parameters<Paths.PatchKanbanBoard.QueryParameters & Paths.PatchKanbanBoard.PathParameters> | null,
     data?: Paths.PatchKanbanBoard.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PatchKanbanBoard.Responses.$200>
@@ -637,7 +731,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetKanbanBoard.PathParameters> | null,
+      parameters?: Parameters<Paths.GetKanbanBoard.QueryParameters & Paths.GetKanbanBoard.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetKanbanBoard.Responses.$200>
@@ -650,7 +744,7 @@ export interface PathsDictionary {
      * 
      */
     'put'(
-      parameters?: Parameters<Paths.UpdateKanbanBoard.PathParameters> | null,
+      parameters?: Parameters<Paths.UpdateKanbanBoard.QueryParameters & Paths.UpdateKanbanBoard.PathParameters> | null,
       data?: Paths.UpdateKanbanBoard.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateKanbanBoard.Responses.$200>
@@ -663,7 +757,7 @@ export interface PathsDictionary {
      * 
      */
     'patch'(
-      parameters?: Parameters<Paths.PatchKanbanBoard.PathParameters> | null,
+      parameters?: Parameters<Paths.PatchKanbanBoard.QueryParameters & Paths.PatchKanbanBoard.PathParameters> | null,
       data?: Paths.PatchKanbanBoard.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PatchKanbanBoard.Responses.$200>
@@ -747,6 +841,7 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type Board = Components.Schemas.Board;
 export type BoardFilter = Components.Schemas.BoardFilter;
+export type BoardPermission = Components.Schemas.BoardPermission;
 export type BoardSummary = Components.Schemas.BoardSummary;
 export type DynamicDateValue = Components.Schemas.DynamicDateValue;
 export type Error = Components.Schemas.Error;
@@ -756,6 +851,8 @@ export type FilterOperator = Components.Schemas.FilterOperator;
 export type FlowsQueryRequest = Components.Schemas.FlowsQueryRequest;
 export type FlowsQueryResult = Components.Schemas.FlowsQueryResult;
 export type GroupBy = Components.Schemas.GroupBy;
+export type SharedWith = Components.Schemas.SharedWith;
+export type SharedWithGrant = Components.Schemas.SharedWithGrant;
 export type Sorting = Components.Schemas.Sorting;
 export type Swimlane = Components.Schemas.Swimlane;
 export type ValueType = Components.Schemas.ValueType;

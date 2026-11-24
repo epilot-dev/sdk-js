@@ -960,6 +960,7 @@ const { data } = await client.updateOutlookMailboxSyncOptions(
   "provider": "outlook",
   "connected_at": "1970-01-01T00:00:00.000Z",
   "connected_by_user_id": "string",
+  "mailbox_unavailable_since": "1970-01-01T00:00:00.000Z",
   "sync_options": {
     "deletion_policy": "mirror",
     "recent_window_days": 1
@@ -1138,6 +1139,7 @@ const { data } = await client.getConnectedOutlookEmails()
       "provider": "outlook",
       "connected_at": "1970-01-01T00:00:00.000Z",
       "connected_by_user_id": "string",
+      "mailbox_unavailable_since": "1970-01-01T00:00:00.000Z",
       "sync_options": {
         "deletion_policy": "mirror",
         "recent_window_days": 1
@@ -2214,6 +2216,7 @@ type ConnectedOutlookEmail = {
   provider?: "outlook"
   connected_at?: string // date-time
   connected_by_user_id?: string
+  mailbox_unavailable_since?: string // date-time
   sync_options?: {
     deletion_policy: "mirror" | "mirror_recent" | "keep"
     recent_window_days?: number

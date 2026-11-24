@@ -56,6 +56,11 @@
             "in": "path",
             "name": "designId",
             "required": true
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "required": false
           }
         ],
         "requestBody": {
@@ -80,9 +85,42 @@
         "responses": {}
       }
     },
+    "/v1/designs/{designId}/duplicate-as-v1": {
+      "post": {
+        "operationId": "duplicateDesignAsV1",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/designs/{designId}/variables": {
+      "get": {
+        "operationId": "getDesignVariables",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/designs/{designId}/parse": {
       "get": {
         "operationId": "getThemeFromDesign",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -98,6 +136,60 @@
             "in": "query",
             "name": "theme",
             "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/designs/generate": {
+      "post": {
+        "operationId": "generateDesign",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/designs/document/generate": {
+      "post": {
+        "operationId": "generateDesignDocument",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/designs/document/generate/jobs": {
+      "post": {
+        "operationId": "createDesignDocumentJob",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/designs/document/generate/jobs/{jobId}": {
+      "get": {
+        "operationId": "getDesignDocumentJob",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "screenshots_after",
+            "in": "query",
+            "required": false
           }
         ],
         "responses": {}
@@ -132,20 +224,6 @@
         "responses": {}
       }
     },
-    "/v1/designs/limit": {
-      "get": {
-        "deprecated": true,
-        "operationId": "getLimit",
-        "responses": {}
-      }
-    },
-    "/v1/brands": {
-      "get": {
-        "deprecated": true,
-        "operationId": "getBrands",
-        "responses": {}
-      }
-    },
     "/v1/designs/consumer/{application}/{consumerId}": {
       "get": {
         "operationId": "getConsumerDesign",
@@ -167,6 +245,7 @@
     "/v1/designs/addConsumer/{application}/{designId}": {
       "put": {
         "operationId": "addConsumer",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -191,6 +270,7 @@
     "/v1/designs/removeConsumer/{application}/{designId}": {
       "put": {
         "operationId": "removeConsumer",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",

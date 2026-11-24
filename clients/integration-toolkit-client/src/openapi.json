@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.52.0",
+    "version": "1.64.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -13,6 +13,10 @@
     {
       "name": "erp-imports",
       "description": "ERP pricing file import endpoints"
+    },
+    {
+      "name": "imports",
+      "description": "File import endpoints — upload a file, map it with an import template, import it"
     },
     {
       "name": "trigger",
@@ -33,6 +37,10 @@
     {
       "name": "proxy",
       "description": "Secure proxy endpoints"
+    },
+    {
+      "name": "bulk-imports",
+      "description": "Bulk import windows - book a time in which the organisation's updates run on their own lane"
     }
   ],
   "servers": [
@@ -245,11 +253,17 @@
           "403": {
             "$ref": "#/components/responses/Forbidden"
           },
+          "422": {
+            "$ref": "#/components/responses/ERPUpdatesResponse"
+          },
           "429": {
             "$ref": "#/components/responses/ERPUpdatesRetryableResponse"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/IngestRetryLater"
           }
         }
       }
@@ -316,11 +330,17 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
+          "422": {
+            "$ref": "#/components/responses/ERPUpdatesResponse"
+          },
           "429": {
             "$ref": "#/components/responses/ERPUpdatesRetryableResponse"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/IngestRetryLater"
           }
         }
       }
@@ -384,11 +404,17 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
+          "422": {
+            "$ref": "#/components/responses/ERPUpdatesResponse"
+          },
           "429": {
             "$ref": "#/components/responses/ERPUpdatesRetryableResponse"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/IngestRetryLater"
           }
         }
       },
@@ -1416,7 +1442,7 @@
           }
         ],
         "summary": "listIntegrations",
-        "description": "Retrieve all integrations for the authenticated organization",
+        "description": "Retrieve all integrations for the authenticated organization. Integrations backing import templates (`integration_type: file_import`) are not listed.",
         "tags": [
           "integrations"
         ],
@@ -1653,6 +1679,65 @@
         }
       }
     },
+    "/v1/integrations/{integrationId}/config": {
+      "get": {
+        "operationId": "getIntegrationConfig",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
+        "summary": "getIntegrationConfig",
+        "description": "The configuration of an integration for its middleware: the org's\nenvironment variables named in the integration's `environment_config`,\n**secrets included**.\n\nOnly the integration's own apiKey may call it, the access token issued\nand bound by epilot when the integration is bootstrapped. Any other\ntoken gets `403`, whatever its roles. The middleware keeps the response\nin memory for `Cache-Control: max-age` and fetches it again after an\n`UPDATE` lifecycle event.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The integration's configuration",
+            "headers": {
+              "Cache-Control": {
+                "description": "`private, max-age=300`",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationConfig"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/integrations/{integrationId}/events": {
       "post": {
         "operationId": "queryEvents",
@@ -1757,6 +1842,9 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/IngestRetryLater"
           }
         }
       }
@@ -2410,7 +2498,7 @@
           }
         ],
         "summary": "listIntegrationsV2",
-        "description": "Retrieve all integrations with embedded use cases for the authenticated organization",
+        "description": "Retrieve all integrations with embedded use cases for the authenticated organization. Integrations backing import templates (`integration_type: file_import`) are not listed.",
         "tags": [
           "integrations"
         ],
@@ -2640,6 +2728,171 @@
           },
           "404": {
             "description": "Integration not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/integrations/{integrationId}:bootstrap": {
+      "post": {
+        "operationId": "bootstrapIntegrationLifecycle",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "bootstrapIntegrationLifecycle",
+        "description": "Bootstraps the integration's middleware, or re-bootstraps it: issues a\nnew apiKey with the org role the integration names (the previous key is\nrevoked), a new signing secret and a new lifecycle version, and sends the\nlifecycle webhook `CREATE` to the integration's lifecycle webhook URL.\n\nThe URL comes from the integration's `config_push.webhook_url`, the role\nfrom its `api_key_role`. `409 config_push_not_enabled` when the\nintegration's `config_push` is not enabled. Integrations without\n`config_push` may still declare both as environment variables in their\n`environment_config` (keys ending in `lifecycle_webhook_url` and\n`lifecycle_api_key_role`); that fallback goes once they are migrated.\n\n`CREATE` carries the apiKey and the signing secret and is not signed; the\nmiddleware authenticates it by reading the configuration with the apiKey.\nLifecycle webhooks are never stored with their body.\n\nAnswers `200` with the middleware's response whenever the webhook was\nsent, whatever the middleware answered: that is the bootstrap status.\nBehind the feature flag `integration-middleware-config` during rollout.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The webhook was sent; the middleware's answer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationLifecycleDelivery"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/InvalidLifecycleSettings"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/integrations/{integrationId}:config-changed": {
+      "post": {
+        "operationId": "notifyIntegrationConfigChanged",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "notifyIntegrationConfigChanged",
+        "description": "Tells the integration's middleware that its configuration changed: sends\nthe lifecycle webhook `UPDATE`, signed with the integration's signing\nsecret (Standard Webhooks `v1`) and with a new lifecycle version. The\nIntegration Hub calls it after saving the integration's values. `409`\nwhen the integration was never bootstrapped (`not_bootstrapped`) or its\n`config_push` is not enabled (`config_push_not_enabled`).\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The webhook was sent; the middleware's answer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationLifecycleDelivery"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/InvalidLifecycleSettings"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/integrations/{integrationId}/lifecycle": {
+      "get": {
+        "operationId": "getIntegrationLifecycle",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view"
+          }
+        ],
+        "summary": "getIntegrationLifecycle",
+        "description": "The integration's bootstrap status: whether lifecycle webhooks are\nenabled (the integration's `config_push` and the org's rollout flag),\nwhether the middleware is bootstrapped, the current lifecycle version and\nthe last delivery (without its body).\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The bootstrap status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationLifecycle"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -5493,6 +5746,972 @@
           }
         }
       }
+    },
+    "/v2/imports": {
+      "post": {
+        "operationId": "createImport",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "createImport",
+        "description": "Register an already-uploaded file (S3 ref) as a file import job. Returns the job and a file preview. Nothing runs yet: no import template is chosen and no validation starts here. Optionally rank templates with POST /v2/imports/{importId}:suggest-templates, then start validation with POST /v2/imports/{importId}:validate.\nPass `import_id` to repoint an existing import at a different file instead, keeping its id and its place in the history — allowed while the import has written nothing.",
+        "tags": [
+          "imports"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateImportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The named import now points at this file. Returned only when `import_id` was supplied — no `Location`, because nothing was created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateImportResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Import job created. Returned only when `import_id` was omitted.",
+            "headers": {
+              "Location": {
+                "description": "URL of the created job (`/v2/imports/{importId}`).",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateImportResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "get": {
+        "operationId": "listImports",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "listImports",
+        "description": "List recent file import jobs for the org, newest first.\n\nPass `next_cursor` back as `cursor` for the next page. A page can be\nshorter than `limit` and still have more behind it (always so when\nfiltering by `template_id`), so stop on `next_cursor: null`.\n",
+        "tags": [
+          "imports"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Page size. Values above 100 are clamped to 100.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Opaque cursor from a prior page's `next_cursor`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "template_id",
+            "in": "query",
+            "required": false,
+            "description": "Only imports last validated with this import template.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Import jobs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/imports/{importId}": {
+      "get": {
+        "operationId": "getImport",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "getImport",
+        "description": "Get a file import job (status, counts, progress). This is the endpoint to poll.",
+        "tags": [
+          "imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The import job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportJob"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteImport",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "deleteImport",
+        "description": "Remove an import and the file it owns. Allowed from any status: an import whose run is still in flight is stopped by the deletion, and rows it already wrote stay written.",
+        "tags": [
+          "imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The import and its file were removed"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/imports/{importId}:validate": {
+      "post": {
+        "operationId": "validateImport",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "validateImport",
+        "description": "Choose the import template to read this file with, and start the validate phase.\nCallable from PENDING, READY and FAILED — so a wrong choice is corrected by calling this again with a different template, rather than re-uploading. Each call replaces any previous verdict. Any other status returns 409.",
+        "tags": [
+          "imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateImportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Validation started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportJob"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "The import, or the import template (`code: IMPORT_TEMPLATE_NOT_FOUND`), does not\nexist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "description": "The check could not be run. `code` is the translation key.\n\n- `USE_CASE_NOT_USABLE` — the template's mapping cannot drive an import.\n- `SCHEMA_NOT_AUTHORITATIVE` — an entity schema could not be read. Retryable.\n\nA mapping that CAN be judged and is found wanting is not a 422: the job is\nrecorded FAILED with `error.code = VALIDATION_BLOCKED` and the detail in\n`validation.issues`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/imports/{importId}:suggest-templates": {
+      "post": {
+        "operationId": "suggestImportTemplates",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "suggestImportTemplates",
+        "description": "Rank the org's import templates against this file's columns — the input to the ranked picker (\"matches 6 of your 7 columns\"). Optional: skip this and call `:validate` directly when the template is already known. Reads only the file's first row, not its data.\nEvery template is returned, including ones matching nothing: the \"nothing fits, pick anyway\" view needs the full list. Highest match first.\nCSV only — an xlsx import fails with 400 rather than silently returning zero matches, which would look identical to \"we checked and nothing matches\".",
+        "tags": [
+          "imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ranked template suggestions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuggestImportTemplatesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/imports/{importId}:execute": {
+      "post": {
+        "operationId": "executeImport",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "executeImport",
+        "description": "Confirm and run the write phase of a validated import. Only a READY job may be executed; any other status returns 409.\nThe verdict is re-checked against live inputs first: if the mapping or an entity schema changed since the check, this returns 409 `VALIDATION_STALE` and leaves the verdict untouched for `:validate` to re-form.",
+        "tags": [
+          "imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteImportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Execution started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportJob"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "The job cannot be executed as it stands. `code` is the translation key.\n\n- `IMPORT_NOT_READY` — the job is not READY, or a concurrent confirm won.\n- `VALIDATION_STALE` — the inputs the verdict was formed against have changed;\n  re-run `:validate`.\n\nNeither changes the job's status or its verdict.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The write could not be started. `code` is the translation key.\n\n- `WARNINGS_NOT_ACKNOWLEDGED` — the verdict carries warnings and `ack_warnings`\n  was not true.\n- `USE_CASE_NOT_USABLE` — the import template was deleted or lost its mapping\n  after the check.\n- `SCHEMA_NOT_AUTHORITATIVE` — an entity schema could not be read. Retryable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/imports/{importId}:abort": {
+      "post": {
+        "operationId": "abortImport",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "abortImport",
+        "description": "Ask a running import to stop. Valid while the job is VALIDATING or PROCESSING; any other status returns 409.\nThe stop is cooperative: the job passes through CANCELLING and typically reaches CANCELLED within seconds.\nRows already published to the platform are **kept**: this is a stop, not a rollback. Aborting during VALIDATING has published nothing, so it is always clean; aborting during PROCESSING leaves a partial import, and the rows that landed are listed by GET /v2/imports/{importId}/results.",
+        "tags": [
+          "imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The stop was recorded. The job is still finishing up — poll GET /v2/imports/{importId} to observe CANCELLED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportJob"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/imports/{importId}/results": {
+      "get": {
+        "operationId": "getImportResults",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "getImportResults",
+        "description": "Per-row outcomes of an executed import, from monitoring. `summary` counts the rows the platform has reported on so far — it keeps growing for a while after the job reaches IMPORTED, since rows are processed asynchronously. `failed_rows` lists one entry per failed row, newest first, paged with `cursor`.\nAn import that never ran its write phase returns zero counts and no rows.",
+        "tags": [
+          "imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Page size of `failed_rows`. Values above 100 are clamped to 100.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Opaque cursor from a prior page's `next_cursor`.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The import's row outcomes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportResults"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/imports/{importId}/download": {
+      "get": {
+        "operationId": "downloadImportFile",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "downloadImportFile",
+        "description": "A short-lived presigned URL that downloads the file this import was registered with — the import's own copy, so exactly what `:validate` and `:execute` read. The URL serves the file as an attachment under its original filename, and a portal page may fetch it.",
+        "tags": [
+          "imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A download link for the import's file",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErpImportDownload"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "The import does not exist, or its file is no longer available.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/import-templates": {
+      "get": {
+        "operationId": "listImportTemplates",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "listImportTemplates",
+        "description": "List the org's import templates, sorted by name.\n\nPass `next_cursor` back as `cursor` for the next page; stop on `next_cursor: null`.\n",
+        "tags": [
+          "imports"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Page size. Values above 100 are clamped to 100.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Opaque cursor from a prior page's `next_cursor`.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Import templates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportTemplateList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createImportTemplate",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "createImportTemplate",
+        "description": "Save a mapping as a reusable import template. The mapping is checked like any inbound mapping: an invalid configuration, or a `unique_ids` entry that is not an indexed attribute of its entity schema, returns 400.",
+        "tags": [
+          "imports"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertImportTemplateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Import template created",
+            "headers": {
+              "Location": {
+                "description": "URL of the created template (`/v2/import-templates/{templateId}`).",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportTemplate"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/import-templates/{templateId}": {
+      "get": {
+        "operationId": "getImportTemplate",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "getImportTemplate",
+        "description": "Get one import template.",
+        "tags": [
+          "imports"
+        ],
+        "parameters": [
+          {
+            "name": "templateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The import template",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportTemplate"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateImportTemplate",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "updateImportTemplate",
+        "description": "Replace an import template's name, description, mapping and source mapping. A changed mapping becomes a new version of the template: imports validated before keep the mapping they were checked against, including their rows still waiting to be written. New validations use the new mapping.",
+        "tags": [
+          "imports"
+        ],
+        "parameters": [
+          {
+            "name": "templateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertImportTemplateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated import template",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportTemplate"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteImportTemplate",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "deleteImportTemplate",
+        "description": "Delete an import template. Past imports keep their `template_id`, and their results stay readable; imports not yet executed can no longer be executed with it. Refused with `409` (`IMPORT_TEMPLATE_IN_USE`) while an import is still running with it, or ended less than a day ago, since its rows may still be waiting to be written.",
+        "tags": [
+          "imports"
+        ],
+        "parameters": [
+          {
+            "name": "templateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The import template was deleted"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/bulk-imports/window": {
+      "get": {
+        "operationId": "getBulkImportWindow",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view"
+          }
+        ],
+        "summary": "getBulkImportWindow",
+        "description": "The bulk import window of the caller's organisation, if one is booked, and\nthe lane its inbound updates run on right now. During a window the\norganisation's updates run on their own lane, so a large import or\nmigration neither waits behind nor slows down other customers.\n`enabled` says whether windows can be booked on this stage at all.\n",
+        "tags": [
+          "bulk-imports"
+        ],
+        "responses": {
+          "200": {
+            "description": "The window (or none), the lane and the booking limits",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkImportWindowStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "putBulkImportWindow",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "putBulkImportWindow",
+        "description": "Books the bulk import window of the caller's organisation. A window that\nhas not started yet is replaced; one that is active is refused\n(`window-active`). A window lasts at most 24 hours and starts at most 30\ndays ahead (and at most one minute in the past). Refusals answer 409 with\nan `error_code` and one plain sentence.\n",
+        "tags": [
+          "bulk-imports"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkImportWindowRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The booked window",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkImportWindow"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "The window was refused; `error_code` says why",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkImportWindowRefusal"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBulkImportWindow",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "deleteBulkImportWindow",
+        "description": "Cancels the bulk import window of the caller's organisation. An active\nwindow may be cancelled too: its own lane is then given back by the\nnormal rules, once the updates already on it are done.\n",
+        "tags": [
+          "bulk-imports"
+        ],
+        "responses": {
+          "204": {
+            "description": "The window was cancelled"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5505,6 +6724,430 @@
       }
     },
     "schemas": {
+      "CreateImportRequest": {
+        "type": "object",
+        "description": "Register an already-uploaded file as an import. The import template is chosen later, via `:validate` — upload and interpretation are separate decisions.",
+        "required": [
+          "s3_reference"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "s3_reference": {
+            "$ref": "#/components/schemas/S3Reference"
+          },
+          "include_preview": {
+            "type": "boolean",
+            "default": false,
+            "description": "Return a sample of the file's first rows in `preview`. Only controls whether the sample comes BACK — the head is read either way, because that read is how an unreadable file gets refused."
+          },
+          "import_id": {
+            "type": "string",
+            "description": "Repoint an EXISTING import at this file instead of registering a new one — same row, same id, so iterating on which file to import leaves one entry in the history rather than one per attempt.\nRepointing is allowed exactly while the import has written nothing: from PENDING and READY, and from FAILED when `error.code` is one of `VALIDATION_BLOCKED`, `VALIDATE_TIMEOUT` or `FILE_FORMAT_UNSUPPORTED`. Anything else returns 409 with code `IMPORT_NOT_REPLACEABLE`. The repoint clears any verdict the import had.\nAn id that names nothing returns 404. It never falls back to registering a new import: a stale id must fail loudly rather than quietly produce a second one."
+          },
+          "suggestion": {
+            "$ref": "#/components/schemas/ImportSuggestion"
+          }
+        }
+      },
+      "CreateImportResponse": {
+        "type": "object",
+        "required": [
+          "job"
+        ],
+        "properties": {
+          "job": {
+            "$ref": "#/components/schemas/ImportJob"
+          },
+          "preview": {
+            "$ref": "#/components/schemas/ErpImportFilePreview"
+          }
+        }
+      },
+      "ExecuteImportRequest": {
+        "type": "object",
+        "description": "Confirmation options. Required only when the verdict carries warnings — a clean import needs no body at all.",
+        "additionalProperties": false,
+        "properties": {
+          "ack_warnings": {
+            "type": "boolean",
+            "description": "The caller has seen `validation.issues` and accepts them. Required when `validation.warnings` is greater than 0; ignored otherwise."
+          },
+          "notify": {
+            "type": "boolean",
+            "description": "Notify the person who started the import (email and in-app) once every row has a final result: what was written, what failed and why. Defaults to false."
+          }
+        }
+      },
+      "ImportJob": {
+        "type": "object",
+        "required": [
+          "import_id",
+          "org_id",
+          "format",
+          "status",
+          "s3_input_ref",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "import_id": {
+            "type": "string",
+            "description": "`imp_{ULID}` — time-ordered, also used as the job's correlation_id."
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "template_id": {
+            "type": "string",
+            "description": "The import template whose mapping drives both phases. Absent until the first `:validate`, and MUTABLE — re-validating with a different template replaces it."
+          },
+          "template_name": {
+            "type": "string",
+            "description": "The template's name at the time of the last `:validate`."
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "csv",
+              "xlsx"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "PENDING → VALIDATING → READY → PROCESSING → IMPORTED, with FAILED reachable from any working status, and CANCELLING → CANCELLED reachable from VALIDATING or PROCESSING via :abort. Only IMPORTED and CANCELLED are terminal. READY and FAILED both accept a further `:validate`, which is how a wrong template is corrected without re-uploading the file.\nIMPORTED means every row was handed to the platform, not that the platform finished — per-row outcomes are read from GET /v2/imports/{importId}/results. A file that fails validation is FAILED with error.code = VALIDATION_BLOCKED.\nREADY is legitimately idle for as long as the user takes to confirm, so it carries no running work and never goes stale.\nCANCELLING is transient and cooperative: the abort has been recorded but the worker only notices at its next batch boundary. Rows already published stay published — a stop is not a rollback.",
+            "enum": [
+              "PENDING",
+              "VALIDATING",
+              "READY",
+              "PROCESSING",
+              "IMPORTED",
+              "FAILED",
+              "CANCELLING",
+              "CANCELLED"
+            ]
+          },
+          "s3_input_ref": {
+            "$ref": "#/components/schemas/S3Reference"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Size of the uploaded file, recorded at registration. Present on every job registered from version 1.17.0 onwards; absent on older rows, which were written before it was captured."
+          },
+          "column_count": {
+            "type": "integer",
+            "description": "How many effective columns the file's header yielded — the length of the `preview.columns` returned at registration, kept so a job loaded later can still describe its file. The preview ROWS are deliberately not stored: they are a sample for the person about to choose a mapping, not job state. Present on every job registered from version 1.17.0 onwards."
+          },
+          "validation": {
+            "$ref": "#/components/schemas/ErpImportValidation"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/ErpImportProgress"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ErpImportError"
+          },
+          "writing": {
+            "$ref": "#/components/schemas/ImportWriting"
+          },
+          "notify": {
+            "type": "boolean",
+            "description": "Whether the person who started the import is notified once it is written, as asked on `:execute`."
+          },
+          "suggestion": {
+            "$ref": "#/components/schemas/ImportSuggestion"
+          },
+          "correlation_id": {
+            "type": "string",
+            "description": "Scopes this run in monitoring. Always equal to `import_id`."
+          },
+          "activity_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ImportList": {
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportJob"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Cursor for the next page, or null when there are no more rows."
+          }
+        }
+      },
+      "ImportResults": {
+        "type": "object",
+        "required": [
+          "summary",
+          "failed_rows"
+        ],
+        "properties": {
+          "summary": {
+            "type": "object",
+            "required": [
+              "succeeded",
+              "failed"
+            ],
+            "properties": {
+              "succeeded": {
+                "type": "integer",
+                "description": "Rows the platform processed without an error."
+              },
+              "failed": {
+                "type": "integer",
+                "description": "Rows with at least one error."
+              },
+              "total_rows": {
+                "type": "integer",
+                "description": "Data rows in the file, when validation counted them."
+              }
+            }
+          },
+          "failed_rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportFailedRow"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Cursor for the next page of `failed_rows`, or null."
+          }
+        }
+      },
+      "ImportFailedRow": {
+        "type": "object",
+        "required": [
+          "event_id",
+          "message",
+          "timestamp"
+        ],
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "description": "The row's event id in monitoring."
+          },
+          "row_index": {
+            "type": "integer",
+            "description": "0-based data row the failure belongs to. Absent when the row cannot be attributed, as for a group of rows written together."
+          },
+          "code": {
+            "type": "string",
+            "description": "Monitoring error code, when one was recorded."
+          },
+          "message": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ImportTemplate": {
+        "type": "object",
+        "description": "A saved mapping from file columns to entities. `mapping.entities[].fields[].field` names a file column.",
+        "required": [
+          "template_id",
+          "name",
+          "mapping",
+          "mapped_columns",
+          "entity_types",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "template_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "mapping": {
+            "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
+          },
+          "source_mapping": {
+            "$ref": "#/components/schemas/ImportTemplateSourceMapping"
+          },
+          "group_by_column": {
+            "$ref": "#/components/schemas/ImportTemplateGroupByColumn"
+          },
+          "mapped_columns": {
+            "type": "array",
+            "description": "The file columns the mapping is known to read, sorted. Columns read only inside a JSONata expression are included where they can be recognised.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "entity_types": {
+            "type": "array",
+            "description": "The distinct entity schemas the mapping writes, sorted.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string"
+          }
+        }
+      },
+      "ImportTemplateList": {
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportTemplate"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Cursor for the next page, or null when there are no more templates."
+          }
+        }
+      },
+      "ImportTemplateSuggestion": {
+        "type": "object",
+        "required": [
+          "template_id",
+          "name",
+          "matched_columns",
+          "entity_types"
+        ],
+        "properties": {
+          "template_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "matched_columns": {
+            "type": "array",
+            "description": "The FILE's columns this template reads, by exact trimmed name, in file order.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "entity_types": {
+            "type": "array",
+            "description": "The distinct entity schemas this template's mapping writes.",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "SuggestImportTemplatesResponse": {
+        "type": "object",
+        "required": [
+          "file_columns",
+          "suggestions"
+        ],
+        "properties": {
+          "file_columns": {
+            "type": "array",
+            "description": "The file's columns. Present even when `suggestions` is empty.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportTemplateSuggestion"
+            }
+          }
+        }
+      },
+      "UpsertImportTemplateRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "mapping"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "mapping": {
+            "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
+          },
+          "source_mapping": {
+            "$ref": "#/components/schemas/ImportTemplateSourceMapping"
+          },
+          "group_by_column": {
+            "$ref": "#/components/schemas/ImportTemplateGroupByColumn"
+          }
+        }
+      },
+      "ImportTemplateGroupByColumn": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 255,
+        "description": "A file column whose value groups rows: rows with the same value are written one after another, in file order, while rows of different groups are written in parallel. Rows that create or relate the same entity belong in one group, or two of them can each find no existing entity and both create it. A row with an empty cell is a group of its own. Without it, every row is a group of its own. Part of the version: changing it adds a version, like a changed mapping."
+      },
+      "ImportTemplateSourceMapping": {
+        "type": "object",
+        "description": "What the mapping was made from, stored as given and returned unchanged: e.g. the column mapping and value transformations of the client that built `mapping`, so the template can be applied to a new raw file again. The import engine never reads it.",
+        "additionalProperties": true
+      },
+      "ValidateImportRequest": {
+        "type": "object",
+        "required": [
+          "template_id"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "description": "The import template whose mapping reads this file."
+          }
+        }
+      },
       "S3Reference": {
         "type": "object",
         "required": [
@@ -5619,12 +7262,16 @@
           "ack_warnings": {
             "type": "boolean",
             "description": "The caller has seen `validation.issues` and accepts them. Required when `validation.warnings` is greater than 0; ignored otherwise."
+          },
+          "notify": {
+            "type": "boolean",
+            "description": "Notify the person who started the import (email and in-app) once every row has a final result: what was written, what failed and why. Defaults to false."
           }
         }
       },
       "ErpImportIssue": {
         "type": "object",
-        "description": "A problem found during validation, scoped to the file as a whole rather than to\nindividual rows.\n\n`code` is the translation key and the other fields are its parameters — there is\ndeliberately no message to display. Each code appears at most once (once per\n`expected` for `VALUE_FORMAT_INVALID`), with everything it has to say aggregated\ninto that one entry.\n\n`VALUE_FORMAT_INVALID` — the mapping produces values in a format the entity schema\ndoes not store; `expected` says which format, and `columns` names every column\n(or, for a value built by an expression, the attribute) that holds one.\n\n`MAPPING_EXPRESSION_FAILED` (a warning) — a mapping expression failed for some rows,\nincluding `$number()` on a value it cannot convert such as `12,50` or on a blank cell,\nso importing anyway leaves those values out; `attributes` names the attribute it fills.\n\n`FROM_ROWS_EXPRESSION_FAILED` — an expression in a `conditional.from_rows` item failed\nfor some rows. Blocking, unlike a field: the import would skip every entry of that\ntarget built in the same chunk, not one value; `attributes` names the list attribute.\n\n`lines` points at up to five file lines an issue was seen on, as examples.\n\nThe conditional codes describe a file that cannot be written as variants:\n\n- `TIER_ROWS_NOT_GROUPED` — rows of one variant are spread through the file;\n  `columns` names what to group by.\n- `TIER_BANDS_CONFLICT` — two rows of one variant claim the same band.\n- `CONDITION_VALUE_MISSING` — a condition column is blank in every row.\n- `VARIANT_VALUE_CONFLICT` — rows of one variant disagree on a value outside\n  `from_rows`; the first row's value is what would be written.\n- `ATTRIBUTE_NOT_OVERRIDABLE` — the schema does not let a variant override this\n  attribute, so the mapped value would be discarded.\n- `ATTRIBUTE_NOT_IN_SCHEMA` — the schema does not have the attribute at all.\n- `VALID_FROM_NOT_MAPPED` — a conditional target maps no `valid_from`, so the variants\n  the file writes take effect immediately. One entry for the whole mapping:\n  `attributes` holds `valid_from` once per `entity` type.\n\n`UNIQUE_ID_NOT_IN_SCHEMA` (a blocker) — the mapping looks entities up by an attribute\ntheir schema does not have: a target's own `unique_ids`, or those of a relation or\nrelation ref it sets. One entry for the whole mapping: `attributes` names every missing\nattribute, each with the `entity` type it belongs to.\nSuch a lookup never finds anything, so every re-import would create the entities\nagain, and the engine refuses the relations; the file is not read. A looked-up schema\nthat does not exist is reported as `SCHEMA_NOT_FOUND`; one that cannot be read, or is\nnot the org's own, is left unchecked.\n\nThe rest reject the mapping against the entity schemas, before the file is read, and\nname the thing at fault in `subject`: `IS_CONDITIONAL_NOT_CONSTANT`,\n`SCHEMA_NOT_CONDITIONABLE`, `SCHEMA_NOT_FOUND`, `SCHEMA_DECLARES_NO_CONDITIONS`,\n`GROUPING_KEY_NOT_A_COLUMN`, `GROUPING_KEY_IS_SORT_COLUMN`,\n`CONDITIONAL_TARGET_MODE_UNSUPPORTED` (a conditional target with any `mode` other\nthan `upsert` — a row of such a target addresses one variant-version, while every\nother mode acts on whole entities; removing variants through an import is not\nsupported yet, and to remove a whole entity, map it as a non-conditional target).",
+        "description": "A problem found during validation, scoped to the file as a whole rather than to\nindividual rows.\n\n`code` is the translation key and the other fields are its parameters — there is\ndeliberately no message to display. Each code appears at most once (once per\n`expected` for `VALUE_FORMAT_INVALID`), with everything it has to say aggregated\ninto that one entry.\n\n`VALUE_FORMAT_INVALID` — the mapping produces values in a format the entity schema\ndoes not store; `expected` says which format, and `columns` names every column\n(or, for a value built by an expression, the attribute) that holds one.\n\n`MAPPING_EXPRESSION_FAILED` (a warning) — a mapping expression failed for some rows,\nincluding `$number()` on a value it cannot convert such as `12,50` or on a blank cell,\nso importing anyway leaves those values out; `attributes` names the attribute it fills.\n\n`FROM_ROWS_EXPRESSION_FAILED` — an expression in a `conditional.from_rows` item failed\nfor some rows. Blocking, unlike a field: the import would skip every entry of that\ntarget built in the same chunk, not one value; `attributes` names the list attribute.\n\n`ENTITY_REF_INVALID` — a `resolve_refs` field produced a `<name>_ref` without unique id\nvalues for some rows, typically from a blank cell. Blocking: the import would fail the\nwhole entity of such a row, not one value; `attributes` names the attribute.\n\n`lines` points at up to five file lines an issue was seen on, as examples.\n\nThe conditional codes describe a file that cannot be written as variants:\n\n- `TIER_ROWS_NOT_GROUPED` — rows of one variant are spread through the file;\n  `columns` names what to group by.\n- `TIER_BANDS_CONFLICT` — two rows of one variant claim the same band.\n- `CONDITION_VALUE_MISSING` — a condition column is blank in every row.\n- `VARIANT_VALUE_CONFLICT` — rows of one variant disagree on a value outside\n  `from_rows`; the first row's value is what would be written.\n- `ATTRIBUTE_NOT_OVERRIDABLE` — the schema does not let a variant override this\n  attribute, so the mapped value would be discarded.\n- `ATTRIBUTE_NOT_IN_SCHEMA` — the schema does not have the attribute at all.\n- `VALID_FROM_NOT_MAPPED` — a conditional target maps no `valid_from`, so the variants\n  the file writes take effect immediately. One entry for the whole mapping:\n  `attributes` holds `valid_from` once per `entity` type.\n\n`UNIQUE_ID_NOT_IN_SCHEMA` (a blocker) — the mapping looks entities up by an attribute\ntheir schema does not have: a target's own `unique_ids`, or those of a relation or\nrelation ref it sets. One entry for the whole mapping: `attributes` names every missing\nattribute, each with the `entity` type it belongs to.\nSuch a lookup never finds anything, so every re-import would create the entities\nagain, and the engine refuses the relations; the file is not read. A looked-up schema\nthat does not exist is reported as `SCHEMA_NOT_FOUND`; one that cannot be read, or is\nnot the org's own, is left unchecked.\n\nThe rest reject the mapping against the entity schemas, before the file is read, and\nname the thing at fault in `subject`: `IS_CONDITIONAL_NOT_CONSTANT`,\n`SCHEMA_NOT_CONDITIONABLE`, `SCHEMA_NOT_FOUND`, `SCHEMA_DECLARES_NO_CONDITIONS`,\n`GROUPING_KEY_NOT_A_COLUMN`, `GROUPING_KEY_IS_SORT_COLUMN`,\n`CONDITIONAL_TARGET_MODE_UNSUPPORTED` (a conditional target with any `mode` other\nthan `upsert` — a row of such a target addresses one variant-version, while every\nother mode acts on whole entities; removing variants through an import is not\nsupported yet, and to remove a whole entity, map it as a non-conditional target).",
         "required": [
           "code",
           "severity"
@@ -5658,6 +7305,7 @@
               "VALUE_FORMAT_INVALID",
               "MAPPING_EXPRESSION_FAILED",
               "FROM_ROWS_EXPRESSION_FAILED",
+              "ENTITY_REF_INVALID",
               "VALID_FROM_NOT_MAPPED"
             ]
           },
@@ -5690,7 +7338,7 @@
           },
           "attributes": {
             "type": "array",
-            "description": "The mapping fields this issue is about, where the value is not a file column as it is: an expression builds it, or the expression fails. VALUE_FORMAT_INVALID (beside `columns`, which holds the values taken from a column as they are), MAPPING_EXPRESSION_FAILED and FROM_ROWS_EXPRESSION_FAILED; on UNIQUE_ID_NOT_IN_SCHEMA, the unique identifiers that are not attributes of their entity type; on VALID_FROM_NOT_MAPPED, `valid_from` for each conditional entity type that does not map it.",
+            "description": "The mapping fields this issue is about, where the value is not a file column as it is: an expression builds it, or the expression fails. VALUE_FORMAT_INVALID (beside `columns`, which holds the values taken from a column as they are), MAPPING_EXPRESSION_FAILED, FROM_ROWS_EXPRESSION_FAILED and ENTITY_REF_INVALID; on UNIQUE_ID_NOT_IN_SCHEMA, the unique identifiers that are not attributes of their entity type; on ATTRIBUTE_NOT_OVERRIDABLE and ATTRIBUTE_NOT_IN_SCHEMA, the attributes whose values `columns` holds; on VALID_FROM_NOT_MAPPED, `valid_from` for each conditional entity type that does not map it.",
             "items": {
               "type": "object",
               "required": [
@@ -5703,14 +7351,14 @@
                 },
                 "entity": {
                   "type": "string",
-                  "description": "The entity type the attribute belongs to, where the issue spans several (UNIQUE_ID_NOT_IN_SCHEMA, VALID_FROM_NOT_MAPPED)."
+                  "description": "The entity type the attribute belongs to, where the issue spans several (UNIQUE_ID_NOT_IN_SCHEMA, VALID_FROM_NOT_MAPPED, ATTRIBUTE_NOT_OVERRIDABLE, ATTRIBUTE_NOT_IN_SCHEMA)."
                 }
               }
             }
           },
           "lines": {
             "type": "array",
-            "description": "Up to five lines of the file this issue was seen on, as examples rather than the full list. The header is line 1. BLANK_ROWS_SKIPPED, VALUE_FORMAT_INVALID, MAPPING_EXPRESSION_FAILED, FROM_ROWS_EXPRESSION_FAILED, TIER_ROWS_NOT_GROUPED (where a variant's rows start again), TIER_BANDS_CONFLICT and VARIANT_VALUE_CONFLICT (the row at odds with the first).",
+            "description": "Up to five lines of the file this issue was seen on, as examples rather than the full list. The header is line 1. BLANK_ROWS_SKIPPED, VALUE_FORMAT_INVALID, MAPPING_EXPRESSION_FAILED, FROM_ROWS_EXPRESSION_FAILED, ENTITY_REF_INVALID, TIER_ROWS_NOT_GROUPED (where a variant's rows start again), TIER_BANDS_CONFLICT and VARIANT_VALUE_CONFLICT (the row at odds with the first).",
             "items": {
               "type": "integer"
             }
@@ -5725,7 +7373,7 @@
           },
           "expected": {
             "type": "string",
-            "description": "The format the values should have had. VALUE_FORMAT_INVALID only.\n- `number` — a JSON number; the mapping produces text (wrap the column in `$number()`). - `text` — text; the mapping produces a number. - `decimal` — a plain number with a dot as text, like `12.50`. - `date` — a date like `2026-01-01`, optionally with a time and offset like\n  `2026-01-01T08:00:00Z`.",
+            "description": "The format the values should have had. VALUE_FORMAT_INVALID only.\n- `number` — a JSON number; the mapping produces text (wrap the column in `$number()`). - `text` — text; the mapping produces a number. - `decimal` — a plain number with a dot as text, like `12.50`. - `date` — a calendar date like `2026-01-01`, with no time of day.",
             "enum": [
               "number",
               "text",
@@ -5767,6 +7415,24 @@
             "description": "What this import will write, one entry per entity instance, capped at 6 per mapping target in first-appearance order, so no target crowds another out. `entities` stays exact regardless: `entities[slug]` minus the entries listed for that slug is how many are not shown.",
             "items": {
               "$ref": "#/components/schemas/ErpImportEntityDetail"
+            }
+          },
+          "meter_readings": {
+            "type": "object",
+            "description": "The meter readings the file writes. Present only when the mapping has `meter_readings`; readings are not entities, so `entities` never counts them. A reading the write path would refuse (missing or non-ISO timestamp, non-numeric value, unknown source or reason) is a blocking `INVALID_METER_READING` and not counted here.",
+            "required": [
+              "readings",
+              "meters"
+            ],
+            "properties": {
+              "readings": {
+                "type": "integer",
+                "description": "Readings written, one per reading a row yields."
+              },
+              "meters": {
+                "type": "integer",
+                "description": "Distinct meters the readings are for, by their unique ids."
+              }
             }
           },
           "issues": {
@@ -5826,6 +7492,91 @@
           }
         }
       },
+      "ImportSuggestion": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "A proposal for how to read the file, made for the client that finishes the import: e.g. an AI assistant's choice of entities, columns and identifiers, which Datastudio opens prefilled for the user to check. Set on `createImport` (with `import_id`, a given suggestion replaces the import's own; without one, it stays). Kept exactly as given and returned on the job; the toolkit never reads it, and validation and execution do not depend on it. At most 32 KB as JSON."
+      },
+      "ImportWriting": {
+        "type": "object",
+        "description": "How far the platform got writing the rows an import handed over. IMPORTED (or CANCELLED) only means the rows were handed over; they are written afterwards, possibly for a while, with retries. Present once rows were handed over.",
+        "required": [
+          "status",
+          "started_at"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "WRITING",
+              "DONE"
+            ],
+            "description": "WRITING while rows are still being written. DONE once every handed-over row has a final result, or no row has reported anything for so long that the rest never will (`unreported`)."
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the rows were handed over."
+          },
+          "finished_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "events": {
+            "type": "integer",
+            "description": "Events handed over. One per row, unless rows were written in groups (a price sheet's tariff, rows sharing a group key): then one per group."
+          },
+          "succeeded": {
+            "type": "integer",
+            "description": "Events written, with or without caveats."
+          },
+          "with_caveats": {
+            "type": "integer",
+            "description": "Of `succeeded`, events written with a caveat."
+          },
+          "failed": {
+            "type": "integer",
+            "description": "Events that failed for good."
+          },
+          "unreported": {
+            "type": "integer",
+            "description": "Events that never reported a result before the import was closed."
+          },
+          "results": {
+            "type": "array",
+            "description": "The final results by kind, e.g. 1,204 × ENTITY_CREATED on contact, 12 × METER_READING_UPSERTED, 38 × ENTITY_REFERENCE_NOT_FOUND. One event can write several things, so these add up to more than `events`. Codes are monitoring codes; a kind of write added later appears under its own code.",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "level",
+                "count"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "level": {
+                  "type": "string",
+                  "enum": [
+                    "success",
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "entity_schema": {
+                  "type": "string",
+                  "description": "The entity type the result is about, where it is about one."
+                },
+                "count": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
       "ErpImportProgress": {
         "type": "object",
         "description": "How far the currently running phase has got. Written at every batch boundary, so it advances during long runs rather than only at the end.\n`total_rows` is ABSENT during the validate phase until the file has been read to the end — there is deliberately no counting pass, since that would be a second unbounded read of the whole file. Render an indeterminate indicator while it is missing: dividing by a missing total yields a determinate bar pinned at 0%, which reads as a hung import.",
@@ -5844,12 +7595,36 @@
           "events_published": {
             "type": "integer",
             "description": "Events handed to the platform so far — the denominator for \"has everything this run dispatched finished processing?\", answered per event by `getMonitoringRunCompletionV2` under the job's `correlation_id`. Equals `processed_rows` on the flat path; smaller on the grouped path, where rows sharing a variant-version collapse into one event. Execute phase only, and absent on jobs written before this field existed."
+          },
+          "waiting_for_capacity": {
+            "type": "object",
+            "description": "Present only while the import is waiting for room to continue. The import is waiting because the large-load capacity of your organization is in use at the moment. It continues by itself as soon as capacity is free, and nothing needs to be done. The status stays `PROCESSING`, and rows that were already sent stay sent. If capacity does not become free before `gives_up_at`, the import fails with the error code `BULK_CAPACITY_EXHAUSTED`, and you can send it again later.\nThe field appears with the first refused attempt and is gone as soon as an attempt is accepted, when the import is aborted, and when it ends (imported, failed or cancelled). It is absent on an import that never had to wait. A later, separate wait reports a new `since`.",
+            "required": [
+              "since"
+            ],
+            "properties": {
+              "since": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When this wait began, the time of the first refused attempt. It does not change while the same wait continues."
+              },
+              "retry_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the next attempt is made, if known. The import tries again about every minute."
+              },
+              "gives_up_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The time after which the import fails with `BULK_CAPACITY_EXHAUSTED` if capacity is still not free. It is the end of the 6 hours the import waits in total, counted across all of its waits, so the import can fail a little later than shown here, never earlier."
+              }
+            }
           }
         }
       },
       "ErpImportError": {
         "type": "object",
-        "description": "Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`.",
+        "description": "Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`.\n`BULK_CAPACITY_EXHAUSTED` is retryable: the capacity for large data loads stayed in use for the whole waiting time. The import does not fail at once: while it waits it keeps the status PROCESSING and tries again every minute, and the job's `progress.waiting_for_capacity` says that it is waiting and until when. Only after 6 hours of waiting does it fail with this code. Rows sent before that stay sent. Send the import again later with `:validate` followed by `:execute`; the rows already sent update the same entities again.",
         "required": [
           "code",
           "message"
@@ -5868,6 +7643,7 @@
               "IMPORT_NO_PROGRESS",
               "TIER_ROWS_NOT_GROUPED",
               "CHUNK_TOO_LARGE",
+              "BULK_CAPACITY_EXHAUSTED",
               "INTERNAL_ERROR"
             ]
           },
@@ -5971,6 +7747,10 @@
             "type": "string",
             "description": "The inbound use case whose mapping drives both phases. Absent until the first `:validate`, and MUTABLE — re-validating with a different use case replaces it."
           },
+          "template_name": {
+            "type": "string",
+            "description": "The import template's name when the job was validated with one (`/v2/imports`), so a listed job can show it without a read per row."
+          },
           "format": {
             "type": "string",
             "enum": [
@@ -6012,6 +7792,16 @@
           },
           "error": {
             "$ref": "#/components/schemas/ErpImportError"
+          },
+          "writing": {
+            "$ref": "#/components/schemas/ImportWriting"
+          },
+          "notify": {
+            "type": "boolean",
+            "description": "Whether the person who started the import is notified once it is written, as asked on `:execute`."
+          },
+          "suggestion": {
+            "$ref": "#/components/schemas/ImportSuggestion"
           },
           "correlation_id": {
             "type": "string",
@@ -6695,7 +8485,7 @@
           },
           "reasons": {
             "type": "array",
-            "description": "Why the close was not applied, each cause once. Absent when `applied`.\n\n- `retry_requested` - the response is a 422 or 429; the retry carries\n  `correlation_complete` again and closes then.\n- `queue_refused` - the queue refused an event of the request; send the\n  close again once every event is accepted.\n- `rate_limited`, `rate_limit_unavailable` - see `outcome: rate_limited`.\n- `other_integration` - the correlation belongs to another integration.\n- `events_under_own_correlation_ids`, `events_duplicate`,\n  `events_not_configured`, `events_not_interactive`, `events_unrecorded` -\n  the correlation does not exist and this request, which carries events,\n  recorded none under it, so there was nothing to close.\n- `close_failed` - the close could not be written; send it again.\n- `interactive_unavailable` - interactive processing is not available, so\n  there is no correlation to close.\n",
+            "description": "Why the close was not applied, each cause once. Absent when `applied`.\n\n- `retry_requested` - the response is a 422, 429 or 503; the retry carries\n  `correlation_complete` again and closes then.\n- `queue_refused` - the queue refused an event of the request; send the\n  close again once every event is accepted.\n- `rate_limited`, `rate_limit_unavailable` - see `outcome: rate_limited`.\n- `other_integration` - the correlation belongs to another integration.\n- `events_under_own_correlation_ids`, `events_duplicate`,\n  `events_not_configured`, `events_not_interactive`, `events_unrecorded` -\n  the correlation does not exist and this request, which carries events,\n  recorded none under it, so there was nothing to close.\n- `close_failed` - the close could not be written; send it again.\n- `interactive_unavailable` - interactive processing is not available, so\n  there is no correlation to close.\n",
             "items": {
               "type": "string",
               "enum": [
@@ -6791,7 +8581,8 @@
               "interactive",
               "priority",
               "default",
-              "deferred"
+              "deferred",
+              "sandbox"
             ],
             "description": "Which processing lane carried the event."
           },
@@ -7198,10 +8989,11 @@
             "type": "string",
             "enum": [
               "erp",
-              "connector"
+              "connector",
+              "file_import"
             ],
             "default": "erp",
-            "description": "Type of integration. \"erp\" is the ERP integration with inbound/outbound use cases. \"connector\" is for complex proxy integrations with external APIs.\n"
+            "description": "Type of integration. \"erp\" is the ERP integration with inbound/outbound use cases. \"connector\" is for complex proxy integrations with external APIs. \"file_import\" backs an import template (see /v2/import-templates). These are managed through that API and left out of the integration lists.\n"
           },
           "connector_config": {
             "$ref": "#/components/schemas/ConnectorConfig"
@@ -7210,12 +9002,40 @@
             "type": "boolean",
             "description": "If true, integration is displayed in read-only mode in the UI to discourage changes"
           },
+          "config_push": {
+            "$ref": "#/components/schemas/IntegrationConfigPush"
+          },
+          "api_key_role": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+            "description": "Slug of the org role the middleware's apiKey gets when the integration is bootstrapped (see `config_push`). Keep it narrow: it is what a leaked key can do.\n"
+          },
           "_manifest": {
             "type": "array",
             "description": "The manifest IDs associated with this integration",
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "IntegrationConfigPush": {
+        "type": "object",
+        "description": "Config push: whether the integration's middleware takes lifecycle webhooks (`CREATE` with apiKey and signing secret, signed `UPDATE` and `DELETE`; see `bootstrapIntegrationLifecycle`), and where they go. Absent or disabled: the Integration Hub offers no bootstrap for the integration.\n",
+        "required": [
+          "enabled"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the middleware takes lifecycle webhooks."
+          },
+          "webhook_url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2048,
+            "description": "Where lifecycle webhooks go: https, a public address. Required to bootstrap. Whoever can change it receives the apiKey on the next bootstrap.\n"
           }
         }
       },
@@ -7479,6 +9299,106 @@
             "type": "integer",
             "minimum": 0,
             "description": "Sort order for display and drag-to-reorder"
+          }
+        }
+      },
+      "IntegrationConfig": {
+        "type": "object",
+        "description": "The configuration of an integration, as served to its middleware",
+        "required": [
+          "org_id",
+          "integration_id",
+          "version",
+          "environment"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "description": "The organization the integration belongs to"
+          },
+          "integration_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The integration's lifecycle version. Increases with every lifecycle\nevent (`CREATE`, `UPDATE`, `DELETE`); a middleware drops a response\nolder than the event it handles.\n"
+          },
+          "environment": {
+            "type": "object",
+            "description": "The values of the keys in the integration's `environment_config`,\nsecrets included, by key. Keys without a value are left out.\n",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "example": {
+              "tap.base_url": "https://example.com/api",
+              "tap.client_secret": "…"
+            }
+          }
+        }
+      },
+      "IntegrationLifecycleDelivery": {
+        "type": "object",
+        "description": "One lifecycle webhook delivery, without its body",
+        "required": [
+          "action",
+          "version",
+          "status_code",
+          "response",
+          "delivered_at"
+        ],
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "CREATE",
+              "UPDATE",
+              "DELETE"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "status_code": {
+            "type": "integer",
+            "description": "The middleware's HTTP status; 0 when no answer arrived (timeout, connection error)."
+          },
+          "response": {
+            "type": "string",
+            "description": "The middleware's answer (or the transport error), truncated to 2000 characters."
+          },
+          "delivered_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "IntegrationLifecycle": {
+        "type": "object",
+        "description": "The bootstrap status of an integration's middleware",
+        "required": [
+          "enabled",
+          "bootstrapped",
+          "version"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether lifecycle webhooks are enabled: the integration's `config_push` is enabled, and so is the org (rollout feature flag).\n"
+          },
+          "bootstrapped": {
+            "type": "boolean",
+            "description": "Whether an apiKey and a signing secret were issued."
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The current lifecycle version."
+          },
+          "last_delivery": {
+            "$ref": "#/components/schemas/IntegrationLifecycleDelivery"
           }
         }
       },
@@ -7973,10 +9893,7 @@
       },
       "IntegrationEntitySharing": {
         "type": "object",
-        "description": "Keeps the mapped entity's sharing with partner organizations in sync. After the entity is written, it is shared with every listed partner whose `enabled` is true and unshared from every listed partner whose `enabled` is false. Changes are computed against the entity's current `_acl`, so a repeated event with the same outcome makes no sharing call. Each partner org needs an existing partnership; partners without one are skipped and reported as `SHARING_PARTNER_NOT_CONNECTED`.",
-        "required": [
-          "partners"
-        ],
+        "description": "Keeps the mapped entity's sharing with partner organizations in sync. After the entity is written, it is shared with every listed partner whose `enabled` is true and unshared from every listed partner whose `enabled` is false. Changes are computed against the entity's current `_acl`, so a repeated event with the same outcome makes no sharing call. Each partner org needs an existing partnership; partners without one are skipped and reported as `SHARING_PARTNER_NOT_CONNECTED`. Partner orgs are listed in `partners`, found at runtime through `partner_lookups`, or both; at least one of the two is required.",
         "properties": {
           "partners": {
             "type": "array",
@@ -7984,6 +9901,18 @@
             "items": {
               "$ref": "#/components/schemas/IntegrationEntitySharingPartner"
             }
+          },
+          "partner_lookups": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/IntegrationEntitySharingPartnerLookup"
+            }
+          },
+          "exclusive": {
+            "type": "boolean",
+            "default": false,
+            "description": "When true, the entity is unshared from every partner org that this config does not enable, including shares made elsewhere (e.g. by hand in epilot). Use it when the payload decides the one partner an entity belongs to, so the entity follows when that partner changes."
           }
         }
       },
@@ -8009,6 +9938,50 @@
             ],
             "description": "Whether the entity should be shared with this partner. A boolean, or a JSONata expression evaluated against the mapped payload item (the same input as field-level `enabled`). Defaults to true. When false, the entity is unshared from the partner.",
             "example": "salesPartner.number = 'SP-1001'"
+          }
+        }
+      },
+      "IntegrationEntitySharingPartnerLookup": {
+        "type": "object",
+        "description": "Finds the partner org at runtime: the entity matched by `unique_ids` holds the partner org id in `partner_org_id_attribute`. Partner orgs created later are shared with without a mapping change. An item whose `unique_ids` evaluate to nothing has no partner and is skipped. No match, or a match without a partner org id yet, leaves the sharing unchanged and is reported as `SHARING_PARTNER_NOT_PROVISIONED`.",
+        "required": [
+          "unique_ids"
+        ],
+        "properties": {
+          "schema": {
+            "type": "string",
+            "default": "partner",
+            "description": "Schema of the entity that holds the partner org id."
+          },
+          "unique_ids": {
+            "type": "array",
+            "minItems": 1,
+            "description": "How to find that entity from the payload item, like a relation's `unique_ids`.",
+            "items": {
+              "$ref": "#/components/schemas/RelationUniqueIdField"
+            },
+            "example": [
+              {
+                "attribute": "sales_partner_number",
+                "field": "salesPartner.number"
+              }
+            ]
+          },
+          "partner_org_id_attribute": {
+            "type": "string",
+            "default": "partner_org_id",
+            "description": "Attribute of the matched entity that holds the partner org id."
+          },
+          "enabled": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "description": "Whether the entity should be shared with the found partner. A boolean, or a JSONata expression evaluated against the mapped payload item. Defaults to true. When false, the entity is unshared from the found partner."
           }
         }
       },
@@ -8243,6 +10216,10 @@
               }
             ],
             "description": "Controls whether this field mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean. Defaults to true if omitted."
+          },
+          "resolve_refs": {
+            "type": "boolean",
+            "description": "When true, every `<name>_ref` object in the field's value —\n`{ \"unique_ids\": { \"<attribute>\": \"<value>\" }, \"entity_schema\"?: \"<schema>\" }` — is looked up\nby its unique ids and replaced with `<name>_id` before the entity is written. The schema\ndefaults to `<name>`. A ref matching no entity, or more than one, fails the update; the\nreferenced entity is never created. Applies to `field`, `jsonataExpression` and `constant` values.\n"
           },
           "relations": {
             "$ref": "#/components/schemas/RelationConfig"
@@ -8763,7 +10740,10 @@
           },
           "changed_by": {
             "type": "string",
-            "description": "User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.\n"
+            "description": "User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync. When an app or AI agent made the update (`changed_by_actor`), the user it acted on behalf of.\n"
+          },
+          "changed_by_actor": {
+            "$ref": "#/components/schemas/UseCaseChangeActor"
           },
           "created_at": {
             "type": "string",
@@ -9289,6 +11269,35 @@
           }
         ]
       },
+      "UseCaseChangeActor": {
+        "type": "object",
+        "readOnly": true,
+        "description": "The app or AI agent that made the change on behalf of the user in `changed_by`, taken from the `actor` claim of its access token. Absent when a user made the change directly.\n",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "app",
+              "agent"
+            ]
+          },
+          "app_id": {
+            "type": "string",
+            "description": "ID of the installed app (type `app`)"
+          },
+          "agent_id": {
+            "type": "string",
+            "description": "ID of the AI agent (type `agent`)"
+          },
+          "agent_name": {
+            "type": "string",
+            "description": "Display name the AI agent registered with (type `agent`); self-declared"
+          }
+        }
+      },
       "UseCaseHistoryEntry": {
         "oneOf": [
           {
@@ -9365,7 +11374,10 @@
           },
           "changed_by": {
             "type": "string",
-            "description": "User ID of the user who made the change that produced this history entry"
+            "description": "User ID of the user who made the change that produced this history entry. When an app or AI agent made the change (`changed_by_actor`), the user it acted on behalf of.\n"
+          },
+          "changed_by_actor": {
+            "$ref": "#/components/schemas/UseCaseChangeActor"
           },
           "created_at": {
             "type": "string",
@@ -11233,7 +13245,7 @@
           },
           "sharing": {
             "type": "object",
-            "description": "Present when the entity mapping has a `sharing` block: each partner with its `enabled` evaluated against the payload.",
+            "description": "Present when the entity mapping has a `sharing` block: each partner with its `enabled` evaluated against the payload, and each partner lookup with its unique ids evaluated (`lookups`). Lookups are resolved to partner orgs at runtime, not here.",
             "additionalProperties": true
           },
           "mode": {
@@ -13690,6 +15702,7 @@
           "ENV_VAR_REF_LOOKUP_FAILED",
           "ENV_VAR_REF_NOT_FOUND",
           "EVENT_NOT_CONFIGURED",
+          "EVENT_TOO_WIDE",
           "EXTERNAL_API_ERROR",
           "EXTERNAL_ERROR",
           "EXTERNAL_INFO",
@@ -13743,6 +15756,7 @@
           "RELATION_REF_ITEM_NOT_FOUND",
           "RELATION_REF_VALUE_UNDEFINED",
           "REQUIRED_PARAM_MISSING",
+          "SANDBOX_LANE",
           "SECURE_PROXY_DISABLED",
           "SECURE_PROXY_DOMAIN_BLOCKED",
           "SECURE_PROXY_DOMAIN_NOT_ALLOWED",
@@ -13757,6 +15771,7 @@
           "SECURE_PROXY_UNAVAILABLE",
           "SHARING_FAILED",
           "SHARING_PARTNER_NOT_CONNECTED",
+          "SHARING_PARTNER_NOT_PROVISIONED",
           "SHARING_REJECTED",
           "SIGNATURE_VERIFICATION_FAILED",
           "SIGNATURE_VERIFICATION_UNAVAILABLE",
@@ -14387,6 +16402,203 @@
             "description": "Markdown source of the page"
           }
         }
+      },
+      "BulkImportWindowRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "starts_at",
+          "ends_at",
+          "note"
+        ],
+        "properties": {
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the window opens (ISO 8601, UTC)",
+            "example": "2026-11-24T06:00:00Z"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the window closes (ISO 8601, UTC); at most 24 hours after `starts_at`",
+            "example": "2026-11-24T18:00:00Z"
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "description": "What the import is, for whoever looks at the window later",
+            "example": "Migration of all contracts from SAP"
+          }
+        }
+      },
+      "BulkImportWindow": {
+        "type": "object",
+        "required": [
+          "starts_at",
+          "ends_at",
+          "note",
+          "created_at",
+          "created_by",
+          "status"
+        ],
+        "properties": {
+          "starts_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string",
+            "description": "The id of the user who booked the window"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "active",
+              "ended"
+            ],
+            "description": "`scheduled`: not started yet, can still be replaced. `active`: open now.\n`ended`: over, and removed by the platform shortly.\n"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the platform first saw the window open"
+          }
+        }
+      },
+      "BulkImportLane": {
+        "type": "object",
+        "required": [
+          "status",
+          "estimate"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "shared",
+              "preparing",
+              "dedicated",
+              "finishing"
+            ],
+            "description": "`shared`: the organisation's updates run on the shared lane (no window\nin effect and no large import going on). `preparing`: the organisation\nhas its own lane and the platform is making sure older updates are done\nfirst. `dedicated`: the updates run on the organisation's own lane.\n`finishing`: the own lane is being given back and still works off what\nis on it.\n"
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the organisation got its own lane"
+          },
+          "backlog": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Updates waiting on the organisation's own lane, as the platform last\ncounted them (about once a minute). Absent on the shared lane, on a lane\nshared with other organisations, and when it could not be counted.\n"
+          },
+          "estimate": {
+            "type": "string",
+            "enum": [
+              "empty",
+              "finishes",
+              "growing",
+              "not_draining",
+              "unknown"
+            ],
+            "description": "When the waiting updates will be done. `empty`: nothing waits.\n`finishes`: see `estimated_finish_at`. `growing`: more arrive than are\ndone. `not_draining`: updates wait and none were done recently.\n`unknown`: it cannot be said, which is also the answer on the shared lane.\n"
+          },
+          "estimated_finish_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Only with `estimate` `finishes`"
+          }
+        }
+      },
+      "BulkImportWindowLimits": {
+        "type": "object",
+        "required": [
+          "max_duration_hours",
+          "max_lead_days",
+          "note_max_length"
+        ],
+        "properties": {
+          "max_duration_hours": {
+            "type": "integer",
+            "example": 24
+          },
+          "max_lead_days": {
+            "type": "integer",
+            "example": 30
+          },
+          "note_max_length": {
+            "type": "integer",
+            "example": 500
+          }
+        }
+      },
+      "BulkImportWindowStatus": {
+        "type": "object",
+        "required": [
+          "enabled",
+          "window",
+          "lane",
+          "limits"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether bulk import windows exist on this stage. When false a window\ncannot be booked (409 `bulk-imports-unavailable`); the lane is still\nreported.\n"
+          },
+          "window": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BulkImportWindow"
+              }
+            ]
+          },
+          "lane": {
+            "$ref": "#/components/schemas/BulkImportLane"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/BulkImportWindowLimits"
+          }
+        }
+      },
+      "BulkImportWindowRefusal": {
+        "type": "object",
+        "required": [
+          "error_code",
+          "message"
+        ],
+        "properties": {
+          "error_code": {
+            "type": "string",
+            "enum": [
+              "bulk-imports-unavailable",
+              "window-active",
+              "too-many-windows",
+              "window-too-long",
+              "starts-in-the-past",
+              "ends-before-start",
+              "starts-too-far-ahead"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "One plain English sentence"
+          }
+        }
       }
     },
     "responses": {
@@ -14436,6 +16648,31 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/ErrorResponseBase"
+            }
+          }
+        }
+      },
+      "InvalidLifecycleSettings": {
+        "description": "The integration's lifecycle settings are missing or invalid; `problems`\nnames the keys, never their values.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "problems": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              ]
             }
           }
         }
@@ -14637,7 +16874,15 @@
         }
       },
       "ReplayEventsResponse": {
-        "description": "Events replay initiated. Always 200 — per-event outcomes are reported in `results`, so inspect it (or compare `replayed` against the number of requested ids) rather than treating the status code as success.\n",
+        "description": "Events replay initiated. Always 200 — per-event outcomes are reported in `results`, so inspect it (or compare `replayed` against the number of requested ids) rather than treating the status code as success.\nWhen the queue that receives the events throttled the replay part of the way, the answer is still 200 with a `Retry-After` header (2 seconds): the events the queue took are `success` (queued, with their `replay_event_id`), the others are `error`. Replay only the events that are not `success`; replaying the whole request again would queue the first ones a second time, because every replay gets new deduplication ids. When the queue took nothing, or the bulk capacity is in use, the answer is 503 (see `IngestRetryLater`) and the replay can be sent again as it was.\n",
+        "headers": {
+          "Retry-After": {
+            "description": "Present when the replay was throttled part of the way: seconds to wait before replaying the events that are not `success`.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        },
         "content": {
           "application/json": {
             "schema": {
@@ -14702,12 +16947,23 @@
         }
       },
       "ERPUpdatesResponse": {
-        "description": "Some events failed to process",
+        "description": "Some events failed to process. The same body comes with HTTP 422 when an event was refused, an event over the cap on updates per event among them (its result carries the code `EVENT_TOO_WIDE`; the other events of the request are processed).\nA request whose events together would produce more updates than a request may (25,000 by default; a request may carry 100 events) is refused whole with HTTP 422 and a body of `code` `REQUEST_TOO_WIDE` and a `message` that names both numbers, without `results`: nothing of it was accepted and nothing was queued, the deduplication claims of its events are released, and it is sent again as several smaller requests. The events after the one that brought the request over the cap are not evaluated, so the count in the message is a lower bound.",
         "content": {
           "application/json": {
             "schema": {
               "type": "object",
               "properties": {
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "REQUEST_TOO_WIDE"
+                  ],
+                  "description": "Only on the refusal of a whole request that would produce too many updates.\n"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Only with `code`: the refusal in words, naming the cap of the request and the cap of an event.\n"
+                },
                 "correlation_id": {
                   "type": "string",
                   "description": "The request's correlation id, echoed, or the one generated for it when the caller omitted it. This is the id to pass to `GET /v3/erp/updates/events?correlation_id=...` to wait for these events. v3 and v2 generate one when the request has none, so they always return it, except that v2 omits it for an empty `correlation_id`. v1 never generates one: it echoes a non-empty `meta.correlation_id` and otherwise omits the field.\n"
@@ -14748,15 +17004,160 @@
                           "interactive",
                           "priority",
                           "default",
-                          "deferred"
+                          "deferred",
+                          "sandbox"
                         ],
                         "description": "Which processing lane carried the event. Present only alongside `interactive`.\n"
                       },
                       "message": {
                         "type": "string"
+                      },
+                      "code": {
+                        "type": "string",
+                        "enum": [
+                          "EVENT_TOO_WIDE",
+                          "EVENT_EVALUATION_LIMIT"
+                        ],
+                        "description": "A stable code, present only on the results of events that were refused for one reason a caller can act on, and only with `status` `error`. `EVENT_TOO_WIDE`: the event would produce more updates than one event may (5,000 by default; the `message` names the cap and the count). `EVENT_EVALUATION_LIMIT`: the mapping of the event ran longer than 25 seconds, or built a generated sequence of more than 4 million items, and was stopped before its updates could be counted; it says nothing about the width of the event, which may be accepted in a smaller request. Nothing of the event was queued: send its data in several smaller events. The other events of the request are processed and have a result of their own; the response status is 422.\n"
                       }
                     }
                   }
+                }
+              }
+            }
+          }
+        }
+      },
+      "IngestRetryLater": {
+        "description": "The request was not accepted, or only part of it was, and it is safe to send again\nafter the `Retry-After` interval. The body's `code` says why:\n\n- `BULK_CAPACITY_EXHAUSTED`: the capacity for large data loads is in use and the\n  organization is over its allowance for everyday traffic. `Retry-After` is 60\n  seconds, by which time the allowance has refilled or capacity is free. The part of\n  the request that counts as a large data load was not accepted or queued, and a\n  request is never split. Requests within the allowance are not affected. A request\n  that carried only bulk events is refused whole: the body is `code` and `message`\n  alone, with no `results`, and the request can be retried as it was. Interactive\n  events are never charged to the allowance, so a request that mixed them with bulk\n  events still has them accepted: the body then carries the message `Some events of\n  this request were not accepted; see results`, the `correlation_id` of the request\n  and `results`, and, when the request asked to close a correlation, `correlation_close`\n  (the close is not applied, with the reason `retry_requested`).\n- `INGEST_THROTTLED`: the queue that receives the events throttled the request, or the\n  service that checks the allowance of the organization for everyday traffic was busy\n  and could not answer, so the request was not accepted rather than accepted unchecked.\n  Both are transient and have nothing to do with the size of your allowance.\n  `Retry-After` is 2 seconds.\n\nWith `INGEST_THROTTLED` nothing of the request was queued when the body is `code` and\n`message` alone, and the request can be sent again as it was; the deduplication claims\nof its events were released, so the retry is accepted. When some events were queued\nbefore the throttle (or, when the allowance could not be checked, because they are\ninteractive events, which are never charged to it), the body carries the message\n`Some events of this request were not accepted; see results`, the `correlation_id` of\nthe request, and `results`: `success` for the events the queue took (they are queued,\ndo not send them again) and `error` for the events it did not (send those again).\nEvents leave in the order of the request, and\nthe first batch the queue refused ends the send, so an event that was not accepted is\nnever followed by an accepted one on the same queue. If the request asked to close a\ncorrelation (`correlation_complete`), the close is not applied: the retry carries it\nagain.\n\nAn `INGEST_THROTTLED` answer replaces the `500` with the message `Unknown API error`\nthat these operations used to return when the queue throttled the request.\n",
+        "headers": {
+          "Retry-After": {
+            "description": "Seconds to wait before retrying the request",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "message"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "BULK_CAPACITY_EXHAUSTED",
+                        "INGEST_THROTTLED"
+                      ]
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "description": "The request's correlation id, echoed, or the one generated for it when the caller omitted it. Present when some events of the request were accepted, together with `results`.\n"
+                    },
+                    "correlation_close": {
+                      "$ref": "#/components/schemas/CorrelationCloseResult"
+                    },
+                    "results": {
+                      "type": "array",
+                      "description": "Present when some events of the request were accepted.",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "event_id",
+                          "status"
+                        ],
+                        "properties": {
+                          "event_id": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "success",
+                              "error",
+                              "skipped",
+                              "ignored"
+                            ]
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "examples": {
+              "bulk_capacity_exhausted": {
+                "summary": "Nothing of the request was accepted, the capacity for large data loads is in use",
+                "value": {
+                  "code": "BULK_CAPACITY_EXHAUSTED",
+                  "message": "The capacity for large data loads is in use, and this organization is over its allowance for everyday traffic. Nothing of this request was accepted. Send the request again after the Retry-After interval."
+                }
+              },
+              "bulk_capacity_exhausted_mixed_request": {
+                "summary": "The interactive events were accepted, the bulk events were not",
+                "value": {
+                  "code": "BULK_CAPACITY_EXHAUSTED",
+                  "message": "Some events of this request were not accepted; see results",
+                  "correlation_id": "registration-7",
+                  "results": [
+                    {
+                      "event_id": "7f2c4c0e-6f3b-4d5e-9a57-0d7a9e2f8b11",
+                      "status": "success",
+                      "interactive": true,
+                      "lane": "interactive"
+                    },
+                    {
+                      "event_id": "0b6f1d52-92c4-4e0a-8f35-5c1d3a7e4b90",
+                      "status": "error",
+                      "message": "This event was not accepted: the capacity for large data loads is in use, and this organization is over its allowance for everyday traffic. Send the event again after the Retry-After interval."
+                    }
+                  ],
+                  "correlation_close": {
+                    "outcome": "ignored",
+                    "reasons": [
+                      "retry_requested"
+                    ],
+                    "message": "the response asks the caller to retry (422, 429 or 503), so the retried events would arrive after the close; the retry carries the flag again and closes then"
+                  }
+                }
+              },
+              "ingest_throttled": {
+                "summary": "Nothing of the request was accepted, the receiving queue was throttled",
+                "value": {
+                  "code": "INGEST_THROTTLED",
+                  "message": "The queue that receives events is busy and throttled the request. Nothing of this request was accepted. Send the request again after the Retry-After interval."
+                }
+              },
+              "ingest_throttled_partly": {
+                "summary": "Some events were queued before the throttle",
+                "value": {
+                  "code": "INGEST_THROTTLED",
+                  "message": "Some events of this request were not accepted; see results",
+                  "correlation_id": "req-789e4567-e89b-12d3-a456-426614174000",
+                  "results": [
+                    {
+                      "event_id": "7f2c4c0e-6f3b-4d5e-9a57-0d7a9e2f8b11",
+                      "status": "success"
+                    },
+                    {
+                      "event_id": "0b6f1d52-92c4-4e0a-8f35-5c1d3a7e4b90",
+                      "status": "error",
+                      "message": "This event was not accepted: the queue that receives events is busy and throttled the request. Send the event again after the Retry-After interval."
+                    }
+                  ]
                 }
               }
             }
@@ -14818,7 +17219,8 @@
                           "interactive",
                           "priority",
                           "default",
-                          "deferred"
+                          "deferred",
+                          "sandbox"
                         ],
                         "description": "Which processing lane carried the event. Present only alongside `interactive`.\n"
                       },

@@ -59,6 +59,9 @@ declare namespace Components {
         export interface CampaignResponse {
             campaign?: Schemas.Campaign;
         }
+        export interface CampaignsSummaryResponse {
+            results: Schemas.CampaignSummary[];
+        }
         export type ClientErrorResponse = /**
          * Describes the structure of a client error response, which can be one of several types:
          * 1. `MessageError`: Contains a 'message' field for general descriptive errors.
@@ -95,9 +98,14 @@ declare namespace Components {
              * Recipients with a recorded email status (the KPI denominator).
              */
             total_emailed: number;
+            /**
+             * Recipients still at email_status `sent` with no open or click recorded.
+             */
             sent: number;
             /**
-             * Recipients whose SES Delivery event was recorded (needs Delivery publishing enabled).
+             * Recipients whose SES Delivery event was recorded, plus recipients still at
+             * email_status `sent` that opened or clicked (engagement proves delivery).
+             *
              */
             delivered: number;
             bounced: number;
@@ -116,7 +124,9 @@ declare namespace Components {
              */
             unsubscribed: number;
             /**
-             * Unique recipients with at least one open (only where open tracking is on).
+             * Unique recipients with at least one open or click (only where tracking is on). A
+             * click counts as an open even when no open was recorded.
+             *
              */
             opened: number;
             /**
@@ -295,6 +305,10 @@ declare namespace Components {
          * b8c01433-5556-4e2b-aad4-6f5348d1df84
          */
         export type BaseUUID = string; // uuid
+        /**
+         * The status of the automation job
+         */
+        export type BulkJobStatus = "queued" | "processing" | "finished" | "failed" | "cancelled" | "send_report";
         export interface Campaign {
             _id?: /**
              * example:
@@ -320,14 +334,652 @@ declare namespace Components {
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ BaseEntityAcl;
             name?: string;
             goal?: string;
-            status?: CampaignStatus;
-            start_date?: string; // date
-            end_date?: string; // date
+            status?: /**
+             * Lifecycle status of a campaign.
+             *
+             * - `draft`: not launched yet.
+             * - `scheduled`: launched with a `start_date` still in the future. It collects no recipients and
+             *   appears through no delivery method until it starts on its own at `start_date`.
+             * - `activating`: launching; recipients are being collected.
+             * - `active`: running.
+             * - `inactive`: stopped, by hand or on its own at `end_date`.
+             *
+             */
+            CampaignStatus;
+            /**
+             * When the campaign starts. Optional: if set to a future time when the campaign is launched,
+             * the campaign is `scheduled` and starts on its own at this time. Otherwise it is set to the
+             * time the campaign is launched.
+             *
+             */
+            start_date?: string; // date-time
+            /**
+             * When the campaign ends. Optional: if set, the running campaign stops on its own at this
+             * time. Otherwise it is set to the time the campaign is stopped by hand.
+             *
+             */
+            end_date?: string; // date-time
             flow_id?: string;
             job_id?: string;
             target?: BaseRelation;
+            product_recommendations?: BaseRelation;
+            type?: /* Use case of a campaign. Set by campaign setup. */ CampaignType;
         }
-        export type CampaignStatus = "draft" | "activating" | "active" | "inactive";
+        /**
+         * Number of the job's automation executions in total and per execution status
+         * (e.g. `success`, `failed`, `in_progress`, `pending`). Statuses without executions may be left out.
+         *
+         * example:
+         * {
+         *   "total": 4820,
+         *   "success": 3046,
+         *   "failed": 14,
+         *   "in_progress": 10
+         * }
+         */
+        export interface CampaignJobExecutionStats {
+            [name: string]: number;
+            total: number;
+        }
+        export interface CampaignJobSummary {
+            job_id: string;
+            status: /* The status of the automation job */ BulkJobStatus;
+            execution_stats: /**
+             * Number of the job's automation executions in total and per execution status
+             * (e.g. `success`, `failed`, `in_progress`, `pending`). Statuses without executions may be left out.
+             *
+             * example:
+             * {
+             *   "total": 4820,
+             *   "success": 3046,
+             *   "failed": 14,
+             *   "in_progress": 10
+             * }
+             */
+            CampaignJobExecutionStats;
+            /**
+             * Error that moved the job into the `failed` status.
+             */
+            last_error?: string;
+            /**
+             * Entity ID of the job's report file.
+             */
+            report_file_entity_id?: string;
+        }
+        /**
+         * Lifecycle status of a campaign.
+         *
+         * - `draft`: not launched yet.
+         * - `scheduled`: launched with a `start_date` still in the future. It collects no recipients and
+         *   appears through no delivery method until it starts on its own at `start_date`.
+         * - `activating`: launching; recipients are being collected.
+         * - `active`: running.
+         * - `inactive`: stopped, by hand or on its own at `end_date`.
+         *
+         */
+        export type CampaignStatus = "draft" | "scheduled" | "activating" | "active" | "inactive";
+        export interface CampaignSummary {
+            campaign_id: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+            /**
+             * The campaign's automation job. `null` when it has none or it could not be loaded.
+             */
+            job: {
+                job_id: string;
+                status: /* The status of the automation job */ BulkJobStatus;
+                execution_stats: /**
+                 * Number of the job's automation executions in total and per execution status
+                 * (e.g. `success`, `failed`, `in_progress`, `pending`). Statuses without executions may be left out.
+                 *
+                 * example:
+                 * {
+                 *   "total": 4820,
+                 *   "success": 3046,
+                 *   "failed": 14,
+                 *   "in_progress": 10
+                 * }
+                 */
+                CampaignJobExecutionStats;
+                /**
+                 * Error that moved the job into the `failed` status.
+                 */
+                last_error?: string;
+                /**
+                 * Entity ID of the job's report file.
+                 */
+                report_file_entity_id?: string;
+            } | null;
+            /**
+             * Number of portal page blocks showing the campaign, across all portals of the organization.
+             * `null` when the portal configurations could not be loaded.
+             *
+             * example:
+             * 3
+             */
+            portal_blocks: number | null;
+            /**
+             * Number of portals with at least one block showing the campaign.
+             * `null` when the portal configurations could not be loaded.
+             *
+             * example:
+             * 2
+             */
+            portals: number | null;
+        }
+        /**
+         * Use case of a campaign. Set by campaign setup.
+         */
+        export type CampaignType = "tariff_change";
+        export interface CampaignsSummaryRequest {
+            /**
+             * IDs of the campaigns to summarize.
+             */
+            campaign_ids: [
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?
+            ];
+        }
         /**
          * Describes the structure of a client error response, which can be one of several types:
          * 1. `MessageError`: Contains a 'message' field for general descriptive errors.
@@ -455,6 +1107,16 @@ declare namespace Components {
          */
         export type EmailBounceType = "permanent" | "transient";
         /**
+         * Engagement filter for listing a campaign's recipients, independent of the stored
+         * `email_status`.
+         * - `opened`: at least one open or one click (a click proves the email was opened even when
+         *   the tracking pixel was blocked).
+         * - `clicked`: at least one link click.
+         * - `unsubscribed`: the recipient opted out of email marketing.
+         *
+         */
+        export type EmailEngagement = "opened" | "clicked" | "unsubscribed";
+        /**
          * Delivery status of the email a campaign's automation sends to a recipient. Set to `sent`
          * once the automation hands the email off, then updated asynchronously as SES notifications
          * arrive (`bounced` / `complained`; an SES Reject maps to `bounced`). `failed` is a send-time
@@ -496,10 +1158,7 @@ declare namespace Components {
             ];
         }
         export interface JobStatus {
-            /**
-             * The status of the automation job
-             */
-            status?: "queued" | "processing" | "finished" | "failed" | "cancelled" | "send_report";
+            status?: /* The status of the automation job */ BulkJobStatus;
             execution_summary?: ExecutionSummaryItem[];
         }
         export interface MatchCampaignParams {
@@ -1614,6 +2273,101 @@ declare namespace Components {
             };
         }
         export type PortalStatus = "sent" | "seen" | "dismissed" | "clicked";
+        export interface ProductRecommendationOffer {
+            /**
+             * Optional per-offer target entity ID. An offer without a target is shown to everyone.
+             */
+            target_id?: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+            /**
+             * Product/price pairs within this offer.
+             */
+            items: {
+                product_id: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */;
+                price_id: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */;
+                /**
+                 * Opaque per-item highlight/comparison config persisted as-is on the entity.
+                 */
+                highlight_config?: {
+                    [name: string]: any;
+                };
+            }[];
+        }
+        /**
+         * Mirrors `ProductRecommendationOfferGroup` of the pricing API. No `target_id` = everyone.
+         */
+        export interface ProductRecommendationOfferGroup {
+            /**
+             * Unique id of the offer group within its rule
+             */
+            id: string;
+            target_id?: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+            /**
+             * Product/price pairs within this offer group.
+             */
+            items: {
+                product_id: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */;
+                price_id: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */;
+                /**
+                 * Opaque per-item highlight/comparison config persisted as-is on the entity.
+                 */
+                highlight_config?: {
+                    [name: string]: any;
+                };
+            }[];
+        }
+        /**
+         * Mirrors `ProductRecommendationRule` of the pricing API.
+         *
+         */
+        export interface ProductRecommendationRule {
+            /**
+             * Unique id of the rule within its product recommendation
+             */
+            id: string;
+            /**
+             * Current tariff the rule applies to. `null` = fallback rule.
+             */
+            source: {
+                product_id: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */;
+                price_id: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */;
+            } | null;
+            /**
+             * The offers of the rule, grouped by target group
+             */
+            offer_groups: /* Mirrors `ProductRecommendationOfferGroup` of the pricing API. No `target_id` = everyone. */ ProductRecommendationOfferGroup[];
+        }
         export interface Recipient {
             entity_id?: /**
              * example:
@@ -1717,6 +2471,13 @@ declare namespace Components {
                 url: string;
                 clicked_at: string; // date-time
             }[];
+            /**
+             * When the entity became a recipient of the campaign: at launch, when it first saw the
+             * campaign in a portal or as a Next Best Action, or when the daily recipient check added it
+             * (campaigns with `auto_add_recipients` on).
+             *
+             */
+            created_at?: string; // date-time
             updated_at?: string; // date-time
         }
         export interface RetriggerAutomationsRequest {
@@ -1755,75 +2516,124 @@ declare namespace Components {
          *
          */
         SetupTariffChangeCampaignRequest;
+        /**
+         * Setup 400 for an invalid rule table.
+         */
+        export interface SetupCampaignRuleError {
+            code: "PRODUCT_RECOMMENDATION_RULES_MIXED" | "INVALID_PRODUCT_RECOMMENDATION_RULES" | "PRODUCT_OR_PRICE_UNAVAILABLE";
+            errors?: {
+                code: "RULES_REQUIRED" | "RULE_SOURCE_REQUIRED" | "DUPLICATE_SOURCE" | "MULTIPLE_FALLBACKS" | "OFFERS_REQUIRED" | "OFFER_IS_OWN_SOURCE" | "DUPLICATE_RULE_ID";
+                rule_id?: string;
+                offer_group_id?: string;
+                item_index?: number;
+                message: string;
+            }[];
+            /**
+             * Offer products that do not exist or are archived. Sources (the current product) may be archived or
+             * missing and are not listed.
+             *
+             */
+            product_ids?: string[];
+            /**
+             * Offer prices that do not exist or are archived. Sources (the current price) may be archived or
+             * missing and are not listed.
+             *
+             */
+            price_ids?: string[];
+        }
+        /**
+         * Reuses an existing `product_recommendation` entity. It is linked, never modified.
+         */
+        export interface SetupExistingProductRecommendation {
+            product_recommendation_id: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+        }
+        /**
+         * Creates a new `product_recommendation` entity of type `change`, either with a rule table (`rules`) or
+         * with a single source (`source_product_id` + `source_price_id`) and `offers`. Not both.
+         *
+         */
+        export interface SetupNewProductRecommendation {
+            /**
+             * Optional name of the product recommendation. Defaults to the campaign name.
+             */
+            name?: string;
+            /**
+             * Source product entity ID. Requires `source_price_id`.
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            source_product_id?: string; // uuid
+            /**
+             * Source price entity ID. Requires `source_product_id`.
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            source_price_id?: string; // uuid
+            /**
+             * Offer blocks for the product_recommendation entity.
+             */
+            offers?: ProductRecommendationOffer[];
+            /**
+             * The rule table. Excludes `source_product_id`, `source_price_id` and `offers`.
+             *
+             */
+            rules?: /**
+             * Mirrors `ProductRecommendationRule` of the pricing API.
+             *
+             */
+            ProductRecommendationRule[];
+        }
         export interface SetupTariffChangeCampaignRequest {
+            /**
+             * The `CampaignType` of this variant.
+             */
             type: "tariff_change";
-            product_recommendation: {
-                /**
-                 * Optional name of the product recommendation. Defaults to the campaign name.
-                 */
-                name?: string;
-                /**
-                 * Optional source product entity ID for the recommendation.
-                 * example:
-                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
-                 */
-                source_product_id?: string; // uuid
-                /**
-                 * Optional source price entity ID for the recommendation.
-                 * example:
-                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
-                 */
-                source_price_id?: string; // uuid
-                /**
-                 * Offer blocks for the product_recommendation entity.
-                 */
-                offers?: {
-                    /**
-                     * Optional per-offer target entity ID.
-                     */
-                    target_id?: /**
-                     * example:
-                     * b8c01433-5556-4e2b-aad4-6f5348d1df84
-                     */
-                    BaseUUID /* uuid */;
-                    /**
-                     * Product/price pairs within this offer.
-                     */
-                    items: {
-                        product_id: /**
-                         * example:
-                         * b8c01433-5556-4e2b-aad4-6f5348d1df84
-                         */
-                        BaseUUID /* uuid */;
-                        price_id: /**
-                         * example:
-                         * b8c01433-5556-4e2b-aad4-6f5348d1df84
-                         */
-                        BaseUUID /* uuid */;
-                        /**
-                         * Opaque per-item highlight/comparison config persisted as-is on the entity.
-                         */
-                        highlight_config?: {
-                            [name: string]: any;
-                        };
-                    }[];
-                }[];
-            };
             campaign: {
                 name: string;
                 goal?: string;
                 /**
-                 * List of target entity IDs to attach to the campaign. Today only a single
-                 * entry is supported (campaign.target is has_one) but the array shape is kept
-                 * for forward-compatibility — only `target_ids[0]` is used.
+                 * The campaign's audience as a list with exactly one target entity ID. A campaign has
+                 * exactly one audience (`campaign.target` is has_one); the array shape is kept for
+                 * compatibility. A request with no or more than one entry is rejected with 400 and
+                 * nothing is created; extra entries are never silently dropped.
                  *
                  */
-                target_ids: /**
-                 * example:
-                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                target_ids: [
+                    /**
+                     * example:
+                     * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                     */
+                    BaseUUID /* uuid */
+                ];
+                /**
+                 * Optional start of the campaign. Launching the campaign before this time schedules it, and
+                 * it starts on its own at this time. Without it, the campaign starts when it is launched.
+                 *
                  */
-                BaseUUID /* uuid */[];
+                start_date?: string; // date-time
+                /**
+                 * Optional end of the campaign. Must be after `start_date` and in the future. The campaign
+                 * stops on its own at this time. Without it, the campaign runs until it is stopped.
+                 *
+                 */
+                end_date?: string; // date-time
             };
+            /**
+             * The campaign's product recommendation (exactly one): an existing one or a new one.
+             *
+             */
+            product_recommendations: [
+                (/* Reuses an existing `product_recommendation` entity. It is linked, never modified. */ SetupExistingProductRecommendation | /**
+                 * Creates a new `product_recommendation` entity of type `change`, either with a rule table (`rules`) or
+                 * with a single source (`source_product_id` + `source_price_id`) and `offers`. Not both.
+                 *
+                 */
+                SetupNewProductRecommendation)
+            ];
             /**
              * Optional journey configuration selected in the wizard. Only sent by the
              * consumer once a journey has been chosen.
@@ -1895,22 +2705,25 @@ declare namespace Components {
             };
         }
         export interface SetupTariffChangeCampaignResponse {
+            /**
+             * The `CampaignType` of this variant.
+             */
             type: "tariff_change";
-            product_recommendation_id: /**
+            /**
+             * The created campaign.
              * example:
              * b8c01433-5556-4e2b-aad4-6f5348d1df84
              */
-            BaseUUID /* uuid */;
-            campaign_id: /**
+            campaign_id: string; // uuid
+            /**
+             * All product recommendations linked to the campaign, created and reused, in request order.
+             *
+             */
+            product_recommendation_ids: /**
              * example:
              * b8c01433-5556-4e2b-aad4-6f5348d1df84
              */
-            BaseUUID /* uuid */;
-            journey_id?: /**
-             * example:
-             * b8c01433-5556-4e2b-aad4-6f5348d1df84
-             */
-            BaseUUID /* uuid */;
+            BaseUUID /* uuid */[];
             portal_widget_id?: /**
              * example:
              * b8c01433-5556-4e2b-aad4-6f5348d1df84
@@ -1965,7 +2778,7 @@ declare namespace Components {
             };
             /**
              * Free text search entered in the target builder.
-             * Not applied when resolving the target, e.g. by `getTargetQueries` or `matchTargets`.
+             * Applied when resolving the target like the search of entity views: matched against all fields and combined with `filter` using AND.
              *
              */
             search?: string;
@@ -2002,7 +2815,8 @@ declare namespace Components {
             error?: string;
             /**
              * Elasticsearch sort fields for the target's sort order, ready to be passed to entity search.
-             * Ends with an `_id` tie-breaker so the order is stable. Omitted when the target has no sort.
+             * Ends with an `_id` tie-breaker so the order is stable. A target with a limit but no sort returns
+             * `_created_at:desc` and `_id:desc` (newest first). Omitted when the target has neither.
              *
              * example:
              * [
@@ -2070,6 +2884,8 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Responses.CampaignResponse;
             export type $400 = Components.Responses.ClientErrorResponse;
+            export type $403 = Components.Responses.ClientErrorResponse;
+            export type $409 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
         }
     }
@@ -2096,7 +2912,9 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Responses.DiscoverCampaignsResponse;
             export type $400 = Components.Responses.ClientErrorResponse;
+            export type $403 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
+            export type $503 = Components.Responses.ServerErrorResponse;
         }
     }
     namespace GetCampaignJobStatus {
@@ -2133,6 +2951,14 @@ declare namespace Paths {
             export type $500 = Components.Responses.ServerErrorResponse;
         }
     }
+    namespace GetCampaignsSummary {
+        export type RequestBody = Components.Schemas.CampaignsSummaryRequest;
+        namespace Responses {
+            export type $200 = Components.Responses.CampaignsSummaryResponse;
+            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $500 = Components.Responses.ServerErrorResponse;
+        }
+    }
     namespace GetEmailStats {
         namespace Parameters {
             export type CampaignId = /**
@@ -2158,6 +2984,16 @@ declare namespace Paths {
              * b8c01433-5556-4e2b-aad4-6f5348d1df84
              */
             Components.Schemas.BaseUUID /* uuid */;
+            export type EmailEngagement = /**
+             * Engagement filter for listing a campaign's recipients, independent of the stored
+             * `email_status`.
+             * - `opened`: at least one open or one click (a click proves the email was opened even when
+             *   the tracking pixel was blocked).
+             * - `clicked`: at least one link click.
+             * - `unsubscribed`: the recipient opted out of email marketing.
+             *
+             */
+            Components.Schemas.EmailEngagement;
             export type EmailStatus = /**
              * Delivery status of the email a campaign's automation sends to a recipient. Set to `sent`
              * once the automation hands the email off, then updated asynchronously as SES notifications
@@ -2167,6 +3003,13 @@ declare namespace Paths {
              *
              */
             Components.Schemas.EmailStatus;
+            export type EntityUiStatus = /**
+             * Lifecycle status of a Next Best Action on the Entity-UI channel. Unlike the portal
+             * channel there is no `sent` state: an NBA recipient is born at `seen`, the moment the
+             * action is first rendered to an agent.
+             *
+             */
+            Components.Schemas.EntityUiStatus;
             export type Limit = number;
             export type Next = string;
             export type PortalStatus = Components.Schemas.PortalStatus;
@@ -2182,6 +3025,8 @@ declare namespace Paths {
             automation_status?: Parameters.AutomationStatus;
             portal_status?: Parameters.PortalStatus;
             email_status?: Parameters.EmailStatus;
+            email_engagement?: Parameters.EmailEngagement;
+            entity_ui_status?: Parameters.EntityUiStatus;
         }
         namespace Responses {
             export type $200 = Components.Responses.RecipientsResponse;
@@ -2232,9 +3077,11 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Responses.RecipientResponse;
+            export type $403 = Components.Responses.ClientErrorResponse;
             export type $404 = Components.Responses.ClientErrorResponse;
             export type $409 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
+            export type $503 = Components.Responses.ServerErrorResponse;
         }
     }
     namespace RetriggerCampaignAutomations {
@@ -2265,7 +3112,16 @@ declare namespace Paths {
         Components.Schemas.SetupCampaignRequest;
         namespace Responses {
             export type $201 = Components.Responses.SetupCampaignResponse;
-            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $400 = /**
+             * Describes the structure of a client error response, which can be one of several types:
+             * 1. `MessageError`: Contains a 'message' field for general descriptive errors.
+             * 2. `CodeError`: Contains a 'code' field for specific, machine-readable error codes.
+             * 3. `StatusedError`: Contains 'error' and 'status' fields.
+             * The HTTP status code of the response itself (e.g., 400, 404, 409) will always indicate the overall error category.
+             *
+             */
+            Components.Schemas.ClientError | /* Setup 400 for an invalid rule table. */ Components.Schemas.SetupCampaignRuleError;
+            export type $403 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
             export type $504 = Components.Responses.ServerErrorResponse;
         }
@@ -2315,9 +3171,11 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Responses.RecipientResponse;
             export type $400 = Components.Responses.ClientErrorResponse;
+            export type $403 = Components.Responses.ClientErrorResponse;
             export type $404 = Components.Responses.ClientErrorResponse;
             export type $409 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
+            export type $503 = Components.Responses.ServerErrorResponse;
         }
     }
     namespace UpdateRecipientPortalStatus {
@@ -2353,9 +3211,22 @@ export interface OperationMethods {
   /**
    * changeCampaignStatus - changeCampaignStatus
    * 
-   * Change the status of a campaign to a desired status.
+   * Moves a campaign to its next status, depending on its current one:
    * 
-   * The status can be one of the following: active, inactive.
+   * - `draft`: launches the campaign. With a `start_date` still in the future it becomes `scheduled` and
+   *   starts on its own at that time; otherwise it starts now (`activating`, then `active`). Rejected with
+   *   400 if the dates are invalid: `INVALID_CAMPAIGN_DATES` (unparsable), `CAMPAIGN_END_BEFORE_START`
+   *   or `CAMPAIGN_END_IN_PAST`.
+   * - `scheduled`: cancels the schedule; the campaign goes back to `draft` and keeps its dates.
+   * - `active`: stops the campaign (`inactive`) and sets `end_date` to now.
+   * - `inactive`: resets the campaign to `draft` and clears its `start_date` and `end_date`: they
+   *   recorded the previous run, and a past end date would block launching it again.
+   * 
+   * Only launching needs a target and a delivery method (an automation flow, a portal block or a valid
+   * Next Best Action); otherwise it is rejected with 409 `CAMPAIGN_HAS_NO_TARGET` or
+   * `CAMPAIGN_HAS_NO_DELIVERY_METHOD`. A `tariff_change` campaign also needs at least one linked product
+   * recommendation (409 `CAMPAIGN_HAS_NO_PRODUCT_RECOMMENDATIONS`), checked again when a scheduled campaign
+   * starts on its own. Cancelling, stopping and resetting work without them.
    * 
    * Status transition is accompanied by side effects, e.g., automation execution.
    * 
@@ -2387,6 +3258,22 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCampaignPortals.Responses.$200>
   /**
+   * getCampaignsSummary - getCampaignsSummary
+   * 
+   * Returns the automation job progress and portal usage of up to 100 campaigns in one call.
+   * 
+   * - `job` is `null` when the campaign has no automation job or its job could not be loaded.
+   * - `portal_blocks` and `portals` are `null` when the portal configurations could not be loaded.
+   * 
+   * Campaigns that do not exist in the organization (or are deleted) are left out of `results`.
+   * 
+   */
+  'getCampaignsSummary'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.GetCampaignsSummary.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetCampaignsSummary.Responses.$200>
+  /**
    * retriggerCampaignAutomations - retriggerCampaignAutomations
    * 
    * Retrigger automation executions for specific campaign recipients that have failed.
@@ -2396,6 +3283,9 @@ export interface OperationMethods {
    * automation_status 'failed' will be processed. Recipients with other statuses
    * (success, pending, in_progress, cancelled) will be skipped to prevent
    * accidentally retriggering successful or ongoing automations.
+   * 
+   * A campaign that has ended (at its `end_date`, or stopped by hand) starts no new
+   * automation runs: the request is rejected with 400 and message `Campaign has ended`.
    * 
    */
   'retriggerCampaignAutomations'(
@@ -2408,6 +3298,24 @@ export interface OperationMethods {
    * 
    * Creates a `campaign` entity together with its related entities and configurations in a single call.
    * Used by the campaign wizard UI, but not restricted to it.
+   * 
+   * The campaign is created as a `draft`. Its optional `start_date` and `end_date` take effect when it is
+   * launched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,
+   * `CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and
+   * nothing is created.
+   * 
+   * A campaign has exactly one audience: `campaign.target_ids` must contain exactly one target ID.
+   * A request with no or more than one entry fails request validation with 400 (the error points at
+   * `/requestBody/campaign/target_ids`), and nothing is created.
+   * Request validation errors (400) are returned before anything is created.
+   * 
+   * With `channels.portal_widget`, the portal block must exist: otherwise the request fails with 400
+   * `PORTAL_BLOCK_NOT_FOUND` before anything is created. Setup points the block at the new campaign; if a
+   * later step fails, the block is pointed back at the campaign it pointed at before.
+   * 
+   * A new product recommendation can carry a rule table (`rules`). It is validated before anything is created.
+   * Its offer products and prices must exist and not be archived (otherwise 400 `PRODUCT_OR_PRICE_UNAVAILABLE`);
+   * its sources (the current product and price) may be archived or missing.
    * 
    */
   'setupCampaign'(
@@ -2587,9 +3495,22 @@ export interface PathsDictionary {
     /**
      * changeCampaignStatus - changeCampaignStatus
      * 
-     * Change the status of a campaign to a desired status.
+     * Moves a campaign to its next status, depending on its current one:
      * 
-     * The status can be one of the following: active, inactive.
+     * - `draft`: launches the campaign. With a `start_date` still in the future it becomes `scheduled` and
+     *   starts on its own at that time; otherwise it starts now (`activating`, then `active`). Rejected with
+     *   400 if the dates are invalid: `INVALID_CAMPAIGN_DATES` (unparsable), `CAMPAIGN_END_BEFORE_START`
+     *   or `CAMPAIGN_END_IN_PAST`.
+     * - `scheduled`: cancels the schedule; the campaign goes back to `draft` and keeps its dates.
+     * - `active`: stops the campaign (`inactive`) and sets `end_date` to now.
+     * - `inactive`: resets the campaign to `draft` and clears its `start_date` and `end_date`: they
+     *   recorded the previous run, and a past end date would block launching it again.
+     * 
+     * Only launching needs a target and a delivery method (an automation flow, a portal block or a valid
+     * Next Best Action); otherwise it is rejected with 409 `CAMPAIGN_HAS_NO_TARGET` or
+     * `CAMPAIGN_HAS_NO_DELIVERY_METHOD`. A `tariff_change` campaign also needs at least one linked product
+     * recommendation (409 `CAMPAIGN_HAS_NO_PRODUCT_RECOMMENDATIONS`), checked again when a scheduled campaign
+     * starts on its own. Cancelling, stopping and resetting work without them.
      * 
      * Status transition is accompanied by side effects, e.g., automation execution.
      * 
@@ -2625,6 +3546,24 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetCampaignPortals.Responses.$200>
   }
+  ['/v1/campaigns:summary']: {
+    /**
+     * getCampaignsSummary - getCampaignsSummary
+     * 
+     * Returns the automation job progress and portal usage of up to 100 campaigns in one call.
+     * 
+     * - `job` is `null` when the campaign has no automation job or its job could not be loaded.
+     * - `portal_blocks` and `portals` are `null` when the portal configurations could not be loaded.
+     * 
+     * Campaigns that do not exist in the organization (or are deleted) are left out of `results`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.GetCampaignsSummary.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetCampaignsSummary.Responses.$200>
+  }
   ['/v1/campaign/{campaign_id}/automations:retrigger']: {
     /**
      * retriggerCampaignAutomations - retriggerCampaignAutomations
@@ -2636,6 +3575,9 @@ export interface PathsDictionary {
      * automation_status 'failed' will be processed. Recipients with other statuses
      * (success, pending, in_progress, cancelled) will be skipped to prevent
      * accidentally retriggering successful or ongoing automations.
+     * 
+     * A campaign that has ended (at its `end_date`, or stopped by hand) starts no new
+     * automation runs: the request is rejected with 400 and message `Campaign has ended`.
      * 
      */
     'post'(
@@ -2650,6 +3592,24 @@ export interface PathsDictionary {
      * 
      * Creates a `campaign` entity together with its related entities and configurations in a single call.
      * Used by the campaign wizard UI, but not restricted to it.
+     * 
+     * The campaign is created as a `draft`. Its optional `start_date` and `end_date` take effect when it is
+     * launched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,
+     * `CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and
+     * nothing is created.
+     * 
+     * A campaign has exactly one audience: `campaign.target_ids` must contain exactly one target ID.
+     * A request with no or more than one entry fails request validation with 400 (the error points at
+     * `/requestBody/campaign/target_ids`), and nothing is created.
+     * Request validation errors (400) are returned before anything is created.
+     * 
+     * With `channels.portal_widget`, the portal block must exist: otherwise the request fails with 400
+     * `PORTAL_BLOCK_NOT_FOUND` before anything is created. Setup points the block at the new campaign; if a
+     * later step fails, the block is pointed back at the campaign it pointed at before.
+     * 
+     * A new product recommendation can carry a rule table (`rules`). It is validated before anything is created.
+     * Its offer products and prices must exist and not be archived (otherwise 400 `PRODUCT_OR_PRICE_UNAVAILABLE`);
+     * its sources (the current product and price) may be archived or missing.
      * 
      */
     'post'(
@@ -2863,13 +3823,20 @@ export type BaseSystemFieldsRequired = Components.Schemas.BaseSystemFieldsRequir
 export type BaseSystemId = Components.Schemas.BaseSystemId;
 export type BaseTags = Components.Schemas.BaseTags;
 export type BaseUUID = Components.Schemas.BaseUUID;
+export type BulkJobStatus = Components.Schemas.BulkJobStatus;
 export type Campaign = Components.Schemas.Campaign;
+export type CampaignJobExecutionStats = Components.Schemas.CampaignJobExecutionStats;
+export type CampaignJobSummary = Components.Schemas.CampaignJobSummary;
 export type CampaignStatus = Components.Schemas.CampaignStatus;
+export type CampaignSummary = Components.Schemas.CampaignSummary;
+export type CampaignType = Components.Schemas.CampaignType;
+export type CampaignsSummaryRequest = Components.Schemas.CampaignsSummaryRequest;
 export type ClientError = Components.Schemas.ClientError;
 export type CreateRecipientPayload = Components.Schemas.CreateRecipientPayload;
 export type DiscoverCampaignsParams = Components.Schemas.DiscoverCampaignsParams;
 export type DiscoverResult = Components.Schemas.DiscoverResult;
 export type EmailBounceType = Components.Schemas.EmailBounceType;
+export type EmailEngagement = Components.Schemas.EmailEngagement;
 export type EmailStatus = Components.Schemas.EmailStatus;
 export type EntityUiStatus = Components.Schemas.EntityUiStatus;
 export type ExecutionSummaryItem = Components.Schemas.ExecutionSummaryItem;
@@ -2880,11 +3847,17 @@ export type MatchTargetParams = Components.Schemas.MatchTargetParams;
 export type NextBestAction = Components.Schemas.NextBestAction;
 export type PortalRecipientPayload = Components.Schemas.PortalRecipientPayload;
 export type PortalStatus = Components.Schemas.PortalStatus;
+export type ProductRecommendationOffer = Components.Schemas.ProductRecommendationOffer;
+export type ProductRecommendationOfferGroup = Components.Schemas.ProductRecommendationOfferGroup;
+export type ProductRecommendationRule = Components.Schemas.ProductRecommendationRule;
 export type Recipient = Components.Schemas.Recipient;
 export type RetriggerAutomationsRequest = Components.Schemas.RetriggerAutomationsRequest;
 export type RetriggerAutomationsResult = Components.Schemas.RetriggerAutomationsResult;
 export type ServerError = Components.Schemas.ServerError;
 export type SetupCampaignRequest = Components.Schemas.SetupCampaignRequest;
+export type SetupCampaignRuleError = Components.Schemas.SetupCampaignRuleError;
+export type SetupExistingProductRecommendation = Components.Schemas.SetupExistingProductRecommendation;
+export type SetupNewProductRecommendation = Components.Schemas.SetupNewProductRecommendation;
 export type SetupTariffChangeCampaignRequest = Components.Schemas.SetupTariffChangeCampaignRequest;
 export type SetupTariffChangeCampaignResponse = Components.Schemas.SetupTariffChangeCampaignResponse;
 export type Target = Components.Schemas.Target;

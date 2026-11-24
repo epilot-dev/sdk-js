@@ -1,5 +1,32 @@
 # @epilot/customer-portal-client
 
+## 0.56.0
+
+### Minor Changes
+
+- Export: `template` on `PortalDataExportColumn` (the column value as a Handlebars template, rendered with the block template engine; a single-variable template keeps typed formatters) and a column-level `address_field`; `source` is no longer required (older single-attribute shape, still accepted)
+
+## 0.55.0
+
+### Minor Changes
+
+- Portal config: `record_access`, the portal's rules for which records portal users see in lists, per record type (`RecordAccess`, `RecordAccessRule`, `RecordAccessCondition`, `RecordAccessRelationAttributeCondition`, `RecordAccessName`), and the read-only `record_access_defaults` with the built-in rules (`RecordAccessDefaults`)
+
+## 0.54.0
+
+### Minor Changes
+
+- Export: `format` (`csv` / `xlsx`) on `createExport` and on the `getExport` job status, and `targets` / `match_any_targets` in the export `search`
+- Regenerated from the Customer Portal API: removed `getAllOrders`, `getAllOpportunities`, `getAllRequests`, `getExternalLinks`, `getResolvedExternalLink`, `getResolvedExternalLinkV3`, `getEntityActivityFeed`, `getSearchResultsForOpportunities` and `getSearchableAttributesForOpportunities` (the API no longer serves them); added `getPortalUserRole`, `listPortalRoles`, `resendTemporaryPasswordLink`, `setPartnerRole` and `validatePortalConfig`
+
+## 0.53.0
+
+### Minor Changes
+
+- `x-epilot-agent` annotations on the operations that change a portal's live configuration (`effect: config` on `upsertPortal`, `putPortalConfig`, `publishPortalRevision`, `createPortalRevision`, `clonePortalConfig`, the page and block writes, the email template and widget upserts and `putMobileConfig`; `effect: destructive` on `swapPortalConfig`), so agents ask a person before calling them
+- Metering pass-throughs: `getContractMeters`, `getMeter`, `getMeterCounters`, `getMeterCounter`, `getAllowedMeterReading`, `createMeterReadings`, with `MeterCounter` and `PortalMeterReading`
+- `cognito_details` and the page `is_system` flag are documented as server-managed
+
 ## 0.52.1
 
 ### Patch Changes

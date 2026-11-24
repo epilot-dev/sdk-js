@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Pricing API",
-    "description": "The `pricing-api` hub sets the foundations for the following Pricing APIs:\n\n### Order API\nThis api enables the management of orders in epilot 360, providing features such as:\n - Automatic calculation of totals and price breakdowns for taxes on the Order entity\n - Product and pricing data validation\n\n### Shopping Cart API\nUsed to interact with a cart during a customer's checkout session, providing:\n - An unified data model to model a Shopping Cart\n - Product and pricing data validation\n - Checkout a cart into an order or quote\n\n### Catalog API\nProvides a way to query the entire catalog of products and prices.\n\n### Availability API\nProvides endpoints for querying products availability by a set of predefined dimensions.\n\n### Spot Market API\nProvides endpoints to fetch (historic) spot market price data.\n\n### External Integrations API\nProvides endpoints for external integrations. E.g. GetAG.\n\n### External Catalog API\nProvides endpoints for external catalog.\n\n### Product Recommendations API\nProvides endpoints for product recommendations.\n\n### Conditional Pricing API\nProvides endpoints for resolving conditional Products, Prices and Coupons, and for authoring the conditions they vary by.\n\nConditional Pricing reads every date in the organization's timezone, and reports every `as_of`\nin that timezone's offset. Organizations have no timezone setting yet, so every organization\nuses `Europe/Berlin`.\n",
-    "version": "1.2.1",
+    "description": "The `pricing-api` hub sets the foundations for the following Pricing APIs:\n\n### Order API\nThis api enables the management of orders in epilot 360, providing features such as:\n - Automatic calculation of totals and price breakdowns for taxes on the Order entity\n - Product and pricing data validation\n\n### Shopping Cart API\nUsed to interact with a cart during a customer's checkout session, providing:\n - An unified data model to model a Shopping Cart\n - Product and pricing data validation\n - Checkout a cart into an order or quote\n\n### Catalog API\nProvides a way to query the entire catalog of products and prices.\n\n### Availability API\nProvides endpoints for querying products availability by a set of predefined dimensions.\n\n### Spot Market API\nProvides endpoints to fetch (historic) spot market price data.\n\n### External Integrations API\nProvides endpoints for external integrations. E.g. GetAG.\n\n### External Catalog API\nProvides endpoints for external catalog.\n\n### Product Recommendations API\nProvides endpoints for product recommendations.\n\n### Grid Operators API\nProvides endpoints for finding a grid operator's code number by name, and its name by code number.\n\n### Conditional Pricing API\nProvides endpoints for resolving conditional Products, Prices and Coupons, and for authoring the conditions they vary by.\n\nConditional Pricing reads every date in the organization's timezone, and reports every `as_of`\nin that timezone's offset. Organizations have no timezone setting yet, so every organization\nuses `Europe/Berlin`.\n\n### Data sources\nGrid operator data contains data from the Marktstammdatenregister of the Bundesnetzagentur\n(https://www.marktstammdatenregister.de), licensed under the Datenlizenz Deutschland – Namensnennung –\nVersion 2.0 (https://www.govdata.de/dl-de/by-2-0).\n",
+    "version": "1.3.0",
     "termsOfService": "https://epilot.cloud/agb",
     "contact": {
       "name": "Support",
@@ -47,6 +47,10 @@
     {
       "name": "Product Recommendations API",
       "description": "Provides endpoints for product recommendations.\n"
+    },
+    {
+      "name": "Grid Operators API",
+      "description": "Provides endpoints for finding a grid operator's code number by name, and its name by code number.\n"
     },
     {
       "name": "Conditional Pricing API",
@@ -101,6 +105,7 @@
         "External Catalog API",
         "Product Recommendations API",
         "Promo Codes API",
+        "Grid Operators API",
         "Conditional Pricing API"
       ]
     },
@@ -2481,6 +2486,14 @@
                     "street": "Media Park",
                     "street_number": "8a"
                   }
+                },
+                "Search providers excluding closed distribution grids": {
+                  "value": {
+                    "type": "power",
+                    "postal_code": "66111",
+                    "city": "Saarbrücken",
+                    "grid_filter": "exclude_closed"
+                  }
                 }
               }
             }
@@ -3535,6 +3548,12 @@
                   "value": {
                     "contract_id": "98ffca40-46ab-4288-af10-a478893b2aa2"
                   }
+                },
+                "Search product recommendations by campaign and contract": {
+                  "value": {
+                    "campaign_id": "3f1c7d2e-9a4b-4c6d-8e2f-1a2b3c4d5e6f",
+                    "contract_id": "98ffca40-46ab-4288-af10-a478893b2aa2"
+                  }
                 }
               }
             }
@@ -3616,6 +3635,119 @@
         }
       }
     },
+    "/v1/grid-operators:search": {
+      "post": {
+        "description": "Finds the active grid operators of one commodity whose name contains every word of `name`,\nignoring case, and answers the first 10 by name. Type more of the name to narrow the results.\nA retired code number is never answered.\n",
+        "operationId": "$searchGridOperators",
+        "summary": "$searchGridOperators",
+        "tags": [
+          "Grid Operators API"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GridOperatorSearchRequest"
+              },
+              "example": {
+                "commodity": "power",
+                "name": "westnetz"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The first 10 matching grid operators by name, possibly none",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GridOperatorResults"
+                },
+                "example": {
+                  "results": [
+                    {
+                      "code_number": "4045458000000",
+                      "name": "Westnetz GmbH",
+                      "closed_distribution_grid": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request, e.g. a `name` with no word in it",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/grid-operators:lookup": {
+      "post": {
+        "description": "Answers the grid operator each code number is assigned to, retired code numbers included,\nin the order asked and each once. A code number the list doesn't hold is missing from `results`.\n",
+        "operationId": "$lookupGridOperators",
+        "summary": "$lookupGridOperators",
+        "tags": [
+          "Grid Operators API"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GridOperatorLookupRequest"
+              },
+              "example": {
+                "commodity": "power",
+                "code_numbers": [
+                  "4045458000000",
+                  "9900000000001"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The grid operators the list holds for the code numbers asked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GridOperatorResults"
+                },
+                "example": {
+                  "results": [
+                    {
+                      "code_number": "4045458000000",
+                      "name": "Westnetz GmbH",
+                      "closed_distribution_grid": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request, e.g. no code numbers, more than 100, or one that is not 13 digits",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/conditional-pricing/{slug}/condition-sets": {
       "get": {
         "description": "Returns the condition sets built in for one conditional entity type, ready to copy into that schema's `conditions` array. Read-only, and the same for every organization.",
@@ -3659,6 +3791,70 @@
           },
           "403": {
             "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/conditional-pricing/{slug}/conditions:usage": {
+      "get": {
+        "description": "Returns, for each condition the schema declares and each option a `select` condition\ndeclares, how many variants pin it, and for the schema as a whole how many conditional\nentities and variants it has. An entity builder reads it when it loads a schema:\n\n- **Remove condition** is unlocked when the condition's `variants` is 0.\n- Removing a `select` option is unlocked when that option's `variants` is 0.\n- Turning conditional pricing off for the schema is locked while `total.entities` or\n  `total.variants` is above 0.\n- A condition removed while variants still pin it is listed in `undeclared`. Declaring it\n  again with the same `name`, `type`, `format` and `options` makes those variants\n  resolvable once more. Labels are not known and are entered again.\n\nRemoving a condition or option that variants pin makes those variants unresolvable. The\ncounts are of what the search index holds, which lags the stored variants by up to about 90\nseconds, and a variant can be written between this read and a schema save. A variant the\nindex does not hold is not counted.\n",
+        "operationId": "$getConditionUsage",
+        "summary": "$getConditionUsage",
+        "tags": [
+          "Conditional Pricing API"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "The conditional entity type whose schema to report on",
+            "schema": {
+              "$ref": "#/components/schemas/ConditionalEntitySlug"
+            },
+            "required": true,
+            "example": "price"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The schema's condition usage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionUsage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request, e.g. the slug names no conditional entity type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`SCHEMA_NOT_FOUND`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5895,7 +6091,7 @@
       },
       "ConditionType": {
         "type": "string",
-        "description": "The kind of value a condition holds, which decides how a pinned value is matched against a\nresolve context.\n\n- `string`: an arbitrary string, matched exactly and case-sensitively\n- `number`: a numeric value\n- `date`: a single date\n- `daterange`: a window with a from and an until timestamp; either end may be left open\n- `boolean`: a true/false value\n- `select`: one of the values declared in `options`, which is always a closed vocabulary\n- `location`: a geographic value, shaped by `format`\n",
+        "description": "The kind of value a condition holds, which decides how a pinned value is matched against a\nresolve context.\n\n- `string`: an arbitrary string, matched exactly and case-sensitively\n- `number`: a numeric value\n- `date`: a single date\n- `daterange`: a window from a `from` to an `until`, both included; either end may be left open\n- `boolean`: a true/false value\n- `select`: one of the values declared in `options`, which is always a closed vocabulary\n- `location`: a geographic value, shaped by `format`\n",
         "enum": [
           "string",
           "number",
@@ -5904,6 +6100,16 @@
           "boolean",
           "select",
           "location"
+        ]
+      },
+      "LocationFormat": {
+        "type": "string",
+        "description": "The value shape of a `location` condition. Absent for every other type.\n\n- `postal_code`: a postal code\n- `postal_code_city`: a postal code and a city\n- `power_grid_operator`: the code number of the power grid operator an address is connected to\n- `gas_grid_operator`: the code number of the gas grid operator an address is connected to\n",
+        "enum": [
+          "postal_code",
+          "postal_code_city",
+          "power_grid_operator",
+          "gas_grid_operator"
         ]
       },
       "ConditionDefinition": {
@@ -5968,12 +6174,7 @@
             ]
           },
           "format": {
-            "type": "string",
-            "description": "The value shape of a `location` condition. Absent for every other type.",
-            "enum": [
-              "postal_code",
-              "postal_code_city"
-            ]
+            "$ref": "#/components/schemas/LocationFormat"
           }
         }
       },
@@ -6039,6 +6240,198 @@
               "PROVISIONING",
               "ACTIVE"
             ]
+          }
+        }
+      },
+      "ConditionUsage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "total",
+          "conditions",
+          "undeclared"
+        ],
+        "properties": {
+          "total": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "variants",
+              "entities"
+            ],
+            "properties": {
+              "variants": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "The schema's variants in the search index."
+              },
+              "entities": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "The schema's entities flagged `is_conditional`, soft-deleted ones included, whether or\nnot the caller may read them.\n"
+              }
+            }
+          },
+          "conditions": {
+            "type": "array",
+            "description": "One entry per condition the schema declares, in its order, zeros included.",
+            "items": {
+              "$ref": "#/components/schemas/DeclaredConditionUsage"
+            }
+          },
+          "undeclared": {
+            "type": "array",
+            "description": "The conditions variants pin that the schema no longer declares, one entry per name and\ntype, most pinned first, at most 100. Empty when there are none. Each entry carries what\ndeclaring the condition again needs, so that its variants resolve once more.\n",
+            "items": {
+              "$ref": "#/components/schemas/UndeclaredConditionUsage"
+            }
+          }
+        },
+        "example": {
+          "total": {
+            "variants": 1252,
+            "entities": 38
+          },
+          "conditions": [
+            {
+              "name": "delivery_area",
+              "variants": 1240,
+              "entities": 37
+            },
+            {
+              "name": "customer_type",
+              "variants": 12,
+              "entities": 3,
+              "options": [
+                {
+                  "value": "private",
+                  "variants": 12
+                },
+                {
+                  "value": "business",
+                  "variants": 0
+                }
+              ],
+              "undeclared_options": []
+            },
+            {
+              "name": "offer_period",
+              "variants": 0,
+              "entities": 0
+            }
+          ],
+          "undeclared": [
+            {
+              "name": "legacy_customer_type",
+              "type": "select",
+              "variants": 1,
+              "entities": 1,
+              "options": [
+                {
+                  "value": "private",
+                  "variants": 1
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "DeclaredConditionUsage": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "A `select` condition always carries `options` and `undeclared_options`. A condition of any\nother type carries neither.\n",
+        "required": [
+          "name",
+          "variants",
+          "entities"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "customer_type"
+          },
+          "variants": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many variants pin the condition. Exact."
+          },
+          "entities": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many entities those variants belong to. Approximate above about 3,000, so it should\nnot decide a lock.\n"
+          },
+          "options": {
+            "type": "array",
+            "description": "One entry per option the condition declares, in its order, zeros included.",
+            "items": {
+              "$ref": "#/components/schemas/ConditionOptionUsage"
+            }
+          },
+          "undeclared_options": {
+            "type": "array",
+            "description": "The values variants pin that the condition no longer declares, most pinned first, at\nmost 100. Empty when there are none. Listing a value again makes its variants resolvable.\n",
+            "items": {
+              "$ref": "#/components/schemas/ConditionOptionUsage"
+            }
+          }
+        }
+      },
+      "UndeclaredConditionUsage": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "A condition variants pin under this name and type that the schema does not declare. A name\npinned under two types is listed once for each.\n",
+        "required": [
+          "name",
+          "type",
+          "variants",
+          "entities"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "legacy_customer_type"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ConditionType"
+          },
+          "format": {
+            "$ref": "#/components/schemas/LocationFormat"
+          },
+          "variants": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many variants pin the condition under this type."
+          },
+          "entities": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many entities those variants belong to. Approximate above about 3,000."
+          },
+          "options": {
+            "type": "array",
+            "description": "For a `select` only: the values variants pin, most pinned first, at most 100. Declaring\nthem as the condition's options makes the variants pinning them resolvable.\n",
+            "items": {
+              "$ref": "#/components/schemas/ConditionOptionUsage"
+            }
+          }
+        }
+      },
+      "ConditionOptionUsage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "value",
+          "variants"
+        ],
+        "properties": {
+          "value": {
+            "type": "string",
+            "example": "private"
+          },
+          "variants": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many variants pin the value. Exact."
           }
         }
       },
@@ -6212,7 +6605,7 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/ContextConditionValue"
         },
-        "description": "The situation to resolve for: a flat map keyed by condition name. A condition left out\nmatches only variants that leave it unpinned; an empty map therefore returns the `default`\nvariant. A key naming no condition the schema declares is ignored, as if it were left out.\n\nEach value is an exact value, typed by its condition, or a single-operator predicate:\n\n- `{ \"lt\": v }`, `{ \"lte\": v }`, `{ \"gt\": v }`, `{ \"gte\": v }` — order, against a `number`\n  or `date` condition\n- `{ \"in\": [...] }` — membership, against a `string`, `select` or `number` condition\n- `{ \"between\": \"2026-03-01\" }` — `daterange` containment, which a plain date also means\n- `{ \"exists\": true }` — pinned to any value; `{ \"exists\": false }` — left unpinned\n\nA `date` or `daterange` value is an RFC 3339 date or date-time. A date is midnight of that day\nin the organization's timezone and a date-time keeps the moment it names, so\n`2026-03-31T23:30:00Z`, already 1 April in Berlin, falls inside a range pinned from\n`2026-04-01`.\n\nAn `in` list carries at most 50,000 values. A `string` or `select` matches exactly and\ncase-sensitively. A `location` of format\n`postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying\n`postal_code` and `city`, named as an entity address names them, whose city is compared\ncase- and whitespace-insensitively.\n\n`default` and names beginning with `_` are reserved and cannot be supplied.\n",
+        "description": "The situation to resolve for: a flat map keyed by condition name. A condition left out\nmatches only variants that leave it unpinned; an empty map therefore returns the `default`\nvariant. A key naming no condition the schema declares is ignored, as if it were left out.\n\nEach value is an exact value, typed by its condition, or a single-operator predicate:\n\n- `{ \"lt\": v }`, `{ \"lte\": v }`, `{ \"gt\": v }`, `{ \"gte\": v }` — order, against a `number`\n  or `date` condition\n- `{ \"in\": [...] }` — membership, against a `string`, `select` or `number` condition, or a\n  `location` of format `power_grid_operator` or `gas_grid_operator`\n- `{ \"between\": \"2026-03-01\" }` — `daterange` containment, which a plain date also means\n- `{ \"exists\": true }` — pinned to any value; `{ \"exists\": false }` — left unpinned\n\nA `date` or `daterange` value is an RFC 3339 date or date-time. A date is midnight of that day\nin the organization's timezone and a date-time keeps the moment it names, so\n`2026-03-31T23:30:00Z`, already 1 April in Berlin, falls inside a range pinned from\n`2026-04-01`.\n\nAn `in` list carries at most 50,000 values. A `string` or `select` matches exactly and\ncase-sensitively. A `location` of format\n`postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying\n`postal_code` and `city`, named as an entity address names them, whose city is compared\ncase- and whitespace-insensitively. One of format `power_grid_operator` or `gas_grid_operator`\nis the grid operator's code number, a string of exactly 13 digits, matched exactly; it is\nnever looked up, so the caller supplies it, and a context without it gets only the variants\nthat pin no grid operator.\n\n`default` and names beginning with `_` are reserved and cannot be supplied.\n",
         "example": {
           "postal_code": "46045",
           "consumption": {
@@ -6359,13 +6752,13 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/PinnedConditionValue"
         },
-        "description": "The situation this variant applies to: a flat map keyed by condition name. A condition left\nout is a wildcard, which is what makes adding a condition to a schema non-breaking for\nexisting variants.\n\nExact values only; predicates belong to reads. Values are stored canonicalized for their\ntype: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`\nand `until` in that form where an empty string is an open end, a `location` of format\n`postal_code` the postal code itself and one of format `postal_code_city` an object carrying\n`postal_code` and `city`.\n\nA date-only `date` or `daterange` value is midnight of that day in the organization's\ntimezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`.\n\n`default` and names beginning with `_` are reserved; use the request's `default` flag.\n",
+        "description": "The situation this variant applies to: a flat map keyed by condition name. A condition left\nout is a wildcard, which is what makes adding a condition to a schema non-breaking for\nexisting variants.\n\nExact values only; predicates belong to reads. Values are stored canonicalized for their\ntype: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`\nand `until` in that form where an empty string is an open end, a `location` of format\n`postal_code` the postal code itself, one of format `postal_code_city` an object carrying\n`postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` an\nobject carrying the grid operator's code number alone. A grid operator is written as its code\nnumber, a string of exactly 13 digits whatever its prefix, or as the object a read returns;\nonly `code_number` is read from the object.\n\nA date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the\norganization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only\n`until` is the last millisecond of that day: `2026-04-30` is stored as\n`2026-04-30T21:59:59.999Z`.\n\n`default` and names beginning with `_` are reserved; use the request's `default` flag.\n",
         "example": {
           "postal_code": "46045"
         }
       },
       "PinnedConditionValue": {
-        "description": "One condition's exact value. Which of these shapes a condition takes is set by its type in the\nentity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.\n",
+        "description": "One condition's exact value. Which of these shapes a condition takes is set by its type in the\nentity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A\n`location` of format `power_grid_operator` or `gas_grid_operator` is read as a\n`PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13\ndigits.\n",
         "anyOf": [
           {
             "type": "string"
@@ -6381,27 +6774,55 @@
           },
           {
             "$ref": "#/components/schemas/PostalCodeCity"
+          },
+          {
+            "$ref": "#/components/schemas/PinnedGridOperator"
           }
         ]
+      },
+      "PinnedGridOperator": {
+        "type": "object",
+        "description": "The value of a `location` condition of format `power_grid_operator` or `gas_grid_operator`:\nthe grid operator's code number, with the name and closed distribution grid flag the list\nPricing API bundles assigns it, retired or not. A write reads only `code_number` and ignores\nthe rest.\n",
+        "required": [
+          "code_number"
+        ],
+        "properties": {
+          "code_number": {
+            "type": "string",
+            "description": "The 13-digit code number, a BDEW or DVGW code or a GLN.",
+            "example": "4045458000000"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name assigned to the code number. Left out for a code number the list doesn't hold.",
+            "example": "Westnetz GmbH"
+          },
+          "closed_distribution_grid": {
+            "type": "boolean",
+            "description": "Whether the grid is a closed distribution grid. Left out where that is unknown.",
+            "example": false
+          }
+        }
       },
       "PostalCodeFilter": {
         "type": "object",
         "additionalProperties": false,
-        "description": "A listing filter on a `location` of format `postal_code_city` by its postal code alone: it\nmatches the variants pinned to that postal code, whatever their city. Only a listing filter\ntakes it; a resolve context must name the city too.\n",
-        "required": [
-          "postal_code"
-        ],
+        "description": "A `location` of format `postal_code` or `postal_code_city` named in a variant listing filter.\nAs the filter's value, it may name part of the location: `postal_code` alone matches every\npostal code starting with it, so `66` matches `66636` and a whole postal code matches only\nitself; `city` alone, on `postal_code_city` only, matches that city in any postal code,\nregardless of case; both must match where both are given.\n\nIn an `in` or `not_in` list it names one whole location: `postal_code` and `city` on\n`postal_code_city`, a bare postal code string on `postal_code`. A partial value there, or a\npart the format does not have, is refused with `CONTEXT_FORMAT_INVALID`.\n",
         "properties": {
           "postal_code": {
             "type": "string",
-            "example": "10115"
+            "example": "66"
+          },
+          "city": {
+            "type": "string",
+            "example": "Tholey"
           }
         }
       },
       "ConditionDateRange": {
         "type": "object",
         "additionalProperties": false,
-        "description": "The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and a date\nis midnight of that day in the organization's timezone. A bound that is absent, `null` or an\nempty string is an open end; stored, an open end is an empty string.\n",
+        "description": "The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and both\nare included. A date names the whole day in the organization's timezone: as `from` it starts\nat midnight, as `until` it runs to the day's last millisecond. So\n`{ \"from\": \"2026-10-01\", \"until\": \"2026-10-31\" }` is all of October, and a window may start\nand end on the same day. A date-time names one moment. A bound that is absent, `null` or an\nempty string is an open end; stored, an open end is an empty string.\n",
         "properties": {
           "from": {
             "type": "string",
@@ -6411,7 +6832,7 @@
           "until": {
             "type": "string",
             "nullable": true,
-            "example": "2027-01-01"
+            "example": "2026-12-31"
           }
         }
       },
@@ -6521,6 +6942,35 @@
                     },
                     {
                       "type": "number"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PostalCodeFilter"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "not_in"
+            ],
+            "properties": {
+              "not_in": {
+                "type": "array",
+                "description": "Exclusion, accepted only by a variant listing filter: matches a variant pinning none of\nthe values, and one leaving the condition unpinned. A resolve context carrying it is\nrefused with `OPERATOR_UNSUPPORTED`.\n",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PostalCodeFilter"
                     }
                   ]
                 }
@@ -7133,7 +7583,7 @@
           },
           "sort": {
             "type": "string",
-            "description": "`conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number`,\n`date` or `location` pin. A location orders by postal code, then by city ignoring case.\n`variant_id:asc` is always appended, so the order is total.\n",
+            "description": "`conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number`,\n`date` or `location` pin. A postal code location orders by postal code, then by city\nignoring case. A grid operator location orders by the grid operator's name in dictionary\norder, ignoring case and accents (`Ü` sorts as `U`, `ß` as `ss`); a code number with no\nknown name sorts last in both directions, as does a variant that does not pin the\ncondition. `variant_id:asc` is always appended, so the order is total.\n",
             "example": "conditions.postal_code:asc"
           },
           "from": {
@@ -7170,7 +7620,7 @@
           },
           "sort": {
             "type": "string",
-            "description": "`conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number`,\n`date` or `location` pin. A location orders by postal code, then by city ignoring case.\n`variant_id:asc` is always appended, so the order is total.\n",
+            "description": "`conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number`,\n`date` or `location` pin. A postal code location orders by postal code, then by city\nignoring case. A grid operator location orders by the grid operator's name in dictionary\norder, ignoring case and accents (`Ü` sorts as `U`, `ß` as `ss`); a code number with no\nknown name sorts last in both directions, as does a variant that does not pin the\ncondition. `variant_id:asc` is always appended, so the order is total.\n",
             "example": "conditions.postal_code:asc"
           },
           "from": {
@@ -7209,7 +7659,7 @@
             }
           ]
         },
-        "description": "Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the\nsame exact values and predicates a resolve context does. A condition left out is not\nfiltered on. An `in` list carries at most 50,000 values.\n\nA variant matches only where it pins the condition — unlike `:resolve`, where an unpinned\ncondition matches any value. `{ \"exists\": false }` selects the variants that leave it\nunpinned.\n\nA `location` of format `postal_code_city` also takes its postal code alone,\n`{ \"postal_code\": \"10115\" }`, matching that postal code in any city.\n\n`default` is accepted as an exact boolean and takes no predicate: `true` selects the\nentity's fallback variant, `false` every variant that is not it. Names beginning with `_`\nare reserved.\n",
+        "description": "Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the\nsame exact values and predicates a resolve context does, plus `not_in`. A condition left\nout is not filtered on. An `in` or `not_in` list carries at most 50,000 values.\n\nA variant matches only where it pins the condition — unlike `:resolve`, where an unpinned\ncondition matches any value. `{ \"exists\": false }` selects the variants that leave it\nunpinned.\n\n`{ \"not_in\": [...] }` is the one exception: it lists the variants pinning none of the\nvalues **and** those leaving the condition unpinned. It applies where `in` does.\n\nA `location` of format `power_grid_operator` or `gas_grid_operator` takes `in` and\n`not_in`, so one filter lists the variants pinned to any, or none, of several code numbers,\neach a string of exactly 13 digits.\n\nA `location` of format `postal_code` or `postal_code_city` takes four forms a resolve\ncontext does not:\n\n- `{ \"postal_code\": \"66\" }` matches every postal code starting with `66`. Postal codes\n  are fixed-length, so a whole postal code matches only itself.\n- `{ \"city\": \"Tholey\" }`, on `postal_code_city` only, matches that city in any postal\n  code, regardless of case. `{ \"postal_code\": \"66\", \"city\": \"Tholey\" }` needs both.\n- `{ \"in\": [...] }` and `{ \"not_in\": [...] }` take whole values only, each matched as the exact value is:\n  `{ \"postal_code\": \"66636\", \"city\": \"Tholey\" }` objects on `postal_code_city`, postal\n  code strings on `postal_code`. A postal code or city alone in a list is refused.\n\n`default` is accepted as an exact boolean and takes no predicate: `true` selects the\nentity's fallback variant, `false` every variant that is not it. Names beginning with `_`\nare reserved.\n",
         "example": {
           "postal_code": "46045",
           "consumption": {
@@ -7790,6 +8240,93 @@
               }
             ],
             "description": "Why this item failed, present only with `outcome: error`:\n`LAST_VERSION_UNDELETABLE`, `VARIANT_UNPINNED`, the codes a condition tuple that cannot\nbe canonicalized raises, `IDENTIFIER_INVALID`, `VALID_FROM_INVALID`, `WRITE_CONFLICT`,\nand the per-item `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH`, `ENTITY_SOFT_DELETED` and\n`ENTITY_NOT_CONDITIONAL`. A missing variant or version is `skipped` instead.\n"
+          }
+        }
+      },
+      "GridOperatorCommodity": {
+        "type": "string",
+        "description": "The commodity whose grid operators to search or look up. Power and gas code numbers are separate lists.",
+        "enum": [
+          "power",
+          "gas"
+        ]
+      },
+      "GridOperatorSearchRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "commodity",
+          "name"
+        ],
+        "properties": {
+          "commodity": {
+            "$ref": "#/components/schemas/GridOperatorCommodity"
+          },
+          "name": {
+            "type": "string",
+            "description": "Words the grid operator's name must all contain, ignoring case. At least one word.",
+            "example": "westnetz"
+          }
+        }
+      },
+      "GridOperatorLookupRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "commodity",
+          "code_numbers"
+        ],
+        "properties": {
+          "commodity": {
+            "$ref": "#/components/schemas/GridOperatorCommodity"
+          },
+          "code_numbers": {
+            "type": "array",
+            "description": "1 to 100 code numbers of 13 digits each.",
+            "items": {
+              "type": "string",
+              "example": "4045458000000"
+            }
+          }
+        }
+      },
+      "GridOperatorResults": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GridOperator"
+            }
+          }
+        }
+      },
+      "GridOperator": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "A grid operator as the list Pricing API bundles names it, built from the Marktstammdatenregister,\nbdew-codes.de (power) and DVGW (gas).\n",
+        "required": [
+          "code_number",
+          "name"
+        ],
+        "properties": {
+          "code_number": {
+            "type": "string",
+            "description": "The 13-digit code number, a BDEW or DVGW code or a GLN.",
+            "example": "4045458000000"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name assigned to the code number.",
+            "example": "Westnetz GmbH"
+          },
+          "closed_distribution_grid": {
+            "type": "boolean",
+            "description": "Whether the grid is a closed distribution grid. Left out where that is unknown."
           }
         }
       },
@@ -12020,6 +12557,16 @@
             "description": "The street number to search for providers",
             "type": "string",
             "nullable": true
+          },
+          "grid_filter": {
+            "description": "Which grids the search answers with, by whether they are closed distribution grids\n(geschlossene Verteilernetze), such as a railway's grid at a station.\n\n- `all`: every grid, closed distribution grids included.\n- `exclude_closed`: closed distribution grids are left out. An address inside one gets\n  no provider, the same answer as an address with no grid for that commodity.\n- `only_closed`: only closed distribution grids. An address outside one gets no provider.\n",
+            "type": "string",
+            "enum": [
+              "all",
+              "exclude_closed",
+              "only_closed"
+            ],
+            "default": "all"
           }
         },
         "required": [
@@ -15925,6 +16472,11 @@
             "type": "string",
             "description": "The contract id to be used as source for the recommendation"
           },
+          "campaign_id": {
+            "type": "string",
+            "description": "The tariff change campaign the offers are requested for. Used together with `contract_id`:\nthe offers come from the rule table of the campaign's product recommendation, and only when\nthe campaign is active and the contract or its contact is in the campaign's audience.\nOtherwise the result is empty.\n\nOnly applies to organizations with campaign-scoped offers enabled; ignored otherwise.\n",
+            "example": "3f1c7d2e-9a4b-4c6d-8e2f-1a2b3c4d5e6f"
+          },
           "filters": {
             "$ref": "#/components/schemas/AvailabilityFilters"
           }
@@ -15984,9 +16536,10 @@
               },
               "format": {
                 "type": "string",
+                "description": "How the price difference to the current item is shown: as a percentage (e.g. \"12.5%\") or as an\nabsolute amount (e.g. \"€12.00\").\n",
                 "enum": [
                   "absolute",
-                  "relative"
+                  "percentage"
                 ]
               },
               "only_if_better": {
@@ -16024,6 +16577,77 @@
             }
           }
         }
+      },
+      "ProductRecommendationRuleSource": {
+        "type": "object",
+        "description": "The source tariff (product + price) of a product recommendation rule.",
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "description": "The product of the source tariff"
+          },
+          "price_id": {
+            "type": "string",
+            "description": "The price of the source tariff"
+          }
+        },
+        "required": [
+          "product_id",
+          "price_id"
+        ]
+      },
+      "ProductRecommendationOfferGroup": {
+        "description": "A group of offers within a product recommendation rule: an `Offer` with an `id` and required `items`.\nWithout `target_id`, the offers of the group are for everyone on the rule's source tariff;\nwith `target_id`, only for members of that target group.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Offer"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique id of the offer group within its rule"
+              }
+            },
+            "required": [
+              "id",
+              "items"
+            ]
+          }
+        ]
+      },
+      "ProductRecommendationRule": {
+        "type": "object",
+        "description": "A row of the rule table of a product recommendation: customers whose contract is on the `source`\ntariff are offered the items of the rule's `offer_groups`.\n\nThere is at most one rule per source tariff.\n",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique id of the rule within its product recommendation"
+          },
+          "source": {
+            "description": "The source tariff (product + price) this rule applies to.\n\n`null` marks the fallback rule (\"any other product\"): it applies only when no rule matches\nthe contract's current tariff. A product recommendation has at most one fallback rule.\n",
+            "type": "object",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductRecommendationRuleSource"
+              }
+            ]
+          },
+          "offer_groups": {
+            "type": "array",
+            "description": "The offers of the rule, grouped by target group",
+            "items": {
+              "$ref": "#/components/schemas/ProductRecommendationOfferGroup"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "offer_groups"
+        ]
       },
       "ProductRecommendation": {
         "allOf": [
@@ -16068,8 +16692,64 @@
           },
           "offers": {
             "type": "array",
+            "description": "Legacy single-source offers; tariff change campaigns use `rules`.",
             "items": {
               "$ref": "#/components/schemas/Offer"
+            }
+          },
+          "rules": {
+            "type": "array",
+            "description": "The rule table of the product recommendation: one rule per source tariff, plus at most one\nfallback rule (`source: null`) that applies only when no rule matches the contract's current tariff.\n",
+            "items": {
+              "$ref": "#/components/schemas/ProductRecommendationRule"
+            }
+          },
+          "source_products": {
+            "type": "object",
+            "description": "Products of all rule sources. Derived from `rules`; kept in sync by whoever saves the recommendation.\n",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityRelation"
+                }
+              }
+            }
+          },
+          "source_prices": {
+            "type": "object",
+            "description": "Prices of all rule sources. Derived from `rules`; kept in sync by whoever saves the recommendation.\n",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityRelation"
+                }
+              }
+            }
+          },
+          "offer_products": {
+            "type": "object",
+            "description": "Products of all offer items in the rules. Derived from `rules`; kept in sync by whoever saves the recommendation.\n",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityRelation"
+                }
+              }
+            }
+          },
+          "offer_prices": {
+            "type": "object",
+            "description": "Prices of all offer items in the rules. Derived from `rules`; kept in sync by whoever saves the recommendation.\n",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityRelation"
+                }
+              }
             }
           }
         }

@@ -32,13 +32,26 @@ const { data } = await entityMappingClient.storeConfig(...)
 - [`storeNewVersion`](#storenewversion)
 - [`getConfigVersion`](#getconfigversion)
 - [`executeMapping`](#executemapping)
+- [`validateMapping`](#validatemapping)
+- [`validateMappingFlow`](#validatemappingflow)
 - [`searchConfigs`](#searchconfigs)
-- [`queryMappingHistory`](#querymappinghistory)
 - [`executeRelations`](#executerelations)
 - [`getMappingConfig`](#getmappingconfig)
 - [`putMappingConfig`](#putmappingconfig)
 
 **Schemas**
+- [`MappingCheckContext`](#mappingcheckcontext)
+- [`MappingIssue`](#mappingissue)
+- [`MappingAnalysis`](#mappinganalysis)
+- [`ValidateMappingReq`](#validatemappingreq)
+- [`MappingSourceRef`](#mappingsourceref)
+- [`MappingFlowAction`](#mappingflowaction)
+- [`ValidateMappingFlowReq`](#validatemappingflowreq)
+- [`FlowMappingIssue`](#flowmappingissue)
+- [`ValidateMappingFlowResp`](#validatemappingflowresp)
+- [`MappingRoots`](#mappingroots)
+- [`MappingRootDescription`](#mappingrootdescription)
+- [`MappingRootField`](#mappingrootfield)
 - [`SearchMappingReq`](#searchmappingreq)
 - [`MappingConfigsResp`](#mappingconfigsresp)
 - [`MappingConfigs`](#mappingconfigs)
@@ -51,6 +64,8 @@ const { data } = await entityMappingClient.storeConfig(...)
 - [`NewRelationItem`](#newrelationitem)
 - [`RelationItem`](#relationitem)
 - [`ExecuteMappingReq`](#executemappingreq)
+- [`PreviewTarget`](#previewtarget)
+- [`OutputEntityRef`](#outputentityref)
 - [`ExecuteMappingResp`](#executemappingresp)
 - [`MappingFailure`](#mappingfailure)
 - [`MappingWarning`](#mappingwarning)
@@ -80,11 +95,12 @@ const { data } = await entityMappingClient.storeConfig(...)
 - [`SetValueMapper`](#setvaluemapper)
 - [`CopyValueMapper`](#copyvaluemapper)
 - [`AppendValueMapper`](#appendvaluemapper)
-- [`MappingHistoryResp`](#mappinghistoryresp)
-- [`MappingHistoryEntry`](#mappinghistoryentry)
 - [`MappingSource`](#mappingsource)
 - [`MappingSourceProperty`](#mappingsourceproperty)
 - [`MappingSourceTargetType`](#mappingsourcetargettype)
+- [`JourneyContextUsagesReq`](#journeycontextusagesreq)
+- [`JourneyContextUsage`](#journeycontextusage)
+- [`JourneyContextUsagesResp`](#journeycontextusagesresp)
 
 ### `storeConfig`
 
@@ -126,14 +142,12 @@ const { data } = await client.storeConfig(
     created_at: '1970-01-01T00:00:00.000Z',
     updated_at: '1970-01-01T00:00:00.000Z',
     created_by: {
-      type: 'user',
-      org_id: 'string',
-      user_id: 'string'
+      type: 'internal_service'
     },
     last_updated_by: {
       type: 'user',
-      org_id: 'string',
-      user_id: 'string'
+      org_id: 255151,
+      user_id: 99252
     },
     org_id: '66',
     version: 2
@@ -174,14 +188,12 @@ const { data } = await client.storeConfig(
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
-    "type": "user",
-    "org_id": "string",
-    "user_id": "string"
+    "type": "internal_service"
   },
   "last_updated_by": {
     "type": "user",
-    "org_id": "string",
-    "user_id": "string"
+    "org_id": 255151,
+    "user_id": 99252
   },
   "org_id": "66",
   "version": 2
@@ -237,14 +249,12 @@ const { data } = await client.getConfig({
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
-    "type": "user",
-    "org_id": "string",
-    "user_id": "string"
+    "type": "internal_service"
   },
   "last_updated_by": {
     "type": "user",
-    "org_id": "string",
-    "user_id": "string"
+    "org_id": 255151,
+    "user_id": 99252
   },
   "org_id": "66",
   "version": 2
@@ -300,14 +310,12 @@ const { data } = await client.deleteConfig({
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
-    "type": "user",
-    "org_id": "string",
-    "user_id": "string"
+    "type": "internal_service"
   },
   "last_updated_by": {
     "type": "user",
-    "org_id": "string",
-    "user_id": "string"
+    "org_id": 255151,
+    "user_id": 99252
   },
   "org_id": "66",
   "version": 2
@@ -347,7 +355,8 @@ const { data } = await client.getAllVersions({
       "org_id": "66",
       "version": 2
     }
-  ]
+  ],
+  "truncated": true
 }
 ```
 
@@ -395,14 +404,12 @@ const { data } = await client.storeNewVersion(
     created_at: '1970-01-01T00:00:00.000Z',
     updated_at: '1970-01-01T00:00:00.000Z',
     created_by: {
-      type: 'user',
-      org_id: 'string',
-      user_id: 'string'
+      type: 'internal_service'
     },
     last_updated_by: {
       type: 'user',
-      org_id: 'string',
-      user_id: 'string'
+      org_id: 255151,
+      user_id: 99252
     },
     org_id: '66',
     version: 2
@@ -443,14 +450,12 @@ const { data } = await client.storeNewVersion(
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
-    "type": "user",
-    "org_id": "string",
-    "user_id": "string"
+    "type": "internal_service"
   },
   "last_updated_by": {
     "type": "user",
-    "org_id": "string",
-    "user_id": "string"
+    "org_id": 255151,
+    "user_id": 99252
   },
   "org_id": "66",
   "version": 2
@@ -507,14 +512,12 @@ const { data } = await client.getConfigVersion({
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
-    "type": "user",
-    "org_id": "string",
-    "user_id": "string"
+    "type": "internal_service"
   },
   "last_updated_by": {
     "type": "user",
-    "org_id": "string",
-    "user_id": "string"
+    "org_id": 255151,
+    "user_id": 99252
   },
   "org_id": "66",
   "version": 2
@@ -562,7 +565,13 @@ const { data } = await client.executeMapping(
         linkback_relation_tags: ['string'],
         graph_context: [ /* ... */ ]
       }
-    ]
+    ],
+    outputs: {
+      '9ec3711b-db63-449c-b894-54d5bb622a8f': [
+        { /* ... */ }
+      ]
+    },
+    output_ids: ['string']
   },
 )
 ```
@@ -580,8 +589,7 @@ const { data } = await client.executeMapping(
       "_org": "string",
       "_tags": ["string"],
       "_created_at": "string",
-      "_updated_at": "string",
-      "required": {}
+      "_updated_at": "string"
     }
   ],
   "failures": [
@@ -596,7 +604,181 @@ const { data } = await client.executeMapping(
       "context": "string",
       "id": "string"
     }
+  ],
+  "preview_targets": [
+    {
+      "index": 0,
+      "output_id": "string",
+      "mapped_entities": [],
+      "failure": {}
+    }
   ]
+}
+```
+
+</details>
+
+---
+
+### `validateMapping`
+
+Analyse a stored map-entity action config (engine JSON) line by line: a verdict per line (form, json, broken), issues on the engine line they belong to, suggested rewrites and a sentence each. `valid`
+
+`POST /v1/mappings:validate`
+
+```ts
+const { data } = await client.validateMapping()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "valid": true,
+  "skipped_checks": ["attributes"],
+  "counts": {
+    "form": 0,
+    "json": 0,
+    "broken": 0
+  },
+  "issues": [
+    {
+      "code": "ambiguous-producer",
+      "severity": "error",
+      "path": "string",
+      "key": "string",
+      "message": "string",
+      "params": {}
+    }
+  ],
+  "lines": [
+    {
+      "kind": "identity",
+      "index": 0,
+      "target": "string",
+      "verdict": "form",
+      "reason": "string",
+      "issues": [
+        {
+          "code": "ambiguous-producer",
+          "severity": "error",
+          "path": "string",
+          "key": "string",
+          "message": "string",
+          "params": {}
+        }
+      ],
+      "suggestions": [
+        {
+          "why": "pick-producer",
+          "task": "string",
+          "line": {}
+        }
+      ],
+      "description": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `validateMappingFlow`
+
+Analyse every mapping action (`map-entity`, `cart-checkout`) of an automation, each in its place: against the trigger's source, the entities the earlier actions create and its target schema. The sourc
+
+`POST /v1/mappings:validate-flow`
+
+```ts
+const { data } = await client.validateMappingFlow(
+  null,
+  {
+    actions: [
+      {
+        id: 'string',
+        type: 'map-entity',
+        config: {}
+      }
+    ],
+    source: {
+      journey_id: 'string'
+    },
+    previous_actions: [
+      {
+        id: 'string',
+        type: 'map-entity',
+        config: {}
+      }
+    ],
+    acknowledged: [
+      {
+        action_id: 'string',
+        code: 'attribute-not-on-target',
+        target: 'string'
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "valid": true,
+  "blocking": [
+    {
+      "code": "ambiguous-producer",
+      "severity": "error",
+      "path": "string",
+      "key": "string",
+      "message": "string",
+      "params": {},
+      "action_id": "string"
+    }
+  ],
+  "generated": [
+    {
+      "code": "ambiguous-producer",
+      "severity": "error",
+      "path": "string",
+      "key": "string",
+      "message": "string",
+      "params": {},
+      "action_id": "string"
+    }
+  ],
+  "references": {
+    "resolved": ["string"],
+    "unresolved": ["string"]
+  },
+  "acknowledged": [
+    {
+      "code": "ambiguous-producer",
+      "severity": "error",
+      "path": "string",
+      "key": "string",
+      "message": "string",
+      "params": {},
+      "action_id": "string"
+    }
+  ],
+  "introduced": [
+    {
+      "code": "ambiguous-producer",
+      "severity": "error",
+      "path": "string",
+      "key": "string",
+      "message": "string",
+      "params": {},
+      "action_id": "string"
+    }
+  ],
+  "analyses": {}
 }
 ```
 
@@ -629,72 +811,21 @@ const { data } = await client.searchConfigs(
 
 ```json
 {
-  "id": "string",
-  "source": {
-    "type": "journey",
-    "config": {
-      "journey_id": "string"
-    }
-  },
-  "targets": [
+  "configs": [
     {
       "id": "string",
-      "name": "string",
-      "allow_failure": true,
-      "target_schema": "string",
-      "target_unique": ["string"],
-      "use_uniqueness_criteria": false,
-      "loop_config": {},
-      "conditionMode": "oneOf",
-      "conditions": [],
-      "mapping_attributes": [],
-      "relation_attributes": [],
-      "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": ["string"],
-      "graph_context": []
+      "source": {},
+      "targets": [],
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {},
+      "last_updated_by": {},
+      "org_id": "66",
+      "version": 2
     }
   ],
-  "created_at": "1970-01-01T00:00:00.000Z",
-  "updated_at": "1970-01-01T00:00:00.000Z",
-  "created_by": {
-    "type": "user",
-    "org_id": "string",
-    "user_id": "string"
-  },
-  "last_updated_by": {
-    "type": "user",
-    "org_id": "string",
-    "user_id": "string"
-  },
-  "org_id": "66",
-  "version": 2
+  "truncated": true
 }
-```
-
-</details>
-
----
-
-### `queryMappingHistory`
-
-Get the Mapping History
-
-`GET /v1/mappings/history`
-
-```ts
-const { data } = await client.queryMappingHistory({
-  from: 'example',
-  to: 'example',
-  targetEntityId: 'example',
-  sourceEntityId: 'example',
-})
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{}
 ```
 
 </details>
@@ -732,6 +863,7 @@ const { data } = await client.executeRelations(
             schema: 'string',
             attribute: 'string',
             relation_tag: 'string',
+            output_of: 'string',
             tag: 'string',
             self: false
           },
@@ -750,7 +882,8 @@ const { data } = await client.executeRelations(
         entity_id: 'string',
         attribute: 'string'
       }
-    ]
+    ],
+    outputs: {}
   },
 )
 ```
@@ -820,14 +953,12 @@ const { data } = await client.getMappingConfig({
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
-    "type": "user",
-    "org_id": "string",
-    "user_id": "string"
+    "type": "internal_service"
   },
   "last_updated_by": {
     "type": "user",
-    "org_id": "string",
-    "user_id": "string"
+    "org_id": 255151,
+    "user_id": 99252
   },
   "org_id": "66",
   "version": 2
@@ -840,7 +971,7 @@ const { data } = await client.getMappingConfig({
 
 ### `putMappingConfig`
 
-Stores new version of entity mapping config
+Stores new version of entity mapping config. The targets are not checked on store: check them first with `POST /v1/mappings:validate-flow` (`{ source: { journey_id }, actions: [{ id, type: map-entity,
 
 `PUT /v2/mappings/{id}`
 
@@ -878,14 +1009,12 @@ const { data } = await client.putMappingConfig(
     created_at: '1970-01-01T00:00:00.000Z',
     updated_at: '1970-01-01T00:00:00.000Z',
     created_by: {
-      type: 'user',
-      org_id: 'string',
-      user_id: 'string'
+      type: 'internal_service'
     },
     last_updated_by: {
       type: 'user',
-      org_id: 'string',
-      user_id: 'string'
+      org_id: 255151,
+      user_id: 99252
     },
     org_id: '66',
     version: 2
@@ -926,14 +1055,12 @@ const { data } = await client.putMappingConfig(
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
-    "type": "user",
-    "org_id": "string",
-    "user_id": "string"
+    "type": "internal_service"
   },
   "last_updated_by": {
     "type": "user",
-    "org_id": "string",
-    "user_id": "string"
+    "org_id": 255151,
+    "user_id": 99252
   },
   "org_id": "66",
   "version": 2
@@ -945,6 +1072,325 @@ const { data } = await client.putMappingConfig(
 ---
 
 ## Schemas
+
+### `MappingCheckContext`
+
+Where the action sits in its automation or flow
+
+```ts
+type MappingCheckContext = {
+  sourceSchema: string
+  taskOrder: string[]
+  current?: string
+  taskSchemas: Record<string, string>
+  producersBySchema: Record<string, string[]>
+  linkbackTags?: string[]
+  linkbackTagsByTask?: Record<string, string[]>
+  configIdsByTask?: Record<string, string>
+}
+```
+
+### `MappingIssue`
+
+```ts
+type MappingIssue = {
+  code: string
+  severity: "error" | "warning"
+  path: string
+  key: string
+  message: string
+  params?: Record<string, string>
+}
+```
+
+### `MappingAnalysis`
+
+```ts
+type MappingAnalysis = {
+  valid: boolean
+  skipped_checks: "attributes" | "blocks" | "types" | "source-types"[]
+  counts: {
+    form?: number
+    json?: number
+    broken?: number
+  }
+  issues: Array<{
+    code: string
+    severity: "error" | "warning"
+    path: string
+    key: string
+    message: string
+    params?: Record<string, string>
+  }>
+  lines: Array<{
+    kind?: "identity" | "field" | "relation"
+    index?: number
+    target?: string
+    verdict?: "form" | "json" | "broken"
+    reason?: string
+    issues?: Array<{
+      code: { ... }
+      severity: { ... }
+      path: { ... }
+      key: { ... }
+      message: { ... }
+      params?: { ... }
+    }>
+    suggestions?: Array<{
+      why?: { ... }
+      task?: { ... }
+      line?: { ... }
+    }>
+    description?: string
+  }>
+}
+```
+
+### `ValidateMappingReq`
+
+```ts
+type ValidateMappingReq = {
+  config: Record<string, unknown>
+  context?: {
+    sourceSchema: string
+    taskOrder: string[]
+    current?: string
+    taskSchemas: Record<string, string>
+    producersBySchema: Record<string, string[]>
+    linkbackTags?: string[]
+    linkbackTagsByTask?: Record<string, string[]>
+    configIdsByTask?: Record<string, string>
+  }
+  roots?: {
+    source?: {
+      kind: { ... }
+      fields: { ... }
+    }
+    tasks: Array<{
+      id: { ... }
+      schema?: { ... }
+      label?: { ... }
+      description?: { ... }
+    }>
+  }
+  target_root?: {
+    kind: "declared" | "inferred"
+    fields: Array<{
+      path: { ... }
+      label?: { ... }
+      type?: { ... }
+      children?: { ... }
+      open?: { ... }
+      targetTypes?: { ... }
+    }>
+  }
+  source?: {
+    journey_id: string
+  } | {
+    entity_schema: string
+  }
+}
+```
+
+### `MappingSourceRef`
+
+What the automation's trigger provides, by id. Used when `roots.source` is not sent: the server loads the journey's mapping sources (`rootFromMappingSources`) or the entity schema (`rootFromEntitySchema`) with the caller's authorization. A journey or schema that does not exist is an error issue (`so
+
+```ts
+type MappingSourceRef = {
+  journey_id: string
+} | {
+  entity_schema: string
+}
+```
+
+### `MappingFlowAction`
+
+An action of an automation (as stored in it), in execution order; only mapping actions are analysed
+
+```ts
+type MappingFlowAction = {
+  id: string
+  type?: string
+  config?: Record<string, unknown>
+}
+```
+
+### `ValidateMappingFlowReq`
+
+```ts
+type ValidateMappingFlowReq = {
+  actions: Array<{
+    id: string
+    type?: string
+    config?: Record<string, unknown>
+  }>
+  source?: {
+    journey_id: string
+  } | {
+    entity_schema: string
+  }
+  previous_actions?: Array<{
+    id: string
+    type?: string
+    config?: Record<string, unknown>
+  }>
+  acknowledged?: Array<{
+    action_id: string
+    code: string
+    target?: string
+  }>
+}
+```
+
+### `FlowMappingIssue`
+
+```ts
+type FlowMappingIssue = {
+  code: string
+  severity: "error" | "warning"
+  path: string
+  key: string
+  message: string
+  params?: Record<string, string>
+  action_id: string
+}
+```
+
+### `ValidateMappingFlowResp`
+
+```ts
+type ValidateMappingFlowResp = {
+  valid: boolean
+  blocking: Array<{
+    code: string
+    severity: "error" | "warning"
+    path: string
+    key: string
+    message: string
+    params?: Record<string, string>
+    action_id: string
+  }>
+  generated?: Array<{
+    code: string
+    severity: "error" | "warning"
+    path: string
+    key: string
+    message: string
+    params?: Record<string, string>
+    action_id: string
+  }>
+  references?: {
+    resolved?: string[]
+    unresolved?: string[]
+  }
+  acknowledged?: Array<{
+    code: string
+    severity: "error" | "warning"
+    path: string
+    key: string
+    message: string
+    params?: Record<string, string>
+    action_id: string
+  }>
+  introduced?: Array<{
+    code: string
+    severity: "error" | "warning"
+    path: string
+    key: string
+    message: string
+    params?: Record<string, string>
+    action_id: string
+  }>
+  analyses: Record<string, {
+    valid: boolean
+    skipped_checks: "attributes" | "blocks" | "types" | "source-types"[]
+    counts: {
+      form?: { ... }
+      json?: { ... }
+      broken?: { ... }
+    }
+    issues: Array<{
+      code: { ... }
+      severity: { ... }
+      path: { ... }
+      key: { ... }
+      message: { ... }
+      params?: { ... }
+    }>
+    lines: Array<{
+      kind?: { ... }
+      index?: { ... }
+      target?: { ... }
+      verdict?: { ... }
+      reason?: { ... }
+      issues?: { ... }
+      suggestions?: { ... }
+      description?: { ... }
+    }>
+  }>
+}
+```
+
+### `MappingRoots`
+
+Optional descriptions of the source and of each action's output (`Roots` of `@epilot/entity-mapping-validator`). A body whose `roots` does not have this shape is rejected with 400.
+
+```ts
+type MappingRoots = {
+  source?: {
+    kind: "declared" | "inferred"
+    fields: Array<{
+      path: { ... }
+      label?: { ... }
+      type?: { ... }
+      children?: { ... }
+      open?: { ... }
+      targetTypes?: { ... }
+    }>
+  }
+  tasks: Array<{
+    id: string
+    schema?: string
+    label?: string
+    description?: {
+      kind: { ... }
+      fields: { ... }
+    }
+  }>
+}
+```
+
+### `MappingRootDescription`
+
+What the caller knows about a root (`RootDescription` of `@epilot/entity-mapping-validator`)
+
+```ts
+type MappingRootDescription = {
+  kind: "declared" | "inferred"
+  fields: Array<{
+    path: string | number[]
+    label?: string
+    type?: "string" | "number" | "boolean" | "date" | "object" | "array" | "entity"
+    children?: { ... }[]
+    open?: boolean
+    targetTypes?: string[]
+  }>
+}
+```
+
+### `MappingRootField`
+
+```ts
+type MappingRootField = {
+  path: string | number[]
+  label?: string
+  type?: "string" | "number" | "boolean" | "date" | "object" | "array" | "entity"
+  children?: { ... }[]
+  open?: boolean
+  targetTypes?: string[]
+}
+```
 
 ### `SearchMappingReq`
 
@@ -1003,6 +1449,7 @@ type MappingConfigsResp = {
     org_id?: string
     version?: number
   }>
+  truncated?: boolean
 }
 ```
 
@@ -1401,6 +1848,10 @@ type ExecuteRelationsReq = {
     entity_id: string
     attribute: string
   }>
+  outputs?: Record<string, Array<{
+    entity_id: string
+    entity_schema?: string
+  }>>
 }
 ```
 
@@ -1508,6 +1959,64 @@ type ExecuteMappingReq = {
       graph: { ... }
     }>
   }>
+  outputs?: Record<string, Array<{
+    entity_id: string
+    entity_schema?: string
+  }>>
+  output_ids?: string[]
+}
+```
+
+### `PreviewTarget`
+
+What one target would write, in preview mode with `output_ids`
+
+```ts
+type PreviewTarget = {
+  index: number
+  output_id?: string
+  mapped_entities: Array<{
+    _id: string
+    _schema: string
+    _title?: string
+    _org: string
+    _tags?: string[]
+    _created_at: string
+    _updated_at: string
+  }>
+  failure?: {
+    target?: {
+      id?: { ... }
+      name?: { ... }
+      allow_failure?: { ... }
+      target_schema: { ... }
+      target_unique?: { ... }
+      use_uniqueness_criteria?: { ... }
+      loop_config?: { ... }
+      conditionMode?: { ... }
+      conditions?: { ... }
+      mapping_attributes: { ... }
+      relation_attributes?: { ... }
+      linkback_relation_attribute?: { ... }
+      linkback_relation_tags?: { ... }
+      graph_context?: { ... }
+    }
+    error?: {
+      isSilent?: { ... }
+      message?: { ... }
+    }
+  }
+}
+```
+
+### `OutputEntityRef`
+
+One entity an earlier action or task produced
+
+```ts
+type OutputEntityRef = {
+  entity_id: string
+  entity_schema?: string
 }
 ```
 
@@ -1516,14 +2025,13 @@ type ExecuteMappingReq = {
 ```ts
 type ExecuteMappingResp = {
   mapped_entities: Array<{
-    _id?: string
-    _schema?: string
+    _id: string
+    _schema: string
     _title?: string
-    _org?: string
+    _org: string
     _tags?: string[]
-    _created_at?: string
-    _updated_at?: string
-    required?: unknown
+    _created_at: string
+    _updated_at: string
   }>
   failures?: Array<{
     target?: {
@@ -1551,6 +2059,23 @@ type ExecuteMappingResp = {
     explanation: string
     context?: string
     id?: string
+  }>
+  preview_targets?: Array<{
+    index: number
+    output_id?: string
+    mapped_entities: Array<{
+      _id: { ... }
+      _schema: { ... }
+      _title?: { ... }
+      _org: { ... }
+      _tags?: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+    }>
+    failure?: {
+      target?: { ... }
+      error?: { ... }
+    }
   }>
 }
 ```
@@ -1637,14 +2162,13 @@ type MappingWarning = {
 
 ```ts
 type Entity = {
-  _id?: string
-  _schema?: string
+  _id: string
+  _schema: string
   _title?: string
-  _org?: string
+  _org: string
   _tags?: string[]
-  _created_at?: string
-  _updated_at?: string
-  required?: unknown
+  _created_at: string
+  _updated_at: string
 }
 ```
 
@@ -1764,6 +2288,7 @@ type TargetConfig = {
       schema?: { ... }
       attribute?: { ... }
       relation_tag?: { ... }
+      output_of?: { ... }
       tag?: { ... }
       self?: { ... }
     }
@@ -1832,6 +2357,7 @@ type RelationAttribute = {
     schema?: string
     attribute?: string
     relation_tag?: string
+    output_of?: string
     tag?: string
     self?: boolean
   }
@@ -1968,19 +2494,7 @@ type MappingAttributeV2 = {
     }
     _each?: string
     _as?: string
-    _map?: {
-      _set?: { ... }
-      _append?: { ... }
-      _prepend?: { ... }
-      _uniq?: { ... }
-      _retain_old_values?: { ... }
-      _copy?: { ... }
-      _template?: { ... }
-      _random?: { ... }
-      _each?: { ... }
-      _as?: { ... }
-      _map?: { ... }
-    } | string | boolean | number | Record<string, unknown> | unknown[]
+    _map?: { ... }
   } | string | boolean | number | Record<string, unknown> | unknown[]
   origin?: "system_recommendation" | "user_manually" | "entity_updating_system_recommendation"
 }
@@ -2016,37 +2530,7 @@ type OperationNode = {
   }
   _each?: string
   _as?: string
-  _map?: {
-    _set?: string | boolean | number | Record<string, unknown> | unknown[]
-    _append?: unknown
-    _prepend?: unknown
-    _uniq?: boolean | string[]
-    _retain_old_values?: boolean
-    _copy?: string
-    _template?: string
-    _random?: {
-      type: { ... }
-    } | {
-      type: { ... }
-      min?: { ... }
-      max?: { ... }
-    }
-    _each?: string
-    _as?: string
-    _map?: {
-      _set?: { ... }
-      _append?: { ... }
-      _prepend?: { ... }
-      _uniq?: { ... }
-      _retain_old_values?: { ... }
-      _copy?: { ... }
-      _template?: { ... }
-      _random?: { ... }
-      _each?: { ... }
-      _as?: { ... }
-      _map?: { ... }
-    } | string | boolean | number | Record<string, unknown> | unknown[]
-  } | string | boolean | number | Record<string, unknown> | unknown[]
+  _map?: { ... }
 } | string | boolean | number | Record<string, unknown> | unknown[]
 ```
 
@@ -2070,37 +2554,7 @@ type OperationObjectNode = {
   }
   _each?: string
   _as?: string
-  _map?: {
-    _set?: string | boolean | number | Record<string, unknown> | unknown[]
-    _append?: unknown
-    _prepend?: unknown
-    _uniq?: boolean | string[]
-    _retain_old_values?: boolean
-    _copy?: string
-    _template?: string
-    _random?: {
-      type: { ... }
-    } | {
-      type: { ... }
-      min?: { ... }
-      max?: { ... }
-    }
-    _each?: string
-    _as?: string
-    _map?: {
-      _set?: { ... }
-      _append?: { ... }
-      _prepend?: { ... }
-      _uniq?: { ... }
-      _retain_old_values?: { ... }
-      _copy?: { ... }
-      _template?: { ... }
-      _random?: { ... }
-      _each?: { ... }
-      _as?: { ... }
-      _map?: { ... }
-    } | string | boolean | number | Record<string, unknown> | unknown[]
-  } | string | boolean | number | Record<string, unknown> | unknown[]
+  _map?: { ... } | string | boolean | number | Record<string, unknown> | unknown[]
 }
 ```
 
@@ -2184,144 +2638,12 @@ type AppendValueMapper = {
 }
 ```
 
-### `MappingHistoryResp`
-
-```ts
-type MappingHistoryResp = {
-  results: Array<{
-    id: string
-    timestamp: string // ISO datetime
-    source_entity_snapshot: {
-      _id?: { ... }
-      _schema?: { ... }
-      _title?: { ... }
-      _org?: { ... }
-      _tags?: { ... }
-      _created_at?: { ... }
-      _updated_at?: { ... }
-      required?: { ... }
-    }
-    mapped_entities_snapshot: Array<{
-      _id?: { ... }
-      _schema?: { ... }
-      _title?: { ... }
-      _org?: { ... }
-      _tags?: { ... }
-      _created_at?: { ... }
-      _updated_at?: { ... }
-      required?: { ... }
-    }>
-    target_configs_snapshot: Array<{
-      id?: { ... }
-      name?: { ... }
-      allow_failure?: { ... }
-      target_schema: { ... }
-      target_unique?: { ... }
-      use_uniqueness_criteria?: { ... }
-      loop_config?: { ... }
-      conditionMode?: { ... }
-      conditions?: { ... }
-      mapping_attributes: { ... }
-      relation_attributes?: { ... }
-      linkback_relation_attribute?: { ... }
-      linkback_relation_tags?: { ... }
-      graph_context?: { ... }
-    }>
-  }>
-}
-```
-
-### `MappingHistoryEntry`
-
-```ts
-type MappingHistoryEntry = {
-  id: string
-  timestamp: string // ISO datetime
-  source_entity_snapshot: {
-    _id?: string
-    _schema?: string
-    _title?: string
-    _org?: string
-    _tags?: string[]
-    _created_at?: string
-    _updated_at?: string
-    required?: unknown
-  }
-  mapped_entities_snapshot: Array<{
-    _id?: string
-    _schema?: string
-    _title?: string
-    _org?: string
-    _tags?: string[]
-    _created_at?: string
-    _updated_at?: string
-    required?: unknown
-  }>
-  target_configs_snapshot: Array<{
-    id?: string
-    name?: string
-    allow_failure?: boolean
-    target_schema: string
-    target_unique?: string[]
-    use_uniqueness_criteria?: boolean
-    loop_config?: {
-      source_path?: { ... }
-      source_type?: { ... }
-      filter_tags?: { ... }
-      length?: { ... }
-    }
-    conditionMode?: "oneOf" | "anyOf" | "allOf"
-    conditions?: Array<{
-      _exists?: { ... }
-      _equals?: { ... }
-      _not_exists?: { ... }
-      _any_of?: { ... }
-    }>
-    mapping_attributes: Array<{
-      target: { ... }
-      operation: { ... }
-      origin?: { ... }
-    } | {
-      mode: { ... }
-      target: { ... }
-      value: { ... }
-    } | {
-      mode: { ... }
-      target: { ... }
-      source: { ... }
-    } | {
-      mode: { ... }
-      target: { ... }
-      source?: { ... }
-      value_json: { ... }
-      target_unique?: { ... }
-    }>
-    relation_attributes?: Array<{
-      target: { ... }
-      target_tags?: { ... }
-      target_tags_include_source?: { ... }
-      target_entity_tags?: { ... }
-      override_with_source_filter?: { ... }
-      source_filter?: { ... }
-      related_to?: { ... }
-      mode: { ... }
-      origin?: { ... }
-    }>
-    linkback_relation_attribute?: string
-    linkback_relation_tags?: string[]
-    graph_context?: Array<{
-      seed: { ... }
-      graph: { ... }
-    }>
-  }>
-}
-```
-
 ### `MappingSource`
 
 ```ts
 type MappingSource = {
   key: string
+  block_id?: string
   sub_properties?: Array<{
     value: string
     label: string
@@ -2343,6 +2665,7 @@ type MappingSource = {
       schema?: { ... }
       attribute?: { ... }
       relation_tag?: { ... }
+      output_of?: { ... }
       tag?: { ... }
       self?: { ... }
     }
@@ -2382,4 +2705,60 @@ type MappingSourceProperty = {
 
 ```ts
 type MappingSourceTargetType = "string" | "date" | "datetime" | "boolean" | "number" | "image" | "file" | "address" | "email" | "phone" | "select" | "multiselect" | "payment" | "link" | "currency" | "sequence" | "relation" | "array"
+```
+
+### `JourneyContextUsagesReq`
+
+```ts
+type JourneyContextUsagesReq = {
+  journey_id: string // uuid
+  param_keys: string[]
+  param_ids?: string[]
+}
+```
+
+### `JourneyContextUsage`
+
+```ts
+type JourneyContextUsage = {
+  kind: "entity-mapping"
+  resource: {
+    type: "mapping"
+    id: string
+  }
+  location?: {
+    target_schema?: string
+    attribute?: string
+  }
+  matched_as: {
+    dialect: "name"
+    token: string
+    at: string
+  }
+}
+```
+
+### `JourneyContextUsagesResp`
+
+```ts
+type JourneyContextUsagesResp = {
+  usages: Array<{
+    kind: "entity-mapping"
+    resource: {
+      type: { ... }
+      id: { ... }
+    }
+    location?: {
+      target_schema?: { ... }
+      attribute?: { ... }
+    }
+    matched_as: {
+      dialect: { ... }
+      token: { ... }
+      at: { ... }
+    }
+  }>
+  status: "ok" | "partial"
+  scanned: number
+}
 ```

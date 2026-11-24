@@ -18,6 +18,12 @@ export default defineCommand({
   args: {
     path: { type: 'positional', description: 'Path to manifest.json', required: false },
     'new-version': { type: 'boolean', description: 'Create a new version' },
+    changelog: {
+      type: 'string',
+      alias: 'm',
+      description:
+        'Optional short description of the new version (max 250 chars, applies when a new version is created)',
+    },
     'dry-run': { type: 'boolean', description: 'Show what would change without applying' },
     token: { type: 'string', alias: 't', description: 'Bearer token' },
     server: { type: 'string', alias: 's', description: 'Override server base URL' },
@@ -86,9 +92,12 @@ export default defineCommand({
           log.info(`[dry-run] Would create new version (cloned from ${targetVersion})`);
         } else {
           try {
-            const result = await client.cloneVersion(appId!, targetVersion);
+            const result = await client.cloneVersion(appId!, targetVersion, undefined, args.changelog);
             targetVersion = result.version;
             log.success(`Created version ${targetVersion}`);
+            if (!args.changelog) {
+              log.dim('  Tip: describe the changeset with --changelog "<what changed>" (optional)');
+            }
           } catch (err) {
             if (err instanceof Error && err.message.includes('disable dev mode')) {
               log.error('Cannot create a new version while development mode is enabled.');
@@ -224,7 +233,11 @@ export default defineCommand({
           log.info(`[dry-run] Would set ${early.length} app-level option(s) before syncing components`);
         } else {
           await client.patchVersion(appId!, targetVersion, {
-            options: early,
+            // This is a partial set: a condition may point at an option that is
+            // held back until Step 6b, which the API would reject. Conditions
+            // only matter once the full set is in place, so they follow there.
+            options: early.map(({ visible_if: _visible_if, ...option }) => option),
+            option_groups: manifest.option_groups ?? [],
             ...(manifest.blueprint?.manifest_id ? { manifest_id: manifest.blueprint.manifest_id } : {}),
           });
         }
@@ -347,6 +360,8 @@ export default defineCommand({
       } else {
         await client.patchVersion(appId!, targetVersion, {
           options: manifest.options,
+          // Groups are a full replacement set like options (empty clears them)
+          option_groups: manifest.option_groups ?? [],
           // The API resets the blueprint reference on every version patch
           ...(manifest.blueprint?.manifest_id ? { manifest_id: manifest.blueprint.manifest_id } : {}),
         });

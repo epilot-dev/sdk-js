@@ -8,6 +8,7 @@ import type {
 
 declare namespace Components {
     namespace Parameters {
+        export type BlueprintAssistantSkillName = string; // ^[a-z0-9][a-z0-9-]{0,63}$
         export type JobID = /**
          * ID of an import or export job (state machine)
          * example:
@@ -19,9 +20,24 @@ declare namespace Components {
     export interface PathParameters {
         MergePlanID?: Parameters.MergePlanID;
         JobID?: Parameters.JobID;
+        BlueprintAssistantSkillName?: Parameters.BlueprintAssistantSkillName /* ^[a-z0-9][a-z0-9-]{0,63}$ */;
     }
     namespace Schemas {
         export interface AppBlueprint {
+            source_drift?: /**
+             * V3 live-source plan capture only. Available on the install job and destination
+             * blueprint plan. Only confirmed owning-API NotFound/404 reads may be auto-skipped; null, permission,
+             * transport, server errors and missing ids remain strict capture failures.
+             * Complete details are hydrated from durable storage on authenticated GETs.
+             * For source_resources_missing, errors[].data contains missing_count,
+             * exclude_count and source_drift_s3_key only. Poll getBlueprintJob even if
+             * no destination blueprint was created. Exclude these by starting a new install
+             * with the complete exclude_addresses list in options.resources_to_ignore;
+             * it includes gone resources and all transitive referrers. Refresh the SOURCE
+             * blueprint using syncDependencies, wait for that job, then start a new plan.
+             *
+             */
+            V3SourceDrift;
             id?: /**
              * ID of a blueprint
              * example:
@@ -310,6 +326,324 @@ declare namespace Components {
             resources?: BlueprintResource[];
         }
         export type Blueprint = CustomBlueprint | FileBlueprint | MarketplaceBlueprint | DeployedBlueprint | AppBlueprint;
+        export interface BlueprintAssistantConversation {
+            id: string;
+            blueprint_id: string;
+            status: "IN_PROGRESS" | "IDLE" | "FAILED";
+            error?: string;
+            created_at: string; // date-time
+            updated_at: string; // date-time
+            created_by?: string;
+            created_by_name?: string;
+            messages: BlueprintAssistantMessage[];
+        }
+        export interface BlueprintAssistantConversationSummary {
+            id: string;
+            /**
+             * The first message, shortened.
+             */
+            title: string;
+            status: "IN_PROGRESS" | "IDLE" | "FAILED";
+            created_at: string; // date-time
+            updated_at: string; // date-time
+            created_by?: string;
+            created_by_name?: string;
+            message_count: number;
+        }
+        export interface BlueprintAssistantDefaultSkill {
+            name: string;
+            description: string;
+            /**
+             * Only offered to users who may publish to the epilot Marketplace.
+             */
+            audience?: "publishers";
+            /**
+             * Whether the organization uses this skill. Switch it with the skill update, by name.
+             */
+            enabled?: boolean;
+        }
+        export interface BlueprintAssistantMessage {
+            id: string;
+            role: "user" | "assistant";
+            created_at: string; // date-time
+            parts: /**
+             * `text` parts carry `text`. `tool` parts carry the tool call and, once finished, its structured
+             * `result`, discriminated by `result.kind`: `overview`, `resources`, `inclusion`, `resource_content`,
+             * `audit`, `proposal_changes`, `proposal_add`, `proposal_blueprint`, `proposal_publish`, `skill` or `error`. Applied change and add proposals carry `excluded_ids`: the resources the user unchecked.
+             *
+             */
+            BlueprintAssistantPart[];
+        }
+        export interface BlueprintAssistantMessageRequest {
+            /**
+             * Continue this conversation. Omit to start a new one.
+             */
+            conversation_id?: string; // uuid
+            message?: string;
+            /**
+             * Run a failed answer of `conversation_id` again, without a new message. Only allowed while the
+             * conversation is `FAILED` (or its answer stopped updating).
+             *
+             */
+            retry?: boolean;
+            proposal_update?: {
+                proposal_id: string;
+                status: "applied" | "dismissed";
+                note?: string;
+                /**
+                 * Resources of a change or add proposal the user unchecked before applying it. Stored on the proposal as `excluded_ids`.
+                 */
+                excluded_ids?: [
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?
+                ];
+            };
+        }
+        /**
+         * `text` parts carry `text`. `tool` parts carry the tool call and, once finished, its structured
+         * `result`, discriminated by `result.kind`: `overview`, `resources`, `inclusion`, `resource_content`,
+         * `audit`, `proposal_changes`, `proposal_add`, `proposal_blueprint`, `proposal_publish`, `skill` or `error`. Applied change and add proposals carry `excluded_ids`: the resources the user unchecked.
+         *
+         */
+        export interface BlueprintAssistantPart {
+            type: "text" | "tool";
+            text?: string;
+            tool_use_id?: string;
+            tool?: string;
+            title?: string;
+            status?: "running" | "done" | "error";
+            result?: {
+                [name: string]: any;
+                kind?: string;
+            };
+        }
+        export interface BlueprintAssistantSkill {
+            name: string;
+            description: string;
+            /**
+             * Offered to new conversations of the organization.
+             */
+            enabled: boolean;
+            /**
+             * `SKILL.md` and the reference files, e.g. `references/messart.md`.
+             */
+            files: string[];
+            /**
+             * Total size of the files in bytes.
+             */
+            size: number;
+            updated_at: string; // date-time
+            updated_by?: string;
+            updated_by_name?: string;
+        }
+        export interface BlueprintAssistantSkillUpload {
+            /**
+             * Name of the uploaded file, e.g. `SKILL.md` or `wallbox-knowledge.zip`.
+             */
+            file_name: string;
+            /**
+             * The file, base64-encoded. At most 2 MB of text after unpacking.
+             */
+            content_base64: string;
+        }
         export interface BlueprintDependenciesSyncJob {
             id?: /**
              * ID of a job
@@ -349,6 +683,244 @@ declare namespace Components {
             status?: "IN_PROGRESS" | "SUCCESS" | "FAILED" | "CANCELED";
             download_file?: S3Reference;
         }
+        export interface BlueprintGraphSuggestionAcceptInput {
+            /**
+             * Ids of suggestions and/or possible problems (`problems[].id`) of the generation.
+             */
+            suggestion_ids: [
+                string,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?
+            ];
+        }
+        export interface BlueprintGraphSuggestionAcceptance {
+            results: BlueprintTestCase[];
+            accepted_ids: string /* ^[0-9a-f]{64}$ */[];
+        }
+        export interface BlueprintGraphSuggestionPage {
+            id: string; // uuid
+            status: "pending" | "running" | "completed" | "failed";
+            created_at: string; // date-time
+            error?: {
+                code: string; // ^[a-z0-9_]{1,64}$
+                retriable: boolean;
+            };
+            prompt_version?: string;
+            model?: string;
+            digest?: string;
+            /**
+             * Suggestions of the generation, without the ones already accepted from it.
+             */
+            total: number;
+            /**
+             * Suggestions by shape, without the ones already accepted from the generation.
+             */
+            counts_by_shape: {
+                journey_starts_workflow?: number;
+                event_sends_email?: number;
+                step_logic?: number;
+                answer_options?: number;
+                process_order?: number;
+                catalog_structure?: number;
+                other?: number;
+            };
+            excluded: {
+                /**
+                 * `shape_unknown` is no longer produced (shapes are open); it remains for stored generations.
+                 */
+                reason: "invalid" | "unknown_subject" | "shape_unknown" | "not_passing" | "cannot_verify" | "trivial" | "duplicate" | "subsumed";
+                count: number;
+            }[];
+            unreadable: BlueprintTestUnreadableResource[];
+            /**
+             * Identities only; labels come from the graph when presented. A skipped type subject (one AI pass over every resource of a type) has `node_id` = `resource_id` = `type:<resource_type>`.
+             */
+            incomplete_subjects: {
+                node_id: string;
+                resource_id: string;
+                resource_type: string;
+                reason: "step_cap" | "input_cap" | "deadline" | "model_error";
+            }[];
+            /**
+             * One page of suggestions. Suggestions accepted from this generation are left out for good, also after their test case is deleted (a new generation offers them again), so a page may hold fewer than `limit` items, even none, while `next_cursor` is present. Paging ends only when `next_cursor` is absent.
+             */
+            items: Suggestion[];
+            /**
+             * Possible problems of the generation (at most 50), never counted in `total` or `counts_by_shape`. Only on a completed
+             * page requested without `cursor`, filtered by `shape` when given. Problems accepted from this generation are left
+             * out, as accepted suggestions are. Absent for generations created before problems existed.
+             *
+             */
+            problems?: /**
+             * A possible problem: a proposal the engine evaluated with every clause PASSED or FAILED and at least one FAILED.
+             * The configuration may be wrong, or the AI may be. Never counted as a suggestion. The properties of
+             * `Suggestion` plus `results`. Accepting its id creates an ordinary v2 test case (without `results`), which
+             * reports FAILED on a run until the configuration changes.
+             *
+             */
+            BlueprintGraphSuggestionProblem[];
+            /**
+             * Possible problems kept by a completed generation (all shapes), without the ones already accepted from it. Absent for older generations.
+             */
+            problems_total?: number;
+            next_cursor?: string;
+        }
+        /**
+         * A possible problem: a proposal the engine evaluated with every clause PASSED or FAILED and at least one FAILED.
+         * The configuration may be wrong, or the AI may be. Never counted as a suggestion. The properties of
+         * `Suggestion` plus `results`. Accepting its id creates an ordinary v2 test case (without `results`), which
+         * reports FAILED on a run until the configuration changes.
+         *
+         */
+        export interface BlueprintGraphSuggestionProblem {
+            /**
+             * sha256 of the canonical clauses.
+             */
+            id: string; // ^[0-9a-f]{64}$
+            shape: /* Suggestion shape. `other` holds suggestions that fit none of the named shapes. */ BlueprintTestCaseShape;
+            subject: {
+                node_id: string;
+                resource_id: string;
+                resource_type: string;
+                /**
+                 * The graph label of the subject.
+                 */
+                label: string;
+            };
+            clauses: {
+                [name: string]: any;
+            }[];
+            sentences: /* A translation key and its parameters. The UI renders the text; the server never returns sentences. */ Sentence[];
+            titles?: /**
+             * An AI-written plain-language title in both UI languages, checked by deterministic guardrails before it is
+             * stored. Optional: absent when the title step gave none (or for items stored before titles existed); the UI
+             * then renders the sentence. On a test case (schema version 2 only): the title of the suggestion it was accepted
+             * from, kept on duplicates.
+             *
+             */
+            BlueprintTestTitles;
+            /**
+             * An existing v2 test case that already holds every clause of this suggestion.
+             */
+            covered_by?: {
+                case_id: string; // uuid
+                title?: string;
+            };
+            /**
+             * Always set on GET, not stored.
+             */
+            why_code?: "untested_resource" | "new_check";
+            main_resource?: BlueprintTestMainResource;
+            /**
+             * Always set on GET, not stored.
+             */
+            resource_types?: string[];
+            /**
+             * One engine result per clause, in clause order (verdict and evidence, as in suite run results).
+             */
+            results: ClauseResultView[];
+        }
+        export interface BlueprintGraphSuggestionsStarted {
+            generation_id: string; // uuid
+            status: "pending";
+        }
         /**
          * ID of a blueprint
          * example:
@@ -366,6 +938,20 @@ declare namespace Components {
             events?: BlueprintJobEvent[];
             triggered_at?: string; // date-time
             created_by?: CallerIdentity;
+            source_drift?: /**
+             * V3 live-source plan capture only. Available on the install job and destination
+             * blueprint plan. Only confirmed owning-API NotFound/404 reads may be auto-skipped; null, permission,
+             * transport, server errors and missing ids remain strict capture failures.
+             * Complete details are hydrated from durable storage on authenticated GETs.
+             * For source_resources_missing, errors[].data contains missing_count,
+             * exclude_count and source_drift_s3_key only. Poll getBlueprintJob even if
+             * no destination blueprint was created. Exclude these by starting a new install
+             * with the complete exclude_addresses list in options.resources_to_ignore;
+             * it includes gone resources and all transitive referrers. Refresh the SOURCE
+             * blueprint using syncDependencies, wait for that job, then start a new plan.
+             *
+             */
+            V3SourceDrift;
             job_type?: "install";
             source_blueprint_id?: /**
              * ID of a blueprint
@@ -435,6 +1021,62 @@ declare namespace Components {
              */
             include_field_diffs?: boolean;
         }
+        /**
+         * [start, end) character offsets into the author's text.
+         */
+        export type BlueprintInterpretationSpan = [
+            number,
+            number
+        ];
+        /**
+         * An engine-verified check. Code-assigned id (p<i> or p<i>c<n>); the sentence is a key, never model text.
+         */
+        export interface BlueprintInterpretedCheck {
+            id: string; // ^p[0-9]+(c[0-9]+)?$
+            hash: string; // ^[0-9a-f]{64}$
+            /**
+             * The engine's Clause.
+             */
+            clause: {
+                [name: string]: any;
+            };
+            sentence: /* A translation key and its parameters. The UI renders the text; the server never returns sentences. */ Sentence;
+            result: ClauseResultView;
+        }
+        /**
+         * One part of the author's text in one of three states. span is an integer offset pair into the author's own text.
+         */
+        export type BlueprintInterpretedPart = /* One part of the author's text in one of three states. span is an integer offset pair into the author's own text. */ {
+            index: number;
+            span?: /* [start, end) character offsets into the author's text. */ BlueprintInterpretationSpan;
+            state: "supported";
+            check: /* An engine-verified check. Code-assigned id (p<i> or p<i>c<n>); the sentence is a key, never model text. */ BlueprintInterpretedCheck;
+        } | {
+            index: number;
+            span?: /* [start, end) character offsets into the author's text. */ BlueprintInterpretationSpan;
+            state: "ambiguous";
+            candidates: [
+                /* An engine-verified check. Code-assigned id (p<i> or p<i>c<n>); the sentence is a key, never model text. */ BlueprintInterpretedCheck,
+                /* An engine-verified check. Code-assigned id (p<i> or p<i>c<n>); the sentence is a key, never model text. */ BlueprintInterpretedCheck?,
+                /* An engine-verified check. Code-assigned id (p<i> or p<i>c<n>); the sentence is a key, never model text. */ BlueprintInterpretedCheck?,
+                /* An engine-verified check. Code-assigned id (p<i> or p<i>c<n>); the sentence is a key, never model text. */ BlueprintInterpretedCheck?,
+                /* An engine-verified check. Code-assigned id (p<i> or p<i>c<n>); the sentence is a key, never model text. */ BlueprintInterpretedCheck?
+            ];
+        } | {
+            index: number;
+            span?: /* [start, end) character offsets into the author's text. */ BlueprintInterpretationSpan;
+            state: "unsupported";
+            reason: "runtime_behaviour" | "document_content" | "external_system" | "legal_judgement" | "generic_integrity" | "no_matching_resource" | "no_matching_field" | "no_matching_value" | "not_expressible" | "cannot_bind" | "too_vague";
+            hint: {
+                code: "name_the_resource" | "name_the_field" | "name_the_value" | "split_statement" | "describe_configuration" | "use_health_check" | "rephrase_as_check";
+                params: {
+                    /**
+                     * A node type present in the graph.
+                     */
+                    type?: string;
+                };
+            };
+        };
         export type BlueprintJob = BlueprintExportJob | BlueprintInstallationJob | BlueprintRestoreJob | BlueprintDependenciesSyncJob | BlueprintVerificationJob;
         export interface BlueprintJobEvent {
             timestamp?: string; // date-time
@@ -680,6 +1322,1598 @@ declare namespace Components {
                  */
                 has_effective_changes?: boolean;
             } | null;
+        }
+        export interface BlueprintSourceTestOperation {
+            operation_kind: "generate" | "execute";
+            run: BlueprintTestRun;
+        }
+        export interface BlueprintSuggestionCheck {
+            subject_node_id: string;
+            suggestion: {
+                shape?: string;
+                clauses: {
+                    [name: string]: any;
+                }[];
+            };
+        }
+        export interface BlueprintSuggestionCheckResult {
+            verdict: "offered" | "failed" | "excluded" | "invalid";
+            issues: {
+                [name: string]: any;
+            }[];
+            /**
+             * With excluded, the first exclusion rule the draft fails.
+             */
+            reason?: string;
+        }
+        export interface BlueprintSuggestionGraphQuery {
+            tool: "list_subjects" | "graph_summary" | "list_nodes" | "get_node" | "follow_edges" | "list_paths" | "list_operators";
+            /**
+             * The tool's input. list_subjects: `{ cursor?: string }` (the previous page's `next_cursor`).
+             */
+            input?: {
+                [name: string]: any;
+            };
+        }
+        export interface BlueprintSuggestionGraphQueryResult {
+            ok: boolean;
+            data?: {
+                [name: string]: any;
+            };
+            truncated?: boolean;
+            error?: "unknown_node" | "bad_input";
+        }
+        export interface BlueprintSuggestionSubmission {
+            /**
+             * Every subject from list_subjects, each with its suggestions (an empty array when it has none). Subjects not named here are stored as incomplete.
+             */
+            subjects: {
+                subject_node_id: string;
+                suggestions: {
+                    [name: string]: any;
+                    /**
+                     * Optional plain-language title written by the agent. Checked by the same guardrails as generated titles (length, no line breaks, no arrows, quoted names must exist in the configuration); an invalid title is dropped and the suggestion stays untitled. Used for both UI languages.
+                     */
+                    title?: string;
+                }[];
+            }[];
+        }
+        export interface BlueprintSuggestionSubmissionResult {
+            status: "completed";
+            total: number;
+            problems_total: number;
+        }
+        export interface BlueprintTag {
+            id: string;
+            blueprint_id: string;
+            /**
+             * Semantic version for release tags, `sync-<UTC timestamp>` for sync tags
+             */
+            name: string;
+            kind: /* `release`: a semantic version someone tagged. `sync`: recorded automatically for every sync, named by time, for debugging. */ BlueprintTagKind;
+            note?: string | null;
+            status: "building" | "ready" | "failed";
+            created_at: string; // date-time
+            created_by?: {
+                /**
+                 * a human readable name of the caller (e.g. user name, token name or email address)
+                 * example:
+                 * manifest@epilot.cloud
+                 */
+                name?: any;
+                /**
+                 * epilot organization id
+                 * example:
+                 * 911690
+                 */
+                org_id: string;
+                /**
+                 * epilot user id, when called by a user
+                 * example:
+                 * 11001045
+                 */
+                user_id?: string;
+                /**
+                 * token id, when called by API token
+                 * example:
+                 * api_5ZugdRXasLfWBypHi93Fk
+                 */
+                token_id?: string;
+            } | null;
+            /**
+             * First time a Marketplace listing made this tag live; published tags cannot be deleted
+             */
+            published_at?: string | null; // date-time
+            /**
+             * Sync tags are deleted after 90 days; release tags never expire
+             */
+            expires_at?: string | null; // date-time
+            package?: {
+                /**
+                 * `zip`: the signed package, built once. `manifest`: the resources a sync sent; the download builds the signed zip on first use.
+                 */
+                format?: "zip" | "manifest";
+                job_id?: string | null;
+                bucket?: string;
+                key?: string;
+                error?: string | null;
+            } | null;
+            /**
+             * The sync a `sync` tag was recorded for
+             */
+            sync?: {
+                job_id?: string;
+                destination_org_id?: string;
+                destination_blueprint_id?: string;
+                status?: string;
+            } | null;
+        }
+        /**
+         * `release`: a semantic version someone tagged. `sync`: recorded automatically for every sync, named by time, for debugging.
+         */
+        export type BlueprintTagKind = "release" | "sync";
+        export interface BlueprintTestCase {
+            id: string; // uuid
+            blueprint_id: string;
+            org_id: string;
+            schema_version: 1 | 2;
+            revision: number;
+            title?: string;
+            expectation?: string;
+            created_at: string; // date-time
+            created_by: CallerIdentity;
+            updated_at: string; // date-time
+            updated_by: CallerIdentity;
+            /**
+             * Present only on an explicitly requested immutable deletion revision.
+             */
+            deleted_at?: string; // date-time
+            confirmation?: BlueprintTestCaseConfirmation;
+            /**
+             * Schema version 2 only. Id-based business clauses (the engine's Clause type).
+             */
+            clauses?: {
+                [name: string]: any;
+            }[];
+            /**
+             * Schema version 2 only. sha256 of the canonical clauses.
+             */
+            clauses_hash?: string;
+            /**
+             * Schema version 2 only. The revision at which `clauses` last changed
+             */
+            clauses_revision?: number;
+            /**
+             * Schema version 2 only. A Sentence ({key, params}) the UI renders.
+             */
+            title_key?: {
+                [name: string]: any;
+            };
+            titles?: /**
+             * An AI-written plain-language title in both UI languages, checked by deterministic guardrails before it is
+             * stored. Optional: absent when the title step gave none (or for items stored before titles existed); the UI
+             * then renders the sentence. On a test case (schema version 2 only): the title of the suggestion it was accepted
+             * from, kept on duplicates.
+             *
+             */
+            BlueprintTestTitles;
+            /**
+             * Schema version 2 only. Where the case came from (an accepted suggestion, a migrated v1 case or a confirmed interpretation); see BlueprintTestCaseOrigin.
+             */
+            origin?: {
+                [name: string]: any;
+            };
+            /**
+             * Schema version 1 only. Set when the v1 case could not be migrated to v2 clauses.
+             */
+            needs_reinterpretation?: {
+                reason: string; // ^[a-z0-9_]{1,64}$
+            };
+        }
+        export interface BlueprintTestCaseBatchDeleteInput {
+            /**
+             * Test case ids must be unique.
+             */
+            cases: [
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                },
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?
+            ];
+        }
+        export interface BlueprintTestCaseBatchDeleteResult {
+            deleted: string[];
+            /**
+             * The case changed since expected_revision; nothing was deleted for it.
+             */
+            conflicts: string[];
+            /**
+             * The case does not exist or was already deleted.
+             */
+            not_found: string[];
+        }
+        export interface BlueprintTestCaseConfirmation {
+            schema_version: "1";
+            interpretation: BlueprintTestInterpretation;
+            /**
+             * At most 1000 items; enforced by the service boundary.
+             */
+            catalog: BlueprintTestCatalogEntry[];
+            proposal_hash: string; // ^[a-f0-9]{64}$
+            expectation_sha256: string; // ^[a-f0-9]{64}$
+            interpreter_version: string;
+            confirmed_by: CallerIdentity;
+            confirmed_at: string; // date-time
+            interpreter_execution_id?: string; // uuid
+        }
+        export interface BlueprintTestCaseInput {
+            title: string; // \S
+            expectation: string; // \S
+        }
+        /**
+         * Where a v2 case came from (BlueprintTestCase.origin).
+         */
+        export type BlueprintTestCaseOrigin = /* Where a v2 case came from (BlueprintTestCase.origin). */ {
+            kind: "suggestion";
+            source: "ai";
+            shape: /* Suggestion shape. `other` holds suggestions that fit none of the named shapes. */ BlueprintTestCaseShape;
+            suggestion_id: string;
+            generation_id: string;
+            prompt_version: string;
+            model: string;
+        } | {
+            kind: "migrated_v1";
+            from_revision: number;
+        } | {
+            kind: "interpretation";
+            source: "ai";
+            interpretation_id: string; // uuid
+            prompt_version: string;
+            model: string;
+            confirmed_clauses_hash: string; // ^[0-9a-f]{64}$
+            confirmed_at: string; // date-time
+            confirmed_by: CallerIdentity;
+        } | {
+            kind: "duplicate";
+            source_case_id: string; // uuid
+            source_revision: number;
+        };
+        export interface BlueprintTestCasePage {
+            results: BlueprintTestCase[];
+            next_cursor?: string;
+        }
+        /**
+         * Suggestion shape. `other` holds suggestions that fit none of the named shapes.
+         */
+        export type BlueprintTestCaseShape = "journey_starts_workflow" | "event_sends_email" | "step_logic" | "answer_options" | "process_order" | "catalog_structure" | "other";
+        /**
+         * `expectation` is required for schema version 1 and must be absent for schema version 2 (title-only rename).
+         */
+        export interface BlueprintTestCaseUpdate {
+            title: string; // \S
+            expectation?: string; // \S
+            expected_revision: number;
+        }
+        export interface BlueprintTestCatalogEntry {
+            key: string;
+            type: string;
+            id: string;
+            label: string;
+            membership_state: "included" | "excluded" | "absent";
+            /**
+             * At most 4 items; enforced by the service boundary.
+             */
+            capabilities: ("resource_included" | "resource_references" | "config_enabled" | "workflow_task_required")[];
+            /**
+             * At most 1000 items; enforced by the service boundary.
+             */
+            tasks?: {
+                key: string;
+                label: string;
+                /**
+                 * At most 1 items; enforced by the service boundary.
+                 */
+                capabilities: ("workflow_task_required")[];
+            }[];
+        }
+        export interface BlueprintTestCheckResult {
+            predicate?: BlueprintTestPredicate;
+            resource_key?: string;
+            verdict: "PASSED" | "FAILED" | "CANNOT_VERIFY";
+            reason: string; // ^[a-z][a-z0-9_]{0,79}$
+            path?: string;
+            actual?: boolean | string;
+        }
+        export interface BlueprintTestCoverage {
+            covered: number;
+            total: number;
+            untested: {
+                resource_type: string;
+                resource_id: string;
+                name: string;
+            }[];
+        }
+        export interface BlueprintTestDependencyValidation {
+            scope: "related_resources";
+            verdict: "PASSED" | "FAILED" | "CANNOT_VERIFY";
+            /**
+             * At most 256 items; enforced by the service boundary.
+             */
+            checks: BlueprintTestCheckResult[];
+            /**
+             * At most 256 items; enforced by the service boundary.
+             */
+            boundaries: {
+                key?: string;
+                path?: string;
+                reason: string; // ^[a-z][a-z0-9_]{0,79}$
+            }[];
+            omitted_count: number;
+        }
+        export interface BlueprintTestInterpretation {
+            schema_version: "1";
+            /**
+             * At most 32 items; enforced by the service boundary.
+             */
+            clauses: [
+                ({
+                    source_text: string;
+                    status: "supported";
+                    /**
+                     * At most 64 items; enforced by the service boundary.
+                     */
+                    assertions: [
+                        BlueprintTestPredicate,
+                        ...BlueprintTestPredicate[]
+                    ];
+                    reason: string;
+                } | {
+                    source_text: string;
+                    status: "unsupported" | "ambiguous";
+                    assertions: [
+                    ];
+                    reason: string;
+                }),
+                ...({
+                    source_text: string;
+                    status: "supported";
+                    /**
+                     * At most 64 items; enforced by the service boundary.
+                     */
+                    assertions: [
+                        BlueprintTestPredicate,
+                        ...BlueprintTestPredicate[]
+                    ];
+                    reason: string;
+                } | {
+                    source_text: string;
+                    status: "unsupported" | "ambiguous";
+                    assertions: [
+                    ];
+                    reason: string;
+                })[]
+            ];
+        }
+        export interface BlueprintTestInterpretationConfirmInput {
+            /**
+             * The chosen candidate of each ambiguous part.
+             */
+            choices: [
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?,
+                {
+                    part_index: number;
+                    candidate_id: string;
+                }?
+            ];
+            /**
+             * Indexes of parts the author leaves out. Every unsupported part must be omitted.
+             */
+            omit_parts: [
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?,
+                number?
+            ];
+            /**
+             * The author confirmed the checks. Required true unless the selection equals the case's confirmed checks.
+             */
+            confirmed: boolean;
+            /**
+             * Required when the interpretation rewrites a case; the case revision the author saw.
+             */
+            expected_revision?: number;
+        }
+        export interface BlueprintTestInterpretationConfirmation {
+            test_case: BlueprintTestCase;
+            /**
+             * The checks are unchanged, so the case keeps its prior confirmation.
+             */
+            confirmation_kept: boolean;
+        }
+        export interface BlueprintTestInterpretationInput {
+            /**
+             * The author's plain-language test. At most 2000 characters after trimming; longer text is rejected with 400 interpretation_input_too_large, empty text with 400 invalid_request.
+             */
+            text: string;
+            /**
+             * Rewrite this case (a v2 interpretation case, or a v1 case flagged needs_reinterpretation).
+             */
+            test_case_id?: string; // uuid
+        }
+        export interface BlueprintTestInterpretationProposal {
+            schema_version: "1";
+            interpretation: BlueprintTestInterpretation;
+            /**
+             * At most 1000 items; enforced by the service boundary.
+             */
+            catalog: BlueprintTestCatalogEntry[];
+            proposal_hash: string; // ^[a-f0-9]{64}$
+            expectation_sha256: string; // ^[a-f0-9]{64}$
+            interpreter_version: string;
+            interpreter_execution_id?: string; // uuid
+        }
+        export interface BlueprintTestInterpretationResult {
+            id: string; // uuid
+            status: "pending" | "running" | "completed" | "failed";
+            created_at: string; // date-time
+            /**
+             * The author's own text, as submitted (trimmed).
+             */
+            text: string;
+            /**
+             * The case this interpretation rewrites.
+             */
+            test_case_id?: string; // uuid
+            parts: [
+                /* One part of the author's text in one of three states. span is an integer offset pair into the author's own text. */ BlueprintInterpretedPart?,
+                /* One part of the author's text in one of three states. span is an integer offset pair into the author's own text. */ BlueprintInterpretedPart?,
+                /* One part of the author's text in one of three states. span is an integer offset pair into the author's own text. */ BlueprintInterpretedPart?,
+                /* One part of the author's text in one of three states. span is an integer offset pair into the author's own text. */ BlueprintInterpretedPart?,
+                /* One part of the author's text in one of three states. span is an integer offset pair into the author's own text. */ BlueprintInterpretedPart?,
+                /* One part of the author's text in one of three states. span is an integer offset pair into the author's own text. */ BlueprintInterpretedPart?,
+                /* One part of the author's text in one of three states. span is an integer offset pair into the author's own text. */ BlueprintInterpretedPart?,
+                /* One part of the author's text in one of three states. span is an integer offset pair into the author's own text. */ BlueprintInterpretedPart?,
+                /* One part of the author's text in one of three states. span is an integer offset pair into the author's own text. */ BlueprintInterpretedPart?,
+                /* One part of the author's text in one of three states. span is an integer offset pair into the author's own text. */ BlueprintInterpretedPart?,
+                /* One part of the author's text in one of three states. span is an integer offset pair into the author's own text. */ BlueprintInterpretedPart?,
+                /* One part of the author's text in one of three states. span is an integer offset pair into the author's own text. */ BlueprintInterpretedPart?
+            ];
+            /**
+             * Parts the model proposed beyond the caps or that could not be verified at all.
+             */
+            dropped: number;
+            /**
+             * With test_case_id. Every part is supported and the checks equal the case's confirmed checks.
+             */
+            unchanged?: boolean;
+            unreadable: BlueprintTestUnreadableResource[];
+            prompt_version?: string;
+            model?: string;
+            error?: {
+                code: "interpretation_too_complex" | "model_unavailable" | "timeout" | "expired" | "worker_failed" | "not_authorized" | "invoke_failed";
+                retriable: boolean;
+            };
+            /**
+             * Set once the interpretation was confirmed; the case it became.
+             */
+            accepted_case_id?: string; // uuid
+        }
+        export interface BlueprintTestInterpretationStarted {
+            interpretation_id: string; // uuid
+            status: "pending";
+        }
+        export interface BlueprintTestMainResource {
+            type: string;
+            id: string;
+            name: string;
+        }
+        export type BlueprintTestPredicate = {
+            operator: "resource_included";
+            target_key: string;
+        } | {
+            operator: "resource_references";
+            target_key: string;
+            expected_target_key: string;
+        } | {
+            operator: "config_enabled";
+            target_key: string;
+        } | {
+            operator: "workflow_task_required";
+            target_key: string;
+            task_key: string;
+        };
+        export interface BlueprintTestResourceEvidence {
+            type: string;
+            id: string;
+            key: string;
+            membership_state: "included" | "excluded" | "absent";
+            source_state: "read" | "source_unreadable" | "unsupported" | "not_read";
+            checked_at?: string; // date-time
+            fingerprint?: string; // ^[a-f0-9]{64}$
+            /**
+             * At most 10000 items; enforced by the service boundary.
+             */
+            references: {
+                target_key: string;
+                path: string;
+                /**
+                 * At most 1000 items; enforced by the service boundary.
+                 */
+                candidate_target_keys?: string[];
+            }[];
+            dependency_coverage: "complete" | "incomplete";
+            enabled?: {
+                path: string;
+                value: boolean;
+            };
+            tasks_complete?: boolean;
+            /**
+             * At most 1000 items; enforced by the service boundary.
+             */
+            tasks: {
+                key: string;
+                path: string;
+                required?: boolean;
+                manual: boolean;
+                task_type?: "MANUAL" | "AUTOMATION" | "DECISION" | "AI_AGENT";
+            }[];
+        }
+        export interface BlueprintTestRun {
+            id: string; // uuid
+            org_id: string;
+            blueprint_id: string;
+            incarnation_id: string; // uuid
+            test_case_id: string; // uuid
+            test_revision: number;
+            expectation: string;
+            title: string;
+            created_by: CallerIdentity;
+            created_at: string; // date-time
+            expires_at: string; // date-time
+            status: "queued" | "running" | "completed" | "failed";
+            confirmation_hash?: string; // ^[a-f0-9]{64}$
+            membership_fingerprint?: string; // ^[a-f0-9]{64}$
+            result?: BlueprintTestRunResult;
+            error?: {
+                code: "expired" | "timeout" | "invoke_failed" | "worker_failed";
+            };
+            superseded?: boolean;
+            stale: boolean;
+        }
+        export interface BlueprintTestRunError {
+            status: number;
+            code: "invalid_request" | "unauthorized" | "forbidden" | "not_found" | "conflict" | "checks_already_confirmed" | "confirmation_required" | "portable_test_unavailable" | "active_run" | "org_run_limit" | "session_expiring" | "credential_invalid" | "permissions_unavailable" | "permission_denied" | "feature_unavailable" | "run_unavailable" | "storage_conflict" | "v2_case";
+            /**
+             * Sent with v2_case (false); a v2 case runs through the test suite.
+             */
+            retriable?: boolean;
+            active_run_id?: string; // uuid
+            retry_after_seconds?: number;
+        }
+        export interface BlueprintTestRunInput {
+            expected_revision: number;
+        }
+        export interface BlueprintTestRunPage {
+            /**
+             * At most 50 items; pages may end early at a 2MiB JSON byte budget. Follow next_cursor to continue without skipped runs.
+             */
+            results: BlueprintTestRun[];
+            next_cursor?: string;
+        }
+        export interface BlueprintTestRunResult {
+            verdict: "PASSED" | "FAILED" | "CANNOT_VERIFY";
+            /**
+             * At most 10000 items; enforced by the service boundary.
+             */
+            checks: BlueprintTestCheckResult[];
+            coverage: {
+                complete: boolean;
+                /**
+                 * At most 10000 items; enforced by the service boundary.
+                 */
+                boundaries: {
+                    key?: string;
+                    path?: string;
+                    reason: string; // ^[a-z][a-z0-9_]{0,79}$
+                }[];
+                supported_clauses: number;
+                total_clauses: number;
+            };
+            fingerprints: {
+                [name: string]: string; // ^[a-f0-9]{64}$
+            };
+            evaluator_version: "1";
+            checked_at: string; // date-time
+            /**
+             * At most 1000 items; enforced by the service boundary.
+             */
+            evidence?: BlueprintTestResourceEvidence[];
+            evidence_omitted_count: number;
+            dependency_validation?: BlueprintTestDependencyValidation;
+            interpretation_proposal?: BlueprintTestInterpretationProposal;
+            requires_confirmation?: true;
+        }
+        export interface BlueprintTestSuite {
+            cases: {
+                case: BlueprintTestCase;
+                latest?: CaseResultRow;
+                main_resource?: BlueprintTestMainResource;
+                resource_types?: string[];
+                resource_count?: number;
+            }[];
+            summary: /* Over all cases of the blueprint, not only the page. v1 cases count as needs_reinterpretation when migration flagged them, otherwise as never_run. */ BlueprintTestSuiteSummary;
+            active_run?: SuiteRun;
+            last_run?: SuiteRun;
+            /**
+             * The blueprint's newest suggestion generation (current incarnation). `running` while queued or generating,
+             * `finished` once completed (read it via the suggestions endpoint). Omitted when there is none, or the newest
+             * one failed, expired or belongs to an older incarnation.
+             *
+             */
+            latest_suggestions?: {
+                generation_id: string; // uuid
+                status: "running" | "finished";
+                created_at: string; // date-time
+            };
+            coverage?: BlueprintTestCoverage;
+            next_cursor?: string;
+        }
+        export interface BlueprintTestSuiteError {
+            status: number;
+            code: "invalid_request" | "unauthorized" | "forbidden" | "not_found" | "conflict" | "credential_invalid" | "permissions_unavailable" | "permission_denied" | "feature_unavailable" | "session_expiring" | "storage_conflict" | "suite_unavailable" | "v2_case" | "active_generation" | "active_suite_run" | "org_run_limit" | "suggestions_stale" | "unknown_suggestion" | "suggestion_acceptance_changed" | "suggestion_input_too_large" | "generation_not_running" | "generation_submitting" | "invalid_clauses" | "not_implemented" | "interpretation_input_too_large" | "interpretation_incomplete" | "interpretation_not_ready" | "interpretation_used" | "confirmation_required";
+            /**
+             * Whether repeating the same request later can succeed.
+             */
+            retriable: boolean;
+            /**
+             * With active_suite_run.
+             */
+            active_run_id?: string; // uuid
+            /**
+             * With active_generation, when known. The generation or interpretation that is running.
+             */
+            generation_id?: string; // uuid
+            /**
+             * With org_run_limit and storage_conflict; also sent as the retry-after header.
+             */
+            retry_after_seconds?: number;
+            /**
+             * With suggestions_stale. The requested suggestion ids that are test cases now.
+             */
+            accepted_ids?: string /* ^[0-9a-f]{64}$ */[];
+            /**
+             * With unknown_suggestion. How many requested ids the generation does not have, counting ids accepted from it whose test case has since been deleted.
+             */
+            count?: number;
+        }
+        /**
+         * Over all cases of the blueprint, not only the page. v1 cases count as needs_reinterpretation when migration flagged them, otherwise as never_run.
+         */
+        export interface BlueprintTestSuiteSummary {
+            passed: number;
+            failed: number;
+            cannot_verify: number;
+            never_run: number;
+            stale: number;
+            needs_reinterpretation: number;
+        }
+        /**
+         * An AI-written plain-language title in both UI languages, checked by deterministic guardrails before it is
+         * stored. Optional: absent when the title step gave none (or for items stored before titles existed); the UI
+         * then renders the sentence. On a test case (schema version 2 only): the title of the suggestion it was accepted
+         * from, kept on duplicates.
+         *
+         */
+        export interface BlueprintTestTitles {
+            en: string;
+            de: string;
+        }
+        export interface BlueprintTestUnreadableResource {
+            type: string;
+            id: string;
+            reason: string; // ^(empty_payload|invalid_payload|fetch_failed|http_\d{3})$
+        }
+        export interface BlueprintV1TestCaseMigration {
+            migrated: number;
+            needs_reinterpretation: number;
+            cases: ({
+                case_id: string;
+                result: "migrated";
+                clauses: {
+                    [name: string]: any;
+                }[];
+            } | {
+                case_id: string;
+                result: "needs_reinterpretation";
+                reason: string; // ^[a-z0-9_]{1,64}$
+            })[];
         }
         export interface BlueprintVerificationJob {
             id?: /**
@@ -953,6 +3187,20 @@ declare namespace Components {
                 events?: BlueprintJobEvent[];
                 triggered_at?: string; // date-time
                 created_by?: CallerIdentity;
+                source_drift?: /**
+                 * V3 live-source plan capture only. Available on the install job and destination
+                 * blueprint plan. Only confirmed owning-API NotFound/404 reads may be auto-skipped; null, permission,
+                 * transport, server errors and missing ids remain strict capture failures.
+                 * Complete details are hydrated from durable storage on authenticated GETs.
+                 * For source_resources_missing, errors[].data contains missing_count,
+                 * exclude_count and source_drift_s3_key only. Poll getBlueprintJob even if
+                 * no destination blueprint was created. Exclude these by starting a new install
+                 * with the complete exclude_addresses list in options.resources_to_ignore;
+                 * it includes gone resources and all transitive referrers. Refresh the SOURCE
+                 * blueprint using syncDependencies, wait for that job, then start a new plan.
+                 *
+                 */
+                V3SourceDrift;
                 job_type?: "install";
                 source_blueprint_id?: /**
                  * ID of a blueprint
@@ -1053,7 +3301,83 @@ declare namespace Components {
              */
             token_id?: string;
         }
+        export interface CaseResultRow {
+            case_id: string; // uuid
+            case_revision: number;
+            clauses_hash: string;
+            membership_fingerprint: string;
+            /**
+             * stale means the result no longer describes the current case revision, clauses or blueprint membership; a stale result carries no verdicts.
+             */
+            status: "PASSED" | "FAILED" | "CANNOT_VERIFY" | "stale";
+            /**
+             * no_clauses means the case has no clauses, so nothing was verified.
+             */
+            reason?: "no_clauses";
+            results: ClauseResultView[];
+            run_id?: string; // uuid
+            finished_at?: string; // date-time
+        }
+        export interface ClauseEvidenceView {
+            node_id: string;
+            resource_id: string;
+            resource_type: string;
+            label: string;
+            path?: string;
+            expected?: any;
+            actual?: any;
+        }
+        export interface ClauseResultView {
+            clause_id: string;
+            verdict: "PASSED" | "FAILED" | "CANNOT_VERIFY";
+            /**
+             * A reason code (for example an engine CANNOT_VERIFY reason, or stale).
+             */
+            reason?: string;
+            sentence: /* A translation key and its parameters. The UI renders the text; the server never returns sentences. */ Sentence;
+            /**
+             * Sorted by node id, then path.
+             */
+            evidence: [
+                ClauseEvidenceView?,
+                ClauseEvidenceView?,
+                ClauseEvidenceView?,
+                ClauseEvidenceView?,
+                ClauseEvidenceView?,
+                ClauseEvidenceView?,
+                ClauseEvidenceView?,
+                ClauseEvidenceView?,
+                ClauseEvidenceView?,
+                ClauseEvidenceView?,
+                ClauseEvidenceView?,
+                ClauseEvidenceView?,
+                ClauseEvidenceView?,
+                ClauseEvidenceView?,
+                ClauseEvidenceView?,
+                ClauseEvidenceView?,
+                ClauseEvidenceView?,
+                ClauseEvidenceView?,
+                ClauseEvidenceView?,
+                ClauseEvidenceView?
+            ];
+            evidence_truncated?: boolean;
+            candidates?: string[];
+        }
         export interface CommonBlueprintFields {
+            source_drift?: /**
+             * V3 live-source plan capture only. Available on the install job and destination
+             * blueprint plan. Only confirmed owning-API NotFound/404 reads may be auto-skipped; null, permission,
+             * transport, server errors and missing ids remain strict capture failures.
+             * Complete details are hydrated from durable storage on authenticated GETs.
+             * For source_resources_missing, errors[].data contains missing_count,
+             * exclude_count and source_drift_s3_key only. Poll getBlueprintJob even if
+             * no destination blueprint was created. Exclude these by starting a new install
+             * with the complete exclude_addresses list in options.resources_to_ignore;
+             * it includes gone resources and all transitive referrers. Refresh the SOURCE
+             * blueprint using syncDependencies, wait for that job, then start a new plan.
+             *
+             */
+            V3SourceDrift;
             id?: /**
              * ID of a blueprint
              * example:
@@ -1556,6 +3880,20 @@ declare namespace Components {
             source_auth_token?: string; // password
         }
         export interface CustomBlueprint {
+            source_drift?: /**
+             * V3 live-source plan capture only. Available on the install job and destination
+             * blueprint plan. Only confirmed owning-API NotFound/404 reads may be auto-skipped; null, permission,
+             * transport, server errors and missing ids remain strict capture failures.
+             * Complete details are hydrated from durable storage on authenticated GETs.
+             * For source_resources_missing, errors[].data contains missing_count,
+             * exclude_count and source_drift_s3_key only. Poll getBlueprintJob even if
+             * no destination blueprint was created. Exclude these by starting a new install
+             * with the complete exclude_addresses list in options.resources_to_ignore;
+             * it includes gone resources and all transitive referrers. Refresh the SOURCE
+             * blueprint using syncDependencies, wait for that job, then start a new plan.
+             *
+             */
+            V3SourceDrift;
             id?: /**
              * ID of a blueprint
              * example:
@@ -1844,6 +4182,20 @@ declare namespace Components {
             source_type: "custom";
         }
         export interface DeployedBlueprint {
+            source_drift?: /**
+             * V3 live-source plan capture only. Available on the install job and destination
+             * blueprint plan. Only confirmed owning-API NotFound/404 reads may be auto-skipped; null, permission,
+             * transport, server errors and missing ids remain strict capture failures.
+             * Complete details are hydrated from durable storage on authenticated GETs.
+             * For source_resources_missing, errors[].data contains missing_count,
+             * exclude_count and source_drift_s3_key only. Poll getBlueprintJob even if
+             * no destination blueprint was created. Exclude these by starting a new install
+             * with the complete exclude_addresses list in options.resources_to_ignore;
+             * it includes gone resources and all transitive referrers. Refresh the SOURCE
+             * blueprint using syncDependencies, wait for that job, then start a new plan.
+             *
+             */
+            V3SourceDrift;
             id?: /**
              * ID of a blueprint
              * example:
@@ -2175,6 +4527,20 @@ declare namespace Components {
             diff_type?: "value_changed" | "field_missing_in_destination" | "field_missing_in_source" | "type_mismatch";
         }
         export interface FileBlueprint {
+            source_drift?: /**
+             * V3 live-source plan capture only. Available on the install job and destination
+             * blueprint plan. Only confirmed owning-API NotFound/404 reads may be auto-skipped; null, permission,
+             * transport, server errors and missing ids remain strict capture failures.
+             * Complete details are hydrated from durable storage on authenticated GETs.
+             * For source_resources_missing, errors[].data contains missing_count,
+             * exclude_count and source_drift_s3_key only. Poll getBlueprintJob even if
+             * no destination blueprint was created. Exclude these by starting a new install
+             * with the complete exclude_addresses list in options.resources_to_ignore;
+             * it includes gone resources and all transitive referrers. Refresh the SOURCE
+             * blueprint using syncDependencies, wait for that job, then start a new plan.
+             *
+             */
+            V3SourceDrift;
             id?: /**
              * ID of a blueprint
              * example:
@@ -2468,9 +4834,19 @@ declare namespace Components {
             };
             code?: FormattedErrorCodes;
             data?: {
+                missing_count?: number;
+                exclude_count?: number;
+                /**
+                 * Durable details pointer; authenticated job GET hydrates source_drift with the complete lists.
+                 */
+                source_drift_s3_key?: string;
                 formattedResource?: FormattedErrorData;
                 resource?: string;
                 resourceDependency?: string;
+                /**
+                 * Another resource that already holds the id the reported resource needs (custom_schema_id_conflict)
+                 */
+                conflictingResource?: FormattedErrorData;
                 resources?: string[];
                 addresses?: string[];
                 originalError?: string;
@@ -2488,7 +4864,7 @@ declare namespace Components {
                 planned?: number;
             };
         }
-        export type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference";
+        export type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference" | "source_resources_missing" | "custom_schema_id_conflict" | "custom_schema_check_unavailable";
         export interface FormattedErrorData {
             id?: string;
             name?: string;
@@ -3159,6 +5535,20 @@ declare namespace Components {
             updated_at?: string; // date-time
         }
         export interface MarketplaceBlueprint {
+            source_drift?: /**
+             * V3 live-source plan capture only. Available on the install job and destination
+             * blueprint plan. Only confirmed owning-API NotFound/404 reads may be auto-skipped; null, permission,
+             * transport, server errors and missing ids remain strict capture failures.
+             * Complete details are hydrated from durable storage on authenticated GETs.
+             * For source_resources_missing, errors[].data contains missing_count,
+             * exclude_count and source_drift_s3_key only. Poll getBlueprintJob even if
+             * no destination blueprint was created. Exclude these by starting a new install
+             * with the complete exclude_addresses list in options.resources_to_ignore;
+             * it includes gone resources and all transitive referrers. Refresh the SOURCE
+             * blueprint using syncDependencies, wait for that job, then start a new plan.
+             *
+             */
+            V3SourceDrift;
             id?: /**
              * ID of a blueprint
              * example:
@@ -3500,6 +5890,22 @@ declare namespace Components {
             status: "draft" | "live" | "archived";
             created_at?: string; // date-time
             updated_at?: string; // date-time
+            /**
+             * Snapshot of what is currently live
+             */
+            live?: {
+                version_id?: string;
+                version_name?: string | null;
+                published_at?: string; // date-time
+                installation_link?: string | null;
+                content?: MarketplaceListingUpdate;
+            } | null;
+            webflow_item_id?: string | null;
+            webflow_sync?: {
+                status?: "ok" | "failed";
+                at?: string; // date-time
+                error?: string | null;
+            } | null;
         }
         export interface MarketplaceListingUpdate {
             name?: string;
@@ -3541,6 +5947,13 @@ declare namespace Components {
             id: string; // uuid
             listing_id: string;
             status: "draft" | "published" | "archived";
+            /**
+             * Blueprint release tag whose zip this version ships
+             */
+            tag_id?: string | null;
+            /**
+             * Name of the tag this version ships
+             */
             version_name?: string | null;
             draft_label: string;
             update_note?: string | null;
@@ -3551,7 +5964,206 @@ declare namespace Components {
             recommended_apps?: string[] | null;
             created_at: string; // date-time
             published_at?: string | null; // date-time
+            created_by?: {
+                /**
+                 * a human readable name of the caller (e.g. user name, token name or email address)
+                 * example:
+                 * manifest@epilot.cloud
+                 */
+                name?: any;
+                /**
+                 * epilot organization id
+                 * example:
+                 * 911690
+                 */
+                org_id: string;
+                /**
+                 * epilot user id, when called by a user
+                 * example:
+                 * 11001045
+                 */
+                user_id?: string;
+                /**
+                 * token id, when called by API token
+                 * example:
+                 * api_5ZugdRXasLfWBypHi93Fk
+                 */
+                token_id?: string;
+            } | null;
+            published_by?: {
+                /**
+                 * a human readable name of the caller (e.g. user name, token name or email address)
+                 * example:
+                 * manifest@epilot.cloud
+                 */
+                name?: any;
+                /**
+                 * epilot organization id
+                 * example:
+                 * 911690
+                 */
+                org_id: string;
+                /**
+                 * epilot user id, when called by a user
+                 * example:
+                 * 11001045
+                 */
+                user_id?: string;
+                /**
+                 * token id, when called by API token
+                 * example:
+                 * api_5ZugdRXasLfWBypHi93Fk
+                 */
+                token_id?: string;
+            } | null;
+            package?: MarketplaceListingVersionPackage;
+            content?: {
+                name?: string;
+                slug?: string;
+                logo?: string | null;
+                documentation_url?: string | null;
+                pricing_type?: "free" | "paid" | "freemium" | "contact_us";
+                support_email?: string | null;
+                portal_description?: string | null;
+                teaser_name?: string | null;
+                teaser_short_description?: string | null;
+                teaser_thumbnail?: string | null;
+                details_page_title?: string | null;
+                details_page_description?: string | null;
+                details_page_hero_image?: string | null;
+                details_page_carousel?: string[] | null;
+                resources_section_description?: string | null;
+                resources_section_benefits_title?: string | null;
+                resources_section_benefits_list?: string | null;
+                resources_section_process_details?: string | null;
+                partner?: string | null;
+                partner_subtext?: string | null;
+                partner_logo?: string | null;
+                partner_website_link?: string | null;
+                last_updated_on?: string | null;
+                requires_customer_portal?: boolean | null;
+                process_details_section_title?: string | null;
+                is_new_blueprint?: boolean | null;
+                available_in?: string | null;
+                testimonials?: string[] | null;
+                installation_link?: string | null;
+                installation_slug?: string | null;
+                demo_form_link?: string | null;
+                order?: number | null;
+                categories?: string[] | null;
+                main_category?: string[] | null;
+            } | null;
+            /**
+             * When `content` was last published; equals `published_at` until a text-only publish
+             */
+            content_published_at?: string | null; // date-time
+            content_published_by?: {
+                /**
+                 * a human readable name of the caller (e.g. user name, token name or email address)
+                 * example:
+                 * manifest@epilot.cloud
+                 */
+                name?: any;
+                /**
+                 * epilot organization id
+                 * example:
+                 * 911690
+                 */
+                org_id: string;
+                /**
+                 * epilot user id, when called by a user
+                 * example:
+                 * 11001045
+                 */
+                user_id?: string;
+                /**
+                 * token id, when called by API token
+                 * example:
+                 * api_5ZugdRXasLfWBypHi93Fk
+                 */
+                token_id?: string;
+            } | null;
+            /**
+             * Earlier texts of this version, oldest first, each replaced by a text-only publish
+             */
+            content_revisions?: {
+                content?: {
+                    name?: string;
+                    slug?: string;
+                    logo?: string | null;
+                    documentation_url?: string | null;
+                    pricing_type?: "free" | "paid" | "freemium" | "contact_us";
+                    support_email?: string | null;
+                    portal_description?: string | null;
+                    teaser_name?: string | null;
+                    teaser_short_description?: string | null;
+                    teaser_thumbnail?: string | null;
+                    details_page_title?: string | null;
+                    details_page_description?: string | null;
+                    details_page_hero_image?: string | null;
+                    details_page_carousel?: string[] | null;
+                    resources_section_description?: string | null;
+                    resources_section_benefits_title?: string | null;
+                    resources_section_benefits_list?: string | null;
+                    resources_section_process_details?: string | null;
+                    partner?: string | null;
+                    partner_subtext?: string | null;
+                    partner_logo?: string | null;
+                    partner_website_link?: string | null;
+                    last_updated_on?: string | null;
+                    requires_customer_portal?: boolean | null;
+                    process_details_section_title?: string | null;
+                    is_new_blueprint?: boolean | null;
+                    available_in?: string | null;
+                    testimonials?: string[] | null;
+                    installation_link?: string | null;
+                    installation_slug?: string | null;
+                    demo_form_link?: string | null;
+                    order?: number | null;
+                    categories?: string[] | null;
+                    main_category?: string[] | null;
+                } | null;
+                published_at?: string | null; // date-time
+                published_by?: {
+                    /**
+                     * a human readable name of the caller (e.g. user name, token name or email address)
+                     * example:
+                     * manifest@epilot.cloud
+                     */
+                    name?: any;
+                    /**
+                     * epilot organization id
+                     * example:
+                     * 911690
+                     */
+                    org_id: string;
+                    /**
+                     * epilot user id, when called by a user
+                     * example:
+                     * 11001045
+                     */
+                    user_id?: string;
+                    /**
+                     * token id, when called by API token
+                     * example:
+                     * api_5ZugdRXasLfWBypHi93Fk
+                     */
+                    token_id?: string;
+                } | null;
+            }[];
         }
+        export type MarketplaceListingVersionPackage = {
+            status: "building" | "ready" | "failed";
+            /**
+             * V3 publish job that built the zip
+             */
+            job_id?: string;
+            bucket?: string;
+            key?: string;
+            public_url?: string | null;
+            installation_link?: string | null;
+            error?: string | null;
+        } | null;
         export interface MergeBaseProvenance {
             rung: "apply_evidence" | "none";
             job_id?: string;
@@ -3952,7 +6564,7 @@ declare namespace Components {
         /**
          * Type of the resource
          */
-        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox";
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox" | "event_catalog_event";
         export interface ResourceReplacement {
             /**
              * Original resource ID to be replaced
@@ -4151,6 +6763,21 @@ declare namespace Components {
             pipeline_id?: string;
         }
         /**
+         * A translation key and its parameters. The UI renders the text; the server never returns sentences.
+         */
+        export interface Sentence {
+            key: string;
+            params: {
+                [name: string]: /* A sentence parameter. Strings, lists and objects of parameters; never prose. */ SentenceParamValue;
+            };
+        }
+        /**
+         * A sentence parameter. Strings, lists and objects of parameters; never prose.
+         */
+        export type SentenceParamValue = /* A sentence parameter. Strings, lists and objects of parameters; never prose. */ string | /* A sentence parameter. Strings, lists and objects of parameters; never prose. */ SentenceParamValue[] | {
+            [name: string]: /* A sentence parameter. Strings, lists and objects of parameters; never prose. */ SentenceParamValue;
+        };
+        /**
          * A resource that was requested (or discovered as a dependency) but was not
          * added to the Blueprint. Reasons are stable machine-readable codes.
          *
@@ -4207,6 +6834,75 @@ declare namespace Components {
              */
             add_dependencies_recommended?: boolean;
         }
+        export interface Suggestion {
+            /**
+             * sha256 of the canonical clauses.
+             */
+            id: string; // ^[0-9a-f]{64}$
+            shape: /* Suggestion shape. `other` holds suggestions that fit none of the named shapes. */ BlueprintTestCaseShape;
+            subject: {
+                node_id: string;
+                resource_id: string;
+                resource_type: string;
+                /**
+                 * The graph label of the subject.
+                 */
+                label: string;
+            };
+            clauses: {
+                [name: string]: any;
+            }[];
+            sentences: /* A translation key and its parameters. The UI renders the text; the server never returns sentences. */ Sentence[];
+            titles?: /**
+             * An AI-written plain-language title in both UI languages, checked by deterministic guardrails before it is
+             * stored. Optional: absent when the title step gave none (or for items stored before titles existed); the UI
+             * then renders the sentence. On a test case (schema version 2 only): the title of the suggestion it was accepted
+             * from, kept on duplicates.
+             *
+             */
+            BlueprintTestTitles;
+            /**
+             * An existing v2 test case that already holds every clause of this suggestion.
+             */
+            covered_by?: {
+                case_id: string; // uuid
+                title?: string;
+            };
+            /**
+             * Always set on GET, not stored.
+             */
+            why_code?: "untested_resource" | "new_check";
+            main_resource?: BlueprintTestMainResource;
+            /**
+             * Always set on GET, not stored.
+             */
+            resource_types?: string[];
+        }
+        export interface SuiteRun {
+            id: string; // uuid
+            created_by?: CallerIdentity;
+            /**
+             * The v2 test cases this run covered. Absent when the run covered every v2 test case.
+             */
+            case_ids?: string /* uuid */[];
+            status: "queued" | "running" | "completed" | "failed";
+            created_at: string; // date-time
+            finished_at?: string; // date-time
+            digest?: string;
+            unreadable?: BlueprintTestUnreadableResource[];
+            counts?: {
+                passed: number;
+                failed: number;
+                cannot_verify: number;
+                superseded: number;
+            };
+            /**
+             * v1 cases the suite does not evaluate.
+             */
+            skipped_v1?: number;
+            membership_fingerprint?: string;
+            error?: string; // ^[a-z0-9_]{1,64}$
+        }
         export interface UniquenessCriteria {
             org_id: string;
             resource_type: /* Resource type for which custom uniqueness criteria can be configured. */ UniquenessCriteriaResourceType;
@@ -4229,6 +6925,22 @@ declare namespace Components {
              */
             filename: string;
         }
+        export interface V3MissingSourceResource {
+            /**
+             * Stored source blueprint resource address; use this value for resources_to_ignore.
+             */
+            address: string;
+            type: /* Type of the resource */ ResourceNodeType;
+            name: string;
+            /**
+             * Stored source identity, including composite ids such as schema:uuid or family:name.
+             */
+            id: string;
+            /**
+             * Direct enabled referrer addresses after skippable gone-only cascades are removed.
+             */
+            referenced_by: string[];
+        }
         export interface V3ResourceProgressEntry {
             lineage_id: string;
             type: string;
@@ -4250,6 +6962,45 @@ declare namespace Components {
             error_data?: {
                 [name: string]: any;
             };
+        }
+        /**
+         * V3 live-source plan capture only. Available on the install job and destination
+         * blueprint plan. Only confirmed owning-API NotFound/404 reads may be auto-skipped; null, permission,
+         * transport, server errors and missing ids remain strict capture failures.
+         * Complete details are hydrated from durable storage on authenticated GETs.
+         * For source_resources_missing, errors[].data contains missing_count,
+         * exclude_count and source_drift_s3_key only. Poll getBlueprintJob even if
+         * no destination blueprint was created. Exclude these by starting a new install
+         * with the complete exclude_addresses list in options.resources_to_ignore;
+         * it includes gone resources and all transitive referrers. Refresh the SOURCE
+         * blueprint using syncDependencies, wait for that job, then start a new plan.
+         *
+         */
+        export interface V3SourceDrift {
+            /**
+             * Confirmed gone identities skipped automatically because no surviving enabled resource needs them.
+             */
+            removed: V3SourceResource[];
+            /**
+             * Present on blocked plans; all non-excluded gone identities, including unreferenced entries with empty referenced_by.
+             */
+            missing?: V3MissingSourceResource[];
+            /**
+             * Complete recovery scope including gone aliases and transitive referrers; send unchanged in options.resources_to_ignore on a new plan.
+             */
+            exclude_addresses?: string[];
+        }
+        export interface V3SourceResource {
+            /**
+             * Stored source blueprint resource address; use this value for resources_to_ignore.
+             */
+            address: string;
+            type: /* Type of the resource */ ResourceNodeType;
+            name: string;
+            /**
+             * Stored source identity, including composite ids such as schema:uuid or family:name.
+             */
+            id: string;
         }
         export interface VerificationSummary {
             total_resources?: number;
@@ -4281,6 +7032,26 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
+    namespace AcceptBlueprintGraphSuggestions {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type GenerationId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            generation_id: Parameters.GenerationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.BlueprintGraphSuggestionAcceptInput;
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintGraphSuggestionAcceptance;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $409 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
+        }
+    }
     namespace AddBlueprintNote {
         namespace Parameters {
             export type BlueprintId = /**
@@ -4415,6 +7186,32 @@ declare namespace Paths {
             }
         }
     }
+    namespace BatchDeleteBlueprintTestCases {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+        }
+        export type RequestBody = Components.Schemas.BlueprintTestCaseBatchDeleteInput;
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintTestCaseBatchDeleteResult;
+            export interface $400 {
+            }
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $500 {
+            }
+            export interface $503 {
+            }
+        }
+    }
     namespace BulkAddBlueprintResources {
         namespace Parameters {
             /**
@@ -4521,6 +7318,47 @@ declare namespace Paths {
             export type $200 = Components.Schemas.BlueprintJob;
         }
     }
+    namespace CheckBlueprintTestSuggestion {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type GenerationId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            generation_id: Parameters.GenerationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.BlueprintSuggestionCheck;
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintSuggestionCheckResult;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $409 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
+        }
+    }
+    namespace ConfirmBlueprintTestInterpretationV2 {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type InterpretationId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            interpretation_id: Parameters.InterpretationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.BlueprintTestInterpretationConfirmInput;
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintTestInterpretationConfirmation;
+            export type $201 = Components.Schemas.BlueprintTestInterpretationConfirmation;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $409 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
+        }
+    }
     namespace ContinueInstallationJob {
         namespace Parameters {
             export type JobId = /**
@@ -4542,6 +7380,248 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.Blueprint;
         namespace Responses {
             export type $200 = Components.Schemas.Blueprint;
+            export interface $409 {
+            }
+        }
+    }
+    namespace CreateBlueprintGraphSuggestions {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+        }
+        export interface RequestBody {
+        }
+        namespace Responses {
+            export type $202 = Components.Schemas.BlueprintGraphSuggestionsStarted;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $409 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
+        }
+    }
+    namespace CreateBlueprintTag {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        export interface RequestBody {
+            /**
+             * Semantic version, higher than every release tag of this blueprint
+             * example:
+             * 1.2.0
+             */
+            name: string;
+            note?: string | null;
+        }
+        namespace Responses {
+            export type $202 = Components.Schemas.BlueprintTag;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace CreateBlueprintTestCase {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+        }
+        export type RequestBody = Components.Schemas.BlueprintTestCaseInput;
+        namespace Responses {
+            export type $201 = Components.Schemas.BlueprintTestCase;
+            export interface $400 {
+            }
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $500 {
+            }
+            export interface $503 {
+            }
+        }
+    }
+    namespace CreateBlueprintTestInterpretation {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+        }
+        export type RequestBody = Components.Schemas.BlueprintTestInterpretationInput;
+        namespace Responses {
+            export type $202 = Components.Schemas.BlueprintTestInterpretationStarted;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $409 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
+        }
+    }
+    namespace CreateBlueprintTestRun {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type TestCaseId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            test_case_id: Parameters.TestCaseId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.BlueprintTestRunInput;
+        namespace Responses {
+            export type $202 = Components.Schemas.BlueprintTestRun;
+            export type $400 = Components.Schemas.BlueprintTestRunError;
+            export type $401 = Components.Schemas.BlueprintTestRunError;
+            export type $403 = Components.Schemas.BlueprintTestRunError;
+            export type $404 = Components.Schemas.BlueprintTestRunError;
+            export type $409 = Components.Schemas.BlueprintTestRunError;
+            export type $429 = Components.Schemas.BlueprintTestRunError;
+            export type $503 = Components.Schemas.BlueprintTestRunError;
+        }
+    }
+    namespace CreateBlueprintTestSuiteRun {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+        }
+        export interface RequestBody {
+            /**
+             * Run only these v2 test cases. Omit to run every v2 test case.
+             */
+            case_ids?: [
+                string,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?
+            ];
+        }
+        namespace Responses {
+            export type $202 = Components.Schemas.SuiteRun;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $409 = Components.Schemas.BlueprintTestSuiteError;
+            export type $429 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
         }
     }
     namespace CreateBulkInstallV3 {
@@ -4608,6 +7688,7 @@ declare namespace Paths {
         export interface RequestBody {
             name: string;
             slug?: string;
+            installation_slug?: string; // ^[A-Za-z0-9_-]+$
         }
         namespace Responses {
             export type $201 = Components.Schemas.MarketplaceListing;
@@ -4622,9 +7703,25 @@ declare namespace Paths {
         export interface PathParameters {
             listing_id: Parameters.ListingId;
         }
+        export interface RequestBody {
+            /**
+             * Ready release tag of the listing's blueprint
+             */
+            tag_id?: string;
+            /**
+             * Copy this version's tag, required features and recommended apps
+             */
+            from_version_id?: string;
+        }
         namespace Responses {
             export type $201 = Components.Schemas.MarketplaceListingVersion;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
             export interface $404 {
+            }
+            export interface $409 {
             }
         }
     }
@@ -4719,6 +7816,27 @@ declare namespace Paths {
             }
         }
     }
+    namespace CreateSourceConfirmedRun {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type TestCaseId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            test_case_id: Parameters.TestCaseId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.BlueprintTestRunInput;
+        namespace Responses {
+            export type $202 = Components.Schemas.BlueprintTestRun;
+            export type $400 = Components.Schemas.BlueprintTestRunError;
+            export type $401 = Components.Schemas.BlueprintTestRunError;
+            export type $403 = Components.Schemas.BlueprintTestRunError;
+            export type $404 = Components.Schemas.BlueprintTestRunError;
+            export type $409 = Components.Schemas.BlueprintTestRunError;
+            export type $429 = Components.Schemas.BlueprintTestRunError;
+            export type $503 = Components.Schemas.BlueprintTestRunError;
+        }
+    }
     namespace DeleteBlueprint {
         namespace Parameters {
             export type BlueprintId = /**
@@ -4733,6 +7851,24 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.Blueprint;
+            export interface $409 {
+            }
+        }
+    }
+    namespace DeleteBlueprintAssistantSkill {
+        namespace Parameters {
+            export type SkillName = string; // ^[a-z0-9][a-z0-9-]{0,63}$
+        }
+        export interface PathParameters {
+            skill_name: Parameters.SkillName /* ^[a-z0-9][a-z0-9-]{0,63}$ */;
+        }
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
         }
     }
     namespace DeleteBlueprintNote {
@@ -4783,6 +7919,63 @@ declare namespace Paths {
             }
         }
     }
+    namespace DeleteBlueprintTag {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type TagId = string;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            tag_id: Parameters.TagId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+        }
+    }
+    namespace DeleteBlueprintTestCase {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type ExpectedRevision = number;
+            export type TestCaseId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            test_case_id: Parameters.TestCaseId /* uuid */;
+        }
+        export interface QueryParameters {
+            expected_revision: Parameters.ExpectedRevision;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $400 {
+            }
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $500 {
+            }
+            export interface $503 {
+            }
+        }
+    }
     namespace DeleteManifest {
         namespace Parameters {
             export type ManifestId = /**
@@ -4809,7 +8002,11 @@ declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
+            export interface $403 {
+            }
             export interface $404 {
+            }
+            export interface $502 {
             }
         }
     }
@@ -4831,6 +8028,54 @@ declare namespace Paths {
             export type $200 = /* Summary of an update merge plan. */ Components.Schemas.MergePlanReview;
             export type $404 = Components.Schemas.MergePlanError;
             export type $409 = Components.Schemas.MergePlanError;
+        }
+    }
+    namespace DownloadBlueprintTag {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type TagId = string;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            tag_id: Parameters.TagId;
+        }
+        namespace Responses {
+            export interface $200 {
+                download_url: string;
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+        }
+    }
+    namespace DuplicateBlueprintTestCase {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type TestCaseId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            test_case_id: Parameters.TestCaseId /* uuid */;
+        }
+        export interface RequestBody {
+            title?: string; // \S
+        }
+        namespace Responses {
+            export type $201 = Components.Schemas.BlueprintTestCase;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $409 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
         }
     }
     namespace ExportManifest {
@@ -4931,6 +8176,93 @@ declare namespace Paths {
             export type $200 = Components.Schemas.Blueprint;
         }
     }
+    namespace GetBlueprintAssistantConversation {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type ConversationId = string;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            conversation_id: Parameters.ConversationId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintAssistantConversation;
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace GetBlueprintAssistantSkill {
+        namespace Parameters {
+            export type SkillName = string; // ^[a-z0-9][a-z0-9-]{0,63}$
+        }
+        export interface PathParameters {
+            skill_name: Parameters.SkillName /* ^[a-z0-9][a-z0-9-]{0,63}$ */;
+        }
+        namespace Responses {
+            export interface $200 {
+                name: string;
+                description: string;
+                /**
+                 * Offered to new conversations of the organization.
+                 */
+                enabled: boolean;
+                /**
+                 * `SKILL.md` and the reference files, e.g. `references/messart.md`.
+                 */
+                files: string[];
+                /**
+                 * Total size of the files in bytes.
+                 */
+                size: number;
+                updated_at: string; // date-time
+                updated_by?: string;
+                updated_by_name?: string;
+                /**
+                 * File path to text, e.g. `SKILL.md`, `references/messart.md`.
+                 */
+                contents?: {
+                    [name: string]: string;
+                };
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace GetBlueprintGraphSuggestions {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type Cursor = string;
+            export type GenerationId = string; // uuid
+            export type Limit = number;
+            export type Shape = /* Suggestion shape. `other` holds suggestions that fit none of the named shapes. */ Components.Schemas.BlueprintTestCaseShape;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            generation_id: Parameters.GenerationId /* uuid */;
+        }
+        export interface QueryParameters {
+            shape?: Parameters.Shape;
+            limit?: Parameters.Limit;
+            cursor?: Parameters.Cursor;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintGraphSuggestionPage;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
+        }
+    }
     namespace GetBlueprintJob {
         namespace Parameters {
             export type JobId = /**
@@ -5003,6 +8335,139 @@ declare namespace Paths {
             export type $200 = /* Preview data for a blueprint before installation. Stored temporarily with TTL. */ Components.Schemas.BlueprintPreview;
             export interface $404 {
             }
+        }
+    }
+    namespace GetBlueprintTag {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type TagId = string;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            tag_id: Parameters.TagId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintTag;
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace GetBlueprintTestCase {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type Revision = number;
+            export type TestCaseId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            test_case_id: Parameters.TestCaseId /* uuid */;
+        }
+        export interface QueryParameters {
+            revision?: Parameters.Revision;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintTestCase;
+            export interface $400 {
+            }
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $500 {
+            }
+            export interface $503 {
+            }
+        }
+    }
+    namespace GetBlueprintTestInterpretation {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type InterpretationId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            interpretation_id: Parameters.InterpretationId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintTestInterpretationResult;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
+        }
+    }
+    namespace GetBlueprintTestRun {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type RunId = string; // uuid
+            export type TestCaseId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            test_case_id: Parameters.TestCaseId /* uuid */;
+            run_id: Parameters.RunId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintTestRun;
+            export type $400 = Components.Schemas.BlueprintTestRunError;
+            export type $401 = Components.Schemas.BlueprintTestRunError;
+            export type $403 = Components.Schemas.BlueprintTestRunError;
+            export type $404 = Components.Schemas.BlueprintTestRunError;
+            export type $409 = Components.Schemas.BlueprintTestRunError;
+            export type $429 = Components.Schemas.BlueprintTestRunError;
+            export type $503 = Components.Schemas.BlueprintTestRunError;
+        }
+    }
+    namespace GetBlueprintTestSuite {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type Cursor = string;
+            export type Limit = number;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+            cursor?: Parameters.Cursor;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintTestSuite;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
+        }
+    }
+    namespace GetBlueprintTestSuiteRun {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type RunId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            run_id: Parameters.RunId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.SuiteRun;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
         }
     }
     namespace GetBulkInstallV3 {
@@ -5123,8 +8588,31 @@ declare namespace Paths {
                 status: "draft" | "live" | "archived";
                 created_at?: string; // date-time
                 updated_at?: string; // date-time
+                /**
+                 * Snapshot of what is currently live
+                 */
+                live?: {
+                    version_id?: string;
+                    version_name?: string | null;
+                    published_at?: string; // date-time
+                    installation_link?: string | null;
+                    content?: Components.Schemas.MarketplaceListingUpdate;
+                } | null;
+                webflow_item_id?: string | null;
+                webflow_sync?: {
+                    status?: "ok" | "failed";
+                    at?: string; // date-time
+                    error?: string | null;
+                } | null;
+                /**
+                 * Versions without `resources` and `content`
+                 */
                 versions?: Components.Schemas.MarketplaceListingVersion[];
                 has_publishable_draft?: boolean;
+                /**
+                 * The listing text differs from the text of the live version; publish it with publishMarketplaceListingContent
+                 */
+                has_unpublished_content?: boolean;
             }
             export interface $404 {
             }
@@ -5178,8 +8666,31 @@ declare namespace Paths {
                 status: "draft" | "live" | "archived";
                 created_at?: string; // date-time
                 updated_at?: string; // date-time
+                /**
+                 * Snapshot of what is currently live
+                 */
+                live?: {
+                    version_id?: string;
+                    version_name?: string | null;
+                    published_at?: string; // date-time
+                    installation_link?: string | null;
+                    content?: Components.Schemas.MarketplaceListingUpdate;
+                } | null;
+                webflow_item_id?: string | null;
+                webflow_sync?: {
+                    status?: "ok" | "failed";
+                    at?: string; // date-time
+                    error?: string | null;
+                } | null;
+                /**
+                 * Versions without `resources` and `content`
+                 */
                 versions?: Components.Schemas.MarketplaceListingVersion[];
                 has_publishable_draft?: boolean;
+                /**
+                 * The listing text differs from the text of the live version; publish it with publishMarketplaceListingContent
+                 */
+                has_unpublished_content?: boolean;
             }
             export interface $404 {
             }
@@ -5235,6 +8746,28 @@ declare namespace Paths {
             export type $200 = Components.Schemas.RestorePreviewReport;
             export interface $404 {
             }
+        }
+    }
+    namespace GetSourceTestOperation {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type RunId = string; // uuid
+            export type TestCaseId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            test_case_id: Parameters.TestCaseId /* uuid */;
+            run_id: Parameters.RunId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintSourceTestOperation;
+            export type $400 = Components.Schemas.BlueprintTestRunError;
+            export type $401 = Components.Schemas.BlueprintTestRunError;
+            export type $403 = Components.Schemas.BlueprintTestRunError;
+            export type $404 = Components.Schemas.BlueprintTestRunError;
+            export type $409 = Components.Schemas.BlueprintTestRunError;
+            export type $429 = Components.Schemas.BlueprintTestRunError;
+            export type $503 = Components.Schemas.BlueprintTestRunError;
         }
     }
     namespace GetUniquenessCriteria {
@@ -5411,6 +8944,43 @@ declare namespace Paths {
             }
         }
     }
+    namespace ListBlueprintAssistantConversations {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type Mine = boolean;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        export interface QueryParameters {
+            mine?: Parameters.Mine;
+        }
+        namespace Responses {
+            export interface $200 {
+                results: Components.Schemas.BlueprintAssistantConversationSummary[];
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace ListBlueprintAssistantSkills {
+        namespace Responses {
+            export interface $200 {
+                results?: Components.Schemas.BlueprintAssistantSkill[];
+                defaults?: Components.Schemas.BlueprintAssistantDefaultSkill[];
+                limits?: {
+                    [name: string]: number;
+                };
+            }
+            export interface $403 {
+            }
+        }
+    }
     namespace ListBlueprintJobs {
         namespace Responses {
             export interface $200 {
@@ -5441,6 +9011,87 @@ declare namespace Paths {
             export type $400 = Components.Schemas.MergePlanError;
             export type $404 = Components.Schemas.MergePlanError;
             export type $409 = Components.Schemas.MergePlanError;
+        }
+    }
+    namespace ListBlueprintTags {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type Kind = /* `release`: a semantic version someone tagged. `sync`: recorded automatically for every sync, named by time, for debugging. */ Components.Schemas.BlueprintTagKind;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        export interface QueryParameters {
+            kind?: Parameters.Kind;
+        }
+        namespace Responses {
+            export interface $200 {
+                tags: Components.Schemas.BlueprintTag[];
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace ListBlueprintTestCases {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type Cursor = string;
+            export type Limit = number;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+            cursor?: Parameters.Cursor;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintTestCasePage;
+            export interface $400 {
+            }
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $500 {
+            }
+            export interface $503 {
+            }
+        }
+    }
+    namespace ListBlueprintTestRuns {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type Cursor = string;
+            export type Limit = number;
+            export type TestCaseId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            test_case_id: Parameters.TestCaseId /* uuid */;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+            cursor?: Parameters.Cursor;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintTestRunPage;
+            export type $400 = Components.Schemas.BlueprintTestRunError;
+            export type $401 = Components.Schemas.BlueprintTestRunError;
+            export type $403 = Components.Schemas.BlueprintTestRunError;
+            export type $404 = Components.Schemas.BlueprintTestRunError;
+            export type $409 = Components.Schemas.BlueprintTestRunError;
+            export type $429 = Components.Schemas.BlueprintTestRunError;
+            export type $503 = Components.Schemas.BlueprintTestRunError;
         }
     }
     namespace ListBlueprints {
@@ -5513,6 +9164,9 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
+                /**
+                 * Versions without `resources` and `content`
+                 */
                 versions?: Components.Schemas.MarketplaceListingVersion[];
             }
         }
@@ -5578,6 +9232,26 @@ declare namespace Paths {
                  */
                 readonly_types?: string[];
             }
+        }
+    }
+    namespace MigrateBlueprintV1TestCases {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+        }
+        export interface RequestBody {
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintV1TestCaseMigration;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $409 = Components.Schemas.BlueprintTestSuiteError;
+            export type $501 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
         }
     }
     namespace PreInstallBlueprint {
@@ -5679,6 +9353,27 @@ declare namespace Paths {
             }
         }
     }
+    namespace PublishMarketplaceListingContent {
+        namespace Parameters {
+            export type ListingId = string;
+        }
+        export interface PathParameters {
+            listing_id: Parameters.ListingId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MarketplaceListing;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $413 {
+            }
+        }
+    }
     namespace PublishMarketplaceListingVersion {
         namespace Parameters {
             export type ListingId = string;
@@ -5689,14 +9384,19 @@ declare namespace Paths {
             version_id: Parameters.VersionId;
         }
         export interface RequestBody {
-            version_name: string;
             update_note?: string | null;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.MarketplaceListingVersion;
+            export type $200 = Components.Schemas.MarketplaceListing;
             export interface $400 {
             }
+            export interface $403 {
+            }
             export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $413 {
             }
         }
     }
@@ -5718,6 +9418,26 @@ declare namespace Paths {
             export type $200 = Components.Schemas.UniquenessCriteria;
             export interface $400 {
             }
+        }
+    }
+    namespace QueryBlueprintSuggestionGraph {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type GenerationId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            generation_id: Parameters.GenerationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.BlueprintSuggestionGraphQuery;
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintSuggestionGraphQueryResult;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $409 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
         }
     }
     namespace ReplanBlueprintMergePlan {
@@ -5819,6 +9539,12 @@ declare namespace Paths {
         export interface PathParameters {
             job_id: Parameters.JobId;
         }
+        export interface RequestBody {
+            /**
+             * Token for the job's source org (e.g. the pipeline token). Needed for a cross-org job; never persisted.
+             */
+            source_auth_token?: string;
+        }
         namespace Responses {
             export interface $202 {
                 job_id?: /**
@@ -5838,6 +9564,71 @@ declare namespace Paths {
             }
             export interface $404 {
             }
+        }
+    }
+    namespace RollbackMarketplaceListingVersion {
+        namespace Parameters {
+            export type ListingId = string;
+            export type VersionId = string;
+        }
+        export interface PathParameters {
+            listing_id: Parameters.ListingId;
+            version_id: Parameters.VersionId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MarketplaceListing;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $413 {
+            }
+        }
+    }
+    namespace SendBlueprintAssistantMessage {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        export type RequestBody = Components.Schemas.BlueprintAssistantMessageRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintAssistantConversation;
+            export type $202 = Components.Schemas.BlueprintAssistantConversation;
+            export interface $403 {
+            }
+            export interface $409 {
+            }
+        }
+    }
+    namespace SubmitBlueprintTestSuggestions {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type GenerationId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            generation_id: Parameters.GenerationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.BlueprintSuggestionSubmission;
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintSuggestionSubmissionResult;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $409 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
         }
     }
     namespace SuggestBlueprintResources {
@@ -5870,6 +9661,23 @@ declare namespace Paths {
                  * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
                  */
                 Components.Schemas.BlueprintJobID;
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace SyncMarketplaceListing {
+        namespace Parameters {
+            export type ListingId = string;
+        }
+        export interface PathParameters {
+            listing_id: Parameters.ListingId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MarketplaceListing;
+            export interface $400 {
+            }
+            export interface $403 {
             }
             export interface $404 {
             }
@@ -5950,6 +9758,28 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.Blueprint;
         namespace Responses {
             export type $200 = Components.Schemas.Blueprint;
+            export interface $409 {
+            }
+        }
+    }
+    namespace UpdateBlueprintAssistantSkill {
+        namespace Parameters {
+            export type SkillName = string; // ^[a-z0-9][a-z0-9-]{0,63}$
+        }
+        export interface PathParameters {
+            skill_name: Parameters.SkillName /* ^[a-z0-9][a-z0-9-]{0,63}$ */;
+        }
+        export interface RequestBody {
+            enabled: boolean;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintAssistantSkill;
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
         }
     }
     namespace UpdateBlueprintMergePlanResolutions {
@@ -6023,6 +9853,34 @@ declare namespace Paths {
             }
         }
     }
+    namespace UpdateBlueprintTestCase {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type TestCaseId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            test_case_id: Parameters.TestCaseId /* uuid */;
+        }
+        export type RequestBody = /* `expectation` is required for schema version 1 and must be absent for schema version 2 (title-only rename). */ Components.Schemas.BlueprintTestCaseUpdate;
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintTestCase;
+            export interface $400 {
+            }
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $500 {
+            }
+            export interface $503 {
+            }
+        }
+    }
     namespace UpdateManifest {
         namespace Parameters {
             export type ManifestId = /**
@@ -6050,7 +9908,13 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.MarketplaceListingUpdate;
         namespace Responses {
             export type $200 = Components.Schemas.MarketplaceListing;
+            export interface $400 {
+            }
             export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $413 {
             }
         }
     }
@@ -6073,6 +9937,37 @@ declare namespace Paths {
             export interface $400 {
             }
             export interface $404 {
+            }
+        }
+    }
+    namespace UploadBlueprintAssistantSkill {
+        export type RequestBody = Components.Schemas.BlueprintAssistantSkillUpload;
+        namespace Responses {
+            export interface $200 {
+                name: string;
+                description: string;
+                /**
+                 * Offered to new conversations of the organization.
+                 */
+                enabled: boolean;
+                /**
+                 * `SKILL.md` and the reference files, e.g. `references/messart.md`.
+                 */
+                files: string[];
+                /**
+                 * Total size of the files in bytes.
+                 */
+                size: number;
+                updated_at: string; // date-time
+                updated_by?: string;
+                updated_by_name?: string;
+                ignored?: string[];
+            }
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $409 {
             }
         }
     }
@@ -6360,6 +10255,56 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteBlueprint.Responses.$200>
   /**
+   * listBlueprintTestCases - listBlueprintTestCases
+   * 
+   * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
+   */
+  'listBlueprintTestCases'(
+    parameters?: Parameters<Paths.ListBlueprintTestCases.QueryParameters & Paths.ListBlueprintTestCases.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListBlueprintTestCases.Responses.$200>
+  /**
+   * createBlueprintTestCase - createBlueprintTestCase
+   * 
+   * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
+   */
+  'createBlueprintTestCase'(
+    parameters?: Parameters<Paths.CreateBlueprintTestCase.PathParameters> | null,
+    data?: Paths.CreateBlueprintTestCase.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateBlueprintTestCase.Responses.$201>
+  /**
+   * getBlueprintTestCase - getBlueprintTestCase
+   * 
+   * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
+   */
+  'getBlueprintTestCase'(
+    parameters?: Parameters<Paths.GetBlueprintTestCase.QueryParameters & Paths.GetBlueprintTestCase.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBlueprintTestCase.Responses.$200>
+  /**
+   * updateBlueprintTestCase - updateBlueprintTestCase
+   * 
+   * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
+   */
+  'updateBlueprintTestCase'(
+    parameters?: Parameters<Paths.UpdateBlueprintTestCase.PathParameters> | null,
+    data?: Paths.UpdateBlueprintTestCase.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateBlueprintTestCase.Responses.$200>
+  /**
+   * deleteBlueprintTestCase - deleteBlueprintTestCase
+   * 
+   * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
+   */
+  'deleteBlueprintTestCase'(
+    parameters?: Parameters<Paths.DeleteBlueprintTestCase.QueryParameters & Paths.DeleteBlueprintTestCase.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteBlueprintTestCase.Responses.$204>
+  /**
    * addBlueprintNote - addBlueprintNote
    * 
    * Append an internal note to a blueprint. `id`, `created_at` and `created_by`
@@ -6586,15 +10531,18 @@ export interface OperationMethods {
    * 
    * Must be called by a user of the destination org (where the job lives); the
    * caller's bearer token is used as the destination token. The plan reuses the
-   * manifest persisted by the original install, so no source-org access is
-   * required. The original job's `options` (ignored resources, sync_notes) are
+   * manifest persisted by the original install, but a cross-org job still reads
+   * the source org (file contents, a merge job's live source), so send a token for
+   * the source org (e.g. the pipeline token) as `source_auth_token`. Without it the
+   * caller's bearer stands in for the source and those reads fail with 403.
+   * The original job's `options` (ignored resources, sync_notes) are
    * reused when present; older jobs without persisted options fall back to the
    * destination blueprint's `ignored_resource_addresses`.
    * 
    */
   'retryInstallationJob'(
     parameters?: Parameters<Paths.RetryInstallationJob.PathParameters> | null,
-    data?: any,
+    data?: Paths.RetryInstallationJob.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RetryInstallationJob.Responses.$202>
   /**
@@ -6680,11 +10628,11 @@ export interface OperationMethods {
   /**
    * createMarketplaceListingVersion - createMarketplaceListingVersion
    * 
-   * Create a draft version; auto-snapshots resources, requiredFeatures, recommendedApps from current blueprint
+   * Create a draft version that ships a ready release tag of the listing's blueprint. `from_version_id` copies another version's tag and settings for a text-only change.
    */
   'createMarketplaceListingVersion'(
     parameters?: Parameters<Paths.CreateMarketplaceListingVersion.PathParameters> | null,
-    data?: any,
+    data?: Paths.CreateMarketplaceListingVersion.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateMarketplaceListingVersion.Responses.$201>
   /**
@@ -6700,13 +10648,99 @@ export interface OperationMethods {
   /**
    * publishMarketplaceListingVersion - publishMarketplaceListingVersion
    * 
-   * Publish a draft version; archives the previous live version
+   * Publish a draft version; archives the previous live version and pushes the listing to the Marketplace
    */
   'publishMarketplaceListingVersion'(
     parameters?: Parameters<Paths.PublishMarketplaceListingVersion.PathParameters> | null,
     data?: Paths.PublishMarketplaceListingVersion.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublishMarketplaceListingVersion.Responses.$200>
+  /**
+   * rollbackMarketplaceListingVersion - rollbackMarketplaceListingVersion
+   * 
+   * Make an archived version the live version again
+   */
+  'rollbackMarketplaceListingVersion'(
+    parameters?: Parameters<Paths.RollbackMarketplaceListingVersion.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RollbackMarketplaceListingVersion.Responses.$200>
+  /**
+   * syncMarketplaceListing - syncMarketplaceListing
+   * 
+   * Re-push the live listing to Webflow
+   */
+  'syncMarketplaceListing'(
+    parameters?: Parameters<Paths.SyncMarketplaceListing.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SyncMarketplaceListing.Responses.$200>
+  /**
+   * publishMarketplaceListingContent - publishMarketplaceListingContent
+   * 
+   * Publishes the listing's edited text on the live version: same tag, same zip, same version number, no update
+   * for installers. The text it replaces is kept in the version's `content_revisions`. Changed resources need a new
+   * tag and a new version instead.
+   * 
+   */
+  'publishMarketplaceListingContent'(
+    parameters?: Parameters<Paths.PublishMarketplaceListingContent.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PublishMarketplaceListingContent.Responses.$200>
+  /**
+   * listBlueprintTags - listBlueprintTags
+   * 
+   * Tags of the blueprint, newest first
+   */
+  'listBlueprintTags'(
+    parameters?: Parameters<Paths.ListBlueprintTags.QueryParameters & Paths.ListBlueprintTags.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListBlueprintTags.Responses.$200>
+  /**
+   * createBlueprintTag - createBlueprintTag
+   * 
+   * Tags the blueprint's current state as a release. The zip is built once in the background
+   * (poll the tag until `status` is `ready`) and never changes afterwards. When it is ready, the
+   * blueprint's `version` becomes the tag name.
+   * 
+   */
+  'createBlueprintTag'(
+    parameters?: Parameters<Paths.CreateBlueprintTag.PathParameters> | null,
+    data?: Paths.CreateBlueprintTag.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateBlueprintTag.Responses.$202>
+  /**
+   * getBlueprintTag - getBlueprintTag
+   * 
+   * A release or sync tag of the blueprint, with its build status
+   */
+  'getBlueprintTag'(
+    parameters?: Parameters<Paths.GetBlueprintTag.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBlueprintTag.Responses.$200>
+  /**
+   * deleteBlueprintTag - deleteBlueprintTag
+   * 
+   * Deletes a tag and its zip. Tags that were ever published to the Marketplace are kept.
+   */
+  'deleteBlueprintTag'(
+    parameters?: Parameters<Paths.DeleteBlueprintTag.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteBlueprintTag.Responses.$204>
+  /**
+   * downloadBlueprintTag - downloadBlueprintTag
+   * 
+   * Short-lived download URL for the tag's signed zip. For a sync tag the zip is built on the first download.
+   */
+  'downloadBlueprintTag'(
+    parameters?: Parameters<Paths.DownloadBlueprintTag.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DownloadBlueprintTag.Responses.$200>
   /**
    * publishBlueprintV3 - publishBlueprintV3
    * 
@@ -6721,6 +10755,102 @@ export interface OperationMethods {
     data?: Paths.PublishBlueprintV3.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublishBlueprintV3.Responses.$202>
+  /**
+   * sendBlueprintAssistantMessage - sendBlueprintAssistantMessage
+   * 
+   * Sends a message to the blueprint assistant for a custom blueprint, starting a conversation when
+   * `conversation_id` is omitted. The answer is produced asynchronously: poll
+   * `getBlueprintAssistantConversation` until `status` is no longer `IN_PROGRESS`.
+   * 
+   * `proposal_update` records that the user applied or dismissed a proposal from an earlier answer.
+   * The assistant never changes the blueprint itself; proposals are applied by the client through the
+   * existing resource and publish endpoints. Available when `blueprint-ai-assistant` is on; publish proposals also need `blueprint-marketplace-publishing`.
+   * 
+   */
+  'sendBlueprintAssistantMessage'(
+    parameters?: Parameters<Paths.SendBlueprintAssistantMessage.PathParameters> | null,
+    data?: Paths.SendBlueprintAssistantMessage.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SendBlueprintAssistantMessage.Responses.$200 | Paths.SendBlueprintAssistantMessage.Responses.$202>
+  /**
+   * listBlueprintAssistantConversations - listBlueprintAssistantConversations
+   * 
+   * The blueprint's blueprint assistant conversations in this organization, most recently updated first
+   * (at most 20). Conversations expire 30 days after their last update.
+   * 
+   */
+  'listBlueprintAssistantConversations'(
+    parameters?: Parameters<Paths.ListBlueprintAssistantConversations.QueryParameters & Paths.ListBlueprintAssistantConversations.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListBlueprintAssistantConversations.Responses.$200>
+  /**
+   * getBlueprintAssistantConversation - getBlueprintAssistantConversation
+   * 
+   * A blueprint assistant conversation, including the answer in progress.
+   */
+  'getBlueprintAssistantConversation'(
+    parameters?: Parameters<Paths.GetBlueprintAssistantConversation.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBlueprintAssistantConversation.Responses.$200>
+  /**
+   * listBlueprintAssistantSkills - listBlueprintAssistantSkills
+   * 
+   * The organization's blueprint assistant skills, the skills epilot ships (`defaults`; an organization
+   * skill with the same name replaces one), and the upload limits. Available when `blueprint-ai-assistant` is on.
+   * 
+   */
+  'listBlueprintAssistantSkills'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListBlueprintAssistantSkills.Responses.$200>
+  /**
+   * uploadBlueprintAssistantSkill - uploadBlueprintAssistantSkill
+   * 
+   * Uploads a skill for the organization's blueprint assistant, replacing the skill of the same name.
+   * The file is a `SKILL.md` or a zip with `SKILL.md` and `references/*.md` (the format claude.ai exports;
+   * a single top-level folder is stripped). `SKILL.md` starts with YAML front matter with `name` and
+   * `description`. Other files (scripts, assets) are ignored and listed in `ignored`. A new skill is enabled
+   * while the organization has fewer than the enabled limit.
+   * 
+   */
+  'uploadBlueprintAssistantSkill'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.UploadBlueprintAssistantSkill.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UploadBlueprintAssistantSkill.Responses.$200>
+  /**
+   * getBlueprintAssistantSkill - getBlueprintAssistantSkill
+   * 
+   * A skill of the organization with the text of its files.
+   */
+  'getBlueprintAssistantSkill'(
+    parameters?: Parameters<Paths.GetBlueprintAssistantSkill.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBlueprintAssistantSkill.Responses.$200>
+  /**
+   * updateBlueprintAssistantSkill - updateBlueprintAssistantSkill
+   * 
+   * Enables or disables a skill. Conversations keep the skills they started with.
+   */
+  'updateBlueprintAssistantSkill'(
+    parameters?: Parameters<Paths.UpdateBlueprintAssistantSkill.PathParameters> | null,
+    data?: Paths.UpdateBlueprintAssistantSkill.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateBlueprintAssistantSkill.Responses.$200>
+  /**
+   * deleteBlueprintAssistantSkill - deleteBlueprintAssistantSkill
+   * 
+   * Deletes a skill. Running conversations that offered it answer that it was removed.
+   */
+  'deleteBlueprintAssistantSkill'(
+    parameters?: Parameters<Paths.DeleteBlueprintAssistantSkill.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteBlueprintAssistantSkill.Responses.$200>
   /**
    * preInstallBlueprintV3 - preInstallBlueprintV3
    * 
@@ -7108,6 +11238,206 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteUniquenessCriteria.Responses.$204>
+  /**
+   * batchDeleteBlueprintTestCases - batchDeleteBlueprintTestCases
+   * 
+   * Delete up to 100 test cases of the blueprint in one request. Each case is deleted exactly like deleteBlueprintTestCase (own revision check, never all-or-nothing across cases); every requested id is returned in exactly one of deleted, conflicts or not_found. Requires the blueprint-test-cases organization feature flag.
+   */
+  'batchDeleteBlueprintTestCases'(
+    parameters?: Parameters<Paths.BatchDeleteBlueprintTestCases.PathParameters> | null,
+    data?: Paths.BatchDeleteBlueprintTestCases.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BatchDeleteBlueprintTestCases.Responses.$200>
+  /**
+   * duplicateBlueprintTestCase - duplicateBlueprintTestCase
+   * 
+   * Copy a v2 test case of the blueprint into a new test case that keeps the source's clauses. Requires the blueprint-test-cases organization feature flag.
+   */
+  'duplicateBlueprintTestCase'(
+    parameters?: Parameters<Paths.DuplicateBlueprintTestCase.PathParameters> | null,
+    data?: Paths.DuplicateBlueprintTestCase.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DuplicateBlueprintTestCase.Responses.$201>
+  /**
+   * getSourceTestOperation - getSourceTestOperation
+   * 
+   * Read a source-only generation or manual run. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
+   */
+  'getSourceTestOperation'(
+    parameters?: Parameters<Paths.GetSourceTestOperation.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSourceTestOperation.Responses.$200>
+  /**
+   * createSourceConfirmedRun - createSourceConfirmedRun
+   * 
+   * Evaluate previously confirmed checks against the source Blueprint only. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
+   */
+  'createSourceConfirmedRun'(
+    parameters?: Parameters<Paths.CreateSourceConfirmedRun.PathParameters> | null,
+    data?: Paths.CreateSourceConfirmedRun.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateSourceConfirmedRun.Responses.$202>
+  /**
+   * listBlueprintTestRuns - listBlueprintTestRuns
+   * 
+   * Run read-only configuration acceptance checks or review their interpretation. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
+   */
+  'listBlueprintTestRuns'(
+    parameters?: Parameters<Paths.ListBlueprintTestRuns.QueryParameters & Paths.ListBlueprintTestRuns.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListBlueprintTestRuns.Responses.$200>
+  /**
+   * createBlueprintTestRun - createBlueprintTestRun
+   * 
+   * Run read-only configuration acceptance checks or review their interpretation. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
+   */
+  'createBlueprintTestRun'(
+    parameters?: Parameters<Paths.CreateBlueprintTestRun.PathParameters> | null,
+    data?: Paths.CreateBlueprintTestRun.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateBlueprintTestRun.Responses.$202>
+  /**
+   * getBlueprintTestRun - getBlueprintTestRun
+   * 
+   * Run read-only configuration acceptance checks or review their interpretation. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
+   */
+  'getBlueprintTestRun'(
+    parameters?: Parameters<Paths.GetBlueprintTestRun.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBlueprintTestRun.Responses.$200>
+  /**
+   * getBlueprintTestSuite - getBlueprintTestSuite
+   * 
+   * The v2 test cases of the blueprint with their current latest suite result (stale results never count as passed) and a summary over all cases. Requires the blueprint-test-cases organization feature flag.
+   */
+  'getBlueprintTestSuite'(
+    parameters?: Parameters<Paths.GetBlueprintTestSuite.QueryParameters & Paths.GetBlueprintTestSuite.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBlueprintTestSuite.Responses.$200>
+  /**
+   * createBlueprintTestSuiteRun - createBlueprintTestSuiteRun
+   * 
+   * Run every v2 test case of the blueprint against one configuration snapshot. Requires the blueprint-test-cases organization feature flag.
+   */
+  'createBlueprintTestSuiteRun'(
+    parameters?: Parameters<Paths.CreateBlueprintTestSuiteRun.PathParameters> | null,
+    data?: Paths.CreateBlueprintTestSuiteRun.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateBlueprintTestSuiteRun.Responses.$202>
+  /**
+   * getBlueprintTestSuiteRun - getBlueprintTestSuiteRun
+   * 
+   * Read a suite run. Requires the blueprint-test-cases organization feature flag.
+   */
+  'getBlueprintTestSuiteRun'(
+    parameters?: Parameters<Paths.GetBlueprintTestSuiteRun.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBlueprintTestSuiteRun.Responses.$200>
+  /**
+   * createBlueprintGraphSuggestions - createBlueprintGraphSuggestions
+   * 
+   * Generate engine-verified test suggestions from the blueprint configuration graph. Requires the blueprint-test-cases organization feature flag.
+   */
+  'createBlueprintGraphSuggestions'(
+    parameters?: Parameters<Paths.CreateBlueprintGraphSuggestions.PathParameters> | null,
+    data?: Paths.CreateBlueprintGraphSuggestions.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateBlueprintGraphSuggestions.Responses.$202>
+  /**
+   * getBlueprintGraphSuggestions - getBlueprintGraphSuggestions
+   * 
+   * Read a graph suggestion generation and a page of its suggestions. Requires the blueprint-test-cases organization feature flag.
+   */
+  'getBlueprintGraphSuggestions'(
+    parameters?: Parameters<Paths.GetBlueprintGraphSuggestions.QueryParameters & Paths.GetBlueprintGraphSuggestions.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBlueprintGraphSuggestions.Responses.$200>
+  /**
+   * acceptBlueprintGraphSuggestions - acceptBlueprintGraphSuggestions
+   * 
+   * Accept suggestions as v2 test cases. Idempotent per suggestion id. Requires the blueprint-test-cases organization feature flag.
+   */
+  'acceptBlueprintGraphSuggestions'(
+    parameters?: Parameters<Paths.AcceptBlueprintGraphSuggestions.PathParameters> | null,
+    data?: Paths.AcceptBlueprintGraphSuggestions.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AcceptBlueprintGraphSuggestions.Responses.$200>
+  /**
+   * migrateBlueprintV1TestCases - migrateBlueprintV1TestCases
+   * 
+   * Migrate v1 test cases to v2 clauses; cases that cannot be mapped are flagged needs_reinterpretation. Requires the blueprint-test-cases organization feature flag.
+   */
+  'migrateBlueprintV1TestCases'(
+    parameters?: Parameters<Paths.MigrateBlueprintV1TestCases.PathParameters> | null,
+    data?: Paths.MigrateBlueprintV1TestCases.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.MigrateBlueprintV1TestCases.Responses.$200>
+  /**
+   * createBlueprintTestInterpretation - createBlueprintTestInterpretation
+   * 
+   * Start interpreting an author's plain-language test against the blueprint configuration. With test_case_id the result rewrites that case. One active interpretation per author and blueprint. Requires the blueprint-test-cases organization feature flag.
+   */
+  'createBlueprintTestInterpretation'(
+    parameters?: Parameters<Paths.CreateBlueprintTestInterpretation.PathParameters> | null,
+    data?: Paths.CreateBlueprintTestInterpretation.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateBlueprintTestInterpretation.Responses.$202>
+  /**
+   * getBlueprintTestInterpretation - getBlueprintTestInterpretation
+   * 
+   * Read the caller's own text interpretation. Requires the blueprint-test-cases organization feature flag.
+   */
+  'getBlueprintTestInterpretation'(
+    parameters?: Parameters<Paths.GetBlueprintTestInterpretation.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBlueprintTestInterpretation.Responses.$200>
+  /**
+   * confirmBlueprintTestInterpretationV2 - confirmBlueprintTestInterpretationV2
+   * 
+   * Save the author's confirmed selection of a completed interpretation as a v2 test case (201), or as a new revision of the case it rewrites (200, needs expected_revision). Ambiguous parts need a chosen candidate, unsupported parts must be omitted; only engine-verified clauses are saved. An interpretation is confirmed at most once. Requires the blueprint-test-cases organization feature flag.
+   */
+  'confirmBlueprintTestInterpretationV2'(
+    parameters?: Parameters<Paths.ConfirmBlueprintTestInterpretationV2.PathParameters> | null,
+    data?: Paths.ConfirmBlueprintTestInterpretationV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ConfirmBlueprintTestInterpretationV2.Responses.$200 | Paths.ConfirmBlueprintTestInterpretationV2.Responses.$201>
+  /**
+   * queryBlueprintSuggestionGraph - queryBlueprintSuggestionGraph
+   * 
+   * Read-only graph query for the Luna suggestions agent of a running Luna generation (list_subjects or one of the graph tools). Only a Luna agent token acting for the user who started the generation is accepted. `list_subjects` takes `{ cursor? }` and returns one page `{ subjects, next_cursor?, total, unreadable, unreadable_total }`: pass `next_cursor` back until it is absent to read every subject (pages are sized to the tool result cap; no subject is ever cut). `unreadable` lists up to 20 resources the capture could not read (type, id, reason code), `unreadable_total` counts them all: when it is not 0 the blueprint picture is incomplete. Requires the blueprint-test-cases organization feature flag.
+   */
+  'queryBlueprintSuggestionGraph'(
+    parameters?: Parameters<Paths.QueryBlueprintSuggestionGraph.PathParameters> | null,
+    data?: Paths.QueryBlueprintSuggestionGraph.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.QueryBlueprintSuggestionGraph.Responses.$200>
+  /**
+   * checkBlueprintTestSuggestion - checkBlueprintTestSuggestion
+   * 
+   * Checks one draft suggestion with the engine for a running Luna generation (offered, failed, excluded or invalid) without storing anything. Requires the blueprint-test-cases organization feature flag.
+   */
+  'checkBlueprintTestSuggestion'(
+    parameters?: Parameters<Paths.CheckBlueprintTestSuggestion.PathParameters> | null,
+    data?: Paths.CheckBlueprintTestSuggestion.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CheckBlueprintTestSuggestion.Responses.$200>
+  /**
+   * submitBlueprintTestSuggestions - submitBlueprintTestSuggestions
+   * 
+   * Final submission of the Luna suggestions agent. Verifies every draft, stores suggestions and problems and completes the generation. Only once per running Luna generation; while a submission is being saved every Luna endpoint of the generation answers 409 generation_submitting. Name every subject from list_subjects: a subject with an empty `suggestions` array counts as covered, every subject not named is stored as incomplete. Only a Luna agent token acting for the user who started the generation is accepted. Requires the blueprint-test-cases organization feature flag.
+   */
+  'submitBlueprintTestSuggestions'(
+    parameters?: Parameters<Paths.SubmitBlueprintTestSuggestions.PathParameters> | null,
+    data?: Paths.SubmitBlueprintTestSuggestions.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SubmitBlueprintTestSuggestions.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -7329,6 +11659,60 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteBlueprint.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases']: {
+    /**
+     * listBlueprintTestCases - listBlueprintTestCases
+     * 
+     * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListBlueprintTestCases.QueryParameters & Paths.ListBlueprintTestCases.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListBlueprintTestCases.Responses.$200>
+    /**
+     * createBlueprintTestCase - createBlueprintTestCase
+     * 
+     * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateBlueprintTestCase.PathParameters> | null,
+      data?: Paths.CreateBlueprintTestCase.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateBlueprintTestCase.Responses.$201>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}']: {
+    /**
+     * getBlueprintTestCase - getBlueprintTestCase
+     * 
+     * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBlueprintTestCase.QueryParameters & Paths.GetBlueprintTestCase.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBlueprintTestCase.Responses.$200>
+    /**
+     * updateBlueprintTestCase - updateBlueprintTestCase
+     * 
+     * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateBlueprintTestCase.PathParameters> | null,
+      data?: Paths.UpdateBlueprintTestCase.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateBlueprintTestCase.Responses.$200>
+    /**
+     * deleteBlueprintTestCase - deleteBlueprintTestCase
+     * 
+     * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteBlueprintTestCase.QueryParameters & Paths.DeleteBlueprintTestCase.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteBlueprintTestCase.Responses.$204>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/notes']: {
     /**
@@ -7584,15 +11968,18 @@ export interface PathsDictionary {
      * 
      * Must be called by a user of the destination org (where the job lives); the
      * caller's bearer token is used as the destination token. The plan reuses the
-     * manifest persisted by the original install, so no source-org access is
-     * required. The original job's `options` (ignored resources, sync_notes) are
+     * manifest persisted by the original install, but a cross-org job still reads
+     * the source org (file contents, a merge job's live source), so send a token for
+     * the source org (e.g. the pipeline token) as `source_auth_token`. Without it the
+     * caller's bearer stands in for the source and those reads fail with 403.
+     * The original job's `options` (ignored resources, sync_notes) are
      * reused when present; older jobs without persisted options fall back to the
      * destination blueprint's `ignored_resource_addresses`.
      * 
      */
     'post'(
       parameters?: Parameters<Paths.RetryInstallationJob.PathParameters> | null,
-      data?: any,
+      data?: Paths.RetryInstallationJob.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RetryInstallationJob.Responses.$202>
   }
@@ -7678,11 +12065,11 @@ export interface PathsDictionary {
     /**
      * createMarketplaceListingVersion - createMarketplaceListingVersion
      * 
-     * Create a draft version; auto-snapshots resources, requiredFeatures, recommendedApps from current blueprint
+     * Create a draft version that ships a ready release tag of the listing's blueprint. `from_version_id` copies another version's tag and settings for a text-only change.
      */
     'post'(
       parameters?: Parameters<Paths.CreateMarketplaceListingVersion.PathParameters> | null,
-      data?: any,
+      data?: Paths.CreateMarketplaceListingVersion.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateMarketplaceListingVersion.Responses.$201>
     /**
@@ -7712,13 +12099,111 @@ export interface PathsDictionary {
     /**
      * publishMarketplaceListingVersion - publishMarketplaceListingVersion
      * 
-     * Publish a draft version; archives the previous live version
+     * Publish a draft version; archives the previous live version and pushes the listing to the Marketplace
      */
     'post'(
       parameters?: Parameters<Paths.PublishMarketplaceListingVersion.PathParameters> | null,
       data?: Paths.PublishMarketplaceListingVersion.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PublishMarketplaceListingVersion.Responses.$200>
+  }
+  ['/v1/marketplace-listings/{listing_id}/versions/{version_id}/rollback']: {
+    /**
+     * rollbackMarketplaceListingVersion - rollbackMarketplaceListingVersion
+     * 
+     * Make an archived version the live version again
+     */
+    'post'(
+      parameters?: Parameters<Paths.RollbackMarketplaceListingVersion.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RollbackMarketplaceListingVersion.Responses.$200>
+  }
+  ['/v1/marketplace-listings/{listing_id}/sync']: {
+    /**
+     * syncMarketplaceListing - syncMarketplaceListing
+     * 
+     * Re-push the live listing to Webflow
+     */
+    'post'(
+      parameters?: Parameters<Paths.SyncMarketplaceListing.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SyncMarketplaceListing.Responses.$200>
+  }
+  ['/v1/marketplace-listings/{listing_id}/publish-content']: {
+    /**
+     * publishMarketplaceListingContent - publishMarketplaceListingContent
+     * 
+     * Publishes the listing's edited text on the live version: same tag, same zip, same version number, no update
+     * for installers. The text it replaces is kept in the version's `content_revisions`. Changed resources need a new
+     * tag and a new version instead.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.PublishMarketplaceListingContent.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PublishMarketplaceListingContent.Responses.$200>
+  }
+  ['/v3/blueprint-manifest/blueprints/{blueprint_id}/tags']: {
+    /**
+     * createBlueprintTag - createBlueprintTag
+     * 
+     * Tags the blueprint's current state as a release. The zip is built once in the background
+     * (poll the tag until `status` is `ready`) and never changes afterwards. When it is ready, the
+     * blueprint's `version` becomes the tag name.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateBlueprintTag.PathParameters> | null,
+      data?: Paths.CreateBlueprintTag.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateBlueprintTag.Responses.$202>
+    /**
+     * listBlueprintTags - listBlueprintTags
+     * 
+     * Tags of the blueprint, newest first
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListBlueprintTags.QueryParameters & Paths.ListBlueprintTags.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListBlueprintTags.Responses.$200>
+  }
+  ['/v3/blueprint-manifest/blueprints/{blueprint_id}/tags/{tag_id}']: {
+    /**
+     * getBlueprintTag - getBlueprintTag
+     * 
+     * A release or sync tag of the blueprint, with its build status
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBlueprintTag.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBlueprintTag.Responses.$200>
+    /**
+     * deleteBlueprintTag - deleteBlueprintTag
+     * 
+     * Deletes a tag and its zip. Tags that were ever published to the Marketplace are kept.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteBlueprintTag.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteBlueprintTag.Responses.$204>
+  }
+  ['/v3/blueprint-manifest/blueprints/{blueprint_id}/tags/{tag_id}/download']: {
+    /**
+     * downloadBlueprintTag - downloadBlueprintTag
+     * 
+     * Short-lived download URL for the tag's signed zip. For a sync tag the zip is built on the first download.
+     */
+    'get'(
+      parameters?: Parameters<Paths.DownloadBlueprintTag.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DownloadBlueprintTag.Responses.$200>
   }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}:publish']: {
     /**
@@ -7735,6 +12220,112 @@ export interface PathsDictionary {
       data?: Paths.PublishBlueprintV3.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PublishBlueprintV3.Responses.$202>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/assistant/messages']: {
+    /**
+     * sendBlueprintAssistantMessage - sendBlueprintAssistantMessage
+     * 
+     * Sends a message to the blueprint assistant for a custom blueprint, starting a conversation when
+     * `conversation_id` is omitted. The answer is produced asynchronously: poll
+     * `getBlueprintAssistantConversation` until `status` is no longer `IN_PROGRESS`.
+     * 
+     * `proposal_update` records that the user applied or dismissed a proposal from an earlier answer.
+     * The assistant never changes the blueprint itself; proposals are applied by the client through the
+     * existing resource and publish endpoints. Available when `blueprint-ai-assistant` is on; publish proposals also need `blueprint-marketplace-publishing`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.SendBlueprintAssistantMessage.PathParameters> | null,
+      data?: Paths.SendBlueprintAssistantMessage.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SendBlueprintAssistantMessage.Responses.$200 | Paths.SendBlueprintAssistantMessage.Responses.$202>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/assistant/conversations']: {
+    /**
+     * listBlueprintAssistantConversations - listBlueprintAssistantConversations
+     * 
+     * The blueprint's blueprint assistant conversations in this organization, most recently updated first
+     * (at most 20). Conversations expire 30 days after their last update.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListBlueprintAssistantConversations.QueryParameters & Paths.ListBlueprintAssistantConversations.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListBlueprintAssistantConversations.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/assistant/conversations/{conversation_id}']: {
+    /**
+     * getBlueprintAssistantConversation - getBlueprintAssistantConversation
+     * 
+     * A blueprint assistant conversation, including the answer in progress.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBlueprintAssistantConversation.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBlueprintAssistantConversation.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/assistant/skills']: {
+    /**
+     * listBlueprintAssistantSkills - listBlueprintAssistantSkills
+     * 
+     * The organization's blueprint assistant skills, the skills epilot ships (`defaults`; an organization
+     * skill with the same name replaces one), and the upload limits. Available when `blueprint-ai-assistant` is on.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListBlueprintAssistantSkills.Responses.$200>
+    /**
+     * uploadBlueprintAssistantSkill - uploadBlueprintAssistantSkill
+     * 
+     * Uploads a skill for the organization's blueprint assistant, replacing the skill of the same name.
+     * The file is a `SKILL.md` or a zip with `SKILL.md` and `references/*.md` (the format claude.ai exports;
+     * a single top-level folder is stripped). `SKILL.md` starts with YAML front matter with `name` and
+     * `description`. Other files (scripts, assets) are ignored and listed in `ignored`. A new skill is enabled
+     * while the organization has fewer than the enabled limit.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.UploadBlueprintAssistantSkill.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UploadBlueprintAssistantSkill.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/assistant/skills/{skill_name}']: {
+    /**
+     * getBlueprintAssistantSkill - getBlueprintAssistantSkill
+     * 
+     * A skill of the organization with the text of its files.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBlueprintAssistantSkill.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBlueprintAssistantSkill.Responses.$200>
+    /**
+     * updateBlueprintAssistantSkill - updateBlueprintAssistantSkill
+     * 
+     * Enables or disables a skill. Conversations keep the skills they started with.
+     */
+    'patch'(
+      parameters?: Parameters<Paths.UpdateBlueprintAssistantSkill.PathParameters> | null,
+      data?: Paths.UpdateBlueprintAssistantSkill.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateBlueprintAssistantSkill.Responses.$200>
+    /**
+     * deleteBlueprintAssistantSkill - deleteBlueprintAssistantSkill
+     * 
+     * Deletes a skill. Running conversations that offered it answer that it was removed.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteBlueprintAssistantSkill.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteBlueprintAssistantSkill.Responses.$200>
   }
   ['/v3/blueprint-manifest/blueprints:pre-install']: {
     /**
@@ -8171,6 +12762,244 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteUniquenessCriteria.Responses.$204>
   }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases:batchDelete']: {
+    /**
+     * batchDeleteBlueprintTestCases - batchDeleteBlueprintTestCases
+     * 
+     * Delete up to 100 test cases of the blueprint in one request. Each case is deleted exactly like deleteBlueprintTestCase (own revision check, never all-or-nothing across cases); every requested id is returned in exactly one of deleted, conflicts or not_found. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.BatchDeleteBlueprintTestCases.PathParameters> | null,
+      data?: Paths.BatchDeleteBlueprintTestCases.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BatchDeleteBlueprintTestCases.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/duplicate']: {
+    /**
+     * duplicateBlueprintTestCase - duplicateBlueprintTestCase
+     * 
+     * Copy a v2 test case of the blueprint into a new test case that keeps the source's clauses. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.DuplicateBlueprintTestCase.PathParameters> | null,
+      data?: Paths.DuplicateBlueprintTestCase.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DuplicateBlueprintTestCase.Responses.$201>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/source-operations/{run_id}']: {
+    /**
+     * getSourceTestOperation - getSourceTestOperation
+     * 
+     * Read a source-only generation or manual run. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSourceTestOperation.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSourceTestOperation.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/source-confirmed-runs']: {
+    /**
+     * createSourceConfirmedRun - createSourceConfirmedRun
+     * 
+     * Evaluate previously confirmed checks against the source Blueprint only. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateSourceConfirmedRun.PathParameters> | null,
+      data?: Paths.CreateSourceConfirmedRun.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateSourceConfirmedRun.Responses.$202>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/runs']: {
+    /**
+     * createBlueprintTestRun - createBlueprintTestRun
+     * 
+     * Run read-only configuration acceptance checks or review their interpretation. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateBlueprintTestRun.PathParameters> | null,
+      data?: Paths.CreateBlueprintTestRun.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateBlueprintTestRun.Responses.$202>
+    /**
+     * listBlueprintTestRuns - listBlueprintTestRuns
+     * 
+     * Run read-only configuration acceptance checks or review their interpretation. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListBlueprintTestRuns.QueryParameters & Paths.ListBlueprintTestRuns.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListBlueprintTestRuns.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/runs/{run_id}']: {
+    /**
+     * getBlueprintTestRun - getBlueprintTestRun
+     * 
+     * Run read-only configuration acceptance checks or review their interpretation. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBlueprintTestRun.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBlueprintTestRun.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite']: {
+    /**
+     * getBlueprintTestSuite - getBlueprintTestSuite
+     * 
+     * The v2 test cases of the blueprint with their current latest suite result (stale results never count as passed) and a summary over all cases. Requires the blueprint-test-cases organization feature flag.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBlueprintTestSuite.QueryParameters & Paths.GetBlueprintTestSuite.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBlueprintTestSuite.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/runs']: {
+    /**
+     * createBlueprintTestSuiteRun - createBlueprintTestSuiteRun
+     * 
+     * Run every v2 test case of the blueprint against one configuration snapshot. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateBlueprintTestSuiteRun.PathParameters> | null,
+      data?: Paths.CreateBlueprintTestSuiteRun.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateBlueprintTestSuiteRun.Responses.$202>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/runs/{run_id}']: {
+    /**
+     * getBlueprintTestSuiteRun - getBlueprintTestSuiteRun
+     * 
+     * Read a suite run. Requires the blueprint-test-cases organization feature flag.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBlueprintTestSuiteRun.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBlueprintTestSuiteRun.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions']: {
+    /**
+     * createBlueprintGraphSuggestions - createBlueprintGraphSuggestions
+     * 
+     * Generate engine-verified test suggestions from the blueprint configuration graph. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateBlueprintGraphSuggestions.PathParameters> | null,
+      data?: Paths.CreateBlueprintGraphSuggestions.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateBlueprintGraphSuggestions.Responses.$202>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}']: {
+    /**
+     * getBlueprintGraphSuggestions - getBlueprintGraphSuggestions
+     * 
+     * Read a graph suggestion generation and a page of its suggestions. Requires the blueprint-test-cases organization feature flag.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBlueprintGraphSuggestions.QueryParameters & Paths.GetBlueprintGraphSuggestions.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBlueprintGraphSuggestions.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/accept']: {
+    /**
+     * acceptBlueprintGraphSuggestions - acceptBlueprintGraphSuggestions
+     * 
+     * Accept suggestions as v2 test cases. Idempotent per suggestion id. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.AcceptBlueprintGraphSuggestions.PathParameters> | null,
+      data?: Paths.AcceptBlueprintGraphSuggestions.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AcceptBlueprintGraphSuggestions.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite:migrate-v1']: {
+    /**
+     * migrateBlueprintV1TestCases - migrateBlueprintV1TestCases
+     * 
+     * Migrate v1 test cases to v2 clauses; cases that cannot be mapped are flagged needs_reinterpretation. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.MigrateBlueprintV1TestCases.PathParameters> | null,
+      data?: Paths.MigrateBlueprintV1TestCases.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.MigrateBlueprintV1TestCases.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/interpretations']: {
+    /**
+     * createBlueprintTestInterpretation - createBlueprintTestInterpretation
+     * 
+     * Start interpreting an author's plain-language test against the blueprint configuration. With test_case_id the result rewrites that case. One active interpretation per author and blueprint. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateBlueprintTestInterpretation.PathParameters> | null,
+      data?: Paths.CreateBlueprintTestInterpretation.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateBlueprintTestInterpretation.Responses.$202>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/interpretations/{interpretation_id}']: {
+    /**
+     * getBlueprintTestInterpretation - getBlueprintTestInterpretation
+     * 
+     * Read the caller's own text interpretation. Requires the blueprint-test-cases organization feature flag.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBlueprintTestInterpretation.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBlueprintTestInterpretation.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/interpretations/{interpretation_id}/confirm']: {
+    /**
+     * confirmBlueprintTestInterpretationV2 - confirmBlueprintTestInterpretationV2
+     * 
+     * Save the author's confirmed selection of a completed interpretation as a v2 test case (201), or as a new revision of the case it rewrites (200, needs expected_revision). Ambiguous parts need a chosen candidate, unsupported parts must be omitted; only engine-verified clauses are saved. An interpretation is confirmed at most once. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ConfirmBlueprintTestInterpretationV2.PathParameters> | null,
+      data?: Paths.ConfirmBlueprintTestInterpretationV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ConfirmBlueprintTestInterpretationV2.Responses.$200 | Paths.ConfirmBlueprintTestInterpretationV2.Responses.$201>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/graph-query']: {
+    /**
+     * queryBlueprintSuggestionGraph - queryBlueprintSuggestionGraph
+     * 
+     * Read-only graph query for the Luna suggestions agent of a running Luna generation (list_subjects or one of the graph tools). Only a Luna agent token acting for the user who started the generation is accepted. `list_subjects` takes `{ cursor? }` and returns one page `{ subjects, next_cursor?, total, unreadable, unreadable_total }`: pass `next_cursor` back until it is absent to read every subject (pages are sized to the tool result cap; no subject is ever cut). `unreadable` lists up to 20 resources the capture could not read (type, id, reason code), `unreadable_total` counts them all: when it is not 0 the blueprint picture is incomplete. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.QueryBlueprintSuggestionGraph.PathParameters> | null,
+      data?: Paths.QueryBlueprintSuggestionGraph.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.QueryBlueprintSuggestionGraph.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/check']: {
+    /**
+     * checkBlueprintTestSuggestion - checkBlueprintTestSuggestion
+     * 
+     * Checks one draft suggestion with the engine for a running Luna generation (offered, failed, excluded or invalid) without storing anything. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CheckBlueprintTestSuggestion.PathParameters> | null,
+      data?: Paths.CheckBlueprintTestSuggestion.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CheckBlueprintTestSuggestion.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/submissions']: {
+    /**
+     * submitBlueprintTestSuggestions - submitBlueprintTestSuggestions
+     * 
+     * Final submission of the Luna suggestions agent. Verifies every draft, stores suggestions and problems and completes the generation. Only once per running Luna generation; while a submission is being saved every Luna endpoint of the generation answers 409 generation_submitting. Name every subject from list_subjects: a subject with an empty `suggestions` array counts as covered, every subject not named is stored as incomplete. Only a Luna agent token acting for the user who started the generation is accepted. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.SubmitBlueprintTestSuggestions.PathParameters> | null,
+      data?: Paths.SubmitBlueprintTestSuggestions.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SubmitBlueprintTestSuggestions.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -8178,12 +13007,28 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type AppBlueprint = Components.Schemas.AppBlueprint;
 export type Blueprint = Components.Schemas.Blueprint;
+export type BlueprintAssistantConversation = Components.Schemas.BlueprintAssistantConversation;
+export type BlueprintAssistantConversationSummary = Components.Schemas.BlueprintAssistantConversationSummary;
+export type BlueprintAssistantDefaultSkill = Components.Schemas.BlueprintAssistantDefaultSkill;
+export type BlueprintAssistantMessage = Components.Schemas.BlueprintAssistantMessage;
+export type BlueprintAssistantMessageRequest = Components.Schemas.BlueprintAssistantMessageRequest;
+export type BlueprintAssistantPart = Components.Schemas.BlueprintAssistantPart;
+export type BlueprintAssistantSkill = Components.Schemas.BlueprintAssistantSkill;
+export type BlueprintAssistantSkillUpload = Components.Schemas.BlueprintAssistantSkillUpload;
 export type BlueprintDependenciesSyncJob = Components.Schemas.BlueprintDependenciesSyncJob;
 export type BlueprintExportJob = Components.Schemas.BlueprintExportJob;
+export type BlueprintGraphSuggestionAcceptInput = Components.Schemas.BlueprintGraphSuggestionAcceptInput;
+export type BlueprintGraphSuggestionAcceptance = Components.Schemas.BlueprintGraphSuggestionAcceptance;
+export type BlueprintGraphSuggestionPage = Components.Schemas.BlueprintGraphSuggestionPage;
+export type BlueprintGraphSuggestionProblem = Components.Schemas.BlueprintGraphSuggestionProblem;
+export type BlueprintGraphSuggestionsStarted = Components.Schemas.BlueprintGraphSuggestionsStarted;
 export type BlueprintID = Components.Schemas.BlueprintID;
 export type BlueprintInstallStatus = Components.Schemas.BlueprintInstallStatus;
 export type BlueprintInstallationJob = Components.Schemas.BlueprintInstallationJob;
 export type BlueprintInstallationJobOptions = Components.Schemas.BlueprintInstallationJobOptions;
+export type BlueprintInterpretationSpan = Components.Schemas.BlueprintInterpretationSpan;
+export type BlueprintInterpretedCheck = Components.Schemas.BlueprintInterpretedCheck;
+export type BlueprintInterpretedPart = Components.Schemas.BlueprintInterpretedPart;
 export type BlueprintJob = Components.Schemas.BlueprintJob;
 export type BlueprintJobEvent = Components.Schemas.BlueprintJobEvent;
 export type BlueprintJobID = Components.Schemas.BlueprintJobID;
@@ -8192,6 +13037,49 @@ export type BlueprintPreview = Components.Schemas.BlueprintPreview;
 export type BlueprintResource = Components.Schemas.BlueprintResource;
 export type BlueprintResourceID = Components.Schemas.BlueprintResourceID;
 export type BlueprintRestoreJob = Components.Schemas.BlueprintRestoreJob;
+export type BlueprintSourceTestOperation = Components.Schemas.BlueprintSourceTestOperation;
+export type BlueprintSuggestionCheck = Components.Schemas.BlueprintSuggestionCheck;
+export type BlueprintSuggestionCheckResult = Components.Schemas.BlueprintSuggestionCheckResult;
+export type BlueprintSuggestionGraphQuery = Components.Schemas.BlueprintSuggestionGraphQuery;
+export type BlueprintSuggestionGraphQueryResult = Components.Schemas.BlueprintSuggestionGraphQueryResult;
+export type BlueprintSuggestionSubmission = Components.Schemas.BlueprintSuggestionSubmission;
+export type BlueprintSuggestionSubmissionResult = Components.Schemas.BlueprintSuggestionSubmissionResult;
+export type BlueprintTag = Components.Schemas.BlueprintTag;
+export type BlueprintTagKind = Components.Schemas.BlueprintTagKind;
+export type BlueprintTestCase = Components.Schemas.BlueprintTestCase;
+export type BlueprintTestCaseBatchDeleteInput = Components.Schemas.BlueprintTestCaseBatchDeleteInput;
+export type BlueprintTestCaseBatchDeleteResult = Components.Schemas.BlueprintTestCaseBatchDeleteResult;
+export type BlueprintTestCaseConfirmation = Components.Schemas.BlueprintTestCaseConfirmation;
+export type BlueprintTestCaseInput = Components.Schemas.BlueprintTestCaseInput;
+export type BlueprintTestCaseOrigin = Components.Schemas.BlueprintTestCaseOrigin;
+export type BlueprintTestCasePage = Components.Schemas.BlueprintTestCasePage;
+export type BlueprintTestCaseShape = Components.Schemas.BlueprintTestCaseShape;
+export type BlueprintTestCaseUpdate = Components.Schemas.BlueprintTestCaseUpdate;
+export type BlueprintTestCatalogEntry = Components.Schemas.BlueprintTestCatalogEntry;
+export type BlueprintTestCheckResult = Components.Schemas.BlueprintTestCheckResult;
+export type BlueprintTestCoverage = Components.Schemas.BlueprintTestCoverage;
+export type BlueprintTestDependencyValidation = Components.Schemas.BlueprintTestDependencyValidation;
+export type BlueprintTestInterpretation = Components.Schemas.BlueprintTestInterpretation;
+export type BlueprintTestInterpretationConfirmInput = Components.Schemas.BlueprintTestInterpretationConfirmInput;
+export type BlueprintTestInterpretationConfirmation = Components.Schemas.BlueprintTestInterpretationConfirmation;
+export type BlueprintTestInterpretationInput = Components.Schemas.BlueprintTestInterpretationInput;
+export type BlueprintTestInterpretationProposal = Components.Schemas.BlueprintTestInterpretationProposal;
+export type BlueprintTestInterpretationResult = Components.Schemas.BlueprintTestInterpretationResult;
+export type BlueprintTestInterpretationStarted = Components.Schemas.BlueprintTestInterpretationStarted;
+export type BlueprintTestMainResource = Components.Schemas.BlueprintTestMainResource;
+export type BlueprintTestPredicate = Components.Schemas.BlueprintTestPredicate;
+export type BlueprintTestResourceEvidence = Components.Schemas.BlueprintTestResourceEvidence;
+export type BlueprintTestRun = Components.Schemas.BlueprintTestRun;
+export type BlueprintTestRunError = Components.Schemas.BlueprintTestRunError;
+export type BlueprintTestRunInput = Components.Schemas.BlueprintTestRunInput;
+export type BlueprintTestRunPage = Components.Schemas.BlueprintTestRunPage;
+export type BlueprintTestRunResult = Components.Schemas.BlueprintTestRunResult;
+export type BlueprintTestSuite = Components.Schemas.BlueprintTestSuite;
+export type BlueprintTestSuiteError = Components.Schemas.BlueprintTestSuiteError;
+export type BlueprintTestSuiteSummary = Components.Schemas.BlueprintTestSuiteSummary;
+export type BlueprintTestTitles = Components.Schemas.BlueprintTestTitles;
+export type BlueprintTestUnreadableResource = Components.Schemas.BlueprintTestUnreadableResource;
+export type BlueprintV1TestCaseMigration = Components.Schemas.BlueprintV1TestCaseMigration;
 export type BlueprintVerificationJob = Components.Schemas.BlueprintVerificationJob;
 export type BulkInstall = Components.Schemas.BulkInstall;
 export type BulkInstallCounts = Components.Schemas.BulkInstallCounts;
@@ -8201,6 +13089,9 @@ export type BulkInstallTarget = Components.Schemas.BulkInstallTarget;
 export type BulkInstallTargetInput = Components.Schemas.BulkInstallTargetInput;
 export type BulkInstallTargetList = Components.Schemas.BulkInstallTargetList;
 export type CallerIdentity = Components.Schemas.CallerIdentity;
+export type CaseResultRow = Components.Schemas.CaseResultRow;
+export type ClauseEvidenceView = Components.Schemas.ClauseEvidenceView;
+export type ClauseResultView = Components.Schemas.ClauseResultView;
 export type CommonBlueprintFields = Components.Schemas.CommonBlueprintFields;
 export type CommonBlueprintJobFields = Components.Schemas.CommonBlueprintJobFields;
 export type CommonImportFields = Components.Schemas.CommonImportFields;
@@ -8235,6 +13126,7 @@ export type MarketplaceBlueprint = Components.Schemas.MarketplaceBlueprint;
 export type MarketplaceListing = Components.Schemas.MarketplaceListing;
 export type MarketplaceListingUpdate = Components.Schemas.MarketplaceListingUpdate;
 export type MarketplaceListingVersion = Components.Schemas.MarketplaceListingVersion;
+export type MarketplaceListingVersionPackage = Components.Schemas.MarketplaceListingVersionPackage;
 export type MergeBaseProvenance = Components.Schemas.MergeBaseProvenance;
 export type MergeChoice = Components.Schemas.MergeChoice;
 export type MergeChoiceInput = Components.Schemas.MergeChoiceInput;
@@ -8277,12 +13169,19 @@ export type RestorePreviewReport = Components.Schemas.RestorePreviewReport;
 export type RootResourceNode = Components.Schemas.RootResourceNode;
 export type S3Reference = Components.Schemas.S3Reference;
 export type SelectedResources = Components.Schemas.SelectedResources;
+export type Sentence = Components.Schemas.Sentence;
+export type SentenceParamValue = Components.Schemas.SentenceParamValue;
 export type SkippedBlueprintResource = Components.Schemas.SkippedBlueprintResource;
 export type SuggestBlueprintResourcesRequest = Components.Schemas.SuggestBlueprintResourcesRequest;
 export type SuggestBlueprintResourcesResponse = Components.Schemas.SuggestBlueprintResourcesResponse;
+export type Suggestion = Components.Schemas.Suggestion;
+export type SuiteRun = Components.Schemas.SuiteRun;
 export type UniquenessCriteria = Components.Schemas.UniquenessCriteria;
 export type UniquenessCriteriaResourceType = Components.Schemas.UniquenessCriteriaResourceType;
 export type UploadFilePayload = Components.Schemas.UploadFilePayload;
+export type V3MissingSourceResource = Components.Schemas.V3MissingSourceResource;
 export type V3ResourceProgressEntry = Components.Schemas.V3ResourceProgressEntry;
+export type V3SourceDrift = Components.Schemas.V3SourceDrift;
+export type V3SourceResource = Components.Schemas.V3SourceResource;
 export type VerificationSummary = Components.Schemas.VerificationSummary;
 export type VirtualResourceNodeGroup = Components.Schemas.VirtualResourceNodeGroup;

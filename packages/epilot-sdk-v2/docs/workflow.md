@@ -56,8 +56,10 @@ const { data } = await workflowClient.getExecutions(...)
 - [`runTaskAutomation`](#runtaskautomation)
 - [`previewTaskEmail`](#previewtaskemail)
 - [`executeTask`](#executetask)
+- [`expireTaskHold`](#expiretaskhold)
 - [`patchPhase`](#patchphase)
 - [`addTask`](#addtask)
+- [`rescheduleTask`](#rescheduletask)
 - [`cancelTaskSchedule`](#canceltaskschedule)
 - [`reconcileAutomationTask`](#reconcileautomationtask)
 - [`runTaskScheduleNow`](#runtaskschedulenow)
@@ -70,6 +72,7 @@ const { data } = await workflowClient.getExecutions(...)
 - [`WorkflowExecutionCreateReq`](#workflowexecutioncreatereq)
 - [`WorkflowExecutionUpdateReq`](#workflowexecutionupdatereq)
 - [`ClosingReason`](#closingreason)
+- [`ClosingReasonCategoryRef`](#closingreasoncategoryref)
 - [`WorkflowContext`](#workflowcontext)
 - [`WorkflowExecutionBase`](#workflowexecutionbase)
 - [`WorkflowExecutionSlim`](#workflowexecutionslim)
@@ -85,6 +88,7 @@ const { data } = await workflowClient.getExecutions(...)
 - [`StepExtended`](#stepextended)
 - [`StepStatus`](#stepstatus)
 - [`SectionStatus`](#sectionstatus)
+- [`PhaseStatus`](#phasestatus)
 - [`StepType`](#steptype)
 - [`StepJourney`](#stepjourney)
 - [`JourneyContextParameter`](#journeycontextparameter)
@@ -172,6 +176,16 @@ const { data } = await workflowClient.getExecutions(...)
 - [`ActionSchedule`](#actionschedule)
 - [`ImmediateSchedule`](#immediateschedule)
 - [`DelayedSchedule`](#delayedschedule)
+- [`OnHoldConfig`](#onholdconfig)
+- [`OnHoldResumeAfter`](#onholdresumeafter)
+- [`OnHoldFieldMode`](#onholdfieldmode)
+- [`OnHoldReasonOption`](#onholdreasonoption)
+- [`PutOnHoldReq`](#putonholdreq)
+- [`TaskHold`](#taskhold)
+- [`ExpireTaskHoldReq`](#expiretaskholdreq)
+- [`ExpireTaskHoldResp`](#expiretaskholdresp)
+- [`RescheduleTaskReq`](#rescheduletaskreq)
+- [`ScheduleChange`](#schedulechange)
 - [`RelativeSchedule`](#relativeschedule)
 - [`DecisionTask`](#decisiontask)
 - [`AiAgentTask`](#aiagenttask)
@@ -182,11 +196,13 @@ const { data } = await workflowClient.getExecutions(...)
 - [`Stage`](#stage)
 - [`Phase`](#phase)
 - [`Edge`](#edge)
+- [`LegacyAutomationDefinition`](#legacyautomationdefinition)
 - [`AutomationInfo`](#automationinfo)
 - [`JourneyExecutionInfo`](#journeyexecutioninfo)
 - [`AutomationInputContext`](#automationinputcontext)
 - [`AutomationInputExtraContextRef`](#automationinputextracontextref)
 - [`AutomationInputExtraTaskRef`](#automationinputextrataskref)
+- [`AutomationInputExtraLinkedEntityRef`](#automationinputextralinkedentityref)
 - [`AutomationOutputContext`](#automationoutputcontext)
 - [`AnalyticsInfo`](#analyticsinfo)
 - [`ConditionResult`](#conditionresult)
@@ -206,6 +222,7 @@ const { data } = await workflowClient.getExecutions(...)
 - [`FlowExecutionId`](#flowexecutionid)
 - [`UserId`](#userid)
 - [`EcpPlaceholderAssignees`](#ecpplaceholderassignees)
+- [`AssigneeSync`](#assigneesync)
 - [`VariableAssignment`](#variableassignment)
 - [`Assignees`](#assignees)
 - [`RunTaskAutomationReq`](#runtaskautomationreq)
@@ -429,7 +446,11 @@ const { data } = await client.updateExecution(
     selectedClosingReasons: [
       {
         id: 'string',
-        title: 'string'
+        title: 'string',
+        category: {
+          id: 'string',
+          title: 'string'
+        }
       }
     ],
     closingReasonDescription: 'string',
@@ -848,7 +869,11 @@ const { data } = await client.getClosingReasonExecution({
   "reasons": [
     {
       "id": "string",
-      "title": "string"
+      "title": "string",
+      "category": {
+        "id": "string",
+        "title": "string"
+      }
     }
   ]
 }
@@ -873,6 +898,21 @@ const { data } = await client.startFlowExecution(
       type: 'MANUAL',
       automation_config: {
         flow_id: 'string',
+        action_definition: {},
+        legacy_definition: {
+          actions: [
+            {}
+          ],
+          conditions: [
+            {}
+          ],
+          schedules: [
+            {}
+          ],
+          loops: [
+            {}
+          ]
+        },
         execution_id: 'string',
         execution_status: 'string',
         error_reason: 'string',
@@ -880,6 +920,8 @@ const { data } = await client.startFlowExecution(
           source: 'main_context',
           task_id: 'string',
           trigger_id: 'string',
+          rule_id: 'string',
+          schema: 'string',
           with_relations: true,
           also_pass: [
             {
@@ -927,7 +969,8 @@ const { data } = await client.startFlowExecution(
         added_by_task_id: 'string'
       }
     ],
-    purposes: ['string']
+    purposes: ['string'],
+    revision_id: 'string'
   },
 )
 ```
@@ -940,6 +983,7 @@ const { data } = await client.startFlowExecution(
   "id": "string",
   "loop_source": "loops",
   "flow_template_id": "string",
+  "revision_id": "string",
   "org_id": "string",
   "name": "string",
   "created_at": "string",
@@ -954,6 +998,7 @@ const { data } = await client.startFlowExecution(
   },
   "status": "STARTED",
   "assigned_to": ["string"],
+  "assignee_sync": "follow_attribute",
   "analytics": {
     "started_at": "string",
     "completed_at": "string",
@@ -1000,6 +1045,7 @@ const { data } = await client.startFlowExecution(
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
       "assigned_to": ["string"],
+      "assignee_sync": "follow_attribute",
       "analytics": {},
       "taxonomies": ["string"],
       "loop_config": {},
@@ -1036,14 +1082,18 @@ const { data } = await client.startFlowExecution(
       "due_date_config": {},
       "start_date": "2021-04-27T12:00:00.000Z",
       "start_date_config": {},
+      "on_hold_config": {},
+      "hold": {},
       "requirements": [],
       "required": true,
+      "only_assignee_can_complete": true,
       "subtasks": [],
       "subtask_states": {},
       "journey_submission": {},
       "completion_gates_reset_at": "1970-01-01T00:00:00.000Z",
       "journey_gate_waived_at": "1970-01-01T00:00:00.000Z",
       "assigned_to": ["string"],
+      "assignee_sync": "follow_attribute",
       "ecp_placeholder_assignees": {},
       "analytics": {},
       "loop_iterations": {},
@@ -1099,6 +1149,8 @@ const { data } = await client.startFlowExecution(
     "type": "MANUAL",
     "automation_config": {
       "flow_id": "string",
+      "action_definition": {},
+      "legacy_definition": {},
       "execution_id": "string",
       "execution_status": "string",
       "error_reason": "string",
@@ -1145,6 +1197,7 @@ Retrieves a complete flow execution by ID, including all phases, tasks, edges, c
 ```ts
 const { data } = await client.getFlowExecution({
   execution_id: 'example',
+  skip_heal: true,
 })
 ```
 
@@ -1156,6 +1209,7 @@ const { data } = await client.getFlowExecution({
   "id": "string",
   "loop_source": "loops",
   "flow_template_id": "string",
+  "revision_id": "string",
   "org_id": "string",
   "name": "string",
   "created_at": "string",
@@ -1170,6 +1224,7 @@ const { data } = await client.getFlowExecution({
   },
   "status": "STARTED",
   "assigned_to": ["string"],
+  "assignee_sync": "follow_attribute",
   "analytics": {
     "started_at": "string",
     "completed_at": "string",
@@ -1216,6 +1271,7 @@ const { data } = await client.getFlowExecution({
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
       "assigned_to": ["string"],
+      "assignee_sync": "follow_attribute",
       "analytics": {},
       "taxonomies": ["string"],
       "loop_config": {},
@@ -1252,14 +1308,18 @@ const { data } = await client.getFlowExecution({
       "due_date_config": {},
       "start_date": "2021-04-27T12:00:00.000Z",
       "start_date_config": {},
+      "on_hold_config": {},
+      "hold": {},
       "requirements": [],
       "required": true,
+      "only_assignee_can_complete": true,
       "subtasks": [],
       "subtask_states": {},
       "journey_submission": {},
       "completion_gates_reset_at": "1970-01-01T00:00:00.000Z",
       "journey_gate_waived_at": "1970-01-01T00:00:00.000Z",
       "assigned_to": ["string"],
+      "assignee_sync": "follow_attribute",
       "ecp_placeholder_assignees": {},
       "analytics": {},
       "loop_iterations": {},
@@ -1315,6 +1375,8 @@ const { data } = await client.getFlowExecution({
     "type": "MANUAL",
     "automation_config": {
       "flow_id": "string",
+      "action_definition": {},
+      "legacy_definition": {},
       "execution_id": "string",
       "execution_status": "string",
       "error_reason": "string",
@@ -1366,17 +1428,26 @@ const { data } = await client.patchFlowExecution(
   {
     status: 'STARTED',
     assigned_to: ['string'],
+    assignee_sync: 'follow_attribute',
     closing_reason: {
       selected_reasons: [
         {
           id: 'string',
-          title: 'string'
+          title: 'string',
+          category: {
+            id: 'string',
+            title: 'string'
+          }
         }
       ],
       configured_reasons: [
         {
           id: 'string',
-          title: 'string'
+          title: 'string',
+          category: {
+            id: 'string',
+            title: 'string'
+          }
         }
       ],
       extra_description: 'string'
@@ -1422,6 +1493,7 @@ const { data } = await client.patchFlowExecution(
   "id": "string",
   "loop_source": "loops",
   "flow_template_id": "string",
+  "revision_id": "string",
   "org_id": "string",
   "name": "string",
   "created_at": "string",
@@ -1436,6 +1508,7 @@ const { data } = await client.patchFlowExecution(
   },
   "status": "STARTED",
   "assigned_to": ["string"],
+  "assignee_sync": "follow_attribute",
   "analytics": {
     "started_at": "string",
     "completed_at": "string",
@@ -1482,6 +1555,7 @@ const { data } = await client.patchFlowExecution(
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
       "assigned_to": ["string"],
+      "assignee_sync": "follow_attribute",
       "analytics": {},
       "taxonomies": ["string"],
       "loop_config": {},
@@ -1518,14 +1592,18 @@ const { data } = await client.patchFlowExecution(
       "due_date_config": {},
       "start_date": "2021-04-27T12:00:00.000Z",
       "start_date_config": {},
+      "on_hold_config": {},
+      "hold": {},
       "requirements": [],
       "required": true,
+      "only_assignee_can_complete": true,
       "subtasks": [],
       "subtask_states": {},
       "journey_submission": {},
       "completion_gates_reset_at": "1970-01-01T00:00:00.000Z",
       "journey_gate_waived_at": "1970-01-01T00:00:00.000Z",
       "assigned_to": ["string"],
+      "assignee_sync": "follow_attribute",
       "ecp_placeholder_assignees": {},
       "analytics": {},
       "loop_iterations": {},
@@ -1581,6 +1659,8 @@ const { data } = await client.patchFlowExecution(
     "type": "MANUAL",
     "automation_config": {
       "flow_id": "string",
+      "action_definition": {},
+      "legacy_definition": {},
       "execution_id": "string",
       "execution_status": "string",
       "error_reason": "string",
@@ -1660,6 +1740,7 @@ const { data } = await client.searchFlowExecutions(
       "id": "string",
       "loop_source": "loops",
       "flow_template_id": "string",
+      "revision_id": "string",
       "org_id": "string",
       "name": "string",
       "created_at": "string",
@@ -1668,6 +1749,7 @@ const { data } = await client.searchFlowExecutions(
       "due_date_config": {},
       "status": "STARTED",
       "assigned_to": ["string"],
+      "assignee_sync": "follow_attribute",
       "analytics": {},
       "contexts": [],
       "visibility": "entity_views",
@@ -1985,6 +2067,7 @@ const { data } = await client.getActiveBulkStartFlowsJob()
       "attempts": 0,
       "updated_at": "1970-01-01T00:00:00.000Z"
     },
+    "cancelled_by": "string",
     "counts": {
       "total": 0,
       "pending": 0,
@@ -2090,6 +2173,7 @@ const { data } = await client.getBulkStartFlowsJob({
     "attempts": 0,
     "updated_at": "1970-01-01T00:00:00.000Z"
   },
+  "cancelled_by": "string",
   "counts": {
     "total": 0,
     "pending": 0,
@@ -2197,6 +2281,7 @@ const { data } = await client.patchBulkStartFlowsJob(
     "attempts": 0,
     "updated_at": "1970-01-01T00:00:00.000Z"
   },
+  "cancelled_by": "string",
   "counts": {
     "total": 0,
     "pending": 0,
@@ -2297,6 +2382,10 @@ const { data } = await client.patchTask(
   {
     name: 'Review customer application',
     status: 'UNASSIGNED',
+    put_on_hold: {
+      reason_option_id: 'string',
+      reason_text: 'string'
+    },
     due_date: '2026-05-28T00:00:00.000',
     due_date_config: {
       duration: 0,
@@ -2306,9 +2395,17 @@ const { data } = await client.patchTask(
       phase_id: 'string'
     },
     assigned_to: ['string'],
+    assignee_sync: 'follow_attribute',
     enabled: true,
     automation_config: {
       flow_id: 'string',
+      action_definition: {},
+      legacy_definition: {
+        actions: [ /* ... */ ],
+        conditions: [ /* ... */ ],
+        schedules: [ /* ... */ ],
+        loops: [ /* ... */ ]
+      },
       execution_id: 'string',
       execution_status: 'string',
       error_reason: 'string',
@@ -2316,6 +2413,8 @@ const { data } = await client.patchTask(
         source: 'main_context',
         task_id: 'string',
         trigger_id: 'string',
+        rule_id: 'string',
+        schema: 'string',
         with_relations: true,
         also_pass: [ /* ... */ ]
       },
@@ -2458,6 +2557,28 @@ const { data } = await client.patchTask(
     "type": "WORKFLOW_STARTED",
     "task_id": "string"
   },
+  "on_hold_config": {
+    "resume_after": {
+      "duration": 1,
+      "unit": "hours"
+    },
+    "reason": "disabled",
+    "reason_input": "text",
+    "reason_options": [
+      {}
+    ]
+  },
+  "hold": {
+    "id": "string",
+    "set_at": "string",
+    "set_by": "string",
+    "until": "string",
+    "reason_option_id": "string",
+    "reason": "string",
+    "reason_text": "string",
+    "schedule_id": "string",
+    "expired_at": "string"
+  },
   "requirements": [
     {
       "task_id": "string",
@@ -2466,6 +2587,7 @@ const { data } = await client.patchTask(
     }
   ],
   "required": true,
+  "only_assignee_can_complete": true,
   "subtasks": [
     {
       "id": "string",
@@ -2482,6 +2604,7 @@ const { data } = await client.patchTask(
   "completion_gates_reset_at": "1970-01-01T00:00:00.000Z",
   "journey_gate_waived_at": "1970-01-01T00:00:00.000Z",
   "assigned_to": ["string"],
+  "assignee_sync": "follow_attribute",
   "ecp_placeholder_assignees": {
     "placeholder_ecp_customers": ["string"],
     "placeholder_ecp_installers": ["string"]
@@ -2644,6 +2767,28 @@ const { data } = await client.runTaskAutomation(
     "type": "WORKFLOW_STARTED",
     "task_id": "string"
   },
+  "on_hold_config": {
+    "resume_after": {
+      "duration": 1,
+      "unit": "hours"
+    },
+    "reason": "disabled",
+    "reason_input": "text",
+    "reason_options": [
+      {}
+    ]
+  },
+  "hold": {
+    "id": "string",
+    "set_at": "string",
+    "set_by": "string",
+    "until": "string",
+    "reason_option_id": "string",
+    "reason": "string",
+    "reason_text": "string",
+    "schedule_id": "string",
+    "expired_at": "string"
+  },
   "requirements": [
     {
       "task_id": "string",
@@ -2652,6 +2797,7 @@ const { data } = await client.runTaskAutomation(
     }
   ],
   "required": true,
+  "only_assignee_can_complete": true,
   "subtasks": [
     {
       "id": "string",
@@ -2668,6 +2814,7 @@ const { data } = await client.runTaskAutomation(
   "completion_gates_reset_at": "1970-01-01T00:00:00.000Z",
   "journey_gate_waived_at": "1970-01-01T00:00:00.000Z",
   "assigned_to": ["string"],
+  "assignee_sync": "follow_attribute",
   "ecp_placeholder_assignees": {
     "placeholder_ecp_customers": ["string"],
     "placeholder_ecp_installers": ["string"]
@@ -2729,6 +2876,13 @@ const { data } = await client.runTaskAutomation(
   "task_type": "MANUAL",
   "automation_config": {
     "flow_id": "string",
+    "action_definition": {},
+    "legacy_definition": {
+      "actions": [],
+      "conditions": [],
+      "schedules": [],
+      "loops": []
+    },
     "execution_id": "string",
     "execution_status": "string",
     "error_reason": "string",
@@ -2736,6 +2890,8 @@ const { data } = await client.runTaskAutomation(
       "source": "main_context",
       "task_id": "string",
       "trigger_id": "string",
+      "rule_id": "string",
+      "schema": "string",
       "with_relations": true,
       "also_pass": []
     },
@@ -2901,6 +3057,28 @@ const { data } = await client.executeTask({
     "type": "WORKFLOW_STARTED",
     "task_id": "string"
   },
+  "on_hold_config": {
+    "resume_after": {
+      "duration": 1,
+      "unit": "hours"
+    },
+    "reason": "disabled",
+    "reason_input": "text",
+    "reason_options": [
+      {}
+    ]
+  },
+  "hold": {
+    "id": "string",
+    "set_at": "string",
+    "set_by": "string",
+    "until": "string",
+    "reason_option_id": "string",
+    "reason": "string",
+    "reason_text": "string",
+    "schedule_id": "string",
+    "expired_at": "string"
+  },
   "requirements": [
     {
       "task_id": "string",
@@ -2909,6 +3087,7 @@ const { data } = await client.executeTask({
     }
   ],
   "required": true,
+  "only_assignee_can_complete": true,
   "subtasks": [
     {
       "id": "string",
@@ -2925,6 +3104,7 @@ const { data } = await client.executeTask({
   "completion_gates_reset_at": "1970-01-01T00:00:00.000Z",
   "journey_gate_waived_at": "1970-01-01T00:00:00.000Z",
   "assigned_to": ["string"],
+  "assignee_sync": "follow_attribute",
   "ecp_placeholder_assignees": {
     "placeholder_ecp_customers": ["string"],
     "placeholder_ecp_installers": ["string"]
@@ -2995,6 +3175,37 @@ const { data } = await client.executeTask({
 
 ---
 
+### `expireTaskHold`
+
+Ends the task's hold once it expires (AL-3320): scheduler-api's `flow-task-hold-expiry` timer calls it with the hold it was booked for. A task still in that hold resumes in progress as the system and 
+
+`POST /v2/flows/executions/{execution_id}/tasks/{task_id}/hold/expire`
+
+```ts
+const { data } = await client.expireTaskHold(
+  {
+    execution_id: 'example',
+    task_id: 'example',
+  },
+  {
+    hold_id: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "expired": true
+}
+```
+
+</details>
+
+---
+
 ### `patchPhase`
 
 Apply updates to a phase within flow execution
@@ -3017,7 +3228,8 @@ const { data } = await client.patchPhase(
       task_id: 'string',
       phase_id: 'string'
     },
-    assigned_to: ['string']
+    assigned_to: ['string'],
+    assignee_sync: 'follow_attribute'
   },
 )
 ```
@@ -3041,6 +3253,7 @@ const { data } = await client.patchPhase(
     "phase_id": "string"
   },
   "assigned_to": ["string"],
+  "assignee_sync": "follow_attribute",
   "analytics": {
     "started_at": "1970-01-01T00:00:00.000Z",
     "in_progress_at": "1970-01-01T00:00:00.000Z",
@@ -3100,6 +3313,21 @@ const { data } = await client.addTask(
       enabled: true,
       automation_config: {
         flow_id: 'string',
+        action_definition: {},
+        legacy_definition: {
+          actions: [
+            {}
+          ],
+          conditions: [
+            {}
+          ],
+          schedules: [
+            {}
+          ],
+          loops: [
+            {}
+          ]
+        },
         execution_id: 'string',
         execution_status: 'string',
         error_reason: 'string',
@@ -3107,6 +3335,8 @@ const { data } = await client.addTask(
           source: 'main_context',
           task_id: 'string',
           trigger_id: 'string',
+          rule_id: 'string',
+          schema: 'string',
           with_relations: true,
           also_pass: [
             {
@@ -3211,6 +3441,28 @@ const { data } = await client.addTask(
     "type": "WORKFLOW_STARTED",
     "task_id": "string"
   },
+  "on_hold_config": {
+    "resume_after": {
+      "duration": 1,
+      "unit": "hours"
+    },
+    "reason": "disabled",
+    "reason_input": "text",
+    "reason_options": [
+      {}
+    ]
+  },
+  "hold": {
+    "id": "string",
+    "set_at": "string",
+    "set_by": "string",
+    "until": "string",
+    "reason_option_id": "string",
+    "reason": "string",
+    "reason_text": "string",
+    "schedule_id": "string",
+    "expired_at": "string"
+  },
   "requirements": [
     {
       "task_id": "string",
@@ -3219,6 +3471,7 @@ const { data } = await client.addTask(
     }
   ],
   "required": true,
+  "only_assignee_can_complete": true,
   "subtasks": [
     {
       "id": "string",
@@ -3235,6 +3488,208 @@ const { data } = await client.addTask(
   "completion_gates_reset_at": "1970-01-01T00:00:00.000Z",
   "journey_gate_waived_at": "1970-01-01T00:00:00.000Z",
   "assigned_to": ["string"],
+  "assignee_sync": "follow_attribute",
+  "ecp_placeholder_assignees": {
+    "placeholder_ecp_customers": ["string"],
+    "placeholder_ecp_installers": ["string"]
+  },
+  "analytics": {
+    "started_at": "1970-01-01T00:00:00.000Z",
+    "in_progress_at": "1970-01-01T00:00:00.000Z",
+    "completed_at": "1970-01-01T00:00:00.000Z",
+    "status_updated_at": "1970-01-01T00:00:00.000Z",
+    "in_progress_by": "string",
+    "completed_by": "string",
+    "skipped_at": "1970-01-01T00:00:00.000Z",
+    "skipped_by": "string",
+    "on_hold_by": "string"
+  },
+  "loop_iterations": {},
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "manually_created": true,
+  "enabled": true,
+  "ecp": {
+    "enabled": true,
+    "label": "string",
+    "description": "string",
+    "journey": {
+      "id": "string",
+      "journeyId": "string",
+      "name": "string",
+      "portal_button_label": "string",
+      "complete_task_automatically": true,
+      "journey_submission_required": true,
+      "context_parameters": [],
+      "ai_prefill": {}
+    }
+  },
+  "installer": {
+    "enabled": true,
+    "label": "string",
+    "description": "string",
+    "journey": {
+      "id": "string",
+      "journeyId": "string",
+      "name": "string",
+      "portal_button_label": "string",
+      "complete_task_automatically": true,
+      "journey_submission_required": true,
+      "context_parameters": [],
+      "ai_prefill": {}
+    }
+  },
+  "partner": {
+    "enabled": true,
+    "label": "string",
+    "description": "string"
+  },
+  "audience_order": ["description"],
+  "taxonomies": ["string"],
+  "phase_id": "string",
+  "task_type": "MANUAL",
+  "loop_config": {
+    "max_iterations": 3,
+    "crt_iterations": 0
+  }
+}
+```
+
+</details>
+
+---
+
+### `rescheduleTask`
+
+Moves the execution date of a scheduled task that has not run yet (AL-3774). The task must be SCHEDULED with a booked timer, and its flow open. The task's timer is replaced by one for the new date, so
+
+`PUT /v2/flows/executions/{execution_id}/tasks/{task_id}/schedule`
+
+```ts
+const { data } = await client.rescheduleTask(
+  {
+    execution_id: 'example',
+    task_id: 'example',
+  },
+  {
+    scheduled_at: 'string',
+    reason: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "string",
+  "loop_membership": [
+    {
+      "loop_id": "string",
+      "runs_in_loop": true
+    }
+  ],
+  "template_id": "string",
+  "name": "string",
+  "description": {
+    "enabled": true,
+    "value": "string"
+  },
+  "status": "UNASSIGNED",
+  "journey": {
+    "id": "string",
+    "journeyId": "string",
+    "name": "string",
+    "portal_button_label": "string",
+    "complete_task_automatically": true,
+    "journey_submission_required": true,
+    "context_parameters": [
+      {}
+    ],
+    "ai_prefill": {
+      "enabled": false,
+      "source": {},
+      "extraction_fields": [],
+      "mappings": [],
+      "min_confidence": 0.8,
+      "instructions": "string"
+    }
+  },
+  "journey_prefill": {
+    "status": "PENDING",
+    "agent_execution_id": "string",
+    "dispatched_at": "1970-01-01T00:00:00.000Z",
+    "extracted_at": "1970-01-01T00:00:00.000Z",
+    "initial_state": {},
+    "field_confidence": {},
+    "dropped": [
+      {}
+    ]
+  },
+  "due_date": "2021-04-27T12:00:00.000Z",
+  "due_date_config": {
+    "duration": 0,
+    "unit": "minutes",
+    "type": "WORKFLOW_STARTED",
+    "task_id": "string",
+    "phase_id": "string"
+  },
+  "start_date": "2021-04-27T12:00:00.000Z",
+  "start_date_config": {
+    "duration": 0,
+    "unit": "minutes",
+    "type": "WORKFLOW_STARTED",
+    "task_id": "string"
+  },
+  "on_hold_config": {
+    "resume_after": {
+      "duration": 1,
+      "unit": "hours"
+    },
+    "reason": "disabled",
+    "reason_input": "text",
+    "reason_options": [
+      {}
+    ]
+  },
+  "hold": {
+    "id": "string",
+    "set_at": "string",
+    "set_by": "string",
+    "until": "string",
+    "reason_option_id": "string",
+    "reason": "string",
+    "reason_text": "string",
+    "schedule_id": "string",
+    "expired_at": "string"
+  },
+  "requirements": [
+    {
+      "task_id": "string",
+      "phase_id": "string",
+      "when": "TASK_FINISHED"
+    }
+  ],
+  "required": true,
+  "only_assignee_can_complete": true,
+  "subtasks": [
+    {
+      "id": "string",
+      "name": "string",
+      "party": "description",
+      "required": true
+    }
+  ],
+  "subtask_states": {},
+  "journey_submission": {
+    "submission_entity_id": "string",
+    "submitted_at": "1970-01-01T00:00:00.000Z"
+  },
+  "completion_gates_reset_at": "1970-01-01T00:00:00.000Z",
+  "journey_gate_waived_at": "1970-01-01T00:00:00.000Z",
+  "assigned_to": ["string"],
+  "assignee_sync": "follow_attribute",
   "ecp_placeholder_assignees": {
     "placeholder_ecp_customers": ["string"],
     "placeholder_ecp_installers": ["string"]
@@ -3341,6 +3796,7 @@ const { data } = await client.reconcileAutomationTask({
   "id": "string",
   "loop_source": "loops",
   "flow_template_id": "string",
+  "revision_id": "string",
   "org_id": "string",
   "name": "string",
   "created_at": "string",
@@ -3355,6 +3811,7 @@ const { data } = await client.reconcileAutomationTask({
   },
   "status": "STARTED",
   "assigned_to": ["string"],
+  "assignee_sync": "follow_attribute",
   "analytics": {
     "started_at": "string",
     "completed_at": "string",
@@ -3401,6 +3858,7 @@ const { data } = await client.reconcileAutomationTask({
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
       "assigned_to": ["string"],
+      "assignee_sync": "follow_attribute",
       "analytics": {},
       "taxonomies": ["string"],
       "loop_config": {},
@@ -3437,14 +3895,18 @@ const { data } = await client.reconcileAutomationTask({
       "due_date_config": {},
       "start_date": "2021-04-27T12:00:00.000Z",
       "start_date_config": {},
+      "on_hold_config": {},
+      "hold": {},
       "requirements": [],
       "required": true,
+      "only_assignee_can_complete": true,
       "subtasks": [],
       "subtask_states": {},
       "journey_submission": {},
       "completion_gates_reset_at": "1970-01-01T00:00:00.000Z",
       "journey_gate_waived_at": "1970-01-01T00:00:00.000Z",
       "assigned_to": ["string"],
+      "assignee_sync": "follow_attribute",
       "ecp_placeholder_assignees": {},
       "analytics": {},
       "loop_iterations": {},
@@ -3500,6 +3962,8 @@ const { data } = await client.reconcileAutomationTask({
     "type": "MANUAL",
     "automation_config": {
       "flow_id": "string",
+      "action_definition": {},
+      "legacy_definition": {},
       "execution_id": "string",
       "execution_status": "string",
       "error_reason": "string",
@@ -3614,6 +4078,28 @@ const { data } = await client.runTaskScheduleNow({
     "type": "WORKFLOW_STARTED",
     "task_id": "string"
   },
+  "on_hold_config": {
+    "resume_after": {
+      "duration": 1,
+      "unit": "hours"
+    },
+    "reason": "disabled",
+    "reason_input": "text",
+    "reason_options": [
+      {}
+    ]
+  },
+  "hold": {
+    "id": "string",
+    "set_at": "string",
+    "set_by": "string",
+    "until": "string",
+    "reason_option_id": "string",
+    "reason": "string",
+    "reason_text": "string",
+    "schedule_id": "string",
+    "expired_at": "string"
+  },
   "requirements": [
     {
       "task_id": "string",
@@ -3622,6 +4108,7 @@ const { data } = await client.runTaskScheduleNow({
     }
   ],
   "required": true,
+  "only_assignee_can_complete": true,
   "subtasks": [
     {
       "id": "string",
@@ -3638,6 +4125,7 @@ const { data } = await client.runTaskScheduleNow({
   "completion_gates_reset_at": "1970-01-01T00:00:00.000Z",
   "journey_gate_waived_at": "1970-01-01T00:00:00.000Z",
   "assigned_to": ["string"],
+  "assignee_sync": "follow_attribute",
   "ecp_placeholder_assignees": {
     "placeholder_ecp_customers": ["string"],
     "placeholder_ecp_installers": ["string"]
@@ -3735,6 +4223,10 @@ type WorkflowExecutionUpdateReq = {
   selectedClosingReasons?: Array<{
     id: string
     title: string
+    category?: {
+      id: { ... }
+      title: { ... }
+    }
   }>
   closingReasonDescription?: string
   dueDate?: string
@@ -3759,6 +4251,21 @@ type WorkflowExecutionUpdateReq = {
 
 ```ts
 type ClosingReason = {
+  id: string
+  title: string
+  category?: {
+    id: string
+    title: string
+  }
+}
+```
+
+### `ClosingReasonCategoryRef`
+
+The category a configured reason was grouped under when the flow started, snapshotted with its title. Absent on a reason without a category and on flows started before categories existed. Only `configured_reasons` carries it; a selected reason's category is the one its id has in `configured_reasons`
+
+```ts
+type ClosingReasonCategoryRef = {
   id: string
   title: string
 }
@@ -3809,10 +4316,18 @@ type WorkflowExecutionBase = {
   configuredClosingReasonSnapshot?: Array<{
     id: string
     title: string
+    category?: {
+      id: { ... }
+      title: { ... }
+    }
   }>
   selectedClosingReasons?: Array<{
     id: string
     title: string
+    category?: {
+      id: { ... }
+      title: { ... }
+    }
   }>
   closingReasonDescription?: string
   enableECPWorkflow?: boolean
@@ -3864,10 +4379,18 @@ type WorkflowExecutionSlim = {
   configuredClosingReasonSnapshot?: Array<{
     id: string
     title: string
+    category?: {
+      id: { ... }
+      title: { ... }
+    }
   }>
   selectedClosingReasons?: Array<{
     id: string
     title: string
+    category?: {
+      id: { ... }
+      title: { ... }
+    }
   }>
   closingReasonDescription?: string
   enableECPWorkflow?: boolean
@@ -3924,14 +4447,6 @@ type WorkflowExecutionSlim = {
       statusLastUpdated?: { ... }
       startedTime?: { ... }
       completedTime?: { ... }
-      dueDate?: { ... }
-      dynamicDueDate?: { ... }
-      manuallyCreated?: { ... }
-      automationConfig?: { ... }
-      journey?: { ... }
-      taxonomies?: { ... }
-    }>
-    taxonomies?: string[]
   // ...
 }
 ```
@@ -4185,10 +4700,18 @@ type WorkflowExecution = {
   configuredClosingReasonSnapshot?: Array<{
     id: string
     title: string
+    category?: {
+      id: { ... }
+      title: { ... }
+    }
   }>
   selectedClosingReasons?: Array<{
     id: string
     title: string
+    category?: {
+      id: { ... }
+      title: { ... }
+    }
   }>
   closingReasonDescription?: string
   enableECPWorkflow?: boolean
@@ -4245,14 +4768,6 @@ type WorkflowExecution = {
       statusLastUpdated?: { ... }
       startedTime?: { ... }
       completedTime?: { ... }
-      dueDate?: { ... }
-      dynamicDueDate?: { ... }
-      manuallyCreated?: { ... }
-      automationConfig?: { ... }
-      journey?: { ... }
-      taxonomies?: { ... }
-    }>
-    taxonomies?: string[]
   // ...
 }
 ```
@@ -4612,6 +5127,17 @@ type StepStatus = "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED" | "IN_PROG
 
 ```ts
 type SectionStatus = "OPEN" | "IN_PROGRESS" | "COMPLETED"
+```
+
+### `PhaseStatus`
+
+Status of a phase of a flow execution. `SKIPPED`: every task in the
+phase was skipped and none ran, e.g. because the phase sits on a
+branch of a decision that was not taken.
+
+
+```ts
+type PhaseStatus = "OPEN" | "IN_PROGRESS" | "COMPLETED" | "SKIPPED"
 ```
 
 ### `StepType`
@@ -5085,10 +5611,12 @@ type SearchExecutionsResp = {
     configuredClosingReasonSnapshot?: Array<{
       id: { ... }
       title: { ... }
+      category?: { ... }
     }>
     selectedClosingReasons?: Array<{
       id: { ... }
       title: { ... }
+      category?: { ... }
     }>
     closingReasonDescription?: string
     enableECPWorkflow?: boolean
@@ -5150,6 +5678,7 @@ type SearchExecutionsResp = {
     orgId?: string
     creationTime?: string
   }
+  // ...
 }
 ```
 
@@ -5223,6 +5752,10 @@ type ClosingReasonResp = {
   reasons?: Array<{
     id: string
     title: string
+    category?: {
+      id: { ... }
+      title: { ... }
+    }
   }>
 }
 ```
@@ -5294,6 +5827,10 @@ type WorkflowInEntity = {
   selected_closing_reasons?: Array<{
     id: string
     title: string
+    category?: {
+      id: { ... }
+      title: { ... }
+    }
   }>
   closing_reason_description?: string
 }
@@ -5371,6 +5908,8 @@ type StartFlowReq = {
     type?: "MANUAL" | "AUTOMATIC"
     automation_config?: {
       flow_id: { ... }
+      action_definition?: { ... }
+      legacy_definition?: { ... }
       execution_id?: { ... }
       execution_status?: { ... }
       error_reason?: { ... }
@@ -5399,6 +5938,7 @@ type StartFlowReq = {
     added_by_task_id?: string
   }>
   purposes?: string[]
+  revision_id?: string
 }
 ```
 
@@ -5520,7 +6060,7 @@ type BulkStartFlowsReq = {
 
 The entities an entity search matches, as the entity table's "select all
 matching" selects them. Resolved once, in the background, when the job is prepared: the
-job holds the entities matching at that time (at most 10,000).
+job holds the entities matching at that time (at most 80,000).
 
 
 ```ts
@@ -5701,6 +6241,7 @@ type BulkStartFlowsJob = {
     attempts: number
     updated_at: string // date-time
   }
+  cancelled_by?: string
   counts: {
     total: number
     pending: number
@@ -5906,6 +6447,7 @@ type ActiveBulkStartFlowsJobResp = {
       attempts: { ... }
       updated_at: { ... }
     }
+    cancelled_by?: string
     counts: {
       total: { ... }
       pending: { ... }
@@ -6231,14 +6773,17 @@ type PatchFlowReq = {
     variable: string
     value?: string[]
   }>
+  assignee_sync?: "follow_attribute" | "fill_empty"
   closing_reason?: {
     selected_reasons?: Array<{
       id: { ... }
       title: { ... }
+      category?: { ... }
     }>
     configured_reasons?: Array<{
       id: { ... }
       title: { ... }
+      category?: { ... }
     }>
     extra_description?: string
   }
@@ -6277,6 +6822,7 @@ type FlowExecution = {
   id: string
   loop_source?: "loops" | "loop_config"
   flow_template_id: string
+  revision_id?: string
   org_id: string
   name: string
   created_at: string
@@ -6294,6 +6840,7 @@ type FlowExecution = {
     variable: string
     value?: string[]
   }>
+  assignee_sync?: "follow_attribute" | "fill_empty"
   analytics: {
     started_at?: string
     completed_at?: string
@@ -6328,7 +6875,7 @@ type FlowExecution = {
     id: string
     template_id: string
     name: string
-    status?: "OPEN" | "IN_PROGRESS" | "COMPLETED"
+    status?: "OPEN" | "IN_PROGRESS" | "COMPLETED" | "SKIPPED"
     updated_at?: string
     due_date?: string
     due_date_config?: {
@@ -6342,6 +6889,7 @@ type FlowExecution = {
       variable: { ... }
       value?: { ... }
     }>
+    assignee_sync?: "follow_attribute" | "fill_empty"
     analytics?: {
       started_at?: { ... }
       in_progress_at?: { ... }
@@ -6370,9 +6918,6 @@ type FlowExecution = {
     entry_node_id?: string
     cut_edge_ids?: string[]
     color?: string
-    portal_names?: {
-      ecp?: { ... }
-      installer?: { ... }
   // ...
 }
 ```
@@ -6384,10 +6929,18 @@ type FlowClosingReason = {
   selected_reasons?: Array<{
     id: string
     title: string
+    category?: {
+      id: { ... }
+      title: { ... }
+    }
   }>
   configured_reasons?: Array<{
     id: string
     title: string
+    category?: {
+      id: { ... }
+      title: { ... }
+    }
   }>
   extra_description?: string
 }
@@ -6400,6 +6953,13 @@ type FlowTrigger = {
   type?: "MANUAL" | "AUTOMATIC"
   automation_config?: {
     flow_id: string
+    action_definition?: Record<string, unknown>
+    legacy_definition?: {
+      actions?: { ... }
+      conditions?: { ... }
+      schedules?: { ... }
+      loops?: { ... }
+    }
     execution_id?: string
     execution_status?: string
     error_reason?: string
@@ -6407,6 +6967,8 @@ type FlowTrigger = {
       source: { ... }
       task_id?: { ... }
       trigger_id?: { ... }
+      rule_id?: { ... }
+      schema?: { ... }
       with_relations?: { ... }
       also_pass?: { ... }
     }
@@ -6576,12 +7138,36 @@ type Task = {
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED" | "THIS_TASK_LAST_COMPLETED"
     task_id?: string
   }
+  on_hold_config?: {
+    resume_after?: {
+      duration: { ... }
+      unit: { ... }
+    }
+    reason?: "disabled" | "optional" | "required"
+    reason_input?: "text" | "options" | "options_and_text"
+    reason_options?: Array<{
+      id: { ... }
+      label: { ... }
+    }>
+  }
+  hold?: {
+    id: string
+    set_at: string
+    set_by?: string
+    until?: string
+    reason_option_id?: string
+    reason?: string
+    reason_text?: string
+    schedule_id?: string
+    expired_at?: string
+  }
   requirements?: Array<{
     task_id?: string
     phase_id?: string
     when: "TASK_FINISHED" | "PHASE_FINISHED"
   }>
   required?: boolean
+  only_assignee_can_complete?: boolean
   subtasks?: Array<{
     id: string
     name?: string
@@ -6591,30 +7177,6 @@ type Task = {
   subtask_states?: Record<string, {
     completed: boolean
     completed_by?: string
-    completed_at?: string // date-time
-  }>
-  journey_submission?: {
-    submission_entity_id?: string
-    submitted_at?: string // date-time
-  }
-  completion_gates_reset_at?: string // date-time
-  journey_gate_waived_at?: string // date-time
-  assigned_to?: Array<string | {
-    variable: string
-    value?: string[]
-  }>
-  ecp_placeholder_assignees?: {
-    placeholder_ecp_customers?: string[]
-    placeholder_ecp_installers?: string[]
-  }
-  analytics: {
-    started_at?: string // date-time
-    in_progress_at?: string // date-time
-    completed_at?: string // date-time
-    status_updated_at?: string // date-time
-    in_progress_by?: string
-    completed_by?: string
-    skipped_at?: string // date-time
   // ...
 }
 ```
@@ -6689,12 +7251,36 @@ type ManualTask = {
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED" | "THIS_TASK_LAST_COMPLETED"
     task_id?: string
   }
+  on_hold_config?: {
+    resume_after?: {
+      duration: { ... }
+      unit: { ... }
+    }
+    reason?: "disabled" | "optional" | "required"
+    reason_input?: "text" | "options" | "options_and_text"
+    reason_options?: Array<{
+      id: { ... }
+      label: { ... }
+    }>
+  }
+  hold?: {
+    id: string
+    set_at: string
+    set_by?: string
+    until?: string
+    reason_option_id?: string
+    reason?: string
+    reason_text?: string
+    schedule_id?: string
+    expired_at?: string
+  }
   requirements?: Array<{
     task_id?: string
     phase_id?: string
     when: "TASK_FINISHED" | "PHASE_FINISHED"
   }>
   required?: boolean
+  only_assignee_can_complete?: boolean
   subtasks?: Array<{
     id: string
     name?: string
@@ -6704,30 +7290,6 @@ type ManualTask = {
   subtask_states?: Record<string, {
     completed: boolean
     completed_by?: string
-    completed_at?: string // date-time
-  }>
-  journey_submission?: {
-    submission_entity_id?: string
-    submitted_at?: string // date-time
-  }
-  completion_gates_reset_at?: string // date-time
-  journey_gate_waived_at?: string // date-time
-  assigned_to?: Array<string | {
-    variable: string
-    value?: string[]
-  }>
-  ecp_placeholder_assignees?: {
-    placeholder_ecp_customers?: string[]
-    placeholder_ecp_installers?: string[]
-  }
-  analytics: {
-    started_at?: string // date-time
-    in_progress_at?: string // date-time
-    completed_at?: string // date-time
-    status_updated_at?: string // date-time
-    in_progress_by?: string
-    completed_by?: string
-    skipped_at?: string // date-time
   // ...
 }
 ```
@@ -6796,12 +7358,36 @@ type AutomationTask = {
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED" | "THIS_TASK_LAST_COMPLETED"
     task_id?: string
   }
+  on_hold_config?: {
+    resume_after?: {
+      duration: { ... }
+      unit: { ... }
+    }
+    reason?: "disabled" | "optional" | "required"
+    reason_input?: "text" | "options" | "options_and_text"
+    reason_options?: Array<{
+      id: { ... }
+      label: { ... }
+    }>
+  }
+  hold?: {
+    id: string
+    set_at: string
+    set_by?: string
+    until?: string
+    reason_option_id?: string
+    reason?: string
+    reason_text?: string
+    schedule_id?: string
+    expired_at?: string
+  }
   requirements?: Array<{
     task_id?: string
     phase_id?: string
     when: "TASK_FINISHED" | "PHASE_FINISHED"
   }>
   required?: boolean
+  only_assignee_can_complete?: boolean
   subtasks?: Array<{
     id: string
     name?: string
@@ -6811,30 +7397,6 @@ type AutomationTask = {
   subtask_states?: Record<string, {
     completed: boolean
     completed_by?: string
-    completed_at?: string // date-time
-  }>
-  journey_submission?: {
-    submission_entity_id?: string
-    submitted_at?: string // date-time
-  }
-  completion_gates_reset_at?: string // date-time
-  journey_gate_waived_at?: string // date-time
-  assigned_to?: Array<string | {
-    variable: string
-    value?: string[]
-  }>
-  ecp_placeholder_assignees?: {
-    placeholder_ecp_customers?: string[]
-    placeholder_ecp_installers?: string[]
-  }
-  analytics: {
-    started_at?: string // date-time
-    in_progress_at?: string // date-time
-    completed_at?: string // date-time
-    status_updated_at?: string // date-time
-    in_progress_by?: string
-    completed_by?: string
-    skipped_at?: string // date-time
   // ...
 }
 ```
@@ -6920,6 +7482,14 @@ type ActionSchedule = {
   schedule_id?: string
   scheduled_at?: string
   error_reason?: string
+  rescheduled?: {
+    schedule_id: string
+    original_scheduled_at: string
+    previous_scheduled_at: string
+    changed_by: string
+    changed_at: string
+    reason?: string
+  }
 } | {
   mode: "relative"
   direction: "before" | "after"
@@ -6934,6 +7504,14 @@ type ActionSchedule = {
   schedule_id?: string
   scheduled_at?: string
   error_reason?: string
+  rescheduled?: {
+    schedule_id: string
+    original_scheduled_at: string
+    previous_scheduled_at: string
+    changed_by: string
+    changed_at: string
+    reason?: string
+  }
 }
 ```
 
@@ -6955,6 +7533,132 @@ type DelayedSchedule = {
   schedule_id?: string
   scheduled_at?: string
   error_reason?: string
+  rescheduled?: {
+    schedule_id: string
+    original_scheduled_at: string
+    previous_scheduled_at: string
+    changed_by: string
+    changed_at: string
+    reason?: string
+  }
+}
+```
+
+### `OnHoldConfig`
+
+What happens when a person puts the task on hold (AL-3320), snapshotted from the template at flow start: after `resume_after` the task resumes in progress on its own (absent: only by hand), `reason` is `disabled`, `optional` or `required` (absent is `disabled`), and a reason is typed (`text`, the de
+
+```ts
+type OnHoldConfig = {
+  resume_after?: {
+    duration: number
+    unit: "hours" | "days" | "weeks"
+  }
+  reason?: "disabled" | "optional" | "required"
+  reason_input?: "text" | "options" | "options_and_text"
+  reason_options?: Array<{
+    id: string
+    label: string
+  }>
+}
+```
+
+### `OnHoldResumeAfter`
+
+How long after a task is put on hold it resumes in progress on its own (AL-3320), counted from the moment it is put on hold. A day is 24 hours and a week 7 days.
+
+```ts
+type OnHoldResumeAfter = {
+  duration: number
+  unit: "hours" | "days" | "weeks"
+}
+```
+
+### `OnHoldFieldMode`
+
+```ts
+type OnHoldFieldMode = "disabled" | "optional" | "required"
+```
+
+### `OnHoldReasonOption`
+
+```ts
+type OnHoldReasonOption = {
+  id: string
+  label: string
+}
+```
+
+### `PutOnHoldReq`
+
+The reason of the hold this PATCH puts the task in (AL-3320). The expiry is not given: it follows from the task's `on_hold_config.resume_after`. Accepted only when the PATCH leaves the task on hold: with `status: ON_HOLD`, or with no status on a task that is on hold, which changes the reason of the 
+
+```ts
+type PutOnHoldReq = {
+  reason_option_id?: string
+  reason_text?: string
+}
+```
+
+### `TaskHold`
+
+The task's last hold (AL-3320), written each time a person puts it on hold. It describes the task only while its status is `ON_HOLD`: a task that resumed, was reset or was put on hold again without an expiry or reason keeps or loses the record, and readers must ignore it whenever the task is not on 
+
+```ts
+type TaskHold = {
+  id: string
+  set_at: string
+  set_by?: string
+  until?: string
+  reason_option_id?: string
+  reason?: string
+  reason_text?: string
+  schedule_id?: string
+  expired_at?: string
+}
+```
+
+### `ExpireTaskHoldReq`
+
+```ts
+type ExpireTaskHoldReq = {
+  hold_id: string
+}
+```
+
+### `ExpireTaskHoldResp`
+
+```ts
+type ExpireTaskHoldResp = {
+  expired: boolean
+}
+```
+
+### `RescheduleTaskReq`
+
+```ts
+type RescheduleTaskReq = {
+  scheduled_at: string
+  reason?: string
+}
+```
+
+### `ScheduleChange`
+
+A person moved the execution date of this booked schedule (AL-3774).
+It describes the booking named by `schedule_id` only: once the task's
+`schedule.schedule_id` differs (the timer fired and a reset or re-arm
+booked a new one, run-now released it, a revert cleared it), the change
+no longer applies a
+
+```ts
+type ScheduleChange = {
+  schedule_id: string
+  original_scheduled_at: string
+  previous_scheduled_at: string
+  changed_by: string
+  changed_at: string
+  reason?: string
 }
 ```
 
@@ -6975,6 +7679,14 @@ type RelativeSchedule = {
   schedule_id?: string
   scheduled_at?: string
   error_reason?: string
+  rescheduled?: {
+    schedule_id: string
+    original_scheduled_at: string
+    previous_scheduled_at: string
+    changed_by: string
+    changed_at: string
+    reason?: string
+  }
 }
 ```
 
@@ -7042,12 +7754,36 @@ type DecisionTask = {
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED" | "THIS_TASK_LAST_COMPLETED"
     task_id?: string
   }
+  on_hold_config?: {
+    resume_after?: {
+      duration: { ... }
+      unit: { ... }
+    }
+    reason?: "disabled" | "optional" | "required"
+    reason_input?: "text" | "options" | "options_and_text"
+    reason_options?: Array<{
+      id: { ... }
+      label: { ... }
+    }>
+  }
+  hold?: {
+    id: string
+    set_at: string
+    set_by?: string
+    until?: string
+    reason_option_id?: string
+    reason?: string
+    reason_text?: string
+    schedule_id?: string
+    expired_at?: string
+  }
   requirements?: Array<{
     task_id?: string
     phase_id?: string
     when: "TASK_FINISHED" | "PHASE_FINISHED"
   }>
   required?: boolean
+  only_assignee_can_complete?: boolean
   subtasks?: Array<{
     id: string
     name?: string
@@ -7057,30 +7793,6 @@ type DecisionTask = {
   subtask_states?: Record<string, {
     completed: boolean
     completed_by?: string
-    completed_at?: string // date-time
-  }>
-  journey_submission?: {
-    submission_entity_id?: string
-    submitted_at?: string // date-time
-  }
-  completion_gates_reset_at?: string // date-time
-  journey_gate_waived_at?: string // date-time
-  assigned_to?: Array<string | {
-    variable: string
-    value?: string[]
-  }>
-  ecp_placeholder_assignees?: {
-    placeholder_ecp_customers?: string[]
-    placeholder_ecp_installers?: string[]
-  }
-  analytics: {
-    started_at?: string // date-time
-    in_progress_at?: string // date-time
-    completed_at?: string // date-time
-    status_updated_at?: string // date-time
-    in_progress_by?: string
-    completed_by?: string
-    skipped_at?: string // date-time
   // ...
 }
 ```
@@ -7149,12 +7861,36 @@ type AiAgentTask = {
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED" | "THIS_TASK_LAST_COMPLETED"
     task_id?: string
   }
+  on_hold_config?: {
+    resume_after?: {
+      duration: { ... }
+      unit: { ... }
+    }
+    reason?: "disabled" | "optional" | "required"
+    reason_input?: "text" | "options" | "options_and_text"
+    reason_options?: Array<{
+      id: { ... }
+      label: { ... }
+    }>
+  }
+  hold?: {
+    id: string
+    set_at: string
+    set_by?: string
+    until?: string
+    reason_option_id?: string
+    reason?: string
+    reason_text?: string
+    schedule_id?: string
+    expired_at?: string
+  }
   requirements?: Array<{
     task_id?: string
     phase_id?: string
     when: "TASK_FINISHED" | "PHASE_FINISHED"
   }>
   required?: boolean
+  only_assignee_can_complete?: boolean
   subtasks?: Array<{
     id: string
     name?: string
@@ -7164,30 +7900,6 @@ type AiAgentTask = {
   subtask_states?: Record<string, {
     completed: boolean
     completed_by?: string
-    completed_at?: string // date-time
-  }>
-  journey_submission?: {
-    submission_entity_id?: string
-    submitted_at?: string // date-time
-  }
-  completion_gates_reset_at?: string // date-time
-  journey_gate_waived_at?: string // date-time
-  assigned_to?: Array<string | {
-    variable: string
-    value?: string[]
-  }>
-  ecp_placeholder_assignees?: {
-    placeholder_ecp_customers?: string[]
-    placeholder_ecp_installers?: string[]
-  }
-  analytics: {
-    started_at?: string // date-time
-    in_progress_at?: string // date-time
-    completed_at?: string // date-time
-    status_updated_at?: string // date-time
-    in_progress_by?: string
-    completed_by?: string
-    skipped_at?: string // date-time
   // ...
 }
 ```
@@ -7289,12 +8001,36 @@ type TaskBase = {
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED" | "THIS_TASK_LAST_COMPLETED"
     task_id?: string
   }
+  on_hold_config?: {
+    resume_after?: {
+      duration: { ... }
+      unit: { ... }
+    }
+    reason?: "disabled" | "optional" | "required"
+    reason_input?: "text" | "options" | "options_and_text"
+    reason_options?: Array<{
+      id: { ... }
+      label: { ... }
+    }>
+  }
+  hold?: {
+    id: string
+    set_at: string
+    set_by?: string
+    until?: string
+    reason_option_id?: string
+    reason?: string
+    reason_text?: string
+    schedule_id?: string
+    expired_at?: string
+  }
   requirements?: Array<{
     task_id?: string
     phase_id?: string
     when: "TASK_FINISHED" | "PHASE_FINISHED"
   }>
   required?: boolean
+  only_assignee_can_complete?: boolean
   subtasks?: Array<{
     id: string
     name?: string
@@ -7304,30 +8040,6 @@ type TaskBase = {
   subtask_states?: Record<string, {
     completed: boolean
     completed_by?: string
-    completed_at?: string // date-time
-  }>
-  journey_submission?: {
-    submission_entity_id?: string
-    submitted_at?: string // date-time
-  }
-  completion_gates_reset_at?: string // date-time
-  journey_gate_waived_at?: string // date-time
-  assigned_to?: Array<string | {
-    variable: string
-    value?: string[]
-  }>
-  ecp_placeholder_assignees?: {
-    placeholder_ecp_customers?: string[]
-    placeholder_ecp_installers?: string[]
-  }
-  analytics: {
-    started_at?: string // date-time
-    in_progress_at?: string // date-time
-    completed_at?: string // date-time
-    status_updated_at?: string // date-time
-    in_progress_by?: string
-    completed_by?: string
-    skipped_at?: string // date-time
   // ...
 }
 ```
@@ -7362,7 +8074,7 @@ type Phase = {
   id: string
   template_id: string
   name: string
-  status?: "OPEN" | "IN_PROGRESS" | "COMPLETED"
+  status?: "OPEN" | "IN_PROGRESS" | "COMPLETED" | "SKIPPED"
   updated_at?: string
   due_date?: string
   due_date_config?: {
@@ -7376,6 +8088,7 @@ type Phase = {
     variable: string
     value?: string[]
   }>
+  assignee_sync?: "follow_attribute" | "fill_empty"
   analytics?: {
     started_at?: string // date-time
     in_progress_at?: string // date-time
@@ -7412,24 +8125,50 @@ type Edge = {
 }
 ```
 
+### `LegacyAutomationDefinition`
+
+The task's automation as the flow template held it, when it is more than one plain action: several actions, or conditions, schedules or loops. Ignored in requests.
+
+```ts
+type LegacyAutomationDefinition = {
+  actions?: Record<string, unknown>[]
+  conditions?: Record<string, unknown>[]
+  schedules?: Record<string, unknown>[]
+  loops?: Record<string, unknown>[]
+}
+```
+
 ### `AutomationInfo`
 
 ```ts
 type AutomationInfo = {
   flow_id: string
+  action_definition?: Record<string, unknown>
+  legacy_definition?: {
+    actions?: Record<string, unknown>[]
+    conditions?: Record<string, unknown>[]
+    schedules?: Record<string, unknown>[]
+    loops?: Record<string, unknown>[]
+  }
   execution_id?: string
   execution_status?: string
   error_reason?: string
   input_context?: {
-    source: "main_context" | "task" | "trigger"
+    source: "main_context" | "task" | "trigger" | "linked_entity"
     task_id?: string
     trigger_id?: string
+    rule_id?: string
+    schema?: string
     with_relations?: boolean
     also_pass?: Array<{
       source: { ... }
     } | {
       source: { ... }
       task_id: { ... }
+    } | {
+      source: { ... }
+      rule_id: { ... }
+      schema: { ... }
     }>
   }
   output_context?: {
@@ -7483,15 +8222,21 @@ Optional. Source of the entity fed into this automation task. If omitted, the ru
 
 ```ts
 type AutomationInputContext = {
-  source: "main_context" | "task" | "trigger"
+  source: "main_context" | "task" | "trigger" | "linked_entity"
   task_id?: string
   trigger_id?: string
+  rule_id?: string
+  schema?: string
   with_relations?: boolean
   also_pass?: Array<{
     source: "main_context"
   } | {
     source: "task"
     task_id: string
+  } | {
+    source: "linked_entity"
+    rule_id: string
+    schema: string
   }>
 }
 ```
@@ -7515,6 +8260,19 @@ Every entity produced by an upstream task.
 type AutomationInputExtraTaskRef = {
   source: "task"
   task_id: string
+}
+```
+
+### `AutomationInputExtraLinkedEntityRef`
+
+Every entity a display rule of the flow's Contexts settings finds by relation (an additional entity), resolved from the run's main context when the task runs. The rule must be one the workflow uses (`attach_to_contexts`). A rule matching nothing passes nothing.
+
+
+```ts
+type AutomationInputExtraLinkedEntityRef = {
+  source: "linked_entity"
+  rule_id: string
+  schema: string
 }
 ```
 
@@ -7647,10 +8405,10 @@ type Statement = {
   source: {
     id?: string
     origin?: "trigger" | "action" | "flow_runtime"
-    origin_type?: "entity" | "workflow" | "journey_block" | "trigger_source" | "main_context" | "flow_trait"
+    origin_type?: "entity" | "workflow" | "journey_block" | "trigger_source" | "main_context" | "flow_trait" | "linked_entity"
     schema?: string
     attribute?: string
-    attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address"
+    attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address" | "consent"
     attribute_repeatable?: boolean
     attribute_operation?: "all" | "updated" | "added" | "deleted"
     attributes?: string[]
@@ -7673,10 +8431,10 @@ type Statement = {
 type EvaluationSource = {
   id?: string
   origin?: "trigger" | "action" | "flow_runtime"
-  origin_type?: "entity" | "workflow" | "journey_block" | "trigger_source" | "main_context" | "flow_trait"
+  origin_type?: "entity" | "workflow" | "journey_block" | "trigger_source" | "main_context" | "flow_trait" | "linked_entity"
   schema?: string
   attribute?: string
-  attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address"
+  attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address" | "consent"
   attribute_repeatable?: boolean
   attribute_operation?: "all" | "updated" | "added" | "deleted"
   attributes?: string[]
@@ -7794,6 +8552,18 @@ type EcpPlaceholderAssignees = {
   placeholder_ecp_customers?: string[]
   placeholder_ecp_installers?: string[]
 }
+```
+
+### `AssigneeSync`
+
+`fill_empty` (also when absent) only resolves a variable that has no
+value yet. `follow_attribute` re-resolves a variable whenever its
+entity attribute changes, and clears it when the attribute is
+emptied or the entity is unshared from every partner. Only the
+variable's own entries change; other ass
+
+```ts
+type AssigneeSync = "follow_attribute" | "fill_empty"
 ```
 
 ### `VariableAssignment`
@@ -7927,6 +8697,10 @@ All fields are optional; only provided fields will be updated.
 type PatchTaskReq = {
   name?: string
   status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED" | "IN_PROGRESS" | "SCHEDULED" | "PENDING" | "CONDITION_PENDING" | "WAITING_FOR_CONFIRMATION" | "WAITING_FOR_JOURNEY_SUBMISSION" | "ON_HOLD" | "FAILED"
+  put_on_hold?: {
+    reason_option_id?: string
+    reason_text?: string
+  }
   due_date?: string
   due_date_config?: {
     duration: number
@@ -7939,9 +8713,17 @@ type PatchTaskReq = {
     variable: string
     value?: string[]
   }>
+  assignee_sync?: "follow_attribute" | "fill_empty"
   enabled?: boolean
   automation_config?: {
     flow_id: string
+    action_definition?: Record<string, unknown>
+    legacy_definition?: {
+      actions?: { ... }
+      conditions?: { ... }
+      schedules?: { ... }
+      loops?: { ... }
+    }
     execution_id?: string
     execution_status?: string
     error_reason?: string
@@ -7949,6 +8731,8 @@ type PatchTaskReq = {
       source: { ... }
       task_id?: { ... }
       trigger_id?: { ... }
+      rule_id?: { ... }
+      schema?: { ... }
       with_relations?: { ... }
       also_pass?: { ... }
     }
@@ -8010,20 +8794,6 @@ type PatchTaskReq = {
       journey_submission_required?: { ... }
       context_parameters?: { ... }
       ai_prefill?: { ... }
-    }
-  }
-  partner?: {
-    enabled?: boolean
-    label?: string
-    description?: string
-  }
-  subtask_states?: Record<string, {
-    completed: boolean
-    completed_by?: string
-    completed_at?: string // date-time
-  }>
-  next_condition_id?: string
-  next_condition_ids?: string[]
   // ...
 }
 ```
@@ -8045,6 +8815,7 @@ type PatchPhaseReq = {
     variable: string
     value?: string[]
   }>
+  assignee_sync?: "follow_attribute" | "fill_empty"
 }
 ```
 
@@ -8073,6 +8844,8 @@ type AddTaskReq = {
     enabled?: boolean
     automation_config?: {
       flow_id: { ... }
+      action_definition?: { ... }
+      legacy_definition?: { ... }
       execution_id?: { ... }
       execution_status?: { ... }
       error_reason?: { ... }

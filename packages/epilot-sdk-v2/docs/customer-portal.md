@@ -45,6 +45,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`getPublicPages`](#getpublicpages)
 - [`getUserEntryPoint`](#getuserentrypoint)
 - [`completeTemporaryPassword`](#completetemporarypassword)
+- [`resendTemporaryPasswordLink`](#resendtemporarypasswordlink)
 - [`deRegisterMLoginUser`](#deregistermloginuser)
 - [`notifyMLoginInterestChange`](#notifymlogininterestchange)
 
@@ -97,6 +98,12 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`createMeterReading`](#createmeterreading)
 - [`getAllowedMeterReadingRange`](#getallowedmeterreadingrange)
 - [`getMeterReadings`](#getmeterreadings)
+- [`getMeter`](#getmeter)
+- [`getMeterCounters`](#getmetercounters)
+- [`createMeterReadings`](#createmeterreadings)
+- [`getAllowedMeterReading`](#getallowedmeterreading)
+- [`getMeterCounter`](#getmetercounter)
+- [`getContractMeters`](#getcontractmeters)
 - [`getPortalPage`](#getportalpage)
 - [`getPortalPages`](#getportalpages)
 - [`getTriggeredJourney`](#gettriggeredjourney)
@@ -108,11 +115,14 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`markAllPortalNotificationsRead`](#markallportalnotificationsread)
 - [`markPortalNotificationRead`](#markportalnotificationread)
 - [`updateNotificationsStatus`](#updatenotificationsstatus)
+- [`getPortalUserRole`](#getportaluserrole)
+- [`listPortalRoles`](#listportalroles)
 - [`invitePartner`](#invitepartner)
 - [`listBusinessPartners`](#listbusinesspartners)
 - [`resendPartnerInvitation`](#resendpartnerinvitation)
 - [`revokePartner`](#revokepartner)
 - [`disablePartner`](#disablepartner)
+- [`setPartnerRole`](#setpartnerrole)
 - [`enablePartner`](#enablepartner)
 - [`portalProxyExecute`](#portalproxyexecute)
 
@@ -161,6 +171,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`updatePortalRevision`](#updateportalrevision)
 - [`createPortalRevisionPreview`](#createportalrevisionpreview)
 - [`publishPortalRevision`](#publishportalrevision)
+- [`validatePortalConfig`](#validateportalconfig)
 - [`listAllPortalConfigs`](#listallportalconfigs)
 - [`listPortalConfigSummaries`](#listportalconfigsummaries)
 - [`swapPortalConfig`](#swapportalconfig)
@@ -168,9 +179,6 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`verifyDns`](#verifydns)
 - [`getMobileConfig`](#getmobileconfig)
 - [`putMobileConfig`](#putmobileconfig)
-
-**Activity**
-- [`getEntityActivityFeed`](#getentityactivityfeed)
 
 **Balance**
 - [`getCustomerBalance`](#getcustomerbalance)
@@ -191,7 +199,6 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`MobileConfig`](#mobileconfig)
 - [`MobileConfigUpdate`](#mobileconfigupdate)
 - [`MobileOtaConfig`](#mobileotaconfig)
-- [`NewDesignMigrationResult`](#newdesignmigrationresult)
 - [`OtaPortal`](#otaportal)
 - [`ContextEntity`](#contextentity)
 - [`ContextEntities`](#contextentities)
@@ -253,7 +260,6 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`PortalContactUpdate`](#portalcontactupdate)
 - [`PortalContractUpdate`](#portalcontractupdate)
 - [`Contact`](#contact)
-- [`WorfklowIdentifier`](#worfklowidentifier)
 - [`Meter`](#meter)
 - [`Order`](#order)
 - [`Opportunity`](#opportunity)
@@ -343,6 +349,8 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`ReadBy`](#readby)
 - [`ReadingStatus`](#readingstatus)
 - [`MeterReading`](#meterreading)
+- [`PortalMeterReading`](#portalmeterreading)
+- [`MeterCounter`](#metercounter)
 - [`MeterReadingPhoto`](#meterreadingphoto)
 - [`MeterReadingPhotoData`](#meterreadingphotodata)
 - [`SSOLoginToken`](#ssologintoken)
@@ -377,6 +385,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`PortalConfigV3`](#portalconfigv3)
 - [`PortalFeatureSettings`](#portalfeaturesettings)
 - [`PortalCopilotVisibility`](#portalcopilotvisibility)
+- [`RegistrationTargetGroup`](#registrationtargetgroup)
 - [`PortalUsingDesign`](#portalusingdesign)
 - [`PortalConfigSummaryV3`](#portalconfigsummaryv3)
 - [`JuiceSettings`](#juicesettings)
@@ -385,6 +394,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`PublishRevisionRequest`](#publishrevisionrequest)
 - [`UpdatePortalRevisionRequest`](#updateportalrevisionrequest)
 - [`RevisionSource`](#revisionsource)
+- [`PortalRevisionActor`](#portalrevisionactor)
 - [`PortalRevisionSummary`](#portalrevisionsummary)
 - [`PortalRevisionList`](#portalrevisionlist)
 - [`PortalRevisionCreated`](#portalrevisioncreated)
@@ -392,6 +402,12 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`PortalRevisionPreview`](#portalrevisionpreview)
 - [`PreviewRevision`](#previewrevision)
 - [`PortalRevision`](#portalrevision)
+- [`PortalValidationFinding`](#portalvalidationfinding)
+- [`PortalValidationResult`](#portalvalidationresult)
+- [`PortalWriteValidation`](#portalwritevalidation)
+- [`PortalConfigWriteResult`](#portalconfigwriteresult)
+- [`PortalConfigV3WriteResult`](#portalconfigv3writeresult)
+- [`PortalValidationFailedResp`](#portalvalidationfailedresp)
 - [`PublishResult`](#publishresult)
 - [`SwappableConfig`](#swappableconfig)
 - [`SwapPortalReferencesResult`](#swapportalreferencesresult)
@@ -399,6 +415,13 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`SwapPortalReferenceItem`](#swapportalreferenceitem)
 - [`PortalUserRegistrationStatus`](#portaluserregistrationstatus)
 - [`BusinessPartnerItem`](#businesspartneritem)
+- [`RecordAccess`](#recordaccess)
+- [`RecordAccessRule`](#recordaccessrule)
+- [`RecordAccessCondition`](#recordaccesscondition)
+- [`RecordAccessRelationAttributeCondition`](#recordaccessrelationattributecondition)
+- [`RecordAccessName`](#recordaccessname)
+- [`RecordAccessDefaults`](#recordaccessdefaults)
+- [`PortalRoleRef`](#portalroleref)
 - [`SupportReportType`](#supportreporttype)
 - [`SupportRequestAttachment`](#supportrequestattachment)
 - [`CleverPvContext`](#cleverpvcontext)
@@ -553,7 +576,8 @@ const { data } = await client.getPortalConfigByDomain({
       "channel": "canary",
       "auto_update": true,
       "update_strategy": "next-launch",
-      "min_native_version": "string"
+      "recommended_native_version": "2.0.0",
+      "min_supported_native_version": "1.4.0"
     }
   },
   "enabled": true,
@@ -577,6 +601,12 @@ const { data } = await client.getPortalConfigByDomain({
   "self_registration_account_setting": "ALLOW_WITH_CREATION",
   "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
+  "registration_target_group": {
+    "visible_for_targets": ["string"],
+    "visible_for_operator": "and",
+    "hidden_for_targets": ["string"],
+    "hidden_for_operator": "and"
+  },
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -696,6 +726,20 @@ const { data } = await client.getPortalConfigByDomain({
       "schema": "contract"
     }
   ],
+  "default_role": "default_end_customer_portal_role",
+  "allowed_roles": ["b2b_admin", "b2b_viewer"],
+  "record_access": {
+    "contract": {
+      "conditions": []
+    },
+    "meter": {
+      "conditions": []
+    },
+    "ticket": {
+      "conditions": []
+    }
+  },
+  "record_access_defaults": {},
   "surfaces": [
     {
       "id": "website-journeys",
@@ -841,7 +885,7 @@ const { data } = await client.getPortalConfigByDomain({
 
 ### `createExport`
 
-Request an asynchronous CSV export of the portal user's entities for one schema. Columns come from the request Returns a job id to poll.
+Request an asynchronous CSV or XLSX export of the portal user's entities for one schema. Columns come from the request Returns a job id to poll.
 
 `POST /v1/portal/exports`
 
@@ -859,6 +903,8 @@ const { data } = await client.createExport(
       filters_context: [
         {}
       ],
+      targets: ['string'],
+      match_any_targets: ['string'],
       sort: {}
     },
     columns: [
@@ -873,12 +919,15 @@ const { data } = await client.createExport(
           attribute: 'customer_number',
           address_field: 'full'
         },
+        template: '{{contract.customer.last_name}}',
+        address_field: 'full',
         formatter: 'text',
         enum_labels: {}
       }
     ],
     expand_over: 'string',
-    language: 'de'
+    language: 'de',
+    format: 'csv'
   },
 )
 ```
@@ -904,6 +953,7 @@ const { data } = await client.getExport({
 {
   "jobId": "string",
   "status": "queued",
+  "format": "csv",
   "downloadUrl": "string",
   "error": "string"
 }
@@ -1495,7 +1545,8 @@ const { data } = await client.getPublicPortalConfigV3({
       "channel": "canary",
       "auto_update": true,
       "update_strategy": "next-launch",
-      "min_native_version": "string"
+      "recommended_native_version": "2.0.0",
+      "min_supported_native_version": "1.4.0"
     }
   },
   "enabled": true,
@@ -1519,6 +1570,12 @@ const { data } = await client.getPublicPortalConfigV3({
   "self_registration_account_setting": "ALLOW_WITH_CREATION",
   "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
+  "registration_target_group": {
+    "visible_for_targets": ["string"],
+    "visible_for_operator": "and",
+    "hidden_for_targets": ["string"],
+    "hidden_for_operator": "and"
+  },
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -1638,6 +1695,20 @@ const { data } = await client.getPublicPortalConfigV3({
       "schema": "contract"
     }
   ],
+  "default_role": "default_end_customer_portal_role",
+  "allowed_roles": ["b2b_admin", "b2b_viewer"],
+  "record_access": {
+    "contract": {
+      "conditions": []
+    },
+    "meter": {
+      "conditions": []
+    },
+    "ticket": {
+      "conditions": []
+    }
+  },
+  "record_access_defaults": {},
   "surfaces": [
     {
       "id": "website-journeys",
@@ -1832,7 +1903,8 @@ const { data } = await client.getOrgPortalConfigV3({
       "channel": "canary",
       "auto_update": true,
       "update_strategy": "next-launch",
-      "min_native_version": "string"
+      "recommended_native_version": "2.0.0",
+      "min_supported_native_version": "1.4.0"
     }
   },
   "enabled": true,
@@ -1856,6 +1928,12 @@ const { data } = await client.getOrgPortalConfigV3({
   "self_registration_account_setting": "ALLOW_WITH_CREATION",
   "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
+  "registration_target_group": {
+    "visible_for_targets": ["string"],
+    "visible_for_operator": "and",
+    "hidden_for_targets": ["string"],
+    "hidden_for_operator": "and"
+  },
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -1975,6 +2053,20 @@ const { data } = await client.getOrgPortalConfigV3({
       "schema": "contract"
     }
   ],
+  "default_role": "default_end_customer_portal_role",
+  "allowed_roles": ["b2b_admin", "b2b_viewer"],
+  "record_access": {
+    "contract": {
+      "conditions": []
+    },
+    "meter": {
+      "conditions": []
+    },
+    "ticket": {
+      "conditions": []
+    }
+  },
+  "record_access_defaults": {},
   "surfaces": [
     {
       "id": "website-journeys",
@@ -2129,7 +2221,7 @@ const { data } = await client.getOrgPortalConfigV3({
 
 ### `getAllPortalConfigs`
 
-Retrieves all portal configurations.
+Retrieves all portal configurations, each with its pages, email templates and grants.
 
 `GET /v2/portal/configs`
 
@@ -2158,6 +2250,7 @@ const { data } = await client.getAllPortalConfigs()
       "self_registration_account_setting": "ALLOW_WITH_CREATION",
       "block_registration_if_portal_user_exists": true,
       "self_registration_entity": "contact",
+      "registration_target_group": {},
       "user_account_self_management": false,
       "feature_settings": {},
       "accessToken": "string",
@@ -2174,6 +2267,10 @@ const { data } = await client.getAllPortalConfigs()
       "self_assignment_mode": "contracts",
       "contract_selector_config": {},
       "registration_identifiers": [],
+      "default_role": "default_end_customer_portal_role",
+      "allowed_roles": ["b2b_admin", "b2b_viewer"],
+      "record_access": {},
+      "record_access_defaults": {},
       "surfaces": [],
       "contact_identifiers_for_account": [],
       "additional_contact_attributes": [],
@@ -2286,7 +2383,7 @@ const { data } = await client.listEmailTemplateReferences(
 
 ### `upsertEmailTemplatesByPortalId`
 
-Upserts the email templates of a portal by portal ID. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the
+Upserts the email templates of a portal by portal ID. A slot can only be set to an email template of the organization (or to `null`): a template id the organization does not have fails with `400` (`re
 
 `POST /v3/portal/email-templates/{portal_id}`
 
@@ -2697,7 +2794,13 @@ const { data } = await client.replaceECPTemplateVariables(
     "invitationLink": "https://employee-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com",
     "newDocumentLink": "https://employee-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b",
     "entityLink": "https://employee-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b",
-    "userEmailsOnEntity": ["peter@doe.com", "jane@doe.com"]
+    "userEmailsOnEntity": ["peter@doe.com", "jane@doe.com"],
+    "origin": "END_CUSTOMER_PORTAL",
+    "pagePaths": {
+      "documents": "/documents",
+      "contract": "/contract/:id",
+      "opportunities": "/requests/opportunities/:id"
+    }
   }
 }
 ```
@@ -3305,7 +3408,8 @@ const { data } = await client.getPortalCopilotAccess()
 
 ### `getPortalUser`
 
-Get the portal user details
+Get the portal user details. For a portal with portal roles, also the user's roles and
+their grants, so the portal shows what those roles allow without another request.
 
 `GET /v2/portal/user`
 
@@ -3333,6 +3437,16 @@ const { data } = await client.getPortalUser()
       }
     ],
     "_schema": "portal_user"
+  },
+  "portal_roles": {
+    "roles": ["b2b_admin", "b2b_billing"],
+    "grants": [
+      {
+        "action": "entity-read",
+        "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
+        "effect": "allow"
+      }
+    ]
   }
 }
 ```
@@ -3438,7 +3552,8 @@ const { data } = await client.getPortalUserNotificationPreferences()
 
 ```json
 {
-  "in_app": true
+  "in_app": true,
+  "email": false
 }
 ```
 
@@ -3456,7 +3571,8 @@ Partially updates the notification preferences of the authenticated portal user.
 const { data } = await client.updatePortalUserNotificationPreferences(
   null,
   {
-    in_app: true
+    in_app: true,
+    email: true
   },
 )
 ```
@@ -3466,7 +3582,8 @@ const { data } = await client.updatePortalUserNotificationPreferences(
 
 ```json
 {
-  "in_app": true
+  "in_app": true,
+  "email": false
 }
 ```
 
@@ -4111,53 +4228,6 @@ const { data } = await client.getEntityIdentifiers({
     {
       "name": "contract_number",
       "type": "string"
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `getEntityActivityFeed`
-
-Get activity feed for an entity
-
-`GET /v2/portal/entity/{slug}/{id}/activity`
-
-```ts
-const { data } = await client.getEntityActivityFeed({
-  slug: 'example',
-  id: '123e4567-e89b-12d3-a456-426614174000',
-  after: 'example',
-  before: 'example',
-  from: 1,
-  size: 1,
-  type: 'example',
-  include_relations: true,
-})
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "total": 1,
-  "results": [
-    {
-      "_id": "01F130Q52Q6MWSNS8N2AVXV4JN",
-      "timestamp": "1970-01-01T00:00:00.000Z",
-      "type": "MyCustomActivity",
-      "title": "My custom activity",
-      "message": "{{caller}} did something with {{entity payload.entity.id}}.",
-      "payload": {
-        "entity": {
-          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-          "schema": "contact"
-        }
-      }
     }
   ]
 }
@@ -5560,6 +5630,317 @@ const { data } = await client.getMeterReadings(
 
 ---
 
+### `getMeter`
+
+Retrieves a meter of the portal user, with its journey actions and related entities.
+
+`GET /v2/portal/metering/meter/{meter_id}`
+
+```ts
+const { data } = await client.getMeter({
+  meter_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "data": {
+    "entity": {
+      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "_title": "Example Entity",
+      "_org": "123",
+      "_tags": ["example", "mock"],
+      "_created_at": "2021-02-09T12:41:43.662Z",
+      "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [
+        {
+          "field": "string",
+          "fragment": "string"
+        }
+      ],
+      "_schema": "meter"
+    },
+    "journey_actions": {
+      "journey_id": "string",
+      "action_label": {
+        "en": "string",
+        "de": "string"
+      },
+      "slug": "string",
+      "rules": [
+        {
+          "entity": "string",
+          "attribute": "string",
+          "attribute_value": "string"
+        }
+      ]
+    },
+    "relations": [
+      {
+        "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+        "_title": "Example Entity",
+        "_org": "123",
+        "_tags": ["example", "mock"],
+        "_created_at": "2021-02-09T12:41:43.662Z",
+        "_updated_at": "2021-02-09T12:41:43.662Z",
+        "templates_output_highlighted": {},
+        "search_snippets": [
+          {
+            "field": "string",
+            "fragment": "string"
+          }
+        ],
+        "templates_output": {
+          "content_top_name": "Customer #123456",
+          "main_content_name": "Orange Flexible A2 (654321)",
+          "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany",
+          "nested_content": {
+            "title": "Orange Flexible A2",
+            "subtitle": "654321"
+          }
+        },
+        "_schema": "contact"
+      }
+    ]
+  }
+}
+```
+
+</details>
+
+---
+
+### `getMeterCounters`
+
+Retrieves the counters of a meter of the portal user.
+
+`GET /v2/portal/metering/meter/{meter_id}/counters`
+
+```ts
+const { data } = await client.getMeterCounters({
+  meter_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "data": [
+    {
+      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "_title": "Example Entity",
+      "_org": "123",
+      "_tags": ["example", "mock"],
+      "_created_at": "2021-02-09T12:41:43.662Z",
+      "_updated_at": "2021-02-09T12:41:43.662Z",
+      "_schema": "meter_counter",
+      "obis_number": "string",
+      "direction": "feed-in",
+      "transformer_ratio": 0,
+      "unit": "string",
+      "forecast_reading_value": "string",
+      "forecast_as_of": "string",
+      "current_consumption": 0,
+      "last_reading": "string",
+      "conversion_factor": 0,
+      "tariff_type": "ht"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `createMeterReadings`
+
+Inserts readings for several counters of a meter of the portal user at once, one reading per
+counter and at most 100 per request. Use `createMeterReading` instead when the portal has a
+meter reading p
+
+`POST /v2/portal/metering/meter/{meter_id}/readings`
+
+```ts
+const { data } = await client.createMeterReadings(
+  {
+    meter_id: 'example',
+  },
+  {
+    readings: [
+      {
+        value: 0,
+        counter_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+        direction: 'feed-in',
+        timestamp: 'string',
+        read_by: 'John Doe',
+        reason: 'Storing the feed-in record',
+        source: 'ECP',
+        status: 'valid',
+        remark: 'string',
+        metadata: {}
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "data": [
+    {
+      "value": 240,
+      "read_by": "John Doe",
+      "reason": "Storing the feed-in record",
+      "meter_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "counter_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "direction": "feed-in",
+      "timestamp": "2022-10-10",
+      "source": "ECP",
+      "status": "valid",
+      "external_id": "string",
+      "remark": "Customer reported unusual consumption",
+      "metadata": {
+        "registration_id": "1234567890",
+        "business_unit": "ABC"
+      }
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getAllowedMeterReading`
+
+Returns the allowed min/max reading per counter of the meter, derived from its reading history.
+Unlike `getAllowedMeterReadingRange`, this needs no plausibility check hook.
+
+`GET /v2/portal/metering/meter/{meter_id}/allowed-reading`
+
+```ts
+const { data } = await client.getAllowedMeterReading({
+  meter_id: 'example',
+  timestamp: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "data": [
+    {
+      "counter_id": "string",
+      "min_value": 0,
+      "max_value": 0,
+      "last_reading": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getMeterCounter`
+
+Retrieves a counter of a meter of the portal user, incl. its unit and last reading.
+
+`GET /v2/portal/metering/counter/{counter_id}`
+
+```ts
+const { data } = await client.getMeterCounter({
+  counter_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "data": {
+    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "_title": "Example Entity",
+    "_org": "123",
+    "_tags": ["example", "mock"],
+    "_created_at": "2021-02-09T12:41:43.662Z",
+    "_updated_at": "2021-02-09T12:41:43.662Z",
+    "_schema": "meter_counter",
+    "obis_number": "string",
+    "direction": "feed-in",
+    "transformer_ratio": 0,
+    "unit": "string",
+    "forecast_reading_value": "string",
+    "forecast_as_of": "string",
+    "current_consumption": 0,
+    "last_reading": "string",
+    "conversion_factor": 0,
+    "tariff_type": "ht"
+  }
+}
+```
+
+</details>
+
+---
+
+### `getContractMeters`
+
+Retrieves the meters of a contract of the portal user.
+
+`GET /v2/portal/metering/contract/{contract_id}/meters`
+
+```ts
+const { data } = await client.getContractMeters({
+  contract_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "data": [
+    {
+      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "_title": "Example Entity",
+      "_org": "123",
+      "_tags": ["example", "mock"],
+      "_created_at": "2021-02-09T12:41:43.662Z",
+      "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [
+        {
+          "field": "string",
+          "fragment": "string"
+        }
+      ],
+      "_schema": "meter"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `getPublicSSOProviderV3`
 
 Returns the public configuration of a single SSO identity provider with env var
@@ -6679,6 +7060,37 @@ const { data } = await client.completeTemporaryPassword(
 
 ---
 
+### `resendTemporaryPasswordLink`
+
+Sends a fresh set-password link to a portal user whose link has expired. A new link is only sent when the temporary password of that login has expired; the response is the same in every other case.
+
+`POST /v3/portal/public/user/temporary-password/resend`
+
+```ts
+const { data } = await client.resendTemporaryPasswordLink(
+  null,
+  {
+    org_id: '123',
+    portal_id: '7hj28akg-97fb-4f5c-b2a1-3e4fbc1d8c7a',
+    email: 'user@example.com',
+    temporary_password: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "message": "If the link has expired, a new one has been sent."
+}
+```
+
+</details>
+
+---
+
 ### `updateCampaignPortalBlockStatus`
 
 Updates the status of a campaign portal block for multiple recipients.
@@ -6891,7 +7303,8 @@ const { data } = await client.notifyMLoginInterestChange(
 
 ### `createPortalConfig`
 
-Creates a new portal configuration.
+Creates a new portal configuration. Only `name` and `origin` are required; keys left out
+get these defaults (a value that is sent is always stored as sent):
 
 `POST /v3/portal/config`
 
@@ -6966,7 +7379,8 @@ const { data } = await client.createPortalConfig(
         channel: 'canary',
         auto_update: true,
         update_strategy: 'next-launch',
-        min_native_version: 'string'
+        recommended_native_version: '2.0.0',
+        min_supported_native_version: '1.4.0'
       }
     },
     enabled: true,
@@ -7110,6 +7524,20 @@ const { data } = await client.createPortalConfig(
         schema: 'contract'
       }
     ],
+    default_role: 'default_end_customer_portal_role',
+    allowed_roles: ['b2b_admin', 'b2b_viewer'],
+    record_access: {
+      contract: {
+        conditions: [ /* ... */ ]
+      },
+      meter: {
+        conditions: [ /* ... */ ]
+      },
+      ticket: {
+        conditions: [ /* ... */ ]
+      }
+    },
+    record_access_defaults: {},
     surfaces: [
       {
         id: 'website-journeys',
@@ -7281,7 +7709,8 @@ const { data } = await client.createPortalConfig(
       "channel": "canary",
       "auto_update": true,
       "update_strategy": "next-launch",
-      "min_native_version": "string"
+      "recommended_native_version": "2.0.0",
+      "min_supported_native_version": "1.4.0"
     }
   },
   "enabled": true,
@@ -7424,6 +7853,20 @@ const { data } = await client.createPortalConfig(
       "schema": "contract"
     }
   ],
+  "default_role": "default_end_customer_portal_role",
+  "allowed_roles": ["b2b_admin", "b2b_viewer"],
+  "record_access": {
+    "contract": {
+      "conditions": []
+    },
+    "meter": {
+      "conditions": []
+    },
+    "ticket": {
+      "conditions": []
+    }
+  },
+  "record_access_defaults": {},
   "surfaces": [
     {
       "id": "website-journeys",
@@ -7541,7 +7984,13 @@ const { data } = await client.createPortalConfig(
       "_lineage_id": "string",
       "detached_lineage_ids": ["string"]
     }
-  ]
+  ],
+  "validation": {
+    "valid": true,
+    "findings": [
+      {}
+    ]
+  }
 }
 ```
 
@@ -7634,7 +8083,8 @@ const { data } = await client.getPortalConfigV3({
       "channel": "canary",
       "auto_update": true,
       "update_strategy": "next-launch",
-      "min_native_version": "string"
+      "recommended_native_version": "2.0.0",
+      "min_supported_native_version": "1.4.0"
     }
   },
   "enabled": true,
@@ -7777,6 +8227,20 @@ const { data } = await client.getPortalConfigV3({
       "schema": "contract"
     }
   ],
+  "default_role": "default_end_customer_portal_role",
+  "allowed_roles": ["b2b_admin", "b2b_viewer"],
+  "record_access": {
+    "contract": {
+      "conditions": []
+    },
+    "meter": {
+      "conditions": []
+    },
+    "ticket": {
+      "conditions": []
+    }
+  },
+  "record_access_defaults": {},
   "surfaces": [
     {
       "id": "website-journeys",
@@ -7984,7 +8448,8 @@ const { data } = await client.putPortalConfig(
         channel: 'canary',
         auto_update: true,
         update_strategy: 'next-launch',
-        min_native_version: 'string'
+        recommended_native_version: '2.0.0',
+        min_supported_native_version: '1.4.0'
       }
     },
     enabled: true,
@@ -8128,6 +8593,20 @@ const { data } = await client.putPortalConfig(
         schema: 'contract'
       }
     ],
+    default_role: 'default_end_customer_portal_role',
+    allowed_roles: ['b2b_admin', 'b2b_viewer'],
+    record_access: {
+      contract: {
+        conditions: [ /* ... */ ]
+      },
+      meter: {
+        conditions: [ /* ... */ ]
+      },
+      ticket: {
+        conditions: [ /* ... */ ]
+      }
+    },
+    record_access_defaults: {},
     surfaces: [
       {
         id: 'website-journeys',
@@ -8323,7 +8802,8 @@ const { data } = await client.putPortalConfig(
       "channel": "canary",
       "auto_update": true,
       "update_strategy": "next-launch",
-      "min_native_version": "string"
+      "recommended_native_version": "2.0.0",
+      "min_supported_native_version": "1.4.0"
     }
   },
   "enabled": true,
@@ -8466,6 +8946,20 @@ const { data } = await client.putPortalConfig(
       "schema": "contract"
     }
   ],
+  "default_role": "default_end_customer_portal_role",
+  "allowed_roles": ["b2b_admin", "b2b_viewer"],
+  "record_access": {
+    "contract": {
+      "conditions": []
+    },
+    "meter": {
+      "conditions": []
+    },
+    "ticket": {
+      "conditions": []
+    }
+  },
+  "record_access_defaults": {},
   "surfaces": [
     {
       "id": "website-journeys",
@@ -8583,7 +9077,13 @@ const { data } = await client.putPortalConfig(
       "_lineage_id": "string",
       "detached_lineage_ids": ["string"]
     }
-  ]
+  ],
+  "validation": {
+    "valid": true,
+    "findings": [
+      {}
+    ]
+  }
 }
 ```
 
@@ -8686,7 +9186,8 @@ const { data } = await client.createPortalRevision(
         channel: 'canary',
         auto_update: true,
         update_strategy: 'next-launch',
-        min_native_version: 'string'
+        recommended_native_version: '2.0.0',
+        min_supported_native_version: '1.4.0'
       }
     },
     enabled: true,
@@ -8830,6 +9331,20 @@ const { data } = await client.createPortalRevision(
         schema: 'contract'
       }
     ],
+    default_role: 'default_end_customer_portal_role',
+    allowed_roles: ['b2b_admin', 'b2b_viewer'],
+    record_access: {
+      contract: {
+        conditions: [ /* ... */ ]
+      },
+      meter: {
+        conditions: [ /* ... */ ]
+      },
+      ticket: {
+        conditions: [ /* ... */ ]
+      }
+    },
+    record_access_defaults: {},
     surfaces: [
       {
         id: 'website-journeys',
@@ -8935,6 +9450,13 @@ const { data } = await client.createPortalRevision(
   "revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "created_at": "1970-01-01T00:00:00.000Z",
   "created_by": "string",
+  "created_by_actor": {
+    "type": "agent",
+    "name": "Claude",
+    "on_behalf_of": "string",
+    "purpose": "string",
+    "host": "string"
+  },
   "name": "FAQ page launch",
   "description": "string",
   "source": {
@@ -8944,75 +9466,23 @@ const { data } = await client.createPortalRevision(
   "page_count": 0,
   "published_at": "1970-01-01T00:00:00.000Z",
   "published_by": "string",
+  "published_by_actor": {
+    "type": "agent",
+    "name": "Claude",
+    "on_behalf_of": "string",
+    "purpose": "string",
+    "host": "string"
+  },
   "is_published": true,
   "identity_providers": [
     {
       "slug": "office-365-login",
       "display_name": "Office 365 Login",
       "provider_type": "OIDC",
-      "attribute_mappings": {
-        "contact": {
-          "email": "email",
-          "first_name": "first_name",
-          "last_name": "last_name",
-          "phone": "tel",
-          "preferred_language": "language",
-          "concession": "GPE",
-          "installer_number": 123456
-        },
-        "account": {
-          "name": "company_name",
-          "street": "street_name",
-          "house_number": "house_number",
-          "postal_code": "postal_code",
-          "city": "city"
-        },
-        "portal_user": {
-          "access_status": "access_status",
-          "expires_at": "expires_at"
-        },
-        "concession_attributes": {
-          "water": "water",
-          "energy": "energy",
-          "gas": "gas"
-        }
-      },
-      "entity_matching": {
-        "portal_user": {
-          "external_id": "sub"
-        },
-        "contact": {
-          "customer_number": "customer_id",
-          "external_id": "sub"
-        },
-        "auto_create_cognito_user": true
-      },
-      "oidc_config": {
-        "type": "implicit",
-        "oidc_issuer": "https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0",
-        "redirect_uri": "https://customer-portal.com/login",
-        "client_id": "ab81daf8-8b1f-42d6-94ca-c51621054c75",
-        "client_secret": "7BIUnn~6shh.7fNtXb..3k1Mp3s6k6WK3B",
-        "has_client_secret": true,
-        "scope": "openid email",
-        "metadata": {
-          "response_modes_supported": ["form_post"],
-          "authorization_endpoint": "https://www.facebook.com/v12.0/dialog/oauth",
-          "token_endpoint": "https://graph.facebook.com/v12.0/oauth/access_token",
-          "userinfo_endpoint": "https://graph.facebook.com/me",
-          "logout_uri": "https://login.microsoftonline.com/common/oauth2/v2.0/logout",
-          "logout_redirect_uri": "https://customer-portal.com/login",
-          "skip_login_as_logout": false,
-          "mobile_redirect_uri": "msauth.io.epilot.ecp://auth",
-          "test_auth_username": "test@epilot.io",
-          "test_auth_password": "string"
-        },
-        "prompt": "login"
-      },
-      "mobile_oidc_config": {
-        "client_id": 123456,
-        "client_secret": 123456
-      },
+      "attribute_mappings": {},
+      "entity_matching": {},
+      "oidc_config": {},
+      "mobile_oidc_config": {},
       "expose_client_secret": false,
       "debug_mode_until": "2026-10-30T12:00:00.000Z"
     }
@@ -9021,9 +9491,26 @@ const { data } = await client.createPortalRevision(
     "revision_id": "string",
     "published_at": "1970-01-01T00:00:00.000Z",
     "published_by": "string",
+    "published_by_actor": {
+      "type": "agent",
+      "name": "Claude",
+      "on_behalf_of": "string",
+      "purpose": "string",
+      "host": "string"
+    },
     "name": "FAQ page launch",
     "post_publish_warnings": ["string"],
-    "held_back": ["allowed_entities_change"]
+    "held_back": ["allowed_entities_change"],
+    "validation": {
+      "valid": true,
+      "findings": []
+    }
+  },
+  "validation": {
+    "valid": true,
+    "findings": [
+      {}
+    ]
   }
 }
 ```
@@ -9056,6 +9543,13 @@ const { data } = await client.listPortalRevisions({
       "revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
       "created_at": "1970-01-01T00:00:00.000Z",
       "created_by": "string",
+      "created_by_actor": {
+        "type": "agent",
+        "name": "Claude",
+        "on_behalf_of": "string",
+        "purpose": "string",
+        "host": "string"
+      },
       "name": "FAQ page launch",
       "description": "string",
       "source": {
@@ -9065,6 +9559,13 @@ const { data } = await client.listPortalRevisions({
       "page_count": 0,
       "published_at": "1970-01-01T00:00:00.000Z",
       "published_by": "string",
+      "published_by_actor": {
+        "type": "agent",
+        "name": "Claude",
+        "on_behalf_of": "string",
+        "purpose": "string",
+        "host": "string"
+      },
       "is_published": true
     }
   ],
@@ -9097,6 +9598,13 @@ const { data } = await client.getPortalRevision({
   "revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "created_at": "1970-01-01T00:00:00.000Z",
   "created_by": "string",
+  "created_by_actor": {
+    "type": "agent",
+    "name": "Claude",
+    "on_behalf_of": "string",
+    "purpose": "string",
+    "host": "string"
+  },
   "name": "FAQ page launch",
   "description": "string",
   "source": {
@@ -9106,6 +9614,13 @@ const { data } = await client.getPortalRevision({
   "page_count": 0,
   "published_at": "1970-01-01T00:00:00.000Z",
   "published_by": "string",
+  "published_by_actor": {
+    "type": "agent",
+    "name": "Claude",
+    "on_behalf_of": "string",
+    "purpose": "string",
+    "host": "string"
+  },
   "is_published": true,
   "config": {},
   "pages": [
@@ -9201,6 +9716,13 @@ const { data } = await client.updatePortalRevision(
   "revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "created_at": "1970-01-01T00:00:00.000Z",
   "created_by": "string",
+  "created_by_actor": {
+    "type": "agent",
+    "name": "Claude",
+    "on_behalf_of": "string",
+    "purpose": "string",
+    "host": "string"
+  },
   "name": "FAQ page launch",
   "description": "string",
   "source": {
@@ -9210,6 +9732,13 @@ const { data } = await client.updatePortalRevision(
   "page_count": 0,
   "published_at": "1970-01-01T00:00:00.000Z",
   "published_by": "string",
+  "published_by_actor": {
+    "type": "agent",
+    "name": "Claude",
+    "on_behalf_of": "string",
+    "purpose": "string",
+    "host": "string"
+  },
   "is_published": true
 }
 ```
@@ -9274,9 +9803,411 @@ const { data } = await client.publishPortalRevision(
   "revision_id": "string",
   "published_at": "1970-01-01T00:00:00.000Z",
   "published_by": "string",
+  "published_by_actor": {
+    "type": "agent",
+    "name": "Claude",
+    "on_behalf_of": "string",
+    "purpose": "string",
+    "host": "string"
+  },
   "name": "FAQ page launch",
   "post_publish_warnings": ["string"],
-  "held_back": ["allowed_entities_change"]
+  "held_back": ["allowed_entities_change"],
+  "validation": {
+    "valid": true,
+    "findings": [
+      {
+        "code": "BLOCK_PARENT_UNRESOLVED",
+        "severity": "error",
+        "path": "pages[slug=login].blocks[id=c495fef9-eeca-4019-a989-8390dcd9825b].parentId",
+        "message": "string"
+      }
+    ]
+  }
+}
+```
+
+</details>
+
+---
+
+### `validatePortalConfig`
+
+Dry run: reports what would leave the portal broken (`error`) or degraded (`warning`). Writes nothing, although it is a `POST`.
+
+`POST /v3/portal/config/{portal_id}/validate`
+
+```ts
+const { data } = await client.validatePortalConfig(
+  {
+    portal_id: 'example',
+    revision_id: 'example',
+    page_upsert_mode: 'example',
+  },
+  {
+    entity_actions: [
+      {
+        journey_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+        slug: 'contact',
+        action_Label: { /* ... */ }
+      }
+    ],
+    extensions: [
+      {
+        id: 'string',
+        status: 'installed',
+        options: {}
+      }
+    ],
+    extension_hooks: {},
+    default_user_to_notify: {
+      onPendingUser: [
+        { /* ... */ }
+      ]
+    },
+    identity_providers: [
+      {
+        slug: 'office-365-login',
+        display_name: 'Office 365 Login',
+        provider_type: 'OIDC',
+        attribute_mappings: { /* ... */ },
+        entity_matching: { /* ... */ },
+        oidc_config: { /* ... */ },
+        mobile_oidc_config: { /* ... */ },
+        expose_client_secret: false,
+        debug_mode_until: '2026-10-30T12:00:00.000Z',
+        debug_mode: false
+      }
+    ],
+    mobile_config: {
+      portal_id: 'string',
+      enabled: true,
+      display_name: 'string',
+      app_host: 'string',
+      environment: 'prod',
+      branding: {
+        app_icon: 'string',
+        splash: 'string',
+        splash_dark: 'string',
+        icon_background_color: 'string',
+        splash_background_color: 'string',
+        splash_background_color_dark: 'string'
+      },
+      ios: {
+        bundle_id: 'string',
+        team_id: 'string',
+        credentials_status: 'not_configured',
+        app_store_id: 'string',
+        store_url: 'string',
+        last_build: { /* ... */ }
+      },
+      android: {
+        package_name: 'string',
+        credentials_status: 'not_configured',
+        upload_key_status: 'not_configured',
+        store_url: 'string',
+        last_build: { /* ... */ }
+      },
+      ota: {
+        enabled: true,
+        channel: 'canary',
+        auto_update: true,
+        update_strategy: 'next-launch',
+        recommended_native_version: '2.0.0',
+        min_supported_native_version: '1.4.0'
+      }
+    },
+    enabled: true,
+    name: 'Installer Portal',
+    domain: 'abc.com',
+    is_epilot_domain: true,
+    epilot_domain: 'example-portal-1.ecp.epilot.io',
+    domain_settings: {
+      is_custom_domain_enabled: true,
+      is_epilot_domain_enabled: true,
+      is_redirection_enabled: true
+    },
+    design_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+    header: {
+      design: {
+        overrides: { /* ... */ }
+      }
+    },
+    allowed_portal_entities: ['contact', 'contract'],
+    self_registration_setting: 'ALLOW_WITH_CONTACT_CREATION',
+    self_registration_account_setting: 'ALLOW_WITH_CREATION',
+    block_registration_if_portal_user_exists: true,
+    self_registration_entity: 'contact',
+    user_account_self_management: false,
+    feature_settings: {
+      start_page: true,
+      billing: true,
+      commodity_billing: true,
+      change_due_date: true,
+      new_design: true,
+      mcp_enabled: true,
+      mcp_grant_version: 0,
+      portal_copilot: false,
+      portal_copilot_agent_id: 'string',
+      portal_copilot_visibility: {
+        visible_for_targets: ['string'],
+        visible_for_operator: 'and',
+        hidden_for_targets: ['string'],
+        hidden_for_operator: 'and'
+      }
+    },
+    accessToken: 'string',
+    advanced_mfa: {
+      enabled: true
+    },
+    auth_settings: {
+      passwordless_login: {
+        enabled: true
+      },
+      passkeys: {
+        enabled: false
+      },
+      entry_point: 'PASSWORD',
+      preferred_sso_providers: ['office-365-login'],
+      auto_redirect_to_sso: true,
+      prevent_user_enumeration: true
+    },
+    cognito_details: {
+      cognito_user_pool_client_id: '6bsd0jkgoie74k2i8mrhc1vest',
+      cognito_mobile_client_id: '3k9fj2l1m0n8b7v6c5x4z3a2s1',
+      cognito_user_pool_arn: 'arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341',
+      cognito_user_pool_id: 'eu-central-1_CUEQRNbUb',
+      timeouts: {
+        refresh_token: 300,
+        access_token: 300,
+        id_token: 300
+      },
+      advanced_authentication: {
+        user_activity_logging: true,
+        adaptive_authentication: true,
+        compromised_credentials_detection: true
+      },
+      password_policy: {
+        minimum_length: 8,
+        maximum_length: 256,
+        require_lowercase: true,
+        require_uppercase: true,
+        require_numbers: true,
+        require_symbols: true,
+        password_history_size: 3
+      }
+    },
+    config: 'string',
+    contact_identifiers: ['email', 'last_name'],
+    approval_state_attributes: {
+      contact: ['name', 'address'],
+      contract: ['installment_amount']
+    },
+    email_templates: {
+      confirmAccount: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      advancedAuth: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      advancedMFA: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      journeySignUp: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      journeySignInOneTimePassword: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      passkeyVerificationCode: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      journeyLoginOTP: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      forgotPassword: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      invitation: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      partnerInvitation: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      onNewQuote: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      onMapAPendingUser: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      onDocUpload: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      onWorkflowStepAssigned: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      confirmEmailUpdate: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      verifyCodeToSetPassword: '5da0a718-c822-403d-9f5d-20d4584e0528'
+    },
+    images: {
+      orderLeftTeaser: 'https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-left-teaser.jpeg',
+      orderRightTeaser: 'https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-right-teaser.jpeg',
+      welcomeBanner: 'https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/welcome-banner.jpeg'
+    },
+    entity_identifiers: {
+      type: {
+        isEnabled: true,
+        attributes: ['contract_number']
+      }
+    },
+    contract_identifiers: [
+      {
+        name: 'email',
+        schema: 'contact'
+      },
+      {
+        name: 'last_name',
+        schema: 'contact'
+      },
+      /* ... 1 more */
+    ],
+    self_assignment_mode: 'contracts',
+    contract_selector_config: {
+      show_inactive: true,
+      title_path: 'string'
+    },
+    registration_identifiers: [
+      {
+        name: 'last_name',
+        schema: 'contact'
+      },
+      {
+        name: 'contract_number',
+        schema: 'contract'
+      }
+    ],
+    default_role: 'default_end_customer_portal_role',
+    allowed_roles: ['b2b_admin', 'b2b_viewer'],
+    record_access: {
+      contract: {
+        conditions: [ /* ... */ ]
+      },
+      meter: {
+        conditions: [ /* ... */ ]
+      },
+      ticket: {
+        conditions: [ /* ... */ ]
+      }
+    },
+    record_access_defaults: {},
+    surfaces: [
+      {
+        id: 'website-journeys',
+        name: 'Website journeys',
+        description: 'string',
+        authentication: 'login',
+        token_ttl_seconds: 300,
+        identifiers: [ /* ... */ ],
+        data_access: { /* ... */ }
+      }
+    ],
+    contact_identifiers_for_account: [
+      {
+        name: 'first_name',
+        schema: 'contact'
+      },
+      {
+        name: 'last_name',
+        schema: 'contact'
+      }
+    ],
+    additional_contact_attributes: [
+      {
+        name: 'first_name',
+        required: true
+      },
+      {
+        name: 'last_name',
+        required: true
+      }
+    ],
+    triggered_journeys: [
+      {
+        trigger_name: 'FIRST_LOGIN',
+        journey_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+        context_params: [ /* ... */ ]
+      }
+    ],
+    entity_edit_rules: [
+      {
+        slug: 'contact',
+        attribute: 'first_name',
+        rule_type: 'cadence',
+        cadence_period_type: 'days',
+        cadence_period: 1,
+        changes_allowed: 1,
+        grace_period: 1,
+        allowed_increment: '10%',
+        allowed_decrement: '10%',
+        number_of_days_before_restriction: 10
+      }
+    ],
+    allowed_file_extensions: {
+      document: ['pdf'],
+      image: ['jpg'],
+      spreadsheet: ['xls'],
+      presentation: ['ppt'],
+      audioVideo: ['mp4'],
+      email: ['eml'],
+      archive: ['zip'],
+      cad: ['cad'],
+      calendar: ['ics'],
+      other: ['txt']
+    },
+    prevent_search_engine_indexing: true,
+    meter_reading_grace_period: 0,
+    inactive_contract_cutoff_years: 0,
+    is_dummy: true,
+    is_v3_item: true,
+    published_revision_id: '2026-08-25T14:03:11.482Z-a7f3c1d9',
+    portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
+    portal_sk_v3: 'PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c',
+    origin: 'string',
+    global_blocks: {},
+    organization_id: 12345,
+    org_settings: {
+      canary: {
+        enabled: true
+      },
+      notracking: {
+        enabled: true
+      }
+    },
+    feature_flags: {},
+    grants: [
+      {
+        action: 'entity-read',
+        resource: 'entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947',
+        effect: 'allow'
+      }
+    ],
+    pages: [
+      {
+        slug: 'dashboard',
+        path: '/dashboard',
+        schema: ['string'],
+        visibility: { /* ... */ },
+        content: {},
+        design: {},
+        blocks: {},
+        order: 1,
+        is_system: false,
+        is_detail: false,
+        detail_schema: 'contact',
+        show_in_navigation: false,
+        is_public: true,
+        parentId: 'c495fef9-eeca-4019-a989-8390dcd9825b',
+        is_entry_route: false,
+        is_deleted: false,
+        id: 'c495fef9-eeca-4019-a989-8390dcd9825b',
+        last_modified_at: '2021-02-09T12:41:43.662Z',
+        portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
+        past_routes: ['old-dashboard', 'home'],
+        _manifest: ['string'],
+        _lineage_id: 'string',
+        detached_lineage_ids: ['string']
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "valid": true,
+  "findings": [
+    {
+      "code": "BLOCK_PARENT_UNRESOLVED",
+      "severity": "error",
+      "path": "pages[slug=login].blocks[id=c495fef9-eeca-4019-a989-8390dcd9825b].parentId",
+      "message": "string"
+    }
+  ]
 }
 ```
 
@@ -9286,7 +10217,7 @@ const { data } = await client.publishPortalRevision(
 
 ### `listAllPortalConfigs`
 
-Retrieves all portal configurations.
+Retrieves all portal configurations, each with its pages, email templates and grants.
 
 `GET /v3/portal/configs`
 
@@ -9336,6 +10267,10 @@ const { data } = await client.listAllPortalConfigs()
       "self_assignment_mode": "contracts",
       "contract_selector_config": {},
       "registration_identifiers": [],
+      "default_role": "default_end_customer_portal_role",
+      "allowed_roles": ["b2b_admin", "b2b_viewer"],
+      "record_access": {},
+      "record_access_defaults": {},
       "surfaces": [],
       "contact_identifiers_for_account": [],
       "additional_contact_attributes": [],
@@ -9395,85 +10330,20 @@ const { data } = await client.listPortalConfigSummaries()
       "is_epilot_domain": true,
       "dnsStatus": "CONFIGURING",
       "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "logo_image": {
-        "url": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/logo.png",
-        "dark_url": "string"
-      },
-      "default_user_to_notify": {
-        "onPendingUser": [
-          {
-            "type": "user",
-            "user_id": "123456",
-            "display_name": "John",
-            "image_uri": {
-              "original": "https://fuafjvoHKsu.cloudimg.io/v7/e-mage-sam-bucket-dev.s3.eu-central-1.amazonaws.com/files/fuafjvoHKsudhfagweucjasdvga/original",
-              "thumbnail_32": "https://fuafjvoHKsu.cloudimg.io/v7/e-mage-sam-bucket-dev.s3.eu-central-1.amazonaws.com/files/fuafjvoHKsudhfagweucjasdvga/original?w=32&h=32",
-              "thumbnail_64": "https://fuafjvoHKsu.cloudimg.io/v7/e-mage-sam-bucket-dev.s3.eu-central-1.amazonaws.com/files/fuafjvoHKsudhfagweucjasdvga/original?w=64&h=64",
-              "key": "fuafjvoHKsudhfagweucjasdvga"
-            },
-            "org_id": "123",
-            "email": "j.doe@epilot.cloud",
-            "phone": "12345 67890"
-          }
-        ]
-      },
-      "feature_settings": {
-        "start_page": true,
-        "billing": true,
-        "commodity_billing": true,
-        "change_due_date": true,
-        "new_design": true,
-        "mcp_enabled": true,
-        "mcp_grant_version": 0,
-        "portal_copilot": false,
-        "portal_copilot_agent_id": "string",
-        "portal_copilot_visibility": {
-          "visible_for_targets": ["string"],
-          "visible_for_operator": "and",
-          "hidden_for_targets": ["string"],
-          "hidden_for_operator": "and"
-        }
-      },
+      "logo_image": {},
+      "default_user_to_notify": {},
+      "feature_settings": {},
       "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
       "self_registration_account_setting": "ALLOW_WITH_CREATION",
       "block_registration_if_portal_user_exists": true,
       "self_registration_entity": "contact",
       "user_account_self_management": true,
-      "registration_identifiers": [
-        {
-          "name": "string",
-          "schema": "contact",
-          "validation_rule_id": "string"
-        }
-      ],
-      "surfaces": [
-        {
-          "id": "website-journeys",
-          "name": "Website journeys",
-          "description": "string",
-          "authentication": "login",
-          "token_ttl_seconds": 300,
-          "identifiers": [
-            {
-              "name": "customer_number",
-              "schema": "contact"
-            },
-            {
-              "name": "meter_number",
-              "schema": "meter"
-            }
-          ],
-          "data_access": {
-            "entities": [
-              {
-                "schema": "contract",
-                "target_ids": ["string"]
-              }
-            ],
-            "role_id": "728:public_journeys_readonly"
-          }
-        }
-      ],
+      "registration_identifiers": [],
+      "default_role": "default_end_customer_portal_role",
+      "allowed_roles": ["b2b_admin", "b2b_viewer"],
+      "record_access": {},
+      "record_access_defaults": {},
+      "surfaces": [],
       "is_dummy": true,
       "is_v3_item": true,
       "published_revision_id": "string",
@@ -9654,7 +10524,8 @@ const { data } = await client.clonePortalConfig(
       "channel": "canary",
       "auto_update": true,
       "update_strategy": "next-launch",
-      "min_native_version": "string"
+      "recommended_native_version": "2.0.0",
+      "min_supported_native_version": "1.4.0"
     }
   },
   "enabled": true,
@@ -9797,6 +10668,20 @@ const { data } = await client.clonePortalConfig(
       "schema": "contract"
     }
   ],
+  "default_role": "default_end_customer_portal_role",
+  "allowed_roles": ["b2b_admin", "b2b_viewer"],
+  "record_access": {
+    "contract": {
+      "conditions": []
+    },
+    "meter": {
+      "conditions": []
+    },
+    "ticket": {
+      "conditions": []
+    }
+  },
+  "record_access_defaults": {},
   "surfaces": [
     {
       "id": "website-journeys",
@@ -9922,6 +10807,69 @@ const { data } = await client.clonePortalConfig(
 
 ---
 
+### `getPortalUserRole`
+
+The signed-in portal user's roles and their grants together.
+
+`GET /v3/portal/user/role`
+
+```ts
+const { data } = await client.getPortalUserRole()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "roles": ["b2b_admin", "b2b_billing"],
+  "role": "b2b_admin",
+  "grants": [
+    {
+      "action": "entity-read",
+      "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
+      "effect": "allow"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `listPortalRoles`
+
+Roles the caller may give to users they invite: the portal's default role first, then each
+of the portal's `allowed_roles` that the caller's role holds a `portal_user:assign_role`
+grant for (resource 
+
+`GET /v3/portal/roles`
+
+```ts
+const { data } = await client.listPortalRoles()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "can_invite": true,
+  "default_role": "string",
+  "roles": [
+    {
+      "slug": "string",
+      "name": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `invitePartner`
 
 Invites a partner to a portal
@@ -9934,6 +10882,8 @@ const { data } = await client.invitePartner(
   {
     email: 'string',
     contact_data: {},
+    roles: ['b2b_admin', 'b2b_billing'],
+    role: 'b2b_admin',
     portal_user_data: {}
   },
 )
@@ -9976,7 +10926,15 @@ const { data } = await client.listBusinessPartners()
       "_title": "John Doe",
       "first_name": "John",
       "last_name": "Doe",
-      "access_status": true
+      "access_status": true,
+      "roles": [
+        {
+          "slug": "b2b_admin",
+          "name": "B2B admin"
+        }
+      ],
+      "role": "b2b_admin",
+      "role_name": "B2B admin"
     }
   ]
 }
@@ -10054,6 +11012,44 @@ const { data } = await client.disablePartner({
 ```json
 {
   "message": "Partner disabled from portal successfully"
+}
+```
+
+</details>
+
+---
+
+### `setPartnerRole`
+
+Changes the portal roles of another user on the caller's account.
+
+`PUT /v3/portal/partner/{partner_id}/role`
+
+```ts
+const { data } = await client.setPartnerRole(
+  {
+    partner_id: 'example',
+  },
+  {
+    roles: ['b2b_billing'],
+    role: 'b2b_billing'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "roles": [
+    {
+      "slug": "b2b_admin",
+      "name": "B2B admin"
+    }
+  ],
+  "role": "b2b_billing",
+  "role_name": "Billing"
 }
 ```
 
@@ -10209,7 +11205,8 @@ const { data } = await client.getMobileConfig({
     "channel": "canary",
     "auto_update": true,
     "update_strategy": "next-launch",
-    "min_native_version": "string"
+    "recommended_native_version": "2.0.0",
+    "min_supported_native_version": "1.4.0"
   }
 }
 ```
@@ -10256,7 +11253,8 @@ const { data } = await client.putMobileConfig(
       channel: 'canary',
       auto_update: true,
       update_strategy: 'next-launch',
-      min_native_version: 'string'
+      recommended_native_version: '2.0.0',
+      min_supported_native_version: '1.4.0'
     }
   },
 )
@@ -10314,7 +11312,8 @@ const { data } = await client.putMobileConfig(
     "channel": "canary",
     "auto_update": true,
     "update_strategy": "next-launch",
-    "min_native_version": "string"
+    "recommended_native_version": "2.0.0",
+    "min_supported_native_version": "1.4.0"
   }
 }
 ```
@@ -10378,11 +11377,12 @@ type PortalNotification = {
 
 ### `PortalUserNotificationPreferences`
 
-Resolved notification preferences of a portal user. Notifications are opt-out: a channel that was never stored on the portal user resolves to enabled (true).
+Resolved notification preferences of a portal user. In-app notifications are opt-out: when never stored on the portal user they resolve to enabled (true). Email notifications are opt-in: when never stored they resolve to disabled (false).
 
 ```ts
 type PortalUserNotificationPreferences = {
   in_app: boolean
+  email: boolean
 }
 ```
 
@@ -10467,7 +11467,8 @@ type MobileConfig = {
     channel?: "canary" | "stable"
     auto_update?: boolean
     update_strategy?: "next-launch" | "immediate"
-    min_native_version?: string
+    recommended_native_version?: string
+    min_supported_native_version?: string
   }
 }
 ```
@@ -10502,14 +11503,15 @@ type MobileConfigUpdate = {
     channel?: "canary" | "stable"
     auto_update?: boolean
     update_strategy?: "next-launch" | "immediate"
-    min_native_version?: string
+    recommended_native_version?: string
+    min_supported_native_version?: string
   }
 }
 ```
 
 ### `MobileOtaConfig`
 
-OTA (over-the-air) update settings for the portal's mobile app. Drives the OTA build pipeline and the per-portal manifest. channel / update_strategy / min_native_version are epilot-internal controls.
+OTA (over-the-air) update settings for the portal's mobile app. Drives the OTA build pipeline and the per-portal manifest. channel / update_strategy / recommended_native_version / min_supported_native_version are epilot-internal controls.
 
 ```ts
 type MobileOtaConfig = {
@@ -10517,23 +11519,8 @@ type MobileOtaConfig = {
   channel?: "canary" | "stable"
   auto_update?: boolean
   update_strategy?: "next-launch" | "immediate"
-  min_native_version?: string
-}
-```
-
-### `NewDesignMigrationResult`
-
-```ts
-type NewDesignMigrationResult = {
-  org_id?: string
-  portal_id?: string
-  origin?: string
-  name?: string
-  is_v3_item?: boolean
-  dry_run?: boolean
-  migrated?: boolean
-  summary?: Record<string, unknown>
-  before?: Record<string, unknown>
+  recommended_native_version?: string
+  min_supported_native_version?: string
 }
 ```
 
@@ -10547,7 +11534,10 @@ type OtaPortal = {
   channel: "canary" | "stable"
   autoUpdate: boolean
   updateStrategy: "next-launch" | "immediate"
-  minNativeVersion?: string
+  recommendedNativeVersion?: string
+  minSupportedNativeVersion?: string
+  iosStoreUrl?: string
+  androidStoreUrl?: string
 }
 ```
 
@@ -10848,7 +11838,8 @@ type CommonConfigAttributes = {
       channel?: { ... }
       auto_update?: { ... }
       update_strategy?: { ... }
-      min_native_version?: { ... }
+      recommended_native_version?: { ... }
+      min_supported_native_version?: { ... }
     }
   }
   enabled?: boolean
@@ -10872,6 +11863,12 @@ type CommonConfigAttributes = {
   self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY"
   block_registration_if_portal_user_exists?: boolean
   self_registration_entity?: "contact" | "account"
+  registration_target_group?: {
+    visible_for_targets?: string[]
+    visible_for_operator?: "and" | "or"
+    hidden_for_targets?: string[]
+    hidden_for_operator?: "and" | "or"
+  }
   user_account_self_management?: boolean
   feature_settings?: {
     start_page?: boolean
@@ -10906,13 +11903,6 @@ type CommonConfigAttributes = {
     auto_redirect_to_sso?: boolean
     prevent_user_enumeration?: boolean
   }
-  cognito_details?: {
-    cognito_user_pool_client_id?: string
-    cognito_mobile_client_id?: string
-    cognito_user_pool_arn?: string
-    cognito_user_pool_id?: string
-    timeouts?: {
-      refresh_token?: { ... }
   // ...
 }
 ```
@@ -11040,9 +12030,9 @@ type UpsertPortalConfig = {
       channel?: { ... }
       auto_update?: { ... }
       update_strategy?: { ... }
-      min_native_version?: { ... }
+      recommended_native_version?: { ... }
+      min_supported_native_version?: { ... }
     }
-  }
   // ...
 }
 ```
@@ -11085,7 +12075,8 @@ type PortalConfig = {
       channel?: { ... }
       auto_update?: { ... }
       update_strategy?: { ... }
-      min_native_version?: { ... }
+      recommended_native_version?: { ... }
+      min_supported_native_version?: { ... }
     }
   }
   enabled?: boolean
@@ -11109,6 +12100,12 @@ type PortalConfig = {
   self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY"
   block_registration_if_portal_user_exists?: boolean
   self_registration_entity?: "contact" | "account"
+  registration_target_group?: {
+    visible_for_targets?: string[]
+    visible_for_operator?: "and" | "or"
+    hidden_for_targets?: string[]
+    hidden_for_operator?: "and" | "or"
+  }
   user_account_self_management?: boolean
   feature_settings?: {
     start_page?: boolean
@@ -11143,13 +12140,6 @@ type PortalConfig = {
     auto_redirect_to_sso?: boolean
     prevent_user_enumeration?: boolean
   }
-  cognito_details?: {
-    cognito_user_pool_client_id?: string
-    cognito_mobile_client_id?: string
-    cognito_user_pool_arn?: string
-    cognito_user_pool_id?: string
-    timeouts?: {
-      refresh_token?: { ... }
   // ...
 }
 ```
@@ -12067,17 +13057,6 @@ type Contact = {
     fragment?: string
   }>
   _schema: "contact"
-}
-```
-
-### `WorfklowIdentifier`
-
-Workflow identifier object
-
-```ts
-type WorfklowIdentifier = {
-  defition_id?: string
-  name?: string
 }
 ```
 
@@ -14018,6 +14997,51 @@ type MeterReading = {
 }
 ```
 
+### `PortalMeterReading`
+
+A meter reading submitted by a portal user for a counter of the meter in the path.
+
+```ts
+type PortalMeterReading = {
+  value: number
+  counter_id: string // uuid
+  direction?: "feed-in" | "feed-out"
+  timestamp?: string
+  read_by?: string
+  reason?: "" | "regular" | "irregular" | "last" | "first" | "meter_change" | "contract_change" | "meter_adjustment"
+  source?: "ECP" | "ERP" | "360" | "journey-submission"
+  status?: "valid" | "in-validation" | "implausible" | null | ""
+  remark?: string
+  metadata?: Record<string, string>
+}
+```
+
+### `MeterCounter`
+
+A counter (measurement channel) of a meter
+
+```ts
+type MeterCounter = {
+  _id: string // uuid
+  _title: string
+  _org: string
+  _tags?: string[]
+  _created_at: string // date-time
+  _updated_at: string // date-time
+  _schema: "meter_counter"
+  obis_number?: string
+  direction?: "feed-in" | "feed-out"
+  transformer_ratio?: number
+  unit?: string
+  forecast_reading_value?: string
+  forecast_as_of?: string
+  current_consumption?: number
+  last_reading?: string
+  conversion_factor?: number
+  tariff_type?: "ht" | "nt"
+}
+```
+
 ### `MeterReadingPhoto`
 
 ```ts
@@ -14607,8 +15631,7 @@ type PortalHeaderDesignOverrides = {
   }
   elements?: {
     icon_actions?: {
-      style?: { ... }
-      color?: { ... }
+      variant?: { ... }
     }
   }
 }
@@ -14652,7 +15675,8 @@ type CommonConfigAttributesV3 = {
       channel?: { ... }
       auto_update?: { ... }
       update_strategy?: { ... }
-      min_native_version?: { ... }
+      recommended_native_version?: { ... }
+      min_supported_native_version?: { ... }
     }
   }
   enabled?: boolean
@@ -14716,7 +15740,6 @@ type CommonConfigAttributesV3 = {
     cognito_user_pool_arn?: string
     cognito_user_pool_id?: string
     timeouts?: {
-      refresh_token?: { ... }
   // ...
 }
 ```
@@ -14731,17 +15754,20 @@ type PortalId = string
 
 ### `PortalDataExportColumn`
 
-One column of the portal data export CSV.
+One column of the portal data export. Send the column value as `template`; `source` is the older single-attribute shape, still accepted.
+
 
 ```ts
 type PortalDataExportColumn = {
   key: string
   header: Record<string, string>
-  source: {
+  source?: {
     path?: string[]
     attribute: string
     address_field?: "full" | "street" | "street_number" | "postal_code" | "city" | "additional_info" | "country"
   }
+  template?: string
+  address_field?: "full" | "street" | "street_number" | "postal_code" | "city" | "additional_info" | "country"
   formatter?: "text" | "date" | "money_cents" | "enum" | "address"
   enum_labels?: Record<string, Record<string, string>>
 }
@@ -14847,9 +15873,9 @@ type UpsertPortalConfigV3 = {
       channel?: { ... }
       auto_update?: { ... }
       update_strategy?: { ... }
-      min_native_version?: { ... }
+      recommended_native_version?: { ... }
+      min_supported_native_version?: { ... }
     }
-  }
   // ...
 }
 ```
@@ -14941,7 +15967,8 @@ type PortalConfigV3 = {
       channel?: { ... }
       auto_update?: { ... }
       update_strategy?: { ... }
-      min_native_version?: { ... }
+      recommended_native_version?: { ... }
+      min_supported_native_version?: { ... }
     }
   }
   enabled?: boolean
@@ -14956,7 +15983,6 @@ type PortalConfigV3 = {
   }
   design_id?: string // uuid
   header?: {
-    design?: {
   // ...
 }
 ```
@@ -14991,6 +16017,22 @@ Limits portal chat to portal users matching targets, with the same rules as page
 
 ```ts
 type PortalCopilotVisibility = {
+  visible_for_targets?: string[]
+  visible_for_operator?: "and" | "or"
+  hidden_for_targets?: string[]
+  hidden_for_operator?: "and" | "or"
+}
+```
+
+### `RegistrationTargetGroup`
+
+Limits who can get a portal user to existing contacts or accounts matching targets,
+with the same rules as page and block visibility. Targets are evaluated against the
+registration entity (`self_registration_entity`): the contact in contact mode, the
+account in account mode. Applies wherever an exis
+
+```ts
+type RegistrationTargetGroup = {
   visible_for_targets?: string[]
   visible_for_operator?: "and" | "or"
   hidden_for_targets?: string[]
@@ -15072,6 +16114,26 @@ type PortalConfigSummaryV3 = {
     name?: string
     schema?: string
     validation_rule_id?: string
+  }>
+  default_role?: string
+  allowed_roles?: string[]
+  record_access?: Record<string, {
+    conditions: Array<{
+      type: { ... }
+      attribute: { ... }
+      through?: { ... }
+    }>
+  }>
+  record_access_defaults?: Record<string, {
+    conditions: Array<{
+      type: { ... }
+      attribute: { ... }
+      through?: { ... }
+    }>
+    never_listed?: Array<{
+      attribute: { ... }
+      value: { ... }
+    }>
   }>
   surfaces?: Array<{
     id: string
@@ -15237,9 +16299,9 @@ type PortalRevisionRequest = {
       channel?: { ... }
       auto_update?: { ... }
       update_strategy?: { ... }
-      min_native_version?: { ... }
+      recommended_native_version?: { ... }
+      min_supported_native_version?: { ... }
     }
-  }
   // ...
 }
 ```
@@ -15275,6 +16337,20 @@ type RevisionSource = {
 }
 ```
 
+### `PortalRevisionActor`
+
+The AI agent or API token that made a write. Absent when a person used their own login.
+
+```ts
+type PortalRevisionActor = {
+  type: "agent" | "api_token"
+  name?: string
+  on_behalf_of?: string
+  purpose?: string
+  host?: string
+}
+```
+
 ### `PortalRevisionSummary`
 
 ```ts
@@ -15282,6 +16358,13 @@ type PortalRevisionSummary = {
   revision_id: string
   created_at: string // date-time
   created_by?: string
+  created_by_actor?: {
+    type: "agent" | "api_token"
+    name?: string
+    on_behalf_of?: string
+    purpose?: string
+    host?: string
+  }
   name?: string
   description?: string
   source?: {
@@ -15291,6 +16374,13 @@ type PortalRevisionSummary = {
   page_count: number
   published_at?: string // date-time
   published_by?: string
+  published_by_actor?: {
+    type: "agent" | "api_token"
+    name?: string
+    on_behalf_of?: string
+    purpose?: string
+    host?: string
+  }
   is_published: boolean
 }
 ```
@@ -15303,6 +16393,13 @@ type PortalRevisionList = {
     revision_id: string
     created_at: string // date-time
     created_by?: string
+    created_by_actor?: {
+      type: { ... }
+      name?: { ... }
+      on_behalf_of?: { ... }
+      purpose?: { ... }
+      host?: { ... }
+    }
     name?: string
     description?: string
     source?: {
@@ -15312,6 +16409,13 @@ type PortalRevisionList = {
     page_count: number
     published_at?: string // date-time
     published_by?: string
+    published_by_actor?: {
+      type: { ... }
+      name?: { ... }
+      on_behalf_of?: { ... }
+      purpose?: { ... }
+      host?: { ... }
+    }
     is_published: boolean
   }>
   next_cursor?: string
@@ -15325,6 +16429,13 @@ type PortalRevisionCreated = {
   revision_id: string
   created_at: string // date-time
   created_by?: string
+  created_by_actor?: {
+    type: "agent" | "api_token"
+    name?: string
+    on_behalf_of?: string
+    purpose?: string
+    host?: string
+  }
   name?: string
   description?: string
   source?: {
@@ -15334,6 +16445,13 @@ type PortalRevisionCreated = {
   page_count: number
   published_at?: string // date-time
   published_by?: string
+  published_by_actor?: {
+    type: "agent" | "api_token"
+    name?: string
+    on_behalf_of?: string
+    purpose?: string
+    host?: string
+  }
   is_published: boolean
   identity_providers?: Array<{
     slug?: string
@@ -15372,12 +16490,32 @@ type PortalRevisionCreated = {
     revision_id: string
     published_at: string // date-time
     published_by?: string
+    published_by_actor?: {
+      type: { ... }
+      name?: { ... }
+      on_behalf_of?: { ... }
+      purpose?: { ... }
+      host?: { ... }
+    }
     name?: string
     post_publish_warnings: string[]
     held_back?: Array<{
       page_id: { ... }
       block_id?: { ... }
       reason: { ... }
+    }>
+    validation?: {
+      valid: { ... }
+      findings: { ... }
+    }
+  }
+  validation?: {
+    valid: boolean
+    findings: Array<{
+      code: { ... }
+      severity: { ... }
+      path: { ... }
+      message: { ... }
     }>
   }
 }
@@ -15423,6 +16561,13 @@ type PortalRevision = {
   revision_id: string
   created_at: string // date-time
   created_by?: string
+  created_by_actor?: {
+    type: "agent" | "api_token"
+    name?: string
+    on_behalf_of?: string
+    purpose?: string
+    host?: string
+  }
   name?: string
   description?: string
   source?: {
@@ -15432,6 +16577,13 @@ type PortalRevision = {
   page_count: number
   published_at?: string // date-time
   published_by?: string
+  published_by_actor?: {
+    type: "agent" | "api_token"
+    name?: string
+    on_behalf_of?: string
+    purpose?: string
+    host?: string
+  }
   is_published: boolean
   config: Record<string, unknown>
   pages: Array<{
@@ -15492,6 +16644,118 @@ type PortalRevision = {
 }
 ```
 
+### `PortalValidationFinding`
+
+One thing the portal config validation found.
+
+```ts
+type PortalValidationFinding = {
+  code: string
+  severity: "error" | "warning"
+  path: string
+  message: string
+}
+```
+
+### `PortalValidationResult`
+
+Result of the portal config validation.
+
+```ts
+type PortalValidationResult = {
+  valid: boolean
+  findings: Array<{
+    code: string
+    severity: "error" | "warning"
+    path: string
+    message: string
+  }>
+}
+```
+
+### `PortalWriteValidation`
+
+What a portal config write adds to its response; never stored and never returned by a read.
+
+
+```ts
+type PortalWriteValidation = {
+  validation?: {
+    valid: boolean
+    findings: Array<{
+      code: { ... }
+      severity: { ... }
+      path: { ... }
+      message: { ... }
+    }>
+  }
+}
+```
+
+### `PortalConfigWriteResult`
+
+The portal config as `upsertPortal` returns it, with the validation of what was written.
+
+```ts
+type PortalConfigWriteResult = {
+  validation?: {
+    valid: boolean
+    findings: Array<{
+      code: { ... }
+      severity: { ... }
+      path: { ... }
+      message: { ... }
+    }>
+  }
+}
+```
+
+### `PortalConfigV3WriteResult`
+
+The portal config as `createPortalConfig` and `putPortalConfig` return it, with the validation of what was written.
+
+
+```ts
+type PortalConfigV3WriteResult = {
+  validation?: {
+    valid: boolean
+    findings: Array<{
+      code: { ... }
+      severity: { ... }
+      path: { ... }
+      message: { ... }
+    }>
+  }
+}
+```
+
+### `PortalValidationFailedResp`
+
+A write refused by the portal config validation (`reason: PORTAL_VALIDATION_FAILED`); nothing was saved.
+
+
+```ts
+type PortalValidationFailedResp = {
+  message?: string
+  reason?: string
+  validation?: {
+    valid: boolean
+    findings: Array<{
+      code: { ... }
+      severity: { ... }
+      path: { ... }
+      message: { ... }
+    }>
+    blocking?: Array<{
+      code: { ... }
+      severity: { ... }
+      path: { ... }
+      message: { ... }
+    }>
+  }
+}
+```
+
 ### `PublishResult`
 
 ```ts
@@ -15499,6 +16763,13 @@ type PublishResult = {
   revision_id: string
   published_at: string // date-time
   published_by?: string
+  published_by_actor?: {
+    type: "agent" | "api_token"
+    name?: string
+    on_behalf_of?: string
+    purpose?: string
+    host?: string
+  }
   name?: string
   post_publish_warnings: string[]
   held_back?: Array<{
@@ -15506,6 +16777,15 @@ type PublishResult = {
     block_id?: string
     reason: "BLUEPRINT_MANAGED"
   }>
+  validation?: {
+    valid: boolean
+    findings: Array<{
+      code: { ... }
+      severity: { ... }
+      path: { ... }
+      message: { ... }
+    }>
+  }
 }
 ```
 
@@ -15605,6 +16885,105 @@ type BusinessPartnerItem = {
   first_name?: string
   last_name?: string
   access_status?: boolean
+  roles?: Array<{
+    slug: string
+    name: string
+  }>
+  role?: string
+  role_name?: string
+}
+```
+
+### `RecordAccess`
+
+Which records portal users see in the portal's lists, per record type (schema slug). A
+record type without an entry uses its default rule (`record_access_defaults`), or else any
+of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+`file` and `portal_user` are ignored
+
+```ts
+type RecordAccess = Record<string, {
+  conditions: Array<{
+    type: "relation_attribute"
+    attribute: string
+    through?: string
+  }>
+}>
+```
+
+### `RecordAccessRule`
+
+A record is visible when one of the conditions applies.
+
+```ts
+type RecordAccessRule = {
+  conditions: Array<{
+    type: "relation_attribute"
+    attribute: string
+    through?: string
+  }>
+}
+```
+
+### `RecordAccessCondition`
+
+```ts
+type RecordAccessCondition = {
+  type: "relation_attribute"
+  attribute: string
+  through?: string
+}
+```
+
+### `RecordAccessRelationAttributeCondition`
+
+The record's relation attribute `attribute` contains the user's contact. With `through`,
+the record related through the attribute `through` must contain it instead, e.g. on meters
+`through: contract, attribute: customer`.
+
+
+```ts
+type RecordAccessRelationAttributeCondition = {
+  type: "relation_attribute"
+  attribute: string
+  through?: string
+}
+```
+
+### `RecordAccessName`
+
+A schema slug or attribute name. Letters, digits and underscores only.
+
+```ts
+type RecordAccessName = string
+```
+
+### `RecordAccessDefaults`
+
+Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+write.
+
+
+```ts
+type RecordAccessDefaults = Record<string, {
+  conditions: Array<{
+    type: "relation_attribute"
+    attribute: string
+    through?: string
+  }>
+  never_listed?: Array<{
+    attribute: string
+    value: string
+  }>
+}>
+```
+
+### `PortalRoleRef`
+
+```ts
+type PortalRoleRef = {
+  slug: string
+  name: string
 }
 ```
 

@@ -241,6 +241,77 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "The journey is a partial that other journeys still use",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "This partial is used in 2 journeys"
+                    },
+                    "details": {
+                      "$ref": "#/components/schemas/PartialUsages"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/journey/partials/{id}/usages": {
+      "get": {
+        "operationId": "getPartialUsages",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "journey:*"
+          }
+        ],
+        "summary": "getPartialUsages",
+        "description": "Lists the journeys of the organization that use the partial journey, with the IDs of their partial instances. Only available for organizations with journey partials enabled; returns `404` otherwise.\n",
+        "tags": [
+          "Journeys"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Partial journey ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "509cdffe-424f-457a-95c2-9708c304ce77"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Journeys that use the partial",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartialUsages"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No permission to view journeys"
+          },
+          "404": {
+            "description": "Journey partials not enabled for the organization"
           }
         }
       }
@@ -1336,7 +1407,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/JourneyCreationRequestV2"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/JourneyCreationRequestV2"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PartialWarnings"
+                    }
+                  ]
                 }
               }
             }
@@ -1407,7 +1485,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/JourneyCreationRequestV2"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/JourneyCreationRequestV2"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PartialWarnings"
+                    }
+                  ]
                 }
               }
             }
@@ -1523,6 +1608,25 @@
           "200": {
             "description": "Success",
             "content": {}
+          },
+          "409": {
+            "description": "The journey is a partial that other journeys still use",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "This partial is used in 2 journeys"
+                    },
+                    "details": {
+                      "$ref": "#/components/schemas/PartialUsages"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -2399,6 +2503,233 @@
           "journeyId"
         ]
       },
+      "PartialContract": {
+        "type": "object",
+        "required": [
+          "requiresLogin"
+        ],
+        "properties": {
+          "exits": {
+            "type": "object",
+            "deprecated": true,
+            "description": "Ignored; accepted from older clients.",
+            "additionalProperties": {
+              "type": "object",
+              "required": [
+                "label"
+              ],
+              "properties": {
+                "label": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "requiresLogin": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "PartialOrigin": {
+        "type": "object",
+        "required": [
+          "instanceId",
+          "partialId",
+          "originalStepId"
+        ],
+        "properties": {
+          "instanceId": {
+            "type": "string"
+          },
+          "partialId": {
+            "type": "string"
+          },
+          "originalStepId": {
+            "type": "string"
+          }
+        }
+      },
+      "PartialProduced": {
+        "type": "object",
+        "required": [
+          "stepIds",
+          "logicIds",
+          "datasourceIds",
+          "contextParameterIds",
+          "raisedRequiredParameterIds"
+        ],
+        "properties": {
+          "stepIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "logicIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "datasourceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contextParameterIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "raisedRequiredParameterIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PartialInstance": {
+        "type": "object",
+        "required": [
+          "partialId"
+        ],
+        "properties": {
+          "partialId": {
+            "type": "string"
+          },
+          "afterStepId": {
+            "type": "string"
+          },
+          "exits": {
+            "type": "object",
+            "deprecated": true,
+            "description": "Ignored; accepted from older clients.",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "produced": {
+            "$ref": "#/components/schemas/PartialProduced"
+          },
+          "exceptions": {
+            "type": "object",
+            "description": "Journey-owned overrides of partial block prefill, keyed by the partial's block id.",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/PartialBlockException"
+            }
+          }
+        }
+      },
+      "PartialBlockException": {
+        "type": "object",
+        "required": [
+          "controlName",
+          "values"
+        ],
+        "properties": {
+          "controlName": {
+            "type": "string"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "PartialUsages": {
+        "type": "object",
+        "required": [
+          "usages"
+        ],
+        "properties": {
+          "usages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "journeyId",
+                "name",
+                "instanceIds"
+              ],
+              "properties": {
+                "journeyId": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "instanceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "PartialWarnings": {
+        "type": "object",
+        "properties": {
+          "partial_warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartialIssue"
+            }
+          }
+        }
+      },
+      "PartialIssue": {
+        "type": "object",
+        "required": [
+          "severity",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "severity": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning"
+            ]
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "instanceId": {
+            "type": "string"
+          },
+          "partialId": {
+            "type": "string"
+          },
+          "stepId": {
+            "type": "string"
+          },
+          "blockId": {
+            "type": "string"
+          },
+          "logicId": {
+            "type": "string"
+          },
+          "paramKey": {
+            "type": "string"
+          },
+          "targetStepId": {
+            "type": "string"
+          }
+        }
+      },
       "JourneyCreationRequest": {
         "type": "object",
         "properties": {
@@ -2425,12 +2756,34 @@
                   "nullable": true
                 },
                 "title": {
-                  "type": "string",
-                  "nullable": true
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    {
+                      "type": "object",
+                      "description": "Text per language code",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  ]
                 },
                 "subTitle": {
-                  "type": "string",
-                  "nullable": true
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    {
+                      "type": "object",
+                      "description": "Text per language code",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  ]
                 },
                 "showStepSubtitle": {
                   "type": "boolean",
@@ -2467,6 +2820,9 @@
                 },
                 "schema": {},
                 "uischema": {},
+                "partialOrigin": {
+                  "$ref": "#/components/schemas/PartialOrigin"
+                },
                 "maxWidth": {
                   "type": "string",
                   "enum": [
@@ -2482,6 +2838,15 @@
                 "schema",
                 "uischema"
               ]
+            }
+          },
+          "partialContract": {
+            "$ref": "#/components/schemas/PartialContract"
+          },
+          "partials": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/PartialInstance"
             }
           },
           "design": {
@@ -2783,11 +3148,17 @@
                 "nullable": true
               },
               "mappingsAutomationId": {
+                "description": "Where this journey's submission mappings are stored. Without `newMappings`: the id of its entity mapping config (entity-mapping-api `/v2/mappings/{id}`). With `newMappings`: the id of the automation flow whose map-entity actions hold the mappings (automation-api `/v1/automation/flows/{flow_id}`). Before saving changed mappings, check them with entity-mapping-api `POST /v1/mappings:validate-flow` (`{ source: { journey_id }, actions }`) and fix every `blocking` issue.",
                 "type": "string"
               },
               "newMappings": {
-                "description": "When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.",
+                "description": "When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation. Write each mapping line as a map-entity action of that automation, reading `submission._block_values['<block id>']['<field>']` (the block id is the `id` of the block in `steps[].uischema`), and check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving the automation.",
                 "type": "boolean"
+              },
+              "flowId": {
+                "description": "Flow template that processes this journey's submissions. Managed by the Journey Builder, which sets it when the journey is saved (in rollout behind the feature flag journey-mappings-flows). API clients and agents must not set or change it: the builder would then show a flow that does not process this journey's submissions. null unlinks the flow.",
+                "type": "string",
+                "nullable": true
               },
               "targetedCustomer": {
                 "type": "string"
@@ -2879,6 +3250,22 @@
                   "PRIVATE"
                 ]
               },
+              "available_languages": {
+                "type": "array",
+                "description": "Languages the journey is offered in. Absent means the journey's single language embedOptions.lang, defaulting to de.",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "de",
+                    "en",
+                    "fr"
+                  ]
+                },
+                "example": [
+                  "de",
+                  "en"
+                ]
+              },
               "authGate": {
                 "type": "object",
                 "description": "Steps after this step require an authenticated session (auth gate)",
@@ -2934,6 +3321,10 @@
                   "modernLauncher": {
                     "type": "boolean",
                     "description": "Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.\n"
+                  },
+                  "sparkDesign": {
+                    "type": "boolean",
+                    "description": "Opt this journey into the Spark design (Spark UI renderers, branded by the journey's design). Effective when true OR the organization flag `journey-spark-design` is on.\n"
                   }
                 }
               },
@@ -3020,12 +3411,34 @@
                   "nullable": true
                 },
                 "title": {
-                  "type": "string",
-                  "nullable": true
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    {
+                      "type": "object",
+                      "description": "Text per language code",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  ]
                 },
                 "subTitle": {
-                  "type": "string",
-                  "nullable": true
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    {
+                      "type": "object",
+                      "description": "Text per language code",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  ]
                 },
                 "showStepSubtitle": {
                   "type": "boolean",
@@ -3062,6 +3475,9 @@
                 },
                 "schema": {},
                 "uischema": {},
+                "partialOrigin": {
+                  "$ref": "#/components/schemas/PartialOrigin"
+                },
                 "maxWidth": {
                   "type": "string",
                   "enum": [
@@ -3077,6 +3493,15 @@
                 "schema",
                 "uischema"
               ]
+            }
+          },
+          "partialContract": {
+            "$ref": "#/components/schemas/PartialContract"
+          },
+          "partials": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/PartialInstance"
             }
           },
           "design": {
@@ -3369,11 +3794,17 @@
                 "nullable": true
               },
               "mappingsAutomationId": {
+                "description": "Where this journey's submission mappings are stored. Without `newMappings`: the id of its entity mapping config (entity-mapping-api `/v2/mappings/{id}`). With `newMappings`: the id of the automation flow whose map-entity actions hold the mappings (automation-api `/v1/automation/flows/{flow_id}`). Before saving changed mappings, check them with entity-mapping-api `POST /v1/mappings:validate-flow` (`{ source: { journey_id }, actions }`) and fix every `blocking` issue.",
                 "type": "string"
               },
               "newMappings": {
-                "description": "When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.",
+                "description": "When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation. Write each mapping line as a map-entity action of that automation, reading `submission._block_values['<block id>']['<field>']` (the block id is the `id` of the block in `steps[].uischema`), and check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving the automation.",
                 "type": "boolean"
+              },
+              "flowId": {
+                "description": "Flow template that processes this journey's submissions. Managed by the Journey Builder, which sets it when the journey is saved (in rollout behind the feature flag journey-mappings-flows). API clients and agents must not set or change it: the builder would then show a flow that does not process this journey's submissions. null unlinks the flow.",
+                "type": "string",
+                "nullable": true
               },
               "templateId": {
                 "type": "string",
@@ -3458,6 +3889,22 @@
                   "PRIVATE"
                 ]
               },
+              "available_languages": {
+                "type": "array",
+                "description": "Languages the journey is offered in. Absent means the journey's single language embedOptions.lang, defaulting to de.",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "de",
+                    "en",
+                    "fr"
+                  ]
+                },
+                "example": [
+                  "de",
+                  "en"
+                ]
+              },
               "authGate": {
                 "type": "object",
                 "description": "Steps after this step require an authenticated session (auth gate)",
@@ -3511,6 +3958,10 @@
                   "modernLauncher": {
                     "type": "boolean",
                     "description": "Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.\n"
+                  },
+                  "sparkDesign": {
+                    "type": "boolean",
+                    "description": "Opt this journey into the Spark design (Spark UI renderers, branded by the journey's design). Effective when true OR the organization flag `journey-spark-design` is on.\n"
                   }
                 }
               },
@@ -3902,6 +4353,12 @@
             "type": "number",
             "description": "Version of the entity-mapping config stored alongside this revision.",
             "example": 12
+          },
+          "partial_warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartialIssue"
+            }
           }
         }
       },

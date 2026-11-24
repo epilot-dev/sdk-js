@@ -57,6 +57,7 @@ COMMANDS
   auth token              Store an API token directly
   auth status             Show authentication status
   auth logout             Remove stored credentials
+  auth browser            Open the portal in your browser, signed in with the CLI token
   profile                 Manage named profiles
   completion              Generate shell completion scripts
 
@@ -91,6 +92,7 @@ APIs
   email-template       Email template API
   entity               Entity API
   entity-mapping       Entity Mapping API
+  entity-ui            Entity UI API
   environments         Environments API
   event-catalog        Event Catalog API
   file                 File API
@@ -159,12 +161,80 @@ epilot auth status
 epilot auth logout
 ```
 
+### Open the portal with the CLI session
+
+`epilot auth browser` prints a portal URL that signs the browser in with the CLI's token, and offers to open it
+in interactive shells. The portal shows who the session belongs to and the verification code to compare with the
+terminal before switching:
+
+<img src="docs/assets/auth-browser-approval.png" alt="Portal approval page for epilot auth browser" width="360">
+
+
+```bash
+epilot auth browser                       # print URL, ask to open the browser
+epilot auth browser /app/entity/contact   # land on a specific page
+epilot auth browser --open                # open without asking
+epilot auth browser --no-open             # only print the URL (stdout)
+epilot auth browser --print-url           # print the full URL even when stdout is not a terminal
+epilot auth browser --json                # {"url": "...", "code": "XXXX-XXXX", "expires_at": "..."}
+```
+
+- The CLI prints a confirmation code (`XXXX-XXXX`) in the terminal and the portal shows it before switching the
+  browser's session: only approve if both match, so a link someone else sends is recognisable.
+- The URL contains your token. When stdout is not a terminal (AI agents, CI, scripts) it is printed with the token
+  hidden; use `--open` to open it on this machine or `--print-url` to print it anyway.
+
+- The browser session uses the token as-is: read-only and anonymized logins stay read-only and anonymized, and
+  the session ends when the token expires (1 hour for `epilot auth login`), at most after 8 hours. Nothing
+  refreshes it.
+- The portal asks for confirmation before replacing the browser's current session.
+- The token travels in the URL fragment (`/cli-session#token=…`), which never reaches a server; the portal removes
+  it from the address bar. Still, treat the URL like a password.
+- Works with user logins, API tokens and agent tokens (`auth login --agent`). An agent session acts as the agent
+  on behalf of the user who approved it; an API token session acts as the token. Portal, journey and preview
+  tokens are rejected.
+
 Token resolution order:
 1. `--token` flag
 2. `EPILOT_TOKEN` environment variable
-3. Active profile token
+3. Profile token (`--profile`, `EPILOT_PROFILE` or `epilot profile use`; a named profile that does not exist is an error)
 4. Stored credentials (`~/.config/epilot/credentials.json`)
 5. Interactive prompt (if TTY)
+
+### Using a pre-minted token
+
+Short-lived tokens minted for you (e.g. a scoped agent token for one organization) belong in a named
+profile, so they never replace your own login. Pass `--profile` on every call (agents can't rely on env vars
+persisting between shell calls):
+
+```bash
+# Store the token in its own profile, read from stdin (org, user and expiry are read from the token)
+printf '%s' "$TOKEN" | epilot profile create agent-911 --token -
+
+# Use it
+epilot --profile agent-911 entity listSchemas
+
+# Check which token is used and its claims (org, user, read-only, anonymized, actor, expiry) — never prints the token
+epilot auth status --profile agent-911
+
+# Remove it again (your default login stays)
+epilot profile delete agent-911
+```
+
+Pass the token as `-` to read it from stdin (`profile create <name> --token -`, `auth token --profile <name> -`,
+`auth login --profile <name> --token -`): a token on the command line is visible in `ps` and lands in your shell
+history. On a terminal, `-` prompts with masked input instead.
+
+Storing a token in a named profile (`--profile` or `EPILOT_PROFILE`) leaves `~/.config/epilot/credentials.json`
+untouched, and a named profile does not fall back to it:
+
+- A profile that does not exist fails with `Profile "…" not found. Create it with: epilot profile create … --token …`
+  (`--token` / `EPILOT_TOKEN` still win over any profile).
+- Once the token has expired, commands fail with `Token of profile "…" expired at … — request a new one`.
+
+`epilot auth logout --profile <name>` clears the token but keeps the profile (and e.g. its `--server`), and a
+profile without a token still uses your default login. Remove a token-only profile with
+`epilot profile delete <name>` instead, so later calls with it fail.
 
 ### Agent mode (optional)
 
@@ -428,6 +498,7 @@ Full documentation with sample calls and responses for all APIs:
 | Email template API | `epilot email-template` | [docs](./docs/email-template.md) |
 | Entity API | `epilot entity` | [docs](./docs/entity.md) |
 | Entity Mapping API | `epilot entity-mapping` | [docs](./docs/entity-mapping.md) |
+| Entity UI API | `epilot entity-ui` | [docs](./docs/entity-ui.md) |
 | Environments API | `epilot environments` | [docs](./docs/environments.md) |
 | Event Catalog API | `epilot event-catalog` | [docs](./docs/event-catalog.md) |
 | File API | `epilot file` | [docs](./docs/file.md) |

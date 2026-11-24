@@ -14,7 +14,7 @@ export const subscribeToParentMessages = (event: string, handler: MessageHandler
       if (
         event === '*' ||
         incomingEvent === event ||
-        (event.endsWith('*') && incomingEvent.startsWith(event.slice(0, -1)))
+        (event.endsWith('*') && typeof incomingEvent === 'string' && incomingEvent.startsWith(event.slice(0, -1)))
       ) {
         handler(msgEvent);
       }

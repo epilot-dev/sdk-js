@@ -13,6 +13,22 @@
     {
       "name": "example",
       "description": "Generate example payloads for webhooks"
+    },
+    {
+      "name": "trigger",
+      "description": "Manually trigger configured webhooks"
+    },
+    {
+      "name": "events",
+      "description": "List and replay webhook events"
+    },
+    {
+      "name": "event",
+      "description": "Inspect and replay a single webhook event"
+    },
+    {
+      "name": "Events",
+      "description": "List webhook events (v2)"
     }
   ],
   "paths": {
@@ -63,6 +79,11 @@
     "/v1/webhooks/configured-events": {
       "get": {
         "operationId": "getConfiguredEvents",
+        "x-epilot-permissions": [
+          {
+            "action": "webhook:view"
+          }
+        ],
         "summary": "getConfiguredEvents",
         "description": "Retrieve events that can trigger webhooks",
         "tags": [
@@ -85,6 +106,11 @@
     "/v1/webhooks/configs": {
       "get": {
         "operationId": "getConfigs",
+        "x-epilot-permissions": [
+          {
+            "action": "webhook:view"
+          }
+        ],
         "summary": "getConfigs",
         "description": "Search Webhook Client Configs",
         "tags": [
@@ -130,6 +156,11 @@
       },
       "post": {
         "operationId": "createConfig",
+        "x-epilot-permissions": [
+          {
+            "action": "webhook:create"
+          }
+        ],
         "summary": "createConfig",
         "description": "Create Webhook Client Config",
         "tags": [
@@ -193,6 +224,12 @@
     "/v1/webhooks/configs/{configId}": {
       "get": {
         "operationId": "getConfig",
+        "x-epilot-permissions": [
+          {
+            "action": "webhook:view",
+            "resource": "webhook:{configId}"
+          }
+        ],
         "summary": "getConfig",
         "description": "Get webhook config by id",
         "tags": [
@@ -245,6 +282,12 @@
       },
       "put": {
         "operationId": "updateConfig",
+        "x-epilot-permissions": [
+          {
+            "action": "webhook:edit",
+            "resource": "webhook:{configId}"
+          }
+        ],
         "summary": "updateConfig",
         "description": "Update Webhook Client Config",
         "tags": [
@@ -260,6 +303,24 @@
             "required": true,
             "description": "Short uuid (length 6) to identify the webhook configuration.",
             "example": "7hj28a"
+          },
+          {
+            "in": "query",
+            "name": "based_on_revision_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "The revision the editor started from (a `revision_id` from the version history, or `none` when the webhook had no revision yet). When sent and a newer revision exists, the update is rejected with 409 so the user can load the latest version or override it. Omit it to keep last-write-wins behaviour."
+          },
+          {
+            "in": "query",
+            "name": "restored_from_revision_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Set when this update restores an earlier revision; the new revision is then recorded with source `restore`."
           }
         ],
         "requestBody": {
@@ -304,6 +365,16 @@
               }
             }
           },
+          "409": {
+            "description": "The webhook gained a newer revision than `based_on_revision_id` (someone else saved in the meantime).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookConfigRevisionConflict"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Other errors",
             "content": {
@@ -318,6 +389,12 @@
       },
       "delete": {
         "operationId": "deleteConfig",
+        "x-epilot-permissions": [
+          {
+            "action": "webhook:delete",
+            "resource": "webhook:{configId}"
+          }
+        ],
         "summary": "deleteConfig",
         "description": "Delete Webhook Client Config",
         "tags": [
@@ -358,7 +435,13 @@
     "/v1/webhooks/configs/{configId}/test-oauth": {
       "post": {
         "operationId": "testOAuth",
-        "summary": "Test OAuth connection",
+        "x-epilot-permissions": [
+          {
+            "action": "webhook:edit",
+            "resource": "webhook:{configId}"
+          }
+        ],
+        "summary": "testOAuth",
         "description": "Tests the OAuth client credentials configuration for a saved webhook by attempting\na token exchange against the configured OAuth endpoint. Returns success with token\nmetadata (e.g. expires_in, token_type) or an error describing why the exchange failed.\nDoes not send the actual webhook.\n",
         "tags": [
           "webhooks"
@@ -422,8 +505,14 @@
     "/v1/webhooks/configs/{configId}/trigger": {
       "post": {
         "operationId": "triggerWebhook",
-        "summary": "triggers a webhook event either async or sync",
-        "description": "Trigger a webhook",
+        "x-epilot-permissions": [
+          {
+            "action": "webhook:create",
+            "resource": "webhook:{configId}"
+          }
+        ],
+        "summary": "triggerWebhook",
+        "description": "Triggers a webhook event either async or sync",
         "tags": [
           "webhooks",
           "trigger"
@@ -497,6 +586,12 @@
       "get": {
         "deprecated": true,
         "operationId": "getWehookEvents",
+        "x-epilot-permissions": [
+          {
+            "action": "webhook:view",
+            "resource": "webhook:{configId}"
+          }
+        ],
         "summary": "getWehookEvents",
         "description": "This endpoint is deprecated and will be removed on 2025-12-31. Use /v2/webhooks/configs/{configId}/events instead.",
         "tags": [
@@ -587,6 +682,12 @@
     "/v1/webhooks/configs/{configId}/events/replay-batch": {
       "post": {
         "operationId": "batchReplayEvents",
+        "x-epilot-permissions": [
+          {
+            "action": "webhook:create",
+            "resource": "webhook:{configId}"
+          }
+        ],
         "summary": "batchReplayEvents",
         "description": "Replay a batch of webhook events",
         "tags": [
@@ -672,6 +773,12 @@
     "/v1/webhooks/configs/{configId}/events/{eventId}": {
       "get": {
         "operationId": "getEventById",
+        "x-epilot-permissions": [
+          {
+            "action": "webhook:view",
+            "resource": "webhook:{configId}"
+          }
+        ],
         "summary": "getEventById",
         "description": "Get a webhook event by its id",
         "tags": [
@@ -736,6 +843,12 @@
     "/v1/webhooks/configs/{configId}/events/{eventId}/replay": {
       "post": {
         "operationId": "replayEvent",
+        "x-epilot-permissions": [
+          {
+            "action": "webhook:create",
+            "resource": "webhook:{configId}"
+          }
+        ],
         "summary": "replayEvent",
         "description": "Replay a webhook event",
         "tags": [
@@ -811,9 +924,204 @@
         }
       }
     },
+    "/v1/webhooks/configs/{configId}/revisions": {
+      "get": {
+        "operationId": "getConfigRevisions",
+        "x-epilot-permissions": [
+          {
+            "action": "webhook:view",
+            "resource": "webhook:{configId}"
+          }
+        ],
+        "summary": "getConfigRevisions",
+        "description": "List the change history of a webhook configuration, newest first. Each revision records who made the change and which fields changed, with before/after values. Secret values (passwords, API keys, client secrets) are never included; a credential change is reported as a redacted `auth.credentials` entry. Saves that change nothing do not create a revision. Revisions are kept for 365 days.",
+        "tags": [
+          "webhooks"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid to identify the webhook configuration.",
+            "example": "7hj28aasgag2gha2"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            },
+            "required": false,
+            "description": "Maximum number of revisions to return."
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Opaque cursor from a previous response's `next_cursor`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - list of revisions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookConfigRevisionList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing webhook:view permission",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Webhook configuration not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/configs/{configId}/revisions/{revisionId}": {
+      "get": {
+        "operationId": "getConfigRevision",
+        "x-epilot-permissions": [
+          {
+            "action": "webhook:view",
+            "resource": "webhook:{configId}"
+          }
+        ],
+        "summary": "getConfigRevision",
+        "description": "One revision of a webhook configuration, including the configuration as it was after that change. Secret values are never included. Used to review or restore an earlier version.",
+        "tags": [
+          "webhooks"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid to identify the webhook configuration."
+          },
+          {
+            "in": "path",
+            "name": "revisionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "A `revision_id` from the version history."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - the revision with its configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookConfigRevisionDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing webhook:view permission",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Webhook configuration or revision not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The revision has no stored configuration (it was too large to keep)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/webhooks/configs/{configId}/example": {
       "post": {
         "operationId": "getWebhookExample",
+        "x-epilot-permissions": [
+          {
+            "action": "webhook:view",
+            "resource": "webhook:{configId}"
+          }
+        ],
         "summary": "getWebhookExample",
         "description": "Generate an example payload for a webhook configuration based on trigger type",
         "tags": [
@@ -890,6 +1198,12 @@
     "/v2/webhooks/configs/{configId}/events": {
       "post": {
         "operationId": "getWebhookEventsV2",
+        "x-epilot-permissions": [
+          {
+            "action": "webhook:view",
+            "resource": "webhook:{configId}"
+          }
+        ],
         "summary": "getWebhookEventsV2",
         "description": "List webhook events and filter them by status, timestamp, etc.",
         "tags": [
@@ -1010,11 +1324,12 @@
           },
           "status": {
             "type": "string",
-            "description": "Filter by event outcome",
+            "description": "Filter by event outcome. `retrying` matches events whose delivery failed transiently and is waiting for its next automatic retry.",
             "enum": [
               "succeeded",
               "failed",
-              "skipped"
+              "skipped",
+              "retrying"
             ],
             "example": "succeeded"
           }
@@ -1353,6 +1668,13 @@
               "use_case_slug"
             ]
           },
+          "integrationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "The integration (Integration Hub) that owns this webhook, set by the\nintegration's outbound mapping sync. When set, every JSON delivery\ncarries `_integration: { id }` at the top level of the signed body,\nafter the JSONata transform, so the receiver can rely on the signed\nintegration id instead of one rendered into the expression. A value\nthe expression put there is overwritten. Not added when the\ntransformed body is not a JSON object, and not part of\n`binary_multipart` deliveries (their signature covers the files only).\nOn update: omit to keep the current owner, pass null to clear it.\n",
+            "example": "6f1c2a4e-0000-4000-8000-000000000001"
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -1437,7 +1759,7 @@
           "signingSecret": {
             "type": "string",
             "readOnly": true,
-            "description": "Per-webhook signing secret following the Standard Webhooks specification.\nOnly returned once during webhook creation. Use this secret to verify\nwebhook signatures using the `webhook-id`, `webhook-timestamp`, and\n`webhook-signature` headers.\n",
+            "description": "Per-webhook signing secret following the Standard Webhooks specification.\nOnly returned once during webhook creation. Use this secret to verify\nwebhook signatures using the `webhook-id`, `webhook-timestamp`, and\n`webhook-signature` headers. `webhook-id` stays the same across\nautomatic retries of an event, so receivers can deduplicate on it.\nEach request also carries an informational, unsigned\n`x-epilot-webhook-attempt` header (1 = first delivery, 2 = first\nretry, ...).\n",
             "example": "whsec_C2FVsBQIhrscChlQIMV+b5sSYspob7oD"
           }
         },
@@ -1446,6 +1768,7 @@
           "eventName"
         ],
         "example": {
+          "name": "Customer Request Created Webhook",
           "eventName": "CustomerRequest_Created",
           "url": "https://my-partner-service.api.com",
           "httpMethod": "POST",
@@ -1662,6 +1985,200 @@
           "metadata"
         ]
       },
+      "WebhookConfigRevisionList": {
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebhookConfigRevision"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "description": "Opaque cursor to pass back as `cursor` to fetch the next page. Absent when there are no older revisions."
+          }
+        }
+      },
+      "WebhookConfigRevision": {
+        "type": "object",
+        "description": "One saved change to a webhook configuration.",
+        "required": [
+          "revision_id",
+          "created_at",
+          "source",
+          "changes"
+        ],
+        "properties": {
+          "revision_id": {
+            "type": "string",
+            "description": "Opaque, URL-safe id of the revision.",
+            "example": "MjAyNi0xMS0wOVQxNDozMjowMC4wMDBaIzdoajI4YWFz"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string",
+            "description": "User id of whoever made the change. Absent when the change was made by an internal or system caller."
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "create",
+              "update",
+              "restore"
+            ],
+            "description": "`create` for the revision recorded when the webhook was created, `restore` for an update that brought back an earlier revision."
+          },
+          "restored_from": {
+            "type": "object",
+            "description": "The earlier revision a `restore` brought back.",
+            "required": [
+              "revision_id",
+              "created_at"
+            ],
+            "properties": {
+              "revision_id": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "changes": {
+            "type": "array",
+            "description": "The fields this save changed. Empty for `create`.",
+            "items": {
+              "$ref": "#/components/schemas/WebhookConfigRevisionChange"
+            }
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "Set when long values were shortened to fit the storage limit."
+          }
+        }
+      },
+      "WebhookConfigRevisionDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WebhookConfigRevision"
+          },
+          {
+            "type": "object",
+            "required": [
+              "configuration"
+            ],
+            "properties": {
+              "configuration": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "The webhook configuration after this change, without secret values or infrastructure fields."
+              }
+            }
+          }
+        ]
+      },
+      "WebhookConfigRevisionConflict": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "latest_revision": {
+            "$ref": "#/components/schemas/WebhookConfigRevision"
+          }
+        }
+      },
+      "WebhookConfigRevisionChange": {
+        "type": "object",
+        "required": [
+          "field",
+          "kind"
+        ],
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Dot path of the changed field, e.g. `url`, `retryPolicy.maxAttempts`, `auth.basicAuthConfig.username`, `filterConditions.conditions`, or `auth.credentials` for a redacted credential change.",
+            "example": "url"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "added",
+              "removed",
+              "changed"
+            ]
+          },
+          "key": {
+            "type": "string",
+            "description": "For key/value fields (custom headers, extra form fields), the entry that changed."
+          },
+          "before": {
+            "description": "The previous value. Absent when the field was added."
+          },
+          "after": {
+            "description": "The new value. Absent when the field was removed."
+          },
+          "redacted": {
+            "type": "boolean",
+            "description": "Set for credential changes; no values are recorded."
+          }
+        }
+      },
+      "WebhookEventAttempt": {
+        "type": "object",
+        "description": "Summary of a single delivery attempt of a webhook event.",
+        "properties": {
+          "retry_attempt": {
+            "type": "integer",
+            "description": "0 for the first delivery, n for the n-th automatic retry."
+          },
+          "status": {
+            "type": "string",
+            "description": "`retrying` for an attempt that failed transiently and was followed (or will be followed) by another attempt; otherwise the final outcome.",
+            "enum": [
+              "succeeded",
+              "failed",
+              "skipped",
+              "retrying"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "example": "2021-04-27T12:01:13.000Z"
+          },
+          "status_code": {
+            "type": "integer",
+            "description": "HTTP status returned by the endpoint for this attempt. Absent when no HTTP response was received (network/TLS errors, internal errors)."
+          },
+          "message": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "description": "Machine-readable classification of the attempt outcome."
+          },
+          "next_retry_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the following retry was scheduled for (retrying attempts only)."
+          }
+        },
+        "required": [
+          "retry_attempt",
+          "status"
+        ]
+      },
       "WebhookEvent": {
         "type": "object",
         "properties": {
@@ -1708,11 +2225,13 @@
           },
           "status": {
             "type": "string",
+            "description": "Outcome of the delivery. `retrying` means the latest attempt failed transiently and another automatic retry is scheduled (see next_retry_at); the event moves to succeeded or failed once the retry loop ends.",
             "enum": [
               "succeeded",
               "failed",
               "in_progress",
-              "skipped"
+              "skipped",
+              "retrying"
             ]
           },
           "http_method": {
@@ -1733,7 +2252,23 @@
           },
           "retry_attempt": {
             "type": "integer",
-            "description": "Number of automatic delivery retries that preceded this terminal outcome. 0 means the event was delivered (or finally failed) on the first attempt."
+            "description": "Number of automatic delivery retries that preceded this outcome. 0 means the event was delivered (or finally failed) on the first attempt. For a `retrying` event, the attempt that last failed."
+          },
+          "next_retry_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the next automatic retry is due. Present only while the event is `retrying`."
+          },
+          "max_retry_attempts": {
+            "type": "integer",
+            "description": "The automatic retry limit that applied when this event was delivered (0 when retries were disabled). Unaffected by later changes to the webhook's retry policy. Absent for events recorded before this field existed."
+          },
+          "attempts": {
+            "type": "array",
+            "description": "Every delivery attempt of this event, oldest first. Returned by getEventById only for events that were retried (retry_attempt > 0).",
+            "items": {
+              "$ref": "#/components/schemas/WebhookEventAttempt"
+            }
           },
           "can_reapply_transform": {
             "type": "boolean",

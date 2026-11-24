@@ -36,7 +36,7 @@
     "/data-governance/v1/{entity_schema}/query": {
       "post": {
         "operationId": "queryEntities",
-        "summary": "Query entities matching a data lifecycle config",
+        "summary": "queryEntities",
         "description": "Executes a query against the specified entity schema using a saved view\ndefinition, optionally combined with additional data governance filters.\n\nThis endpoint is typically used to **preview** which entities would be\naffected by a data lifecycle config before it runs. The response includes\nthe total hit count and (optionally hydrated) entity results.\n\nPagination is supported via `from` and `size` in the request body.\n",
         "tags": [
           "Query"
@@ -89,7 +89,7 @@
     "/data-governance/v1/{entity_schema}/jobs": {
       "post": {
         "operationId": "createJob",
-        "summary": "Create a new job run",
+        "summary": "createJob",
         "description": "Creates a new job run for the given entity schema. The job is associated\nwith an existing config and records the scheduled execution date.\n\nThis is a low-level endpoint used internally by the scheduler. For\nmanually triggering a config execution, prefer\n`POST /data-governance/v1/configs/{config_id}/jobs`.\n",
         "tags": [
           "Auditable Jobs"
@@ -142,7 +142,7 @@
     "/data-governance/v1/{entity_schema}/jobs/{job_id}": {
       "patch": {
         "operationId": "updateJob",
-        "summary": "Update an existing job run",
+        "summary": "updateJob",
         "description": "Partially updates an existing job run. Typically used to record\nprogress or finalize a job by setting its status to `success` or\n`failed`, attaching details, error messages, or a report reference.\n",
         "tags": [
           "Auditable Jobs"
@@ -202,7 +202,7 @@
     "/data-governance/v1/jobs/{job_id}": {
       "get": {
         "operationId": "getJob",
-        "summary": "Get a job by ID",
+        "summary": "getJob",
         "description": "Returns full details of a single job run, including its current status,\nexecution timestamps, type-specific details, and report reference\n(if available).\n",
         "tags": [
           "Auditable Jobs"
@@ -242,7 +242,7 @@
     "/data-governance/v1/jobs/{job_id}/report-url": {
       "get": {
         "operationId": "getJobReportUrl",
-        "summary": "Get report download URL for a job",
+        "summary": "getJobReportUrl",
         "description": "Returns a short-lived, pre-signed S3 URL to download the CSV report\nfile for the given job. The URL expires after the number of seconds\nindicated in the `expires_in` field.\n\nA report is only available after a job has completed. If the job is\nstill in progress or did not produce a report, a 404 is returned.\n",
         "tags": [
           "Auditable Jobs"
@@ -282,7 +282,7 @@
     "/data-governance/v1/configs/{config_id}": {
       "get": {
         "operationId": "getConfig",
-        "summary": "Get a config by ID",
+        "summary": "getConfig",
         "description": "Returns a single data data lifecycle config by its unique identifier,\nincluding its query definition, schedule, and current enabled state.\n",
         "tags": [
           "Data Lifecycle Configs"
@@ -322,7 +322,7 @@
     "/data-governance/v1/configs/{config_id}/jobs": {
       "post": {
         "operationId": "createJobForConfig",
-        "summary": "Trigger a manual job run for a config",
+        "summary": "createJobForConfig",
         "description": "Manually triggers a new job run for the specified config. The job is\ncreated and queued for asynchronous execution.\n\nReturns the newly created job, whose `id` can be used to poll status\nvia `GET /data-governance/v1/jobs/{job_id}`.\n\nThe job's `trigger` field will be set to `manual` and `triggered_by`\nwill contain the authenticated user's identifier.\n",
         "tags": [
           "Auditable Jobs"
@@ -362,7 +362,7 @@
     "/data-governance/v1/{entity_schema}/configs": {
       "post": {
         "operationId": "upsertConfig",
-        "summary": "Create or update a data lifecycle config",
+        "summary": "upsertConfig",
         "description": "Creates a new data lifecycle config or updates an existing one for the\ngiven entity schema. The config defines:\n- A **query** (saved view + optional filters) to identify target entities\n- A **schedule** controlling how often the policy runs\n- An **action type** (currently only `deletion`)\n\nOnce created and enabled, the config is evaluated on its schedule by a\nbackground process that creates job runs automatically.\n\nReturns `201` when a new config is created, `200` when an existing\nconfig is updated.\n",
         "tags": [
           "Data Lifecycle Configs"
@@ -422,7 +422,7 @@
     "/data-governance/v1/configs": {
       "get": {
         "operationId": "listConfigs",
-        "summary": "List data lifecycle configs",
+        "summary": "listConfigs",
         "description": "Returns a cursor-paginated list of data lifecycle configs. Results can be\nfiltered by entity schema, config type, scheduled run date, or\nenabled status.\n",
         "tags": [
           "Data Lifecycle Configs"
@@ -505,7 +505,7 @@
     "/data-governance/v1/jobs": {
       "get": {
         "operationId": "listJobs",
-        "summary": "List job runs",
+        "summary": "listJobs",
         "description": "Returns a cursor-paginated list of job runs. Results can be filtered\nby entity schema, action type, execution status, or parent config.\n",
         "tags": [
           "Auditable Jobs"

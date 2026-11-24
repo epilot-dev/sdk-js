@@ -3,12 +3,12 @@
   "info": {
     "title": "Submission API",
     "version": "1.0.0",
-    "description": "Use this API to handle submissions entities from external sources e.g. journeys and frontends\n"
+    "description": "The Submission API handles inbound form submissions from external sources such as epilot Journey frontends, embedded forms, and third-party integrations.\n\nWhen a customer completes a Journey, the resulting data is sent to this API. The API creates one or more epilot entities (e.g. contacts, opportunities, orders) from the submitted payload, attaches uploaded files, and records opt-in consent choices.\n\n**Key concepts**\n\n- **Submission entity** – A structured record created in epilot from the data captured in a Journey step.\n- **Source** – Identifies where the submission originated (`source_type` + `source_id`), e.g. a Journey ID.\n- **Nonce** – A single-use token that prevents duplicate submissions. Use `getNonce` to check whether a nonce was already consumed before re-submitting.\n- **Opt-ins** – Consent records (e.g. email marketing permission) captured alongside the submission.\n"
   },
   "tags": [
     {
       "name": "Submissions",
-      "description": "Journey Submission"
+      "description": "Operations for creating Journey submissions and checking submission nonces.\n\nA submission is the primary unit of data ingress from epilot Journeys. Each submission can create multiple epilot entities and attach files via S3 references from the File API.\n"
     },
     {
       "name": "submission_schema",
@@ -40,23 +40,164 @@
     "/v1/submission/submissions": {
       "post": {
         "operationId": "createSubmission",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "access": "org"
+              },
+              {
+                "access": "portal"
+              },
+              {
+                "action": "entity:view",
+                "resource": "journey:{source_id}"
+              }
+            ]
+          }
+        ],
         "summary": "createSubmission",
-        "description": "Creates a submission from a public facing Journey\n",
+        "description": "Creates a submission from a public-facing Journey or other external source.\n\n**Access:**\n- Public Journeys and non-journey sources accept anonymous requests or public Journey tokens (by design). A token bound to a Journey (`journey_id` claim) may only submit to that Journey (`source_id`).\n- Private Journeys require a user or portal-user token (public Journey tokens are rejected). Tokens of the Journey's owner organization are accepted; tokens of other organizations (e.g. sharing partners) must be able to access the Journey via journey-api (`entity:view` on the shared journey).\n- Journey submissions always land in the Journey's owner organization.\n\nThe API processes the payload, creates the specified entities in epilot, resolves file attachments from the File API S3 references, and records any opt-in consent entries.\n\n**Idempotency:** Use the `journey_submit_id` field as a client-side idempotency key to avoid duplicate submissions on retries\n(enforced when idempotency is enabled for the organization).\n",
         "tags": [
           "Submissions"
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/SubmissionPayload"
+              },
+              "examples": {
+                "BasicContactSubmission": {
+                  "summary": "Simple contact submission from a Journey",
+                  "value": {
+                    "source_type": "journey",
+                    "source_id": "ce99875f-fba9-4fe2-a8f9-afaf52059051",
+                    "journey_submit_id": "sub-20240101-001",
+                    "organization_id": "123",
+                    "entities": [
+                      {
+                        "_schema": "submission",
+                        "description": "Customer enquiry about EV charging",
+                        "contact_first_name": "Jane",
+                        "contact_last_name": "Doe",
+                        "contact_email": "jane.doe@example.com",
+                        "request": "I would like to know more about home EV charging options"
+                      }
+                    ]
+                  }
+                },
+                "SubmissionWithFileAndOptIn": {
+                  "summary": "Submission with file attachment and marketing opt-in",
+                  "value": {
+                    "source_type": "journey",
+                    "source_id": "ce99875f-fba9-4fe2-a8f9-afaf52059051",
+                    "journey_submit_id": "sub-20240101-002",
+                    "organization_id": "123",
+                    "opt_ins": [
+                      {
+                        "topic": "EMAIL_MARKETING",
+                        "identifier": "jane.doe@example.com",
+                        "meta": {
+                          "source": "journey_footer_checkbox"
+                        }
+                      }
+                    ],
+                    "entities": [
+                      {
+                        "_schema": "submission",
+                        "description": "Electricity contract application",
+                        "contact_first_name": "Jane",
+                        "contact_last_name": "Doe",
+                        "contact_email": "jane.doe@example.com",
+                        "files": [
+                          {
+                            "s3ref": {
+                              "bucket": "epilot-user-content",
+                              "key": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/contract.pdf"
+                            },
+                            "filename": "contract.pdf",
+                            "_tags": [
+                              "contract"
+                            ],
+                            "relation_tags": [
+                              "signed_document"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
               }
             }
           }
         },
         "responses": {
+          "200": {
+            "description": "The same `journey_submit_id` was already accepted for this organization. No second\nsubmission was created. `submission_id` is present once the first submission's entity exists.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionDuplicateResponse"
+                }
+              }
+            }
+          },
           "201": {
-            "description": "Success"
+            "description": "Submission accepted; entities are created asynchronously. The body is currently empty.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "submission_id": {
+                      "type": "string",
+                      "description": "The ID of the created submission entity",
+                      "example": "7f3c2a1b-4d5e-6f7a-8b9c-0d1e2f3a4b5c"
+                    }
+                  }
+                },
+                "example": {
+                  "submission_id": "7f3c2a1b-4d5e-6f7a-8b9c-0d1e2f3a4b5c"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          },
+          "503": {
+            "description": "Another request with the same `journey_submit_id` is still starting the submission. Retry\nafter the number of seconds in `Retry-After`; the retry answers 200 `duplicate: true` once\nthe first request started, or creates the submission if the first request never did.\n",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": 503,
+                  "error": "Submission in progress, retry later"
+                }
+              }
+            }
           }
         }
       }
@@ -64,8 +205,9 @@
     "/v1/submission/nonce/{nonce_id}": {
       "get": {
         "operationId": "getNonce",
-        "summary": "Check if a nonce was already used (aka exists in storage)",
-        "description": "Returns { exists: boolean } along some meta data",
+        "summary": "getNonce",
+        "description": "Check whether a submission nonce has already been consumed (i.e. exists in storage).\n\nNonces are single-use tokens attached to Journey submissions to prevent duplicate processing. Before re-submitting, clients can call this endpoint to verify whether a previous submission with the same nonce was already recorded.\n\nThis endpoint is public (no authorization), so it only answers whether the nonce was used. It does not return the submission or organization the nonce belongs to.\n",
+        "security": [],
         "tags": [
           "Submissions"
         ],
@@ -74,34 +216,50 @@
             "name": "nonce_id",
             "in": "path",
             "required": true,
+            "description": "The nonce token to look up",
             "schema": {
               "type": "string"
-            }
+            },
+            "example": "nonce-a1b2c3d4e5f6"
           }
         ],
         "responses": {
           "200": {
-            "description": "Nonce found",
+            "description": "Nonce lookup result",
             "content": {
               "application/json": {
                 "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SubmissionNonce"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "exists": {
-                          "type": "boolean",
-                          "example": true
-                        }
-                      }
+                  "$ref": "#/components/schemas/SubmissionNonceCheckResult"
+                },
+                "examples": {
+                  "NonceExists": {
+                    "summary": "Nonce was already used",
+                    "value": {
+                      "nonce": "nonce-a1b2c3d4e5f6",
+                      "exists": true
                     }
-                  ]
+                  },
+                  "NonceNotFound": {
+                    "summary": "Nonce has not been used yet",
+                    "value": {
+                      "exists": false
+                    }
+                  }
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
           }
         }
       }
@@ -116,21 +274,168 @@
         "bearerFormat": "JWT"
       }
     },
+    "responses": {
+      "BadRequestResponse": {
+        "description": "Bad request - invalid or missing parameters",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": 400,
+              "error": "Bad Request",
+              "message": "entities must contain at least 1 item"
+            }
+          }
+        }
+      },
+      "UnauthorizedResponse": {
+        "description": "Unauthorized - missing or invalid authentication credentials",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": 401,
+              "error": "Unauthorized",
+              "message": "Missing or invalid authorization token"
+            }
+          }
+        }
+      },
+      "ForbiddenResponse": {
+        "description": "Forbidden - caller does not have permission to perform this action",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": 403,
+              "error": "Forbidden",
+              "message": "Insufficient permissions to create submissions for this organization"
+            }
+          }
+        }
+      },
+      "NotFoundResponse": {
+        "description": "Not found - the requested resource does not exist",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": 404,
+              "error": "Not Found",
+              "message": "Nonce not found"
+            }
+          }
+        }
+      },
+      "InternalServerErrorResponse": {
+        "description": "Internal server error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": 500,
+              "error": "Internal Server Error",
+              "message": "An unexpected error occurred"
+            }
+          }
+        }
+      }
+    },
     "schemas": {
+      "SubmissionDuplicateResponse": {
+        "type": "object",
+        "required": [
+          "duplicate"
+        ],
+        "properties": {
+          "duplicate": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "submission_id": {
+            "type": "string",
+            "description": "Id of the submission entity created by the first request, when already known."
+          }
+        }
+      },
+      "JourneyContextOffline": {
+        "type": "object",
+        "nullable": true,
+        "description": "Set by the journey app when the submission was recorded offline and replayed later.\nThe known keys are typed; unknown keys are accepted (newer app versions may add more).\n",
+        "additionalProperties": true,
+        "properties": {
+          "queued_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "synced_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "device_id": {
+            "type": "string"
+          },
+          "pack_revision_id": {
+            "type": "string"
+          },
+          "pack_published_revision_id": {
+            "type": "string"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code",
+            "example": 400
+          },
+          "error": {
+            "type": "string",
+            "description": "Short error label",
+            "example": "Bad Request"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable description of the error"
+          }
+        }
+      },
       "SubmissionNonce": {
         "type": "object",
         "properties": {
           "nonce": {
-            "type": "string"
+            "type": "string",
+            "description": "The nonce token",
+            "example": "nonce-a1b2c3d4e5f6"
           },
           "submission_id": {
-            "type": "string"
+            "type": "string",
+            "description": "ID of the submission that consumed this nonce",
+            "example": "7f3c2a1b-4d5e-6f7a-8b9c-0d1e2f3a4b5c"
           },
           "organization_id": {
-            "type": "string"
+            "type": "string",
+            "description": "The organization ID associated with this nonce",
+            "example": "123"
           },
           "ttl": {
-            "type": "number"
+            "type": "number",
+            "description": "Unix timestamp (seconds) when the nonce expires",
+            "example": 1700000000
           }
         },
         "required": [
@@ -139,32 +444,50 @@
           "organization_id"
         ]
       },
+      "SubmissionNonceCheckResult": {
+        "type": "object",
+        "properties": {
+          "exists": {
+            "type": "boolean",
+            "description": "Whether the nonce has already been consumed",
+            "example": true
+          },
+          "nonce": {
+            "type": "string",
+            "description": "The nonce token (only set when it exists)",
+            "example": "nonce-a1b2c3d4e5f6"
+          }
+        },
+        "required": [
+          "exists"
+        ]
+      },
       "SubmissionPayload": {
-        "description": "Holds content and meta information",
+        "description": "Holds content and meta information for a Journey submission",
         "type": "object",
         "properties": {
           "organization_id": {
-            "description": "organization id – defaults to token value",
+            "description": "Target organization ID – defaults to the token's organization when omitted",
             "type": "string",
             "example": "123"
           },
           "journey_submit_id": {
-            "description": "journey submit uid",
+            "description": "Client-generated idempotency key (uuid v4), one per submission attempt. When idempotency is\nenabled for the organization, a repeated POST with the same id returns 200 `duplicate: true`\ninstead of creating a second submission (503 with `Retry-After` while the first request is\nstill starting).\n",
             "type": "string",
-            "example": "123"
+            "example": "5b0d3c1e-6a3e-4d2c-9d7e-0f1a2b3c4d5e"
           },
           "source_type": {
             "type": "string",
-            "description": "type of source, e.g. journey or frontend",
+            "description": "Type of source that generated the submission (e.g. `journey`, `frontend`)",
             "example": "journey"
           },
           "source_id": {
             "type": "string",
-            "description": "identifier for source e.g. journey ID or frontend ID",
+            "description": "Identifier for the source, e.g. the Journey ID or frontend component ID",
             "example": "ce99875f-fba9-4fe2-a8f9-afaf52059051"
           },
           "opt_ins": {
-            "description": "Opt-ins to create from submission\n",
+            "description": "Opt-in consent records to create alongside this submission (e.g. email marketing consent)\n",
             "type": "array",
             "maxItems": 10,
             "items": {
@@ -172,7 +495,7 @@
             }
           },
           "entities": {
-            "description": "Entities to create from submission\n",
+            "description": "One or more epilot entities to create from this submission. Must contain at least one entry.\n",
             "type": "array",
             "minItems": 1,
             "maxItems": 10,
@@ -182,7 +505,7 @@
           },
           "_ivy_opportunity_ids": {
             "deprecated": true,
-            "description": "Related Ivy Opportunity Ids",
+            "description": "Related Ivy Opportunity IDs (deprecated – do not use for new integrations)",
             "type": "array",
             "minItems": 1,
             "items": {
@@ -198,22 +521,37 @@
       },
       "SubmissionEntity": {
         "type": "object",
-        "description": "The submission entity to create",
+        "description": "An epilot entity to create as part of the submission",
         "additionalProperties": true,
         "properties": {
           "_schema": {
             "type": "string",
+            "description": "The entity schema type. Must be `submission` for standard Journey submissions.",
             "enum": [
               "submission"
             ]
           },
           "description": {
             "type": "string",
-            "description": "Readable description of the submission. Will be used as the title if passed"
+            "description": "Human-readable description of the submission, used as the entity title"
+          },
+          "journey_context": {
+            "type": "object",
+            "nullable": true,
+            "description": "Runtime context the journey app attaches to the entity. Documented keys are listed below;\nany other key is accepted and stored as sent.\n",
+            "additionalProperties": true,
+            "properties": {
+              "journey_revision_id": {
+                "description": "The journey revision the submission was produced with (usually a string; any value is accepted)."
+              },
+              "offline": {
+                "$ref": "#/components/schemas/JourneyContextOffline"
+              }
+            }
           },
           "files": {
             "type": "array",
-            "description": "Files to attach to Submission Entity as a relation (s3refs from File API)\n",
+            "description": "Files to attach to the Submission entity as relations. Each file must be an S3 reference\npreviously obtained from the epilot File API upload flow.\n",
             "items": {
               "type": "object",
               "properties": {
@@ -222,18 +560,18 @@
                 },
                 "filename": {
                   "type": "string",
-                  "description": "Override the file name"
+                  "description": "Override the file name displayed in epilot"
                 },
                 "_tags": {
                   "type": "array",
-                  "description": "List of tags for File entities",
+                  "description": "Tags to apply to the created File entity",
                   "items": {
                     "type": "string"
                   }
                 },
                 "relation_tags": {
                   "type": "array",
-                  "description": "List of relation labels for File attachments",
+                  "description": "Relation labels for the file attachment (e.g. `signed_document`)",
                   "items": {
                     "type": "string"
                   }
@@ -251,11 +589,11 @@
         ],
         "example": {
           "_schema": "submission",
-          "description": "Submission created via API",
-          "contact_first_name": "First",
-          "contact_last_name": "Last",
-          "contact_email": "example@submission.com",
-          "request": "I would like to know more about electric vehicles",
+          "description": "Customer enquiry about EV charging",
+          "contact_first_name": "Jane",
+          "contact_last_name": "Doe",
+          "contact_email": "jane.doe@example.com",
+          "request": "I would like to know more about home EV charging options",
           "files": [
             {
               "s3ref": {
@@ -269,32 +607,37 @@
       },
       "OptIn": {
         "type": "object",
+        "description": "A consent opt-in record captured during the submission",
         "properties": {
           "topic": {
             "type": "string",
+            "description": "The consent topic (e.g. `EMAIL_MARKETING`, `SMS_MARKETING`)",
             "example": "EMAIL_MARKETING"
           },
           "identifier": {
             "type": "string",
-            "description": "Consent identifier",
-            "example": "example@email.com"
+            "description": "The identifier for the consent record (typically the customer's email address)",
+            "example": "jane.doe@example.com"
           },
           "meta": {
             "type": "object",
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "Additional metadata about the opt-in (e.g. source, timestamp)"
           }
         }
       },
       "S3Reference": {
         "type": "object",
-        "description": "S3 Reference from File API",
+        "description": "An S3 object reference returned by the epilot File API after a successful upload",
         "properties": {
           "bucket": {
             "type": "string",
+            "description": "S3 bucket name",
             "example": "epilot-user-content"
           },
           "key": {
             "type": "string",
+            "description": "S3 object key path",
             "example": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
           }
         },

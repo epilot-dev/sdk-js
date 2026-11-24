@@ -43,6 +43,18 @@
         "responses": {}
       }
     },
+    "/v1/campaigns:summary": {
+      "post": {
+        "operationId": "getCampaignsSummary",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/campaign/{campaign_id}/automations:retrigger": {
       "post": {
         "operationId": "retriggerCampaignAutomations",
@@ -243,6 +255,14 @@
           {
             "name": "email_status",
             "in": "query"
+          },
+          {
+            "name": "email_engagement",
+            "in": "query"
+          },
+          {
+            "name": "entity_ui_status",
+            "in": "query"
           }
         ],
         "responses": {}
@@ -330,6 +350,11 @@
         }
       },
       "CampaignPortalsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "CampaignsSummaryResponse": {
         "content": {
           "application/json": {}
         }

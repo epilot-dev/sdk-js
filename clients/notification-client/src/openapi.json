@@ -113,6 +113,36 @@
         "responses": {
           "202": {
             "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       },
@@ -248,6 +278,40 @@
         "responses": {
           "204": {
             "description": "Success"
+          }
+        }
+      }
+    },
+    "/v1/notification/notifications/{id}/unmark": {
+      "put": {
+        "operationId": "markAsUnread",
+        "summary": "markAsUnread",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
+        "description": "Mark a notification as unread again, e.g. to use it as a reminder. A later \"mark all as read\" clears it again.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "Numeric ID of the notification to mark as unread"
+          }
+        ],
+        "tags": [
+          "Notification"
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "404": {
+            "description": "Notification not found"
           }
         }
       }
@@ -905,6 +969,9 @@
           },
           {
             "type": "object",
+            "required": [
+              "organization_id"
+            ],
             "properties": {
               "read_state": {
                 "type": "boolean",
@@ -923,6 +990,15 @@
                   "4",
                   "5"
                 ]
+              },
+              "skip_user_resolution": {
+                "type": "boolean",
+                "description": "When true, the notification is written directly for each id in `visibility_user_ids` without resolving them against the user API (an in-app notification only; email is skipped). Only honored for trusted service callers whose token carries no user identity of its own — used to target end-customer portal users (`USER#{portal_user_id}`). A real end-user token may not set it."
+              },
+              "template_id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Render this specific `notification_template` entity (by id) instead of looking one up by `type`. Used by portal notification triggers, which let the builder pick an exact template."
               }
             }
           }
@@ -1254,6 +1330,12 @@
             "type": "string",
             "description": "JSON string with style config"
           },
+          "email_template_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Entity id of the `email_template` to send to end-customer portal users in addition to the in-app notification. Only portal users who opted in to email notifications receive it (sent by the customer portal API). Absent or null means no email is sent for this notification."
+          },
           "system_template": {
             "type": "boolean",
             "description": "Whether this is a system template",
@@ -1306,6 +1388,12 @@
             "type": "string",
             "description": "JSON string with style config"
           },
+          "email_template_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Entity id of the `email_template` to send to end-customer portal users in addition to the in-app notification. Only portal users who opted in to email notifications receive it (sent by the customer portal API). Absent or null means no email is sent for this notification."
+          },
           "_title": {
             "type": "string",
             "description": "Display title"
@@ -1354,6 +1442,12 @@
           "style": {
             "type": "string",
             "description": "JSON string with style config"
+          },
+          "email_template_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Entity id of the `email_template` to send to end-customer portal users in addition to the in-app notification. Only portal users who opted in to email notifications receive it (sent by the customer portal API). Absent or null means no email is sent for this notification."
           },
           "_title": {
             "type": "string",

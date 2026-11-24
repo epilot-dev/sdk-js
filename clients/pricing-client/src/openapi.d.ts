@@ -203,7 +203,10 @@ declare namespace Components {
             conditions?: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -1988,11 +1991,16 @@ declare namespace Components {
              * Exact values only; predicates belong to reads. Values are stored canonicalized for their
              * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
              * and `until` in that form where an empty string is an open end, a `location` of format
-             * `postal_code` the postal code itself and one of format `postal_code_city` an object carrying
-             * `postal_code` and `city`.
+             * `postal_code` the postal code itself, one of format `postal_code_city` an object carrying
+             * `postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` an
+             * object carrying the grid operator's code number alone. A grid operator is written as its code
+             * number, a string of exactly 13 digits whatever its prefix, or as the object a read returns;
+             * only `code_number` is read from the object.
              *
-             * A date-only `date` or `daterange` value is midnight of that day in the organization's
-             * timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`.
+             * A date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the
+             * organization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only
+             * `until` is the last millisecond of that day: `2026-04-30` is stored as
+             * `2026-04-30T21:59:59.999Z`.
              *
              * `default` and names beginning with `_` are reserved; use the request's `default` flag.
              *
@@ -4636,11 +4644,16 @@ declare namespace Components {
              * Exact values only; predicates belong to reads. Values are stored canonicalized for their
              * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
              * and `until` in that form where an empty string is an open end, a `location` of format
-             * `postal_code` the postal code itself and one of format `postal_code_city` an object carrying
-             * `postal_code` and `city`.
+             * `postal_code` the postal code itself, one of format `postal_code_city` an object carrying
+             * `postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` an
+             * object carrying the grid operator's code number alone. A grid operator is written as its code
+             * number, a string of exactly 13 digits whatever its prefix, or as the object a read returns;
+             * only `code_number` is read from the object.
              *
-             * A date-only `date` or `daterange` value is midnight of that day in the organization's
-             * timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`.
+             * A date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the
+             * organization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only
+             * `until` is the last millisecond of that day: `2026-04-30` is stored as
+             * `2026-04-30T21:59:59.999Z`.
              *
              * `default` and names beginning with `_` are reserved; use the request's `default` flag.
              *
@@ -7297,7 +7310,8 @@ declare namespace Components {
              *
              * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order, against a `number`
              *   or `date` condition
-             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition
+             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition, or a
+             *   `location` of format `power_grid_operator` or `gas_grid_operator`
              * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
              * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
              *
@@ -7310,7 +7324,10 @@ declare namespace Components {
              * case-sensitively. A `location` of format
              * `postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying
              * `postal_code` and `city`, named as an entity address names them, whose city is compared
-             * case- and whitespace-insensitively.
+             * case- and whitespace-insensitively. One of format `power_grid_operator` or `gas_grid_operator`
+             * is the grid operator's code number, a string of exactly 13 digits, matched exactly; it is
+             * never looked up, so the caller supplies it, and a context without it gets only the variants
+             * that pin no grid operator.
              *
              * `default` and names beginning with `_` are reserved and cannot be supplied.
              *
@@ -7332,7 +7349,8 @@ declare namespace Components {
              *
              * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order, against a `number`
              *   or `date` condition
-             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition
+             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition, or a
+             *   `location` of format `power_grid_operator` or `gas_grid_operator`
              * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
              * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
              *
@@ -7345,7 +7363,10 @@ declare namespace Components {
              * case-sensitively. A `location` of format
              * `postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying
              * `postal_code` and `city`, named as an entity address names them, whose city is compared
-             * case- and whitespace-insensitively.
+             * case- and whitespace-insensitively. One of format `power_grid_operator` or `gas_grid_operator`
+             * is the grid operator's code number, a string of exactly 13 digits, matched exactly; it is
+             * never looked up, so the caller supplies it, and a context without it gets only the variants
+             * that pin no grid operator.
              *
              * `default` and names beginning with `_` are reserved and cannot be supplied.
              *
@@ -7367,7 +7388,8 @@ declare namespace Components {
              *
              * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order, against a `number`
              *   or `date` condition
-             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition
+             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition, or a
+             *   `location` of format `power_grid_operator` or `gas_grid_operator`
              * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
              * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
              *
@@ -7380,7 +7402,10 @@ declare namespace Components {
              * case-sensitively. A `location` of format
              * `postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying
              * `postal_code` and `city`, named as an entity address names them, whose city is compared
-             * case- and whitespace-insensitively.
+             * case- and whitespace-insensitively. One of format `power_grid_operator` or `gas_grid_operator`
+             * is the grid operator's code number, a string of exactly 13 digits, matched exactly; it is
+             * never looked up, so the caller supplies it, and a context without it gets only the variants
+             * that pin no grid operator.
              *
              * `default` and names beginning with `_` are reserved and cannot be supplied.
              *
@@ -7762,7 +7787,10 @@ declare namespace Components {
                 _conditions: {
                     [name: string]: /**
                      * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                     * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                     * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                     * digits.
                      *
                      */
                     PinnedConditionValue;
@@ -8006,7 +8034,10 @@ declare namespace Components {
                 _conditions: {
                     [name: string]: /**
                      * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                     * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                     * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                     * digits.
                      *
                      */
                     PinnedConditionValue;
@@ -8197,7 +8228,10 @@ declare namespace Components {
                 _conditions: {
                     [name: string]: /**
                      * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                     * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                     * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                     * digits.
                      *
                      */
                     PinnedConditionValue;
@@ -11427,8 +11461,11 @@ declare namespace Components {
             [name: string]: /* The computed price */ ComputedBasePrice;
         }
         /**
-         * The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and a date
-         * is midnight of that day in the organization's timezone. A bound that is absent, `null` or an
+         * The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and both
+         * are included. A date names the whole day in the organization's timezone: as `from` it starts
+         * at midnight, as `until` it runs to the day's last millisecond. So
+         * `{ "from": "2026-10-01", "until": "2026-10-31" }` is all of October, and a window may start
+         * and end on the same day. A date-time names one moment. A bound that is absent, `null` or an
          * empty string is an open end; stored, an open end is an empty string.
          *
          */
@@ -11440,7 +11477,7 @@ declare namespace Components {
             from?: string | null;
             /**
              * example:
-             * 2027-01-01
+             * 2026-12-31
              */
             until?: string | null;
         }
@@ -11477,7 +11514,7 @@ declare namespace Components {
              * - `string`: an arbitrary string, matched exactly and case-sensitively
              * - `number`: a numeric value
              * - `date`: a single date
-             * - `daterange`: a window with a from and an until timestamp; either end may be left open
+             * - `daterange`: a window from a `from` to an `until`, both included; either end may be left open
              * - `boolean`: a true/false value
              * - `select`: one of the values declared in `options`, which is always a closed vocabulary
              * - `location`: a geographic value, shaped by `format`
@@ -11506,10 +11543,27 @@ declare namespace Components {
                 value: string;
                 title?: string;
             })[];
-            /**
+            format?: /**
              * The value shape of a `location` condition. Absent for every other type.
+             *
+             * - `postal_code`: a postal code
+             * - `postal_code_city`: a postal code and a city
+             * - `power_grid_operator`: the code number of the power grid operator an address is connected to
+             * - `gas_grid_operator`: the code number of the gas grid operator an address is connected to
+             *
              */
-            format?: "postal_code" | "postal_code_city";
+            LocationFormat;
+        }
+        export interface ConditionOptionUsage {
+            /**
+             * example:
+             * private
+             */
+            value: string;
+            /**
+             * How many variants pin the value. Exact.
+             */
+            variants: number;
         }
         /**
          * A single-operator predicate.
@@ -11543,7 +11597,39 @@ declare namespace Components {
              */
             OrderedConditionOperand;
         } | {
-            in: (string | number)[];
+            in: (string | number | /**
+             * A `location` of format `postal_code` or `postal_code_city` named in a variant listing filter.
+             * As the filter's value, it may name part of the location: `postal_code` alone matches every
+             * postal code starting with it, so `66` matches `66636` and a whole postal code matches only
+             * itself; `city` alone, on `postal_code_city` only, matches that city in any postal code,
+             * regardless of case; both must match where both are given.
+             *
+             * In an `in` or `not_in` list it names one whole location: `postal_code` and `city` on
+             * `postal_code_city`, a bare postal code string on `postal_code`. A partial value there, or a
+             * part the format does not have, is refused with `CONTEXT_FORMAT_INVALID`.
+             *
+             */
+            PostalCodeFilter)[];
+        } | {
+            /**
+             * Exclusion, accepted only by a variant listing filter: matches a variant pinning none of
+             * the values, and one leaving the condition unpinned. A resolve context carrying it is
+             * refused with `OPERATOR_UNSUPPORTED`.
+             *
+             */
+            not_in: (string | number | /**
+             * A `location` of format `postal_code` or `postal_code_city` named in a variant listing filter.
+             * As the filter's value, it may name part of the location: `postal_code` alone matches every
+             * postal code starting with it, so `66` matches `66636` and a whole postal code matches only
+             * itself; `city` alone, on `postal_code_city` only, matches that city in any postal code,
+             * regardless of case; both must match where both are given.
+             *
+             * In an `in` or `not_in` list it names one whole location: `postal_code` and `city` on
+             * `postal_code_city`, a bare postal code string on `postal_code`. A partial value there, or a
+             * part the format does not have, is refused with `CONTEXT_FORMAT_INVALID`.
+             *
+             */
+            PostalCodeFilter)[];
         } | {
             /**
              * The instant a `daterange` condition's range must contain. A date is midnight of that day
@@ -11592,13 +11678,99 @@ declare namespace Components {
          * - `string`: an arbitrary string, matched exactly and case-sensitively
          * - `number`: a numeric value
          * - `date`: a single date
-         * - `daterange`: a window with a from and an until timestamp; either end may be left open
+         * - `daterange`: a window from a `from` to an `until`, both included; either end may be left open
          * - `boolean`: a true/false value
          * - `select`: one of the values declared in `options`, which is always a closed vocabulary
          * - `location`: a geographic value, shaped by `format`
          *
          */
         export type ConditionType = "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location";
+        /**
+         * example:
+         * {
+         *   "total": {
+         *     "variants": 1252,
+         *     "entities": 38
+         *   },
+         *   "conditions": [
+         *     {
+         *       "name": "delivery_area",
+         *       "variants": 1240,
+         *       "entities": 37
+         *     },
+         *     {
+         *       "name": "customer_type",
+         *       "variants": 12,
+         *       "entities": 3,
+         *       "options": [
+         *         {
+         *           "value": "private",
+         *           "variants": 12
+         *         },
+         *         {
+         *           "value": "business",
+         *           "variants": 0
+         *         }
+         *       ],
+         *       "undeclared_options": []
+         *     },
+         *     {
+         *       "name": "offer_period",
+         *       "variants": 0,
+         *       "entities": 0
+         *     }
+         *   ],
+         *   "undeclared": [
+         *     {
+         *       "name": "legacy_customer_type",
+         *       "type": "select",
+         *       "variants": 1,
+         *       "entities": 1,
+         *       "options": [
+         *         {
+         *           "value": "private",
+         *           "variants": 1
+         *         }
+         *       ]
+         *     }
+         *   ]
+         * }
+         */
+        export interface ConditionUsage {
+            total: {
+                /**
+                 * The schema's variants in the search index.
+                 */
+                variants: number;
+                /**
+                 * The schema's entities flagged `is_conditional`, soft-deleted ones included, whether or
+                 * not the caller may read them.
+                 *
+                 */
+                entities: number;
+            };
+            /**
+             * One entry per condition the schema declares, in its order, zeros included.
+             */
+            conditions: /**
+             * A `select` condition always carries `options` and `undeclared_options`. A condition of any
+             * other type carries neither.
+             *
+             */
+            DeclaredConditionUsage[];
+            /**
+             * The conditions variants pin that the schema no longer declares, one entry per name and
+             * type, most pinned first, at most 100. Empty when there are none. Each entry carries what
+             * declaring the condition again needs, so that its variants resolve once more.
+             *
+             */
+            undeclared: /**
+             * A condition variants pin under this name and type that the schema does not declare. A name
+             * pinned under two types is listed once for each.
+             *
+             */
+            UndeclaredConditionUsage[];
+        }
         /**
          * Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route.
          */
@@ -13933,11 +14105,16 @@ declare namespace Components {
              * Exact values only; predicates belong to reads. Values are stored canonicalized for their
              * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
              * and `until` in that form where an empty string is an open end, a `location` of format
-             * `postal_code` the postal code itself and one of format `postal_code_city` an object carrying
-             * `postal_code` and `city`.
+             * `postal_code` the postal code itself, one of format `postal_code_city` an object carrying
+             * `postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` an
+             * object carrying the grid operator's code number alone. A grid operator is written as its code
+             * number, a string of exactly 13 digits whatever its prefix, or as the object a read returns;
+             * only `code_number` is read from the object.
              *
-             * A date-only `date` or `daterange` value is midnight of that day in the organization's
-             * timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`.
+             * A date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the
+             * organization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only
+             * `until` is the last millisecond of that day: `2026-04-30` is stored as
+             * `2026-04-30T21:59:59.999Z`.
              *
              * `default` and names beginning with `_` are reserved; use the request's `default` flag.
              *
@@ -14007,7 +14184,10 @@ declare namespace Components {
             conditions: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -14091,6 +14271,38 @@ declare namespace Components {
              */
             email?: string;
             phone?: string;
+        }
+        /**
+         * A `select` condition always carries `options` and `undeclared_options`. A condition of any
+         * other type carries neither.
+         *
+         */
+        export interface DeclaredConditionUsage {
+            /**
+             * example:
+             * customer_type
+             */
+            name: string;
+            /**
+             * How many variants pin the condition. Exact.
+             */
+            variants: number;
+            /**
+             * How many entities those variants belong to. Approximate above about 3,000, so it should
+             * not decide a lock.
+             *
+             */
+            entities: number;
+            /**
+             * One entry per option the condition declares, in its order, zeros included.
+             */
+            options?: ConditionOptionUsage[];
+            /**
+             * The values variants pin that the condition no longer declares, most pinned first, at
+             * most 100. Empty when there are none. Listing a value again makes its variants resolvable.
+             *
+             */
+            undeclared_options?: ConditionOptionUsage[];
         }
         export interface DeletedVariant {
             /**
@@ -14669,6 +14881,57 @@ declare namespace Components {
              * The vritual trading point identifier
              */
             virtualTradingPoint?: string;
+        }
+        /**
+         * A grid operator as the list Pricing API bundles names it, built from the Marktstammdatenregister,
+         * bdew-codes.de (power) and DVGW (gas).
+         *
+         */
+        export interface GridOperator {
+            /**
+             * The 13-digit code number, a BDEW or DVGW code or a GLN.
+             * example:
+             * 4045458000000
+             */
+            code_number: string;
+            /**
+             * The name assigned to the code number.
+             * example:
+             * Westnetz GmbH
+             */
+            name: string;
+            /**
+             * Whether the grid is a closed distribution grid. Left out where that is unknown.
+             */
+            closed_distribution_grid?: boolean;
+        }
+        /**
+         * The commodity whose grid operators to search or look up. Power and gas code numbers are separate lists.
+         */
+        export type GridOperatorCommodity = "power" | "gas";
+        export interface GridOperatorLookupRequest {
+            commodity: /* The commodity whose grid operators to search or look up. Power and gas code numbers are separate lists. */ GridOperatorCommodity;
+            /**
+             * 1 to 100 code numbers of 13 digits each.
+             */
+            code_numbers: string[];
+        }
+        export interface GridOperatorResults {
+            results: /**
+             * A grid operator as the list Pricing API bundles names it, built from the Marktstammdatenregister,
+             * bdew-codes.de (power) and DVGW (gas).
+             *
+             */
+            GridOperator[];
+        }
+        export interface GridOperatorSearchRequest {
+            commodity: /* The commodity whose grid operators to search or look up. Power and gas code numbers are separate lists. */ GridOperatorCommodity;
+            /**
+             * Words the grid operator's name must all contain, ignoring case. At least one word.
+             * example:
+             * westnetz
+             */
+            name: string;
         }
         /**
          * A market price at a given point in time.
@@ -15371,15 +15634,30 @@ declare namespace Components {
         export interface ListVariantsRequest {
             conditions?: /**
              * Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the
-             * same exact values and predicates a resolve context does. A condition left out is not
-             * filtered on. An `in` list carries at most 50,000 values.
+             * same exact values and predicates a resolve context does, plus `not_in`. A condition left
+             * out is not filtered on. An `in` or `not_in` list carries at most 50,000 values.
              *
              * A variant matches only where it pins the condition — unlike `:resolve`, where an unpinned
              * condition matches any value. `{ "exists": false }` selects the variants that leave it
              * unpinned.
              *
-             * A `location` of format `postal_code_city` also takes its postal code alone,
-             * `{ "postal_code": "10115" }`, matching that postal code in any city.
+             * `{ "not_in": [...] }` is the one exception: it lists the variants pinning none of the
+             * values **and** those leaving the condition unpinned. It applies where `in` does.
+             *
+             * A `location` of format `power_grid_operator` or `gas_grid_operator` takes `in` and
+             * `not_in`, so one filter lists the variants pinned to any, or none, of several code numbers,
+             * each a string of exactly 13 digits.
+             *
+             * A `location` of format `postal_code` or `postal_code_city` takes four forms a resolve
+             * context does not:
+             *
+             * - `{ "postal_code": "66" }` matches every postal code starting with `66`. Postal codes
+             *   are fixed-length, so a whole postal code matches only itself.
+             * - `{ "city": "Tholey" }`, on `postal_code_city` only, matches that city in any postal
+             *   code, regardless of case. `{ "postal_code": "66", "city": "Tholey" }` needs both.
+             * - `{ "in": [...] }` and `{ "not_in": [...] }` take whole values only, each matched as the exact value is:
+             *   `{ "postal_code": "66636", "city": "Tholey" }` objects on `postal_code_city`, postal
+             *   code strings on `postal_code`. A postal code or city alone in a list is refused.
              *
              * `default` is accepted as an exact boolean and takes no predicate: `true` selects the
              * entity's fallback variant, `false` every variant that is not it. Names beginning with `_`
@@ -15404,8 +15682,11 @@ declare namespace Components {
             search?: string;
             /**
              * `conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number`,
-             * `date` or `location` pin. A location orders by postal code, then by city ignoring case.
-             * `variant_id:asc` is always appended, so the order is total.
+             * `date` or `location` pin. A postal code location orders by postal code, then by city
+             * ignoring case. A grid operator location orders by the grid operator's name in dictionary
+             * order, ignoring case and accents (`Ü` sorts as `U`, `ß` as `ss`); a code number with no
+             * known name sorts last in both directions, as does a variant that does not pin the
+             * condition. `variant_id:asc` is always appended, so the order is total.
              *
              * example:
              * conditions.postal_code:asc
@@ -15432,6 +15713,16 @@ declare namespace Components {
              */
             cursor?: string;
         }
+        /**
+         * The value shape of a `location` condition. Absent for every other type.
+         *
+         * - `postal_code`: a postal code
+         * - `postal_code_city`: a postal code and a city
+         * - `power_grid_operator`: the code number of the power grid operator an address is connected to
+         * - `gas_grid_operator`: the code number of the gas grid operator an address is connected to
+         *
+         */
+        export type LocationFormat = "postal_code" | "postal_code_city" | "power_grid_operator" | "gas_grid_operator";
         /**
          * Market participant data
          */
@@ -15732,7 +16023,12 @@ declare namespace Components {
             unique_selling_point_icon?: string;
             total?: {
                 enabled?: boolean;
-                format?: "absolute" | "relative";
+                /**
+                 * How the price difference to the current item is shown: as a percentage (e.g. "12.5%") or as an
+                 * absolute amount (e.g. "€12.00").
+                 *
+                 */
+                format?: "absolute" | "percentage";
                 only_if_better?: boolean;
             };
         }
@@ -16857,7 +17153,10 @@ declare namespace Components {
             conditions?: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -16881,17 +17180,26 @@ declare namespace Components {
         }
         /**
          * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-         * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+         * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+         * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+         * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+         * digits.
          *
          */
         export type PinnedConditionValue = /**
          * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-         * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+         * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+         * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+         * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+         * digits.
          *
          */
         string | number | boolean | /**
-         * The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and a date
-         * is midnight of that day in the organization's timezone. A bound that is absent, `null` or an
+         * The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and both
+         * are included. A date names the whole day in the organization's timezone: as `from` it starts
+         * at midnight, as `until` it runs to the day's last millisecond. So
+         * `{ "from": "2026-10-01", "until": "2026-10-31" }` is all of October, and a window may start
+         * and end on the same day. A date-time names one moment. A bound that is absent, `null` or an
          * empty string is an open end; stored, an open end is an empty string.
          *
          */
@@ -16900,7 +17208,14 @@ declare namespace Components {
          * address names them.
          *
          */
-        PostalCodeCity;
+        PostalCodeCity | /**
+         * The value of a `location` condition of format `power_grid_operator` or `gas_grid_operator`:
+         * the grid operator's code number, with the name and closed distribution grid flag the list
+         * Pricing API bundles assigns it, retired or not. A write reads only `code_number` and ignores
+         * the rest.
+         *
+         */
+        PinnedGridOperator;
         /**
          * The situation this variant applies to: a flat map keyed by condition name. A condition left
          * out is a wildcard, which is what makes adding a condition to a schema non-breaking for
@@ -16909,11 +17224,16 @@ declare namespace Components {
          * Exact values only; predicates belong to reads. Values are stored canonicalized for their
          * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
          * and `until` in that form where an empty string is an open end, a `location` of format
-         * `postal_code` the postal code itself and one of format `postal_code_city` an object carrying
-         * `postal_code` and `city`.
+         * `postal_code` the postal code itself, one of format `postal_code_city` an object carrying
+         * `postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` an
+         * object carrying the grid operator's code number alone. A grid operator is written as its code
+         * number, a string of exactly 13 digits whatever its prefix, or as the object a read returns;
+         * only `code_number` is read from the object.
          *
-         * A date-only `date` or `daterange` value is midnight of that day in the organization's
-         * timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`.
+         * A date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the
+         * organization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only
+         * `until` is the last millisecond of that day: `2026-04-30` is stored as
+         * `2026-04-30T21:59:59.999Z`.
          *
          * `default` and names beginning with `_` are reserved; use the request's `default` flag.
          *
@@ -16925,10 +17245,40 @@ declare namespace Components {
         export interface PinnedConditions {
             [name: string]: /**
              * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-             * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+             * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+             * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+             * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+             * digits.
              *
              */
             PinnedConditionValue;
+        }
+        /**
+         * The value of a `location` condition of format `power_grid_operator` or `gas_grid_operator`:
+         * the grid operator's code number, with the name and closed distribution grid flag the list
+         * Pricing API bundles assigns it, retired or not. A write reads only `code_number` and ignores
+         * the rest.
+         *
+         */
+        export interface PinnedGridOperator {
+            /**
+             * The 13-digit code number, a BDEW or DVGW code or a GLN.
+             * example:
+             * 4045458000000
+             */
+            code_number: string;
+            /**
+             * The name assigned to the code number. Left out for a code number the list doesn't hold.
+             * example:
+             * Westnetz GmbH
+             */
+            name?: string;
+            /**
+             * Whether the grid is a closed distribution grid. Left out where that is unknown.
+             * example:
+             * false
+             */
+            closed_distribution_grid?: boolean;
         }
         /**
          * The options a pinned resolve accepts — `hydrate` and nothing else. `resolve_one` has nothing
@@ -17031,17 +17381,28 @@ declare namespace Components {
             city: string;
         }
         /**
-         * A listing filter on a `location` of format `postal_code_city` by its postal code alone: it
-         * matches the variants pinned to that postal code, whatever their city. Only a listing filter
-         * takes it; a resolve context must name the city too.
+         * A `location` of format `postal_code` or `postal_code_city` named in a variant listing filter.
+         * As the filter's value, it may name part of the location: `postal_code` alone matches every
+         * postal code starting with it, so `66` matches `66636` and a whole postal code matches only
+         * itself; `city` alone, on `postal_code_city` only, matches that city in any postal code,
+         * regardless of case; both must match where both are given.
+         *
+         * In an `in` or `not_in` list it names one whole location: `postal_code` and `city` on
+         * `postal_code_city`, a bare postal code string on `postal_code`. A partial value there, or a
+         * part the format does not have, is refused with `CONTEXT_FORMAT_INVALID`.
          *
          */
         export interface PostalCodeFilter {
             /**
              * example:
-             * 10115
+             * 66
              */
-            postal_code: string;
+            postal_code?: string;
+            /**
+             * example:
+             * Tholey
+             */
+            city?: string;
         }
         /**
          * Market area details for power
@@ -19564,7 +19925,69 @@ declare namespace Components {
              * Type of product recommendation
              */
             type?: "change" | "cross-sell" | "up-sell";
+            /**
+             * Legacy single-source offers; tariff change campaigns use `rules`.
+             */
             offers?: Offer[];
+            /**
+             * The rule table of the product recommendation: one rule per source tariff, plus at most one
+             * fallback rule (`source: null`) that applies only when no rule matches the contract's current tariff.
+             *
+             */
+            rules?: /**
+             * A row of the rule table of a product recommendation: customers whose contract is on the `source`
+             * tariff are offered the items of the rule's `offer_groups`.
+             *
+             * There is at most one rule per source tariff.
+             *
+             */
+            ProductRecommendationRule[];
+            /**
+             * Products of all rule sources. Derived from `rules`; kept in sync by whoever saves the recommendation.
+             *
+             */
+            source_products?: {
+                $relation?: EntityRelation[];
+            };
+            /**
+             * Prices of all rule sources. Derived from `rules`; kept in sync by whoever saves the recommendation.
+             *
+             */
+            source_prices?: {
+                $relation?: EntityRelation[];
+            };
+            /**
+             * Products of all offer items in the rules. Derived from `rules`; kept in sync by whoever saves the recommendation.
+             *
+             */
+            offer_products?: {
+                $relation?: EntityRelation[];
+            };
+            /**
+             * Prices of all offer items in the rules. Derived from `rules`; kept in sync by whoever saves the recommendation.
+             *
+             */
+            offer_prices?: {
+                $relation?: EntityRelation[];
+            };
+        }
+        /**
+         * A group of offers within a product recommendation rule: an `Offer` with an `id` and required `items`.
+         * Without `target_id`, the offers of the group are for everyone on the rule's source tariff;
+         * with `target_id`, only for members of that target group.
+         *
+         */
+        export interface ProductRecommendationOfferGroup {
+            target_id?: string;
+            items: {
+                price_id: string;
+                product_id: string;
+                highlight_config?: OfferHighlightConfig;
+            }[];
+            /**
+             * Unique id of the offer group within its rule
+             */
+            id: string;
         }
         /**
          * Product recommendations request payload
@@ -19824,6 +20247,59 @@ declare namespace Components {
             };
         }
         /**
+         * A row of the rule table of a product recommendation: customers whose contract is on the `source`
+         * tariff are offered the items of the rule's `offer_groups`.
+         *
+         * There is at most one rule per source tariff.
+         *
+         */
+        export interface ProductRecommendationRule {
+            /**
+             * Unique id of the rule within its product recommendation
+             */
+            id: string;
+            /**
+             * The source tariff (product + price) this rule applies to.
+             *
+             * `null` marks the fallback rule ("any other product"): it applies only when no rule matches
+             * the contract's current tariff. A product recommendation has at most one fallback rule.
+             *
+             */
+            source: {
+                /**
+                 * The product of the source tariff
+                 */
+                product_id: string;
+                /**
+                 * The price of the source tariff
+                 */
+                price_id: string;
+            } | null;
+            /**
+             * The offers of the rule, grouped by target group
+             */
+            offer_groups: /**
+             * A group of offers within a product recommendation rule: an `Offer` with an `id` and required `items`.
+             * Without `target_id`, the offers of the group are for everyone on the rule's source tariff;
+             * with `target_id`, only for members of that target group.
+             *
+             */
+            ProductRecommendationOfferGroup[];
+        }
+        /**
+         * The source tariff (product + price) of a product recommendation rule.
+         */
+        export interface ProductRecommendationRuleSource {
+            /**
+             * The product of the source tariff
+             */
+            product_id: string;
+            /**
+             * The price of the source tariff
+             */
+            price_id: string;
+        }
+        /**
          * Product recommendations request payload
          */
         export interface ProductRecommendationSearch {
@@ -19845,6 +20321,18 @@ declare namespace Components {
              * The contract id to be used as source for the recommendation
              */
             contract_id?: string;
+            /**
+             * The tariff change campaign the offers are requested for. Used together with `contract_id`:
+             * the offers come from the rule table of the campaign's product recommendation, and only when
+             * the campaign is active and the contract or its contact is in the campaign's audience.
+             * Otherwise the result is empty.
+             *
+             * Only applies to organizations with campaign-scoped offers enabled; ignored otherwise.
+             *
+             * example:
+             * 3f1c7d2e-9a4b-4c6d-8e2f-1a2b3c4d5e6f
+             */
+            campaign_id?: string;
             filters?: /* Availability filters dimensions */ AvailabilityFilters;
         }
         /**
@@ -20269,7 +20757,10 @@ declare namespace Components {
             conditions?: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -20310,7 +20801,8 @@ declare namespace Components {
              *
              * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order, against a `number`
              *   or `date` condition
-             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition
+             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition, or a
+             *   `location` of format `power_grid_operator` or `gas_grid_operator`
              * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
              * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
              *
@@ -20323,7 +20815,10 @@ declare namespace Components {
              * case-sensitively. A `location` of format
              * `postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying
              * `postal_code` and `city`, named as an entity address names them, whose city is compared
-             * case- and whitespace-insensitively.
+             * case- and whitespace-insensitively. One of format `power_grid_operator` or `gas_grid_operator`
+             * is the grid operator's code number, a string of exactly 13 digits, matched exactly; it is
+             * never looked up, so the caller supplies it, and a context without it gets only the variants
+             * that pin no grid operator.
              *
              * `default` and names beginning with `_` are reserved and cannot be supplied.
              *
@@ -21175,7 +21670,8 @@ declare namespace Components {
          *
          * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order, against a `number`
          *   or `date` condition
-         * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition
+         * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition, or a
+         *   `location` of format `power_grid_operator` or `gas_grid_operator`
          * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
          * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
          *
@@ -21188,7 +21684,10 @@ declare namespace Components {
          * case-sensitively. A `location` of format
          * `postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying
          * `postal_code` and `city`, named as an entity address names them, whose city is compared
-         * case- and whitespace-insensitively.
+         * case- and whitespace-insensitively. One of format `power_grid_operator` or `gas_grid_operator`
+         * is the grid operator's code number, a string of exactly 13 digits, matched exactly; it is
+         * never looked up, so the caller supplies it, and a context without it gets only the variants
+         * that pin no grid operator.
          *
          * `default` and names beginning with `_` are reserved and cannot be supplied.
          *
@@ -21447,7 +21946,10 @@ declare namespace Components {
                 _conditions: {
                     [name: string]: /**
                      * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                     * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                     * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                     * digits.
                      *
                      */
                     PinnedConditionValue;
@@ -21532,7 +22034,10 @@ declare namespace Components {
             _conditions: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -21605,6 +22110,17 @@ declare namespace Components {
              * The street number to search for providers
              */
             street_number?: string | null;
+            /**
+             * Which grids the search answers with, by whether they are closed distribution grids
+             * (geschlossene Verteilernetze), such as a railway's grid at a station.
+             *
+             * - `all`: every grid, closed distribution grids included.
+             * - `exclude_closed`: closed distribution grids are left out. An address inside one gets
+             *   no provider, the same answer as an address with no grid for that commodity.
+             * - `only_closed`: only closed distribution grids. An address outside one gets no provider.
+             *
+             */
+            grid_filter?: "all" | "exclude_closed" | "only_closed";
         }
         /**
          * The search providers payload
@@ -21909,6 +22425,56 @@ declare namespace Components {
         }
         export type TypeGetAg = "base_price" | "work_price";
         /**
+         * A condition variants pin under this name and type that the schema does not declare. A name
+         * pinned under two types is listed once for each.
+         *
+         */
+        export interface UndeclaredConditionUsage {
+            /**
+             * example:
+             * legacy_customer_type
+             */
+            name: string;
+            type: /**
+             * The kind of value a condition holds, which decides how a pinned value is matched against a
+             * resolve context.
+             *
+             * - `string`: an arbitrary string, matched exactly and case-sensitively
+             * - `number`: a numeric value
+             * - `date`: a single date
+             * - `daterange`: a window from a `from` to an `until`, both included; either end may be left open
+             * - `boolean`: a true/false value
+             * - `select`: one of the values declared in `options`, which is always a closed vocabulary
+             * - `location`: a geographic value, shaped by `format`
+             *
+             */
+            ConditionType;
+            format?: /**
+             * The value shape of a `location` condition. Absent for every other type.
+             *
+             * - `postal_code`: a postal code
+             * - `postal_code_city`: a postal code and a city
+             * - `power_grid_operator`: the code number of the power grid operator an address is connected to
+             * - `gas_grid_operator`: the code number of the gas grid operator an address is connected to
+             *
+             */
+            LocationFormat;
+            /**
+             * How many variants pin the condition under this type.
+             */
+            variants: number;
+            /**
+             * How many entities those variants belong to. Approximate above about 3,000.
+             */
+            entities: number;
+            /**
+             * For a `select` only: the values variants pin, most pinned first, at most 100. Declaring
+             * them as the condition's options makes the variants pinning them resolvable.
+             *
+             */
+            options?: ConditionOptionUsage[];
+        }
+        /**
          * The availability rule error
          */
         export interface ValidateAvailabilityFileError {
@@ -21950,15 +22516,30 @@ declare namespace Components {
         }
         /**
          * Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the
-         * same exact values and predicates a resolve context does. A condition left out is not
-         * filtered on. An `in` list carries at most 50,000 values.
+         * same exact values and predicates a resolve context does, plus `not_in`. A condition left
+         * out is not filtered on. An `in` or `not_in` list carries at most 50,000 values.
          *
          * A variant matches only where it pins the condition — unlike `:resolve`, where an unpinned
          * condition matches any value. `{ "exists": false }` selects the variants that leave it
          * unpinned.
          *
-         * A `location` of format `postal_code_city` also takes its postal code alone,
-         * `{ "postal_code": "10115" }`, matching that postal code in any city.
+         * `{ "not_in": [...] }` is the one exception: it lists the variants pinning none of the
+         * values **and** those leaving the condition unpinned. It applies where `in` does.
+         *
+         * A `location` of format `power_grid_operator` or `gas_grid_operator` takes `in` and
+         * `not_in`, so one filter lists the variants pinned to any, or none, of several code numbers,
+         * each a string of exactly 13 digits.
+         *
+         * A `location` of format `postal_code` or `postal_code_city` takes four forms a resolve
+         * context does not:
+         *
+         * - `{ "postal_code": "66" }` matches every postal code starting with `66`. Postal codes
+         *   are fixed-length, so a whole postal code matches only itself.
+         * - `{ "city": "Tholey" }`, on `postal_code_city` only, matches that city in any postal
+         *   code, regardless of case. `{ "postal_code": "66", "city": "Tholey" }` needs both.
+         * - `{ "in": [...] }` and `{ "not_in": [...] }` take whole values only, each matched as the exact value is:
+         *   `{ "postal_code": "66636", "city": "Tholey" }` objects on `postal_code_city`, postal
+         *   code strings on `postal_code`. A postal code or city alone in a list is refused.
          *
          * `default` is accepted as an exact boolean and takes no predicate: `true` selects the
          * entity's fallback variant, `false` every variant that is not it. Names beginning with `_`
@@ -21981,9 +22562,15 @@ declare namespace Components {
              *
              */
             ContextConditionValue | /**
-             * A listing filter on a `location` of format `postal_code_city` by its postal code alone: it
-             * matches the variants pinned to that postal code, whatever their city. Only a listing filter
-             * takes it; a resolve context must name the city too.
+             * A `location` of format `postal_code` or `postal_code_city` named in a variant listing filter.
+             * As the filter's value, it may name part of the location: `postal_code` alone matches every
+             * postal code starting with it, so `66` matches `66636` and a whole postal code matches only
+             * itself; `city` alone, on `postal_code_city` only, matches that city in any postal code,
+             * regardless of case; both must match where both are given.
+             *
+             * In an `in` or `not_in` list it names one whole location: `postal_code` and `city` on
+             * `postal_code_city`, a bare postal code string on `postal_code`. A partial value there, or a
+             * part the format does not have, is refused with `CONTEXT_FORMAT_INVALID`.
              *
              */
             PostalCodeFilter;
@@ -22001,7 +22588,10 @@ declare namespace Components {
         export interface VariantConditions {
             [name: string]: /**
              * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-             * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+             * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+             * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+             * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+             * digits.
              *
              */
             PinnedConditionValue;
@@ -22052,7 +22642,10 @@ declare namespace Components {
             conditions: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -22089,15 +22682,30 @@ declare namespace Components {
         export interface VariantTreeRequest {
             conditions?: /**
              * Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the
-             * same exact values and predicates a resolve context does. A condition left out is not
-             * filtered on. An `in` list carries at most 50,000 values.
+             * same exact values and predicates a resolve context does, plus `not_in`. A condition left
+             * out is not filtered on. An `in` or `not_in` list carries at most 50,000 values.
              *
              * A variant matches only where it pins the condition — unlike `:resolve`, where an unpinned
              * condition matches any value. `{ "exists": false }` selects the variants that leave it
              * unpinned.
              *
-             * A `location` of format `postal_code_city` also takes its postal code alone,
-             * `{ "postal_code": "10115" }`, matching that postal code in any city.
+             * `{ "not_in": [...] }` is the one exception: it lists the variants pinning none of the
+             * values **and** those leaving the condition unpinned. It applies where `in` does.
+             *
+             * A `location` of format `power_grid_operator` or `gas_grid_operator` takes `in` and
+             * `not_in`, so one filter lists the variants pinned to any, or none, of several code numbers,
+             * each a string of exactly 13 digits.
+             *
+             * A `location` of format `postal_code` or `postal_code_city` takes four forms a resolve
+             * context does not:
+             *
+             * - `{ "postal_code": "66" }` matches every postal code starting with `66`. Postal codes
+             *   are fixed-length, so a whole postal code matches only itself.
+             * - `{ "city": "Tholey" }`, on `postal_code_city` only, matches that city in any postal
+             *   code, regardless of case. `{ "postal_code": "66", "city": "Tholey" }` needs both.
+             * - `{ "in": [...] }` and `{ "not_in": [...] }` take whole values only, each matched as the exact value is:
+             *   `{ "postal_code": "66636", "city": "Tholey" }` objects on `postal_code_city`, postal
+             *   code strings on `postal_code`. A postal code or city alone in a list is refused.
              *
              * `default` is accepted as an exact boolean and takes no predicate: `true` selects the
              * entity's fallback variant, `false` every variant that is not it. Names beginning with `_`
@@ -22122,8 +22730,11 @@ declare namespace Components {
             search?: string;
             /**
              * `conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number`,
-             * `date` or `location` pin. A location orders by postal code, then by city ignoring case.
-             * `variant_id:asc` is always appended, so the order is total.
+             * `date` or `location` pin. A postal code location orders by postal code, then by city
+             * ignoring case. A grid operator location orders by the grid operator's name in dictionary
+             * order, ignoring case and accents (`Ü` sorts as `U`, `ß` as `ss`); a code number with no
+             * known name sorts last in both directions, as does a variant that does not pin the
+             * condition. `variant_id:asc` is always appended, so the order is total.
              *
              * example:
              * conditions.postal_code:asc
@@ -22190,7 +22801,10 @@ declare namespace Components {
             conditions: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -22235,7 +22849,10 @@ declare namespace Components {
                 conditions: {
                     [name: string]: /**
                      * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                     * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                     * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                     * digits.
                      *
                      */
                     PinnedConditionValue;
@@ -22343,7 +22960,10 @@ declare namespace Components {
             conditions: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -22442,7 +23062,10 @@ declare namespace Components {
             conditions: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -22593,7 +23216,10 @@ declare namespace Components {
             conditions: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -23172,6 +23798,89 @@ declare namespace Paths {
             Components.Schemas.ConditionalPricingError;
         }
     }
+    namespace $GetConditionUsage {
+        namespace Parameters {
+            export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * example:
+             * {
+             *   "total": {
+             *     "variants": 1252,
+             *     "entities": 38
+             *   },
+             *   "conditions": [
+             *     {
+             *       "name": "delivery_area",
+             *       "variants": 1240,
+             *       "entities": 37
+             *     },
+             *     {
+             *       "name": "customer_type",
+             *       "variants": 12,
+             *       "entities": 3,
+             *       "options": [
+             *         {
+             *           "value": "private",
+             *           "variants": 12
+             *         },
+             *         {
+             *           "value": "business",
+             *           "variants": 0
+             *         }
+             *       ],
+             *       "undeclared_options": []
+             *     },
+             *     {
+             *       "name": "offer_period",
+             *       "variants": 0,
+             *       "entities": 0
+             *     }
+             *   ],
+             *   "undeclared": [
+             *     {
+             *       "name": "legacy_customer_type",
+             *       "type": "select",
+             *       "variants": 1,
+             *       "entities": 1,
+             *       "options": [
+             *         {
+             *           "value": "private",
+             *           "variants": 1
+             *         }
+             *       ]
+             *     }
+             *   ]
+             * }
+             */
+            Components.Schemas.ConditionUsage;
+            export type $400 = Components.Schemas.Error;
+            export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+        }
+    }
     namespace $GetConditionalPricingOrganization {
         namespace Responses {
             export type $200 = Components.Schemas.ConditionalPricingOrganization;
@@ -23567,6 +24276,13 @@ declare namespace Paths {
              *
              */
             Components.Schemas.ConditionalPricingError;
+        }
+    }
+    namespace $LookupGridOperators {
+        export type RequestBody = Components.Schemas.GridOperatorLookupRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.GridOperatorResults;
+            export type $400 = Components.Schemas.Error;
         }
     }
     namespace $PatchActiveConditionalVariantVersion {
@@ -24009,6 +24725,13 @@ declare namespace Paths {
             export type $200 = Components.Schemas.SearchExternalCatalogResult;
             export type $400 = Components.Schemas.Error;
             export type $403 = Components.Schemas.Error;
+        }
+    }
+    namespace $SearchGridOperators {
+        export type RequestBody = Components.Schemas.GridOperatorSearchRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.GridOperatorResults;
+            export type $400 = Components.Schemas.Error;
         }
     }
     namespace $SearchProviders {
@@ -25508,6 +26231,31 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$ProductRecommendations.Responses.$200>
   /**
+   * $searchGridOperators - $searchGridOperators
+   * 
+   * Finds the active grid operators of one commodity whose name contains every word of `name`,
+   * ignoring case, and answers the first 10 by name. Type more of the name to narrow the results.
+   * A retired code number is never answered.
+   * 
+   */
+  '$searchGridOperators'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.$SearchGridOperators.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$SearchGridOperators.Responses.$200>
+  /**
+   * $lookupGridOperators - $lookupGridOperators
+   * 
+   * Answers the grid operator each code number is assigned to, retired code numbers included,
+   * in the order asked and each once. A code number the list doesn't hold is missing from `results`.
+   * 
+   */
+  '$lookupGridOperators'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.$LookupGridOperators.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$LookupGridOperators.Responses.$200>
+  /**
    * $getConditionSets - $getConditionSets
    * 
    * Returns the condition sets built in for one conditional entity type, ready to copy into that schema's `conditions` array. Read-only, and the same for every organization.
@@ -25517,6 +26265,32 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$GetConditionSets.Responses.$200>
+  /**
+   * $getConditionUsage - $getConditionUsage
+   * 
+   * Returns, for each condition the schema declares and each option a `select` condition
+   * declares, how many variants pin it, and for the schema as a whole how many conditional
+   * entities and variants it has. An entity builder reads it when it loads a schema:
+   * 
+   * - **Remove condition** is unlocked when the condition's `variants` is 0.
+   * - Removing a `select` option is unlocked when that option's `variants` is 0.
+   * - Turning conditional pricing off for the schema is locked while `total.entities` or
+   *   `total.variants` is above 0.
+   * - A condition removed while variants still pin it is listed in `undeclared`. Declaring it
+   *   again with the same `name`, `type`, `format` and `options` makes those variants
+   *   resolvable once more. Labels are not known and are entered again.
+   * 
+   * Removing a condition or option that variants pin makes those variants unresolvable. The
+   * counts are of what the search index holds, which lags the stored variants by up to about 90
+   * seconds, and a variant can be written between this read and a schema save. A variant the
+   * index does not hold is not counted.
+   * 
+   */
+  '$getConditionUsage'(
+    parameters?: Parameters<Paths.$GetConditionUsage.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$GetConditionUsage.Responses.$200>
   /**
    * $getConditionalPricingOrganization - $getConditionalPricingOrganization
    * 
@@ -26086,6 +26860,35 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$ProductRecommendations.Responses.$200>
   }
+  ['/v1/grid-operators:search']: {
+    /**
+     * $searchGridOperators - $searchGridOperators
+     * 
+     * Finds the active grid operators of one commodity whose name contains every word of `name`,
+     * ignoring case, and answers the first 10 by name. Type more of the name to narrow the results.
+     * A retired code number is never answered.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.$SearchGridOperators.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$SearchGridOperators.Responses.$200>
+  }
+  ['/v1/grid-operators:lookup']: {
+    /**
+     * $lookupGridOperators - $lookupGridOperators
+     * 
+     * Answers the grid operator each code number is assigned to, retired code numbers included,
+     * in the order asked and each once. A code number the list doesn't hold is missing from `results`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.$LookupGridOperators.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$LookupGridOperators.Responses.$200>
+  }
   ['/v1/conditional-pricing/{slug}/condition-sets']: {
     /**
      * $getConditionSets - $getConditionSets
@@ -26097,6 +26900,34 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$GetConditionSets.Responses.$200>
+  }
+  ['/v1/conditional-pricing/{slug}/conditions:usage']: {
+    /**
+     * $getConditionUsage - $getConditionUsage
+     * 
+     * Returns, for each condition the schema declares and each option a `select` condition
+     * declares, how many variants pin it, and for the schema as a whole how many conditional
+     * entities and variants it has. An entity builder reads it when it loads a schema:
+     * 
+     * - **Remove condition** is unlocked when the condition's `variants` is 0.
+     * - Removing a `select` option is unlocked when that option's `variants` is 0.
+     * - Turning conditional pricing off for the schema is locked while `total.entities` or
+     *   `total.variants` is above 0.
+     * - A condition removed while variants still pin it is listed in `undeclared`. Declaring it
+     *   again with the same `name`, `type`, `format` and `options` makes those variants
+     *   resolvable once more. Labels are not known and are entered again.
+     * 
+     * Removing a condition or option that variants pin makes those variants unresolvable. The
+     * counts are of what the search index holds, which lags the stored variants by up to about 90
+     * seconds, and a variant can be written between this read and a schema save. A variant the
+     * index does not hold is not counted.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.$GetConditionUsage.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$GetConditionUsage.Responses.$200>
   }
   ['/v1/conditional-pricing/organization']: {
     /**
@@ -26451,10 +27282,12 @@ export type ComputedPriceBreakdown = Components.Schemas.ComputedPriceBreakdown;
 export type ComputedPriceComponents = Components.Schemas.ComputedPriceComponents;
 export type ConditionDateRange = Components.Schemas.ConditionDateRange;
 export type ConditionDefinition = Components.Schemas.ConditionDefinition;
+export type ConditionOptionUsage = Components.Schemas.ConditionOptionUsage;
 export type ConditionPredicate = Components.Schemas.ConditionPredicate;
 export type ConditionSet = Components.Schemas.ConditionSet;
 export type ConditionSetCatalog = Components.Schemas.ConditionSetCatalog;
 export type ConditionType = Components.Schemas.ConditionType;
+export type ConditionUsage = Components.Schemas.ConditionUsage;
 export type ConditionalEntitySlug = Components.Schemas.ConditionalEntitySlug;
 export type ConditionalPricingError = Components.Schemas.ConditionalPricingError;
 export type ConditionalPricingErrorCode = Components.Schemas.ConditionalPricingErrorCode;
@@ -26470,6 +27303,7 @@ export type CreatedVariant = Components.Schemas.CreatedVariant;
 export type Currency = Components.Schemas.Currency;
 export type CustomContext = Components.Schemas.CustomContext;
 export type Customer = Components.Schemas.Customer;
+export type DeclaredConditionUsage = Components.Schemas.DeclaredConditionUsage;
 export type DeletedVariant = Components.Schemas.DeletedVariant;
 export type DeletedVariantVersion = Components.Schemas.DeletedVariantVersion;
 export type DiscountAmounts = Components.Schemas.DiscountAmounts;
@@ -26493,6 +27327,11 @@ export type ExternalPriceMetadata = Components.Schemas.ExternalPriceMetadata;
 export type File = Components.Schemas.File;
 export type GasConcessionType = Components.Schemas.GasConcessionType;
 export type GasMarketAreaDetails = Components.Schemas.GasMarketAreaDetails;
+export type GridOperator = Components.Schemas.GridOperator;
+export type GridOperatorCommodity = Components.Schemas.GridOperatorCommodity;
+export type GridOperatorLookupRequest = Components.Schemas.GridOperatorLookupRequest;
+export type GridOperatorResults = Components.Schemas.GridOperatorResults;
+export type GridOperatorSearchRequest = Components.Schemas.GridOperatorSearchRequest;
 export type HistoricMarketPriceRecord = Components.Schemas.HistoricMarketPriceRecord;
 export type HistoricMarketPricesResult = Components.Schemas.HistoricMarketPricesResult;
 export type HydratedCompositePrice = Components.Schemas.HydratedCompositePrice;
@@ -26504,6 +27343,7 @@ export type IntegrationCredentialsResult = Components.Schemas.IntegrationCredent
 export type IntegrationId = Components.Schemas.IntegrationId;
 export type JourneyContext = Components.Schemas.JourneyContext;
 export type ListVariantsRequest = Components.Schemas.ListVariantsRequest;
+export type LocationFormat = Components.Schemas.LocationFormat;
 export type MarketParticipant = Components.Schemas.MarketParticipant;
 export type MarkupPricingModel = Components.Schemas.MarkupPricingModel;
 export type MetaData = Components.Schemas.MetaData;
@@ -26524,6 +27364,7 @@ export type PatchVersionRequest = Components.Schemas.PatchVersionRequest;
 export type PaymentMethod = Components.Schemas.PaymentMethod;
 export type PinnedConditionValue = Components.Schemas.PinnedConditionValue;
 export type PinnedConditions = Components.Schemas.PinnedConditions;
+export type PinnedGridOperator = Components.Schemas.PinnedGridOperator;
 export type PinnedResolveOptions = Components.Schemas.PinnedResolveOptions;
 export type PortalContext = Components.Schemas.PortalContext;
 export type PostalCodeCity = Components.Schemas.PostalCodeCity;
@@ -26551,7 +27392,10 @@ export type PricingModel = Components.Schemas.PricingModel;
 export type Product = Components.Schemas.Product;
 export type ProductCategory = Components.Schemas.ProductCategory;
 export type ProductRecommendation = Components.Schemas.ProductRecommendation;
+export type ProductRecommendationOfferGroup = Components.Schemas.ProductRecommendationOfferGroup;
 export type ProductRecommendationResponse = Components.Schemas.ProductRecommendationResponse;
+export type ProductRecommendationRule = Components.Schemas.ProductRecommendationRule;
+export type ProductRecommendationRuleSource = Components.Schemas.ProductRecommendationRuleSource;
 export type ProductRecommendationSearch = Components.Schemas.ProductRecommendationSearch;
 export type PromoCode = Components.Schemas.PromoCode;
 export type PromoCodeValidationResponse = Components.Schemas.PromoCodeValidationResponse;
@@ -26598,6 +27442,7 @@ export type TaxItem = Components.Schemas.TaxItem;
 export type TierDetails = Components.Schemas.TierDetails;
 export type TotalDetails = Components.Schemas.TotalDetails;
 export type TypeGetAg = Components.Schemas.TypeGetAg;
+export type UndeclaredConditionUsage = Components.Schemas.UndeclaredConditionUsage;
 export type ValidateAvailabilityFileError = Components.Schemas.ValidateAvailabilityFileError;
 export type ValidateAvailabilityFileResult = Components.Schemas.ValidateAvailabilityFileResult;
 export type VariantConditionFilter = Components.Schemas.VariantConditionFilter;

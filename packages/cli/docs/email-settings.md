@@ -1299,6 +1299,7 @@ epilot email-settings updateOutlookMailboxSyncOptions -p email=user@example.com 
   "provider": "outlook",
   "connected_at": "1970-01-01T00:00:00.000Z",
   "connected_by_user_id": "string",
+  "mailbox_unavailable_since": "1970-01-01T00:00:00.000Z",
   "sync_options": {
     "deletion_policy": "mirror",
     "recent_window_days": 1
@@ -1585,6 +1586,7 @@ epilot email-settings getConnectedOutlookEmails --jsonata 'outlook_emails'
       "provider": "outlook",
       "connected_at": "1970-01-01T00:00:00.000Z",
       "connected_by_user_id": "string",
+      "mailbox_unavailable_since": "1970-01-01T00:00:00.000Z",
       "sync_options": {
         "deletion_policy": "mirror",
         "recent_window_days": 1

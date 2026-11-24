@@ -5,7 +5,7 @@
  * and make real API calls intercepted by msw.
  */
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
 import { http, HttpResponse } from 'msw';
@@ -212,6 +212,38 @@ describe('lazy loading', () => {
   it('index.cjs does not inline definition data', () => {
     const content = readFileSync(resolve(DIST_DIR, 'index.cjs'), 'utf-8');
     expect(content.length).toBeLessThan(50_000);
+  });
+
+  // A bundler emits a chunk for every import() an entry can reach, whether or not it ever runs.
+  it('a per-API entry reaches lazy chunks for its own docs only', () => {
+    const staticImports = (file: string): string[] =>
+      [...readFileSync(file, 'utf-8').matchAll(/from "(\.{1,2}\/[^"]+)"/g)].map((m) => resolve(dirname(file), m[1]));
+
+    const reachable = (file: string, seen = new Set<string>()): Set<string> => {
+      if (seen.has(file)) return seen;
+      seen.add(file);
+      for (const imported of staticImports(file)) reachable(imported, seen);
+
+      return seen;
+    };
+
+    const lazyImports = (entry: string): string[] =>
+      [...reachable(entry)].flatMap((file) => readFileSync(file, 'utf-8').match(/import\("[^"]+"\)/g) ?? []);
+
+    const entries = readdirSync(APIS_DIR).filter((f) => f.endsWith('.js') && !f.startsWith('_'));
+
+    for (const entry of entries) {
+      // its help() doc and, where one is checked in, its full OpenAPI spec
+      expect(lazyImports(resolve(APIS_DIR, entry)).length, entry).toBeLessThanOrEqual(2);
+    }
+  });
+
+  it('a per-API entry still serves help() and openapi()', async () => {
+    const { getClient } = await import('../dist/apis/entity.js');
+    const client = getClient();
+
+    expect(await client.help()).toContain('# Entity API');
+    expect((await client.openapi()).info.title).toBe('Entity API');
   });
 
   it('dist file structure is complete', () => {

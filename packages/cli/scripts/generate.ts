@@ -821,6 +821,7 @@ const updateReadme = (clients: ClientInfo[]): void => {
     '  auth token              Store an API token directly',
     '  auth status             Show authentication status',
     '  auth logout             Remove stored credentials',
+    '  auth browser            Open the portal in your browser, signed in with the CLI token',
     '  profile                 Manage named profiles',
     '  completion              Generate shell completion scripts',
     '',

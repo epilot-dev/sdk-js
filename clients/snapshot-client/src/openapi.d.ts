@@ -9,14 +9,50 @@ import type {
 declare namespace Components {
     namespace Responses {
         export type BadRequest = Schemas.Error;
+        export type Forbidden = Schemas.Error;
         export type NotFound = Schemas.Error;
+        export interface RestoreConflict {
+            status: 409;
+            error: string;
+            /**
+             * Snapshot targeted by the active restore lease.
+             */
+            snapshot_id?: string;
+            /**
+             * Operation index reserved by the active restore lease.
+             */
+            restore_index?: number;
+        }
         export type Unauthorized = Schemas.Error;
     }
     namespace Schemas {
+        /**
+         * Present when an agent made the call with a token carrying an `actor`
+         * claim (e.g. the epilot Admin MCP via a login-as token). `user_id`/`name`
+         * on the enclosing CallerIdentity are then the agent's token identity;
+         * `on_behalf_of` is the user the agent acted for.
+         *
+         */
+        export interface CallerActor {
+            type: "agent";
+            agent_id?: string;
+            agent_name?: string;
+            on_behalf_of?: {
+                user_id: string;
+            };
+        }
         export interface CallerIdentity {
             name: string;
             user_id?: string;
             token_id?: string;
+            actor?: /**
+             * Present when an agent made the call with a token carrying an `actor`
+             * claim (e.g. the epilot Admin MCP via a login-as token). `user_id`/`name`
+             * on the enclosing CallerIdentity are then the agent's token identity;
+             * `on_behalf_of` is the user the agent acted for.
+             *
+             */
+            CallerActor;
         }
         /**
          * Request body for `captureOrgSnapshot`. All fields optional — an empty body
@@ -88,14 +124,32 @@ declare namespace Components {
             started_at: string; // date-time
             completed_at?: string; // date-time
             /**
-             * `partial` indicates `engine.apply` reported a partial success
-             * (one or more resources failed individually) but the operation
-             * as a whole did not fail.
+             * For org creation, `partial` means at least one resource was captured
+             * and at least one was skipped or failed. A nonempty inventory with
+             * zero captured resources is `failed`; an empty inventory is `completed`.
+             * Blueprint-install captures continue to fail on any fetch failure.
+             * Restore status is the worse of engine status and outcome-derived status
+             * (failed > partial > completed). Unreported resources count as failed,
+             * except explicit pre-apply exclusions. Failed resources mixed with created, updated, or unchanged
+             * resources produce partial; failures without successful resources produce
+             * failed. Missing archived content also produces partial unless failed.
+             * Explicit caller/type exclusions alone do not make a restore partial.
              *
              */
             status: "in_progress" | "completed" | "partial" | "failed";
             error?: string;
+            summary?: /* One outcome per captured manifest resource, including exclusions. */ RestoreSummary;
+            /**
+             * Restore outcomes artifact key. Read outcomes through getRestore; this is not a download URL.
+             */
+            outcomes_s3_key?: string;
             triggered_by: CallerIdentity;
+            /**
+             * Restore only. How many target ids the caller selected with
+             * `include_target_ids`. Absent on a full restore.
+             *
+             */
+            selected_target_count?: number;
         }
         /**
          * Enrollment record for a scheduled org snapshot. One row per org.
@@ -132,10 +186,59 @@ declare namespace Components {
             schedule_name: string;
             last_started_at?: string; // date-time
             last_completed_at?: string; // date-time
-            last_status?: "completed" | "partial" | "failed";
+            last_status?: "completed" | "partial" | "failed" | "skipped";
+            /**
+             * When the last completed or partial scheduled snapshot finished.
+             */
+            last_succeeded_at?: string; // date-time
+            /**
+             * Why the last run ended as it did. With `skipped`: a restore held the org
+             * (`restore_in_progress`), and the run is retried. With `failed`: the schedule
+             * day ended without a capture, because every attempt failed
+             * (`attempts_exhausted`), a restore held the org until the day's window
+             * closed (`restore_in_progress`), or the window closed before an attempt
+             * could succeed (`window_closed`).
+             *
+             */
+            last_status_reason?: "restore_in_progress" | "attempts_exhausted" | "window_closed";
+            /**
+             * `auto` when the org was enrolled automatically as a paying customer or
+             * a sandbox of one; absent when a person enrolled it.
+             *
+             */
+            enrolled_by?: "auto";
+            /**
+             * When the org was opted out (DELETE). Present while the enrollment is
+             * disabled by an opt-out; cleared when it is enabled again.
+             *
+             */
+            opted_out_at?: string; // date-time
+            /**
+             * The user who opted the org out.
+             */
+            opted_out_by?: string;
+            /**
+             * The user who enrolled the org, or `system:auto-enroll` for an
+             * automatic enrollment.
+             *
+             */
             created_by: string;
             created_at: string; // date-time
             updated_at: string; // date-time
+            blocked?: /**
+             * No scheduled capture starts for the org until this is resolved. The admitted
+             * execution cannot be verified; epilot resolves it.
+             *
+             */
+            ScheduleBlocked;
+            /**
+             * Present when no completed or partial scheduled snapshot followed an owed
+             * schedule slot for longer than the stale threshold (48 hours by default):
+             * the time of that slot. Absent while the `run-daily-snapshots` flag is off
+             * for the org.
+             *
+             */
+            stale_since?: string; // date-time
         }
         /**
          * Body for `putOrgSnapshotSchedule`. All fields optional; unset fields
@@ -187,6 +290,66 @@ declare namespace Components {
             type: string;
             id: string;
         }
+        export interface RestoreOutcome {
+            type: string;
+            /**
+             * Engine result identity when available, otherwise captured identity. Re-created resources may have a new id.
+             */
+            id: string;
+            /**
+             * The id the resource was captured under. Absent on outcomes written before this field existed.
+             */
+            captured_id?: string;
+            lineage_id?: string;
+            /**
+             * unchanged maps the engine no-op impact. Engine 0.5.3 does not distinguish
+             * unchanged payloads from every internal skip; reason engine_no_op preserves
+             * that limitation. Explicit pre-apply exclusions are skipped.
+             *
+             */
+            action: "created" | "updated" | "unchanged" | "failed" | "skipped";
+            reason?: string;
+            error?: string;
+        }
+        /**
+         * Live progress of a running restore (present only while the operation is
+         * in_progress), read from config-engine's operation log. A resource is
+         * "matched" once found or created, "applied" once its full payload is written.
+         *
+         */
+        export interface RestoreProgress {
+            started: number;
+            matched: number;
+            applied: number;
+            failed: number;
+            phase: "preparing" | "matching" | "applying";
+            by_type: {
+                type: string;
+                started: number;
+                applied: number;
+                failed: number;
+            }[];
+            /**
+             * Latest activity first, at most 20.
+             */
+            recent: RestoreResourceProgress[];
+            /**
+             * Every resource started so far, when there are at most 500.
+             */
+            resources?: RestoreResourceProgress[];
+            updated_at?: string; // date-time
+        }
+        export interface RestoreResourceProgress {
+            type: string;
+            /**
+             * The captured id.
+             */
+            id: string;
+            target_id?: string;
+            state: "working" | "matched" | "applied" | "failed";
+            error?: string;
+            at?: string; // date-time
+        }
         /**
          * Apply a captured snapshot to its source org. snapshot-api applies the
          * manifest verbatim minus any target ids the caller pre-decided to skip.
@@ -203,10 +366,46 @@ declare namespace Components {
              *
              */
             exclude_target_ids?: string[];
+            /**
+             * Restore only these target ids. Every other captured resource is
+             * skipped with reason `not_selected` and left as it is now. Omit to
+             * restore the whole snapshot. Applied before `exclude_target_ids`.
+             * Must hold at least one id, and at least one id must match a
+             * captured resource's target id (not its lineage id), otherwise the
+             * request is rejected with 400 and no restore is recorded. Ids that
+             * match nothing in the snapshot are ignored and not counted in
+             * `selected_target_count`. There is no upper bound beyond the
+             * request body size: the list reaches the worker through S3.
+             *
+             */
+            include_target_ids?: string[];
+            /**
+             * The blueprint instance being reverted. Required when the caller
+             * restores with `blueprint:install` instead of
+             * `configuration_hub:snapshot:restore`, and must match the snapshot's
+             * own `blueprint_instance_id`.
+             *
+             */
+            blueprint_instance_id?: string;
         }
         export interface RestoreSnapshotResponse {
+            /**
+             * Index of the created restore operation in the snapshot restores array.
+             */
+            restore_index: number;
             id: string;
             status: "restoring";
+        }
+        /**
+         * One outcome per captured manifest resource, including exclusions.
+         */
+        export interface RestoreSummary {
+            total: number;
+            created: number;
+            updated: number;
+            unchanged: number;
+            failed: number;
+            skipped: number;
         }
         /**
          * Flat retention window for a scheduled snapshot.
@@ -220,12 +419,22 @@ declare namespace Components {
             value: number;
             unit: "days" | "weeks" | "months";
         }
+        /**
+         * No scheduled capture starts for the org until this is resolved. The admitted
+         * execution cannot be verified; epilot resolves it.
+         *
+         */
+        export interface ScheduleBlocked {
+            since: string; // date-time
+            reason: "execution_unverifiable";
+            execution_arn?: string;
+        }
         export interface Snapshot {
             id: string;
             org_id: string;
             name: string;
             description?: string;
-            trigger: "manual" | "sync" | "blueprint_install" | "scheduled";
+            trigger: "manual" | "sync" | "blueprint_install" | "scheduled" | "analytics";
             /**
              * Set iff `trigger === 'blueprint_install'`. The destination blueprint
              * instance this snapshot covers.
@@ -268,7 +477,11 @@ declare namespace Components {
             /**
              * Per-snapshot coverage report set by the capture worker on completion.
              * Records how many resources were attempted, captured, skipped
-             * (unsupported type or explicitly excluded), and failed.
+             * (not found, not archivable, or a user-scoped resource the capturing
+             * identity is not permitted to read), and failed. A blueprint_install capture
+             * fails if any resource fetch throws. Org captures are partial when resources
+             * were skipped or failed, and failed when a nonempty inventory captured nothing.
+             * Excluded, sensitive, or unsupported types do not count as resource skips.
              *
              */
             capture_summary?: {
@@ -281,8 +494,9 @@ declare namespace Components {
                  */
                 captured: number;
                 /**
-                 * Resources skipped — type not supported by config-engine or
-                 * excluded from capture (e.g. access_token, environment_variable).
+                 * Resources not found, not archivable, or (for user-scoped types such as
+                 * kanban, dashboard and insight) not readable by the capturing identity,
+                 * excluding thrown fetch errors.
                  *
                  */
                 skipped: number;
@@ -291,6 +505,450 @@ declare namespace Components {
                  */
                 failed: number;
             };
+            /**
+             * Bounded sample of skipped identities (at most 20 entries and 2 KiB of JSON).
+             * Complete identities are retained in internal S3 capture artifacts.
+             * Present on finalized captures; absent on older snapshots.
+             *
+             */
+            skipped_resources?: [
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    /**
+                     * Why the resource is not in the snapshot. `not found` when it no longer
+                     * resolves; `permission_denied` when a user-scoped resource (kanban,
+                     * dashboard, insight) is owned by another user and the capturing identity
+                     * cannot read it, which also means it cannot be changed by that identity,
+                     * or when a manual org snapshot's user is not allowed to read the resource;
+                     * `owned_by_other_org` when the inventory lists a resource owned by another
+                     * organization (a partner role or shared resource), which is not this
+                     * organization's configuration; otherwise the content-archive reason.
+                     *
+                     */
+                    reason: string;
+                }?
+            ];
+            /**
+             * True when skipped_resources contains fewer identities than capture_summary.skipped.
+             */
+            skipped_resources_truncated?: boolean;
+            /**
+             * Bounded sample of identities whose fetch threw (at most 20 entries and 2 KiB of JSON),
+             * each with the error message as `reason`. Complete identities are retained in internal
+             * S3 capture artifacts. Present on finalized captures; absent on older snapshots.
+             *
+             */
+            failed_resources?: [
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?,
+                {
+                    type: string;
+                    id: string;
+                    reason: string;
+                }?
+            ];
+            /**
+             * True when failed_resources contains fewer identities than capture_summary.failed.
+             */
+            failed_resources_truncated?: boolean;
         }
         /**
          * A single captured resource with its full payload. The identity fields
@@ -358,6 +1016,7 @@ declare namespace Paths {
         namespace Responses {
             export type $202 = Components.Schemas.CreateSnapshotResponse;
             export type $401 = Components.Responses.Unauthorized;
+            export type $409 = Components.Responses.RestoreConflict;
         }
     }
     namespace CreateSnapshot {
@@ -366,6 +1025,7 @@ declare namespace Paths {
             export type $202 = Components.Schemas.CreateSnapshotResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $409 = Components.Responses.RestoreConflict;
         }
     }
     namespace DeleteOrgSnapshotSchedule {
@@ -374,6 +1034,8 @@ declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $404 = Components.Responses.NotFound;
+            export interface $502 {
+            }
         }
     }
     namespace DeleteSnapshot {
@@ -382,6 +1044,7 @@ declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.RestoreConflict;
         }
     }
     namespace GetOrgSnapshotSchedule {
@@ -394,6 +1057,49 @@ declare namespace Paths {
              *
              */
             Components.Schemas.OrgSnapshotSchedule;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
+        }
+    }
+    namespace GetRestore {
+        namespace Parameters {
+            export type Action = string;
+            export type Id = string;
+            export type Index = number;
+            export type Limit = number;
+            export type Offset = number;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+            index: Parameters.Index;
+        }
+        export interface QueryParameters {
+            offset?: Parameters.Offset;
+            limit?: Parameters.Limit;
+            action?: Parameters.Action;
+        }
+        namespace Responses {
+            export interface $200 {
+                operation: Components.Schemas.Operation;
+                outcomes: Components.Schemas.RestoreOutcome[];
+                outcomes_available: boolean;
+                /**
+                 * Resources the restore covers — the selection, or everything captured.
+                 */
+                total?: number;
+                progress?: /**
+                 * Live progress of a running restore (present only while the operation is
+                 * in_progress), read from config-engine's operation log. A resource is
+                 * "matched" once found or created, "applied" once its full payload is written.
+                 *
+                 */
+                Components.Schemas.RestoreProgress;
+                /**
+                 * Omitted on the last page.
+                 */
+                next_offset?: number;
+            }
+            export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $404 = Components.Responses.NotFound;
         }
@@ -442,7 +1148,7 @@ declare namespace Paths {
             export type Cursor = string;
             export type Resource = string /* ^[^:]+:.+$ */[];
             export type Size = number;
-            export type Trigger = "manual" | "sync" | "blueprint_install" | "scheduled";
+            export type Trigger = "manual" | "sync" | "blueprint_install" | "scheduled" | "analytics";
         }
         export interface QueryParameters {
             cursor?: Parameters.Cursor;
@@ -484,6 +1190,8 @@ declare namespace Paths {
             Components.Schemas.OrgSnapshotSchedule;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export interface $502 {
+            }
         }
     }
     namespace RestoreSnapshot {
@@ -498,8 +1206,10 @@ declare namespace Paths {
         Components.Schemas.RestoreSnapshotRequest;
         namespace Responses {
             export type $202 = Components.Schemas.RestoreSnapshotResponse;
+            export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.RestoreConflict;
         }
     }
     namespace V1Snapshots$Id {
@@ -564,6 +1274,11 @@ export interface OperationMethods {
    * with a snapshot ID; client polls `getSnapshot` until `create.status`
    * moves from `in_progress` to `completed` or `failed`.
    * 
+   * Sensitive types and types with no engine adapter are dropped before
+   * capture. A `blueprint_install` snapshot instead rejects a type with no
+   * engine adapter (400), so an install never runs with resources it cannot
+   * roll back.
+   * 
    */
   'createSnapshot'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -579,8 +1294,9 @@ export interface OperationMethods {
    * org's configuration resources from configuration-hub-api, persists it as
    * an inventory artifact, and captures each resource. Client polls
    * `getSnapshot` and watches `capture_summary` fill in until `create.status`
-   * moves from `in_progress` to `completed` or `failed`. An org with no
-   * capturable resources finalizes as a completed 0-resource snapshot.
+   * moves from `in_progress` to `completed`, `partial`, or `failed`. An empty
+   * inventory finalizes as a completed 0-resource snapshot. A nonempty
+   * inventory with zero captured resources fails.
    * 
    * Sensitive types (`access_token`, `environment_variable`), types with no
    * engine adapter, and any `excluded_types` are dropped from the capture and
@@ -605,7 +1321,10 @@ export interface OperationMethods {
   /**
    * deleteSnapshot - deleteSnapshot
    * 
-   * Delete a snapshot's metadata and S3 manifest.
+   * Delete a snapshot's metadata and S3 manifest. Refused with 409 while the
+   * snapshot is still being created, while one of its restores is in progress,
+   * or while the organization holds a restore lease.
+   * 
    */
   'deleteSnapshot'(
     parameters?: Parameters<Paths.V1Snapshots$Id.PathParameters> | null,
@@ -613,14 +1332,33 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSnapshot.Responses.$204>
   /**
+   * getRestore - getRestore
+   * 
+   * Fetch a restore operation and a page of per-resource outcomes in manifest order.
+   * Pagination bounds response size for org snapshots; the compressed artifact is
+   * read in full for each page. Outcomes are immutable once published. Historical,
+   * in-progress, or early-failed operations may have no artifact: outcomes_available
+   * is false and outcomes is empty. A published but missing artifact returns 404.
+   * 
+   */
+  'getRestore'(
+    parameters?: Parameters<Paths.GetRestore.QueryParameters & Paths.GetRestore.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetRestore.Responses.$200>
+  /**
    * restoreSnapshot - restoreSnapshot
    * 
    * Restore a snapshot to the org. Async — returns immediately; client polls
-   * `getSnapshot` until the latest entry in `restores` moves from
+   * `getSnapshot` until `restores[restore_index]` (using the index returned by this POST) moves from
    * `in_progress` to one of `completed | partial | failed`.
    * 
-   * v1: full restore only. Cherry-pick (`resources?` body filter) is an open
-   * question — see RFC OQ #1.
+   * Completed captures and partial org captures can be restored. A partial
+   * org capture restores only the resources that were captured.
+   * 
+   * Pass `include_target_ids` to restore only the chosen resources; every
+   * other captured resource is left as it is now. A selection that names
+   * no captured resource is rejected with 400 before a restore is started.
    * 
    */
   'restoreSnapshot'(
@@ -660,8 +1398,11 @@ export interface OperationMethods {
   /**
    * getOrgSnapshotSchedule - getOrgSnapshotSchedule
    * 
-   * Return the scheduled-snapshot enrollment config for the caller's org.
-   * Returns 404 when the org has not yet enrolled.
+   * Return the scheduled-snapshot enrollment config for the caller's org,
+   * with `blocked` while no scheduled capture can start and `stale_since`
+   * while scheduled captures have stopped succeeding.
+   * Returns 404 when the org has never been enrolled; an org that opted
+   * out returns its disabled enrollment with `opted_out_at`.
    * 
    */
   'getOrgSnapshotSchedule'(
@@ -673,8 +1414,8 @@ export interface OperationMethods {
    * putOrgSnapshotSchedule - putOrgSnapshotSchedule
    * 
    * Create or update the scheduled-snapshot enrollment config for the
-   * caller's org (upsert). The cron expression and retention window are
-   * validated server-side; invalid values are rejected with 400.
+   * caller's org (upsert). The cron expression, timezone and retention
+   * window are validated server-side; invalid values are rejected with 400.
    * 
    * Defaults applied when a field is omitted on first create:
    *   - `cron_expression`: `cron(0 2 * * ? *)` (daily at 02:00)
@@ -682,9 +1423,10 @@ export interface OperationMethods {
    *   - `retention`: `{ value: 90, unit: "days" }`
    *   - `enabled`: `true`
    * 
-   * **Note:** this call persists the row only. EventBridge schedule
-   * materialization is performed by a subsequent reconcile step (Task 6).
-   * The row is the authoritative source of truth for the UI.
+   * The EventBridge schedule is created, updated or (when `enabled` is
+   * false) removed first; the row is persisted only after that succeeds.
+   * A Scheduler failure returns 502 and leaves the stored config unchanged.
+   * A daily reconcile repairs any remaining drift between rows and schedules.
    * 
    */
   'putOrgSnapshotSchedule'(
@@ -695,10 +1437,15 @@ export interface OperationMethods {
   /**
    * deleteOrgSnapshotSchedule - deleteOrgSnapshotSchedule
    * 
-   * Remove the scheduled-snapshot enrollment for the caller's org.
-   * Returns 404 when no schedule exists.
-   * The corresponding EventBridge schedule is removed by a reconcile
-   * step (Task 6).
+   * Opt the caller's org out of scheduled snapshots. The EventBridge
+   * schedule is removed and the enrollment is kept, disabled, with
+   * `opted_out_at` and `opted_out_by`, so no scheduled snapshot is taken
+   * and automatic enrollment never enrolls the org again. A PUT with
+   * `enabled: true` enrolls it again and clears the opt-out.
+   * Returns 404 when the org has no enrollment.
+   * The EventBridge schedule is removed first; the row is disabled only
+   * after that succeeds. A Scheduler failure returns 502 and leaves the
+   * enrollment unchanged so the call can be retried.
    * 
    */
   'deleteOrgSnapshotSchedule'(
@@ -731,6 +1478,11 @@ export interface PathsDictionary {
      * Create a new snapshot of the given resources. Async — returns immediately
      * with a snapshot ID; client polls `getSnapshot` until `create.status`
      * moves from `in_progress` to `completed` or `failed`.
+     * 
+     * Sensitive types and types with no engine adapter are dropped before
+     * capture. A `blueprint_install` snapshot instead rejects a type with no
+     * engine adapter (400), so an install never runs with resources it cannot
+     * roll back.
      * 
      */
     'post'(
@@ -766,8 +1518,9 @@ export interface PathsDictionary {
      * org's configuration resources from configuration-hub-api, persists it as
      * an inventory artifact, and captures each resource. Client polls
      * `getSnapshot` and watches `capture_summary` fill in until `create.status`
-     * moves from `in_progress` to `completed` or `failed`. An org with no
-     * capturable resources finalizes as a completed 0-resource snapshot.
+     * moves from `in_progress` to `completed`, `partial`, or `failed`. An empty
+     * inventory finalizes as a completed 0-resource snapshot. A nonempty
+     * inventory with zero captured resources fails.
      * 
      * Sensitive types (`access_token`, `environment_variable`), types with no
      * engine adapter, and any `excluded_types` are dropped from the capture and
@@ -794,7 +1547,10 @@ export interface PathsDictionary {
     /**
      * deleteSnapshot - deleteSnapshot
      * 
-     * Delete a snapshot's metadata and S3 manifest.
+     * Delete a snapshot's metadata and S3 manifest. Refused with 409 while the
+     * snapshot is still being created, while one of its restores is in progress,
+     * or while the organization holds a restore lease.
+     * 
      */
     'delete'(
       parameters?: Parameters<Paths.V1Snapshots$Id.PathParameters> | null,
@@ -802,16 +1558,37 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSnapshot.Responses.$204>
   }
+  ['/v1/snapshots/{id}/restores/{index}']: {
+    /**
+     * getRestore - getRestore
+     * 
+     * Fetch a restore operation and a page of per-resource outcomes in manifest order.
+     * Pagination bounds response size for org snapshots; the compressed artifact is
+     * read in full for each page. Outcomes are immutable once published. Historical,
+     * in-progress, or early-failed operations may have no artifact: outcomes_available
+     * is false and outcomes is empty. A published but missing artifact returns 404.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetRestore.QueryParameters & Paths.GetRestore.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetRestore.Responses.$200>
+  }
   ['/v1/snapshots/{id}:restore']: {
     /**
      * restoreSnapshot - restoreSnapshot
      * 
      * Restore a snapshot to the org. Async — returns immediately; client polls
-     * `getSnapshot` until the latest entry in `restores` moves from
+     * `getSnapshot` until `restores[restore_index]` (using the index returned by this POST) moves from
      * `in_progress` to one of `completed | partial | failed`.
      * 
-     * v1: full restore only. Cherry-pick (`resources?` body filter) is an open
-     * question — see RFC OQ #1.
+     * Completed captures and partial org captures can be restored. A partial
+     * org capture restores only the resources that were captured.
+     * 
+     * Pass `include_target_ids` to restore only the chosen resources; every
+     * other captured resource is left as it is now. A selection that names
+     * no captured resource is rejected with 400 before a restore is started.
      * 
      */
     'post'(
@@ -857,8 +1634,11 @@ export interface PathsDictionary {
     /**
      * getOrgSnapshotSchedule - getOrgSnapshotSchedule
      * 
-     * Return the scheduled-snapshot enrollment config for the caller's org.
-     * Returns 404 when the org has not yet enrolled.
+     * Return the scheduled-snapshot enrollment config for the caller's org,
+     * with `blocked` while no scheduled capture can start and `stale_since`
+     * while scheduled captures have stopped succeeding.
+     * Returns 404 when the org has never been enrolled; an org that opted
+     * out returns its disabled enrollment with `opted_out_at`.
      * 
      */
     'get'(
@@ -870,8 +1650,8 @@ export interface PathsDictionary {
      * putOrgSnapshotSchedule - putOrgSnapshotSchedule
      * 
      * Create or update the scheduled-snapshot enrollment config for the
-     * caller's org (upsert). The cron expression and retention window are
-     * validated server-side; invalid values are rejected with 400.
+     * caller's org (upsert). The cron expression, timezone and retention
+     * window are validated server-side; invalid values are rejected with 400.
      * 
      * Defaults applied when a field is omitted on first create:
      *   - `cron_expression`: `cron(0 2 * * ? *)` (daily at 02:00)
@@ -879,9 +1659,10 @@ export interface PathsDictionary {
      *   - `retention`: `{ value: 90, unit: "days" }`
      *   - `enabled`: `true`
      * 
-     * **Note:** this call persists the row only. EventBridge schedule
-     * materialization is performed by a subsequent reconcile step (Task 6).
-     * The row is the authoritative source of truth for the UI.
+     * The EventBridge schedule is created, updated or (when `enabled` is
+     * false) removed first; the row is persisted only after that succeeds.
+     * A Scheduler failure returns 502 and leaves the stored config unchanged.
+     * A daily reconcile repairs any remaining drift between rows and schedules.
      * 
      */
     'put'(
@@ -892,10 +1673,15 @@ export interface PathsDictionary {
     /**
      * deleteOrgSnapshotSchedule - deleteOrgSnapshotSchedule
      * 
-     * Remove the scheduled-snapshot enrollment for the caller's org.
-     * Returns 404 when no schedule exists.
-     * The corresponding EventBridge schedule is removed by a reconcile
-     * step (Task 6).
+     * Opt the caller's org out of scheduled snapshots. The EventBridge
+     * schedule is removed and the enrollment is kept, disabled, with
+     * `opted_out_at` and `opted_out_by`, so no scheduled snapshot is taken
+     * and automatic enrollment never enrolls the org again. A PUT with
+     * `enabled: true` enrolls it again and clears the opt-out.
+     * Returns 404 when the org has no enrollment.
+     * The EventBridge schedule is removed first; the row is disabled only
+     * after that succeeds. A Scheduler failure returns 502 and leaves the
+     * enrollment unchanged so the call can be retried.
      * 
      */
     'delete'(
@@ -926,6 +1712,7 @@ export interface PathsDictionary {
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type CallerActor = Components.Schemas.CallerActor;
 export type CallerIdentity = Components.Schemas.CallerIdentity;
 export type CreateOrgSnapshotRequest = Components.Schemas.CreateOrgSnapshotRequest;
 export type CreateSnapshotRequest = Components.Schemas.CreateSnapshotRequest;
@@ -935,9 +1722,14 @@ export type Operation = Components.Schemas.Operation;
 export type OrgSnapshotSchedule = Components.Schemas.OrgSnapshotSchedule;
 export type PutOrgSnapshotScheduleRequest = Components.Schemas.PutOrgSnapshotScheduleRequest;
 export type ResourceRef = Components.Schemas.ResourceRef;
+export type RestoreOutcome = Components.Schemas.RestoreOutcome;
+export type RestoreProgress = Components.Schemas.RestoreProgress;
+export type RestoreResourceProgress = Components.Schemas.RestoreResourceProgress;
 export type RestoreSnapshotRequest = Components.Schemas.RestoreSnapshotRequest;
 export type RestoreSnapshotResponse = Components.Schemas.RestoreSnapshotResponse;
+export type RestoreSummary = Components.Schemas.RestoreSummary;
 export type RetentionConfig = Components.Schemas.RetentionConfig;
+export type ScheduleBlocked = Components.Schemas.ScheduleBlocked;
 export type Snapshot = Components.Schemas.Snapshot;
 export type SnapshotResourceDetail = Components.Schemas.SnapshotResourceDetail;
 export type SnapshotResourceList = Components.Schemas.SnapshotResourceList;

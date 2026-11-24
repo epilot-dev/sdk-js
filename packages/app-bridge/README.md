@@ -169,6 +169,23 @@ Get the current session (throws if not initialized).
 const { token, lang } = getSession();
 ```
 
+#### `getOptions<T>(): Partial<T>`
+
+Get the option values an admin configured for this app's installation (the manifest `options`).
+They arrive with the init handshake, so no App API call is needed.
+
+```typescript
+await initialize();
+
+const { api_region } = getOptions<{ api_region?: string }>();
+```
+
+- Only non-sensitive options are included. Secrets and options declared `sensitive` never reach
+  the browser — use an API proxy or an app function for anything that needs them.
+- Returns `{}` when the host provided no options (an older epilot host, or a user who may not
+  read the installation), so treat every key as optional.
+- Throws `AppBridgeNotInitializedError` when called before `initialize()`.
+
 #### `isInitialized(): boolean`
 
 Check if the app bridge has been initialized.

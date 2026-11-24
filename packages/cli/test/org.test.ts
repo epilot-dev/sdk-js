@@ -218,7 +218,7 @@ describe('epilot org', () => {
       reason: 'epilot CLI: access to organization 911210',
     });
     expect(open).toHaveBeenCalledWith(expect.stringContaining('agent_approval=REQQ-1234'));
-    expect(output.out.stdout).toContain('Verification code: \x1b[1mREQQ-1234');
+    expect(stripAnsi(output.out.stdout)).toContain('Verification code: REQQ-1234');
     // waited for the grant, then issued under the granted profile
     expect(state.executions.at(-1)?.body).toEqual({
       capability: 'epilot.access_token.issue',

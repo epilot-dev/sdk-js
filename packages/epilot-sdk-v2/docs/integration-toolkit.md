@@ -41,6 +41,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`getIntegration`](#getintegration)
 - [`updateIntegration`](#updateintegration)
 - [`deleteIntegration`](#deleteintegration)
+- [`getIntegrationConfig`](#getintegrationconfig)
 - [`queryEvents`](#queryevents)
 - [`replayEvents`](#replayevents)
 - [`listUseCases`](#listusecases)
@@ -58,6 +59,9 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`getIntegrationV2`](#getintegrationv2)
 - [`updateIntegrationV2`](#updateintegrationv2)
 - [`deleteIntegrationV2`](#deleteintegrationv2)
+- [`bootstrapIntegrationLifecycle`](#bootstrapintegrationlifecycle)
+- [`notifyIntegrationConfigChanged`](#notifyintegrationconfigchanged)
+- [`getIntegrationLifecycle`](#getintegrationlifecycle)
 - [`listNotificationHistory`](#listnotificationhistory)
 - [`testSendNotification`](#testsendnotification)
 - [`getNotificationStatus`](#getnotificationstatus)
@@ -107,7 +111,44 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`executeErpImport`](#executeerpimport)
 - [`abortErpImport`](#aborterpimport)
 
+**imports**
+- [`createImport`](#createimport)
+- [`listImports`](#listimports)
+- [`getImport`](#getimport)
+- [`deleteImport`](#deleteimport)
+- [`validateImport`](#validateimport)
+- [`suggestImportTemplates`](#suggestimporttemplates)
+- [`executeImport`](#executeimport)
+- [`abortImport`](#abortimport)
+- [`getImportResults`](#getimportresults)
+- [`downloadImportFile`](#downloadimportfile)
+- [`listImportTemplates`](#listimporttemplates)
+- [`createImportTemplate`](#createimporttemplate)
+- [`getImportTemplate`](#getimporttemplate)
+- [`updateImportTemplate`](#updateimporttemplate)
+- [`deleteImportTemplate`](#deleteimporttemplate)
+
+**bulk-imports**
+- [`getBulkImportWindow`](#getbulkimportwindow)
+- [`putBulkImportWindow`](#putbulkimportwindow)
+- [`deleteBulkImportWindow`](#deletebulkimportwindow)
+
 **Schemas**
+- [`CreateImportRequest`](#createimportrequest)
+- [`CreateImportResponse`](#createimportresponse)
+- [`ExecuteImportRequest`](#executeimportrequest)
+- [`ImportJob`](#importjob)
+- [`ImportList`](#importlist)
+- [`ImportResults`](#importresults)
+- [`ImportFailedRow`](#importfailedrow)
+- [`ImportTemplate`](#importtemplate)
+- [`ImportTemplateList`](#importtemplatelist)
+- [`ImportTemplateSuggestion`](#importtemplatesuggestion)
+- [`SuggestImportTemplatesResponse`](#suggestimporttemplatesresponse)
+- [`UpsertImportTemplateRequest`](#upsertimporttemplaterequest)
+- [`ImportTemplateGroupByColumn`](#importtemplategroupbycolumn)
+- [`ImportTemplateSourceMapping`](#importtemplatesourcemapping)
+- [`ValidateImportRequest`](#validateimportrequest)
 - [`S3Reference`](#s3reference)
 - [`CreateErpImportRequest`](#createerpimportrequest)
 - [`ValidateErpImportRequest`](#validateerpimportrequest)
@@ -117,6 +158,8 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`ErpImportIssue`](#erpimportissue)
 - [`ErpImportValidation`](#erpimportvalidation)
 - [`ErpImportEntityDetail`](#erpimportentitydetail)
+- [`ImportSuggestion`](#importsuggestion)
+- [`ImportWriting`](#importwriting)
 - [`ErpImportProgress`](#erpimportprogress)
 - [`ErpImportError`](#erpimporterror)
 - [`ErpImportFilePreview`](#erpimportfilepreview)
@@ -149,6 +192,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`TriggerErpActionRequest`](#triggererpactionrequest)
 - [`TriggerWebhookResp`](#triggerwebhookresp)
 - [`IntegrationEditableFields`](#integrationeditablefields)
+- [`IntegrationConfigPush`](#integrationconfigpush)
 - [`ConnectorConfig`](#connectorconfig)
 - [`ManagedCallAuth`](#managedcallauth)
 - [`Integration`](#integration)
@@ -156,6 +200,9 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`UpdateIntegrationRequest`](#updateintegrationrequest)
 - [`IntegrationMap`](#integrationmap)
 - [`EnvironmentFieldConfig`](#environmentfieldconfig)
+- [`IntegrationConfig`](#integrationconfig)
+- [`IntegrationLifecycleDelivery`](#integrationlifecycledelivery)
+- [`IntegrationLifecycle`](#integrationlifecycle)
 - [`IntegrationSettings`](#integrationsettings)
 - [`AutoRefreshSettings`](#autorefreshsettings)
 - [`IntegrationNotificationConfig`](#integrationnotificationconfig)
@@ -173,6 +220,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`IntegrationEntity`](#integrationentity)
 - [`IntegrationEntitySharing`](#integrationentitysharing)
 - [`IntegrationEntitySharingPartner`](#integrationentitysharingpartner)
+- [`IntegrationEntitySharingPartnerLookup`](#integrationentitysharingpartnerlookup)
 - [`IntegrationEntityConditional`](#integrationentityconditional)
 - [`IntegrationEntityFromRows`](#integrationentityfromrows)
 - [`MappedFieldValue`](#mappedfieldvalue)
@@ -216,6 +264,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`UpdateFileProxyUseCaseRequest`](#updatefileproxyusecaserequest)
 - [`UpdateManagedCallUseCaseRequest`](#updatemanagedcallusecaserequest)
 - [`UpdateSecureProxyUseCaseRequest`](#updatesecureproxyusecaserequest)
+- [`UseCaseChangeActor`](#usecasechangeactor)
 - [`UseCaseHistoryEntry`](#usecasehistoryentry)
 - [`UseCaseHistoryEntryBase`](#usecasehistoryentrybase)
 - [`InboundUseCaseHistoryEntry`](#inboundusecasehistoryentry)
@@ -340,6 +389,12 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`DocumentationPageSummary`](#documentationpagesummary)
 - [`DocumentationPage`](#documentationpage)
 - [`UpsertDocumentationPageRequest`](#upsertdocumentationpagerequest)
+- [`BulkImportWindowRequest`](#bulkimportwindowrequest)
+- [`BulkImportWindow`](#bulkimportwindow)
+- [`BulkImportLane`](#bulkimportlane)
+- [`BulkImportWindowLimits`](#bulkimportwindowlimits)
+- [`BulkImportWindowStatus`](#bulkimportwindowstatus)
+- [`BulkImportWindowRefusal`](#bulkimportwindowrefusal)
 
 ### `acknowledgeTracking`
 
@@ -443,6 +498,8 @@ const { data } = await client.processErpUpdatesEventsV3(
 
 ```json
 {
+  "code": "REQUEST_TOO_WIDE",
+  "message": "string",
   "correlation_id": "string",
   "correlation_close": {
     "outcome": "applied",
@@ -455,7 +512,8 @@ const { data } = await client.processErpUpdatesEventsV3(
       "status": "success",
       "interactive": true,
       "lane": "interactive",
-      "message": "string"
+      "message": "string",
+      "code": "EVENT_TOO_WIDE"
     }
   ]
 }
@@ -949,7 +1007,7 @@ const { data } = await client.simulateMapping(
 
 ### `listIntegrations`
 
-Retrieve all integrations for the authenticated organization
+Retrieve all integrations for the authenticated organization. Integrations backing import templates (`integration_type: file_import`) are not listed.
 
 `GET /v1/integrations`
 
@@ -978,6 +1036,8 @@ const { data } = await client.listIntegrations()
       "integration_type": "erp",
       "connector_config": {},
       "protected": true,
+      "config_push": {},
+      "api_key_role": "string",
       "_manifest": ["string"]
     }
   ]
@@ -1061,6 +1121,11 @@ const { data } = await client.createIntegration(
       latest_types_package_name: 'string'
     },
     protected: true,
+    config_push: {
+      enabled: true,
+      webhook_url: 'https://example.com/path'
+    },
+    api_key_role: 'string',
     _manifest: ['string']
   },
 )
@@ -1138,6 +1203,11 @@ const { data } = await client.createIntegration(
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "config_push": {
+    "enabled": true,
+    "webhook_url": "https://example.com/path"
+  },
+  "api_key_role": "string",
   "_manifest": ["string"]
 }
 ```
@@ -1230,6 +1300,11 @@ const { data } = await client.getIntegration({
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "config_push": {
+    "enabled": true,
+    "webhook_url": "https://example.com/path"
+  },
+  "api_key_role": "string",
   "_manifest": ["string"]
 }
 ```
@@ -1325,6 +1400,11 @@ const { data } = await client.updateIntegration(
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "config_push": {
+    "enabled": true,
+    "webhook_url": "https://example.com/path"
+  },
+  "api_key_role": "string",
   "_manifest": ["string"]
 }
 ```
@@ -1351,6 +1431,39 @@ const { data } = await client.deleteIntegration({
 ```json
 {
   "message": "string"
+}
+```
+
+</details>
+
+---
+
+### `getIntegrationConfig`
+
+The configuration of an integration for its middleware: the org's
+environment variables named in the integration's `environment_config`,
+**secrets included**.
+
+`GET /v1/integrations/{integrationId}/config`
+
+```ts
+const { data } = await client.getIntegrationConfig({
+  integrationId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "org_id": "string",
+  "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "version": 0,
+  "environment": {
+    "tap.base_url": "https://example.com/api",
+    "tap.client_secret": "…"
+  }
 }
 ```
 
@@ -1480,6 +1593,7 @@ const { data } = await client.listUseCases({
       "enabled": true,
       "change_description": "string",
       "changed_by": "string",
+      "changed_by_actor": {},
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "configuration": {}
@@ -1535,6 +1649,12 @@ const { data } = await client.createUseCase(
   "enabled": true,
   "change_description": "string",
   "changed_by": "string",
+  "changed_by_actor": {
+    "type": "app",
+    "app_id": "string",
+    "agent_id": "string",
+    "agent_name": "string"
+  },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "configuration": {
@@ -1580,6 +1700,12 @@ const { data } = await client.getUseCase({
   "enabled": true,
   "change_description": "string",
   "changed_by": "string",
+  "changed_by_actor": {
+    "type": "app",
+    "app_id": "string",
+    "agent_id": "string",
+    "agent_name": "string"
+  },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "configuration": {
@@ -1644,6 +1770,12 @@ const { data } = await client.updateUseCase(
   "enabled": true,
   "change_description": "string",
   "changed_by": "string",
+  "changed_by_actor": {
+    "type": "app",
+    "app_id": "string",
+    "agent_id": "string",
+    "agent_name": "string"
+  },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "configuration": {
@@ -1720,6 +1852,7 @@ const { data } = await client.listUseCaseHistory({
       "enabled": true,
       "change_description": "string",
       "changed_by": "string",
+      "changed_by_actor": {},
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "history_created_at": "1970-01-01T00:00:00.000Z",
@@ -1881,7 +2014,7 @@ const { data } = await client.deleteDocumentationPage({
 
 ### `listIntegrationsV2`
 
-Retrieve all integrations with embedded use cases for the authenticated organization
+Retrieve all integrations with embedded use cases for the authenticated organization. Integrations backing import templates (`integration_type: file_import`) are not listed.
 
 `GET /v2/integrations`
 
@@ -1910,6 +2043,8 @@ const { data } = await client.listIntegrationsV2()
       "integration_type": "erp",
       "connector_config": {},
       "protected": true,
+      "config_push": {},
+      "api_key_role": "string",
       "_manifest": ["string"],
       "use_cases": []
     }
@@ -1994,6 +2129,11 @@ const { data } = await client.createIntegrationV2(
       latest_types_package_name: 'string'
     },
     protected: true,
+    config_push: {
+      enabled: true,
+      webhook_url: 'https://example.com/path'
+    },
+    api_key_role: 'string',
     _manifest: ['string'],
     use_cases: [
       {
@@ -2082,6 +2222,11 @@ const { data } = await client.createIntegrationV2(
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "config_push": {
+    "enabled": true,
+    "webhook_url": "https://example.com/path"
+  },
+  "api_key_role": "string",
   "_manifest": ["string"],
   "use_cases": [
     {
@@ -2093,6 +2238,7 @@ const { data } = await client.createIntegrationV2(
       "enabled": true,
       "change_description": "string",
       "changed_by": "string",
+      "changed_by_actor": {},
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "configuration": {}
@@ -2189,6 +2335,11 @@ const { data } = await client.getIntegrationV2({
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "config_push": {
+    "enabled": true,
+    "webhook_url": "https://example.com/path"
+  },
+  "api_key_role": "string",
   "_manifest": ["string"],
   "use_cases": [
     {
@@ -2200,6 +2351,7 @@ const { data } = await client.getIntegrationV2({
       "enabled": true,
       "change_description": "string",
       "changed_by": "string",
+      "changed_by_actor": {},
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "configuration": {}
@@ -2291,6 +2443,11 @@ const { data } = await client.updateIntegrationV2(
       latest_types_package_name: 'string'
     },
     protected: true,
+    config_push: {
+      enabled: true,
+      webhook_url: 'https://example.com/path'
+    },
+    api_key_role: 'string',
     _manifest: ['string'],
     use_cases: [
       {
@@ -2379,6 +2536,11 @@ const { data } = await client.updateIntegrationV2(
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "config_push": {
+    "enabled": true,
+    "webhook_url": "https://example.com/path"
+  },
+  "api_key_role": "string",
   "_manifest": ["string"],
   "use_cases": [
     {
@@ -2390,6 +2552,7 @@ const { data } = await client.updateIntegrationV2(
       "enabled": true,
       "change_description": "string",
       "changed_by": "string",
+      "changed_by_actor": {},
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "configuration": {}
@@ -2420,6 +2583,104 @@ const { data } = await client.deleteIntegrationV2({
 ```json
 {
   "message": "string"
+}
+```
+
+</details>
+
+---
+
+### `bootstrapIntegrationLifecycle`
+
+Bootstraps the integration's middleware, or re-bootstraps it: issues a
+new apiKey with the org role the integration names (the previous key is
+revoked), a new signing secret and a new lifecycle versio
+
+`POST /v2/integrations/{integrationId}:bootstrap`
+
+```ts
+const { data } = await client.bootstrapIntegrationLifecycle({
+  integrationId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "action": "CREATE",
+  "version": 1,
+  "status_code": 0,
+  "response": "string",
+  "delivered_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `notifyIntegrationConfigChanged`
+
+Tells the integration's middleware that its configuration changed: sends
+the lifecycle webhook `UPDATE`, signed with the integration's signing
+secret (Standard Webhooks `v1`) and with a new lifecycle 
+
+`POST /v2/integrations/{integrationId}:config-changed`
+
+```ts
+const { data } = await client.notifyIntegrationConfigChanged({
+  integrationId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "action": "CREATE",
+  "version": 1,
+  "status_code": 0,
+  "response": "string",
+  "delivered_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `getIntegrationLifecycle`
+
+The integration's bootstrap status: whether lifecycle webhooks are
+enabled (the integration's `config_push` and the org's rollout flag),
+whether the middleware is bootstrapped, the current lifecycle v
+
+`GET /v2/integrations/{integrationId}/lifecycle`
+
+```ts
+const { data } = await client.getIntegrationLifecycle({
+  integrationId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "enabled": true,
+  "bootstrapped": true,
+  "version": 0,
+  "last_delivery": {
+    "action": "CREATE",
+    "version": 1,
+    "status_code": 0,
+    "response": "string",
+    "delivered_at": "1970-01-01T00:00:00.000Z"
+  }
 }
 ```
 
@@ -2650,6 +2911,12 @@ const { data } = await client.listSecureProxyWhitelistHistory({
       "enabled": true,
       "change_description": "string",
       "changed_by": "string",
+      "changed_by_actor": {
+        "type": "app",
+        "app_id": "string",
+        "agent_id": "string",
+        "agent_name": "string"
+      },
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "history_created_at": "1970-01-01T00:00:00.000Z",
@@ -3732,6 +3999,7 @@ const { data } = await client.createErpImport(
     "created_by": "string",
     "integration_id": "string",
     "use_case_slug": "string",
+    "template_name": "string",
     "format": "csv",
     "status": "PENDING",
     "s3_input_ref": {
@@ -3745,49 +4013,33 @@ const { data } = await client.createErpImport(
       "blocking": 0,
       "warnings": 0,
       "entities": {},
-      "entity_details": [
-        {
-          "mapping_index": 0,
-          "entity_schema": "string",
-          "business_key": {},
-          "variants": 0,
-          "versions": 0,
-          "condition_attributes": ["grid_area"],
-          "version_attribute": "valid_from"
-        }
-      ],
-      "issues": [
-        {
-          "code": "UNIQUE_ID_COLUMN_MISSING",
-          "severity": "warning",
-          "columns": [
-            {
-              "name": "string",
-              "entity": "string"
-            }
-          ],
-          "attributes": [
-            {
-              "name": "string",
-              "entity": "string"
-            }
-          ],
-          "lines": [0],
-          "subject": "string",
-          "row": 0,
-          "expected": "number"
-        }
-      ]
+      "entity_details": [],
+      "meter_readings": {},
+      "issues": []
     },
     "progress": {
       "processed_rows": 0,
       "total_rows": 0,
-      "events_published": 0
+      "events_published": 0,
+      "waiting_for_capacity": {}
     },
     "error": {
       "code": "VALIDATION_BLOCKED",
       "message": "string"
     },
+    "writing": {
+      "status": "WRITING",
+      "started_at": "1970-01-01T00:00:00.000Z",
+      "finished_at": "1970-01-01T00:00:00.000Z",
+      "events": 0,
+      "succeeded": 0,
+      "with_caveats": 0,
+      "failed": 0,
+      "unreported": 0,
+      "results": []
+    },
+    "notify": true,
+    "suggestion": {},
     "correlation_id": "string",
     "activity_id": "string",
     "created_at": "1970-01-01T00:00:00.000Z",
@@ -3831,62 +4083,18 @@ const { data } = await client.listErpImports({
       "created_by": "string",
       "integration_id": "string",
       "use_case_slug": "string",
+      "template_name": "string",
       "format": "csv",
       "status": "PENDING",
-      "s3_input_ref": {
-        "bucket": "string",
-        "key": "string"
-      },
+      "s3_input_ref": {},
       "size_bytes": 0,
       "column_count": 0,
-      "validation": {
-        "total_rows": 0,
-        "blocking": 0,
-        "warnings": 0,
-        "entities": {},
-        "entity_details": [
-          {
-            "mapping_index": 0,
-            "entity_schema": "string",
-            "business_key": {},
-            "variants": 0,
-            "versions": 0,
-            "condition_attributes": ["grid_area"],
-            "version_attribute": "valid_from"
-          }
-        ],
-        "issues": [
-          {
-            "code": "UNIQUE_ID_COLUMN_MISSING",
-            "severity": "warning",
-            "columns": [
-              {
-                "name": "string",
-                "entity": "string"
-              }
-            ],
-            "attributes": [
-              {
-                "name": "string",
-                "entity": "string"
-              }
-            ],
-            "lines": [0],
-            "subject": "string",
-            "row": 0,
-            "expected": "number"
-          }
-        ]
-      },
-      "progress": {
-        "processed_rows": 0,
-        "total_rows": 0,
-        "events_published": 0
-      },
-      "error": {
-        "code": "VALIDATION_BLOCKED",
-        "message": "string"
-      },
+      "validation": {},
+      "progress": {},
+      "error": {},
+      "writing": {},
+      "notify": true,
+      "suggestion": {},
       "correlation_id": "string",
       "activity_id": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
@@ -3923,6 +4131,7 @@ const { data } = await client.getErpImport({
   "created_by": "string",
   "integration_id": "string",
   "use_case_slug": "string",
+  "template_name": "string",
   "format": "csv",
   "status": "PENDING",
   "s3_input_ref": {
@@ -3947,6 +4156,10 @@ const { data } = await client.getErpImport({
         "version_attribute": "valid_from"
       }
     ],
+    "meter_readings": {
+      "readings": 0,
+      "meters": 0
+    },
     "issues": [
       {
         "code": "UNIQUE_ID_COLUMN_MISSING",
@@ -3973,12 +4186,37 @@ const { data } = await client.getErpImport({
   "progress": {
     "processed_rows": 0,
     "total_rows": 0,
-    "events_published": 0
+    "events_published": 0,
+    "waiting_for_capacity": {
+      "since": "1970-01-01T00:00:00.000Z",
+      "retry_at": "1970-01-01T00:00:00.000Z",
+      "gives_up_at": "1970-01-01T00:00:00.000Z"
+    }
   },
   "error": {
     "code": "VALIDATION_BLOCKED",
     "message": "string"
   },
+  "writing": {
+    "status": "WRITING",
+    "started_at": "1970-01-01T00:00:00.000Z",
+    "finished_at": "1970-01-01T00:00:00.000Z",
+    "events": 0,
+    "succeeded": 0,
+    "with_caveats": 0,
+    "failed": 0,
+    "unreported": 0,
+    "results": [
+      {
+        "code": "string",
+        "level": "success",
+        "entity_schema": "string",
+        "count": 0
+      }
+    ]
+  },
+  "notify": true,
+  "suggestion": {},
   "correlation_id": "string",
   "activity_id": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -4128,7 +4366,8 @@ const { data } = await client.executeErpImport(
     importId: 'example',
   },
   {
-    ack_warnings: true
+    ack_warnings: true,
+    notify: true
   },
 )
 ```
@@ -4150,7 +4389,1174 @@ const { data } = await client.abortErpImport({
 
 ---
 
+### `createImport`
+
+Register an already-uploaded file (S3 ref) as a file import job. Returns the job and a file preview. Nothing runs yet: no import template is chosen and no validation starts here. Optionally rank templ
+
+`POST /v2/imports`
+
+```ts
+const { data } = await client.createImport(
+  null,
+  {
+    s3_reference: {
+      bucket: 'string',
+      key: 'string'
+    },
+    include_preview: false,
+    import_id: 'string',
+    suggestion: {}
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "job": {
+    "import_id": "string",
+    "org_id": "string",
+    "created_by": "string",
+    "template_id": "string",
+    "template_name": "string",
+    "format": "csv",
+    "status": "PENDING",
+    "s3_input_ref": {
+      "bucket": "string",
+      "key": "string"
+    },
+    "size_bytes": 0,
+    "column_count": 0,
+    "validation": {
+      "total_rows": 0,
+      "blocking": 0,
+      "warnings": 0,
+      "entities": {},
+      "entity_details": [],
+      "meter_readings": {},
+      "issues": []
+    },
+    "progress": {
+      "processed_rows": 0,
+      "total_rows": 0,
+      "events_published": 0,
+      "waiting_for_capacity": {}
+    },
+    "error": {
+      "code": "VALIDATION_BLOCKED",
+      "message": "string"
+    },
+    "writing": {
+      "status": "WRITING",
+      "started_at": "1970-01-01T00:00:00.000Z",
+      "finished_at": "1970-01-01T00:00:00.000Z",
+      "events": 0,
+      "succeeded": 0,
+      "with_caveats": 0,
+      "failed": 0,
+      "unreported": 0,
+      "results": []
+    },
+    "notify": true,
+    "suggestion": {},
+    "correlation_id": "string",
+    "activity_id": "string",
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "updated_at": "1970-01-01T00:00:00.000Z"
+  },
+  "preview": {
+    "columns": ["string"],
+    "rows": [
+      ["string"]
+    ]
+  }
+}
+```
+
+</details>
+
+---
+
+### `listImports`
+
+List recent file import jobs for the org, newest first.
+
+`GET /v2/imports`
+
+```ts
+const { data } = await client.listImports({
+  limit: 1,
+  cursor: 'example',
+  template_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "import_id": "string",
+      "org_id": "string",
+      "created_by": "string",
+      "template_id": "string",
+      "template_name": "string",
+      "format": "csv",
+      "status": "PENDING",
+      "s3_input_ref": {},
+      "size_bytes": 0,
+      "column_count": 0,
+      "validation": {},
+      "progress": {},
+      "error": {},
+      "writing": {},
+      "notify": true,
+      "suggestion": {},
+      "correlation_id": "string",
+      "activity_id": "string",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "next_cursor": "string"
+}
+```
+
+</details>
+
+---
+
+### `getImport`
+
+Get a file import job (status, counts, progress). This is the endpoint to poll.
+
+`GET /v2/imports/{importId}`
+
+```ts
+const { data } = await client.getImport({
+  importId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "import_id": "string",
+  "org_id": "string",
+  "created_by": "string",
+  "template_id": "string",
+  "template_name": "string",
+  "format": "csv",
+  "status": "PENDING",
+  "s3_input_ref": {
+    "bucket": "string",
+    "key": "string"
+  },
+  "size_bytes": 0,
+  "column_count": 0,
+  "validation": {
+    "total_rows": 0,
+    "blocking": 0,
+    "warnings": 0,
+    "entities": {},
+    "entity_details": [
+      {
+        "mapping_index": 0,
+        "entity_schema": "string",
+        "business_key": {},
+        "variants": 0,
+        "versions": 0,
+        "condition_attributes": ["grid_area"],
+        "version_attribute": "valid_from"
+      }
+    ],
+    "meter_readings": {
+      "readings": 0,
+      "meters": 0
+    },
+    "issues": [
+      {
+        "code": "UNIQUE_ID_COLUMN_MISSING",
+        "severity": "warning",
+        "columns": [
+          {
+            "name": "string",
+            "entity": "string"
+          }
+        ],
+        "attributes": [
+          {
+            "name": "string",
+            "entity": "string"
+          }
+        ],
+        "lines": [0],
+        "subject": "string",
+        "row": 0,
+        "expected": "number"
+      }
+    ]
+  },
+  "progress": {
+    "processed_rows": 0,
+    "total_rows": 0,
+    "events_published": 0,
+    "waiting_for_capacity": {
+      "since": "1970-01-01T00:00:00.000Z",
+      "retry_at": "1970-01-01T00:00:00.000Z",
+      "gives_up_at": "1970-01-01T00:00:00.000Z"
+    }
+  },
+  "error": {
+    "code": "VALIDATION_BLOCKED",
+    "message": "string"
+  },
+  "writing": {
+    "status": "WRITING",
+    "started_at": "1970-01-01T00:00:00.000Z",
+    "finished_at": "1970-01-01T00:00:00.000Z",
+    "events": 0,
+    "succeeded": 0,
+    "with_caveats": 0,
+    "failed": 0,
+    "unreported": 0,
+    "results": [
+      {
+        "code": "string",
+        "level": "success",
+        "entity_schema": "string",
+        "count": 0
+      }
+    ]
+  },
+  "notify": true,
+  "suggestion": {},
+  "correlation_id": "string",
+  "activity_id": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `deleteImport`
+
+Remove an import and the file it owns. Allowed from any status: an import whose run is still in flight is stopped by the deletion, and rows it already wrote stay written.
+
+`DELETE /v2/imports/{importId}`
+
+```ts
+const { data } = await client.deleteImport({
+  importId: 'example',
+})
+```
+
+---
+
+### `validateImport`
+
+Choose the import template to read this file with, and start the validate phase.
+Callable from PENDING, READY and FAILED — so a wrong choice is corrected by calling this again with a different templat
+
+`POST /v2/imports/{importId}:validate`
+
+```ts
+const { data } = await client.validateImport(
+  {
+    importId: 'example',
+  },
+  {
+    template_id: 'string'
+  },
+)
+```
+
+---
+
+### `suggestImportTemplates`
+
+Rank the org's import templates against this file's columns — the input to the ranked picker ("matches 6 of your 7 columns"). Optional: skip this and call `:validate` directly when the template is alr
+
+`POST /v2/imports/{importId}:suggest-templates`
+
+```ts
+const { data } = await client.suggestImportTemplates({
+  importId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "file_columns": ["string"],
+  "suggestions": [
+    {
+      "template_id": "string",
+      "name": "string",
+      "matched_columns": ["string"],
+      "entity_types": ["string"]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `executeImport`
+
+Confirm and run the write phase of a validated import. Only a READY job may be executed; any other status returns 409.
+The verdict is re-checked against live inputs first: if the mapping or an entity 
+
+`POST /v2/imports/{importId}:execute`
+
+```ts
+const { data } = await client.executeImport(
+  {
+    importId: 'example',
+  },
+  {
+    ack_warnings: true,
+    notify: true
+  },
+)
+```
+
+---
+
+### `abortImport`
+
+Ask a running import to stop. Valid while the job is VALIDATING or PROCESSING; any other status returns 409.
+The stop is cooperative: the job passes through CANCELLING and typically reaches CANCELLED 
+
+`POST /v2/imports/{importId}:abort`
+
+```ts
+const { data } = await client.abortImport({
+  importId: 'example',
+})
+```
+
+---
+
+### `getImportResults`
+
+Per-row outcomes of an executed import, from monitoring. `summary` counts the rows the platform has reported on so far — it keeps growing for a while after the job reaches IMPORTED, since rows are pro
+
+`GET /v2/imports/{importId}/results`
+
+```ts
+const { data } = await client.getImportResults({
+  importId: 'example',
+  limit: 1,
+  cursor: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "summary": {
+    "succeeded": 0,
+    "failed": 0,
+    "total_rows": 0
+  },
+  "failed_rows": [
+    {
+      "event_id": "string",
+      "row_index": 0,
+      "code": "string",
+      "message": "string",
+      "timestamp": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "next_cursor": "string"
+}
+```
+
+</details>
+
+---
+
+### `downloadImportFile`
+
+A short-lived presigned URL that downloads the file this import was registered with — the import's own copy, so exactly what `:validate` and `:execute` read. The URL serves the file as an attachment u
+
+`GET /v2/imports/{importId}/download`
+
+```ts
+const { data } = await client.downloadImportFile({
+  importId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "download_url": "https://example.com/path",
+  "filename": "string",
+  "expires_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `listImportTemplates`
+
+List the org's import templates, sorted by name.
+
+`GET /v2/import-templates`
+
+```ts
+const { data } = await client.listImportTemplates({
+  limit: 1,
+  cursor: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "template_id": "string",
+      "name": "string",
+      "description": "string",
+      "mapping": {},
+      "source_mapping": {},
+      "group_by_column": "string",
+      "mapped_columns": ["string"],
+      "entity_types": ["string"],
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "created_by": "string"
+    }
+  ],
+  "next_cursor": "string"
+}
+```
+
+</details>
+
+---
+
+### `createImportTemplate`
+
+Save a mapping as a reusable import template. The mapping is checked like any inbound mapping: an invalid configuration, or a `unique_ids` entry that is not an indexed attribute of its entity schema, 
+
+`POST /v2/import-templates`
+
+```ts
+const { data } = await client.createImportTemplate(
+  null,
+  {
+    name: 'string',
+    description: 'string',
+    mapping: {
+      direct: true,
+      interactive: 'on_request',
+      entities: [
+        { /* ... */ }
+      ],
+      meter_readings: [
+        { /* ... */ }
+      ]
+    },
+    source_mapping: {},
+    group_by_column: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "template_id": "string",
+  "name": "string",
+  "description": "string",
+  "mapping": {
+    "direct": true,
+    "interactive": "on_request",
+    "entities": [
+      {}
+    ],
+    "meter_readings": [
+      {}
+    ]
+  },
+  "source_mapping": {},
+  "group_by_column": "string",
+  "mapped_columns": ["string"],
+  "entity_types": ["string"],
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "created_by": "string"
+}
+```
+
+</details>
+
+---
+
+### `getImportTemplate`
+
+Get one import template.
+
+`GET /v2/import-templates/{templateId}`
+
+```ts
+const { data } = await client.getImportTemplate({
+  templateId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "template_id": "string",
+  "name": "string",
+  "description": "string",
+  "mapping": {
+    "direct": true,
+    "interactive": "on_request",
+    "entities": [
+      {}
+    ],
+    "meter_readings": [
+      {}
+    ]
+  },
+  "source_mapping": {},
+  "group_by_column": "string",
+  "mapped_columns": ["string"],
+  "entity_types": ["string"],
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "created_by": "string"
+}
+```
+
+</details>
+
+---
+
+### `updateImportTemplate`
+
+Replace an import template's name, description, mapping and source mapping. A changed mapping becomes a new version of the template: imports validated before keep the mapping they were checked against
+
+`PUT /v2/import-templates/{templateId}`
+
+```ts
+const { data } = await client.updateImportTemplate(
+  {
+    templateId: 'example',
+  },
+  {
+    name: 'string',
+    description: 'string',
+    mapping: {
+      direct: true,
+      interactive: 'on_request',
+      entities: [
+        { /* ... */ }
+      ],
+      meter_readings: [
+        { /* ... */ }
+      ]
+    },
+    source_mapping: {},
+    group_by_column: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "template_id": "string",
+  "name": "string",
+  "description": "string",
+  "mapping": {
+    "direct": true,
+    "interactive": "on_request",
+    "entities": [
+      {}
+    ],
+    "meter_readings": [
+      {}
+    ]
+  },
+  "source_mapping": {},
+  "group_by_column": "string",
+  "mapped_columns": ["string"],
+  "entity_types": ["string"],
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "created_by": "string"
+}
+```
+
+</details>
+
+---
+
+### `deleteImportTemplate`
+
+Delete an import template. Past imports keep their `template_id`, and their results stay readable; imports not yet executed can no longer be executed with it. Refused with `409` (`IMPORT_TEMPLATE_IN_U
+
+`DELETE /v2/import-templates/{templateId}`
+
+```ts
+const { data } = await client.deleteImportTemplate({
+  templateId: 'example',
+})
+```
+
+---
+
+### `getBulkImportWindow`
+
+The bulk import window of the caller's organisation, if one is booked, and
+the lane its inbound updates run on right now. During a window the
+organisation's updates run on their own lane, so a large i
+
+`GET /v1/bulk-imports/window`
+
+```ts
+const { data } = await client.getBulkImportWindow()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "enabled": true,
+  "window": {
+    "starts_at": "1970-01-01T00:00:00.000Z",
+    "ends_at": "1970-01-01T00:00:00.000Z",
+    "note": "string",
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "created_by": "string",
+    "status": "scheduled",
+    "started_at": "1970-01-01T00:00:00.000Z"
+  },
+  "lane": {
+    "status": "shared",
+    "since": "1970-01-01T00:00:00.000Z",
+    "backlog": 0,
+    "estimate": "empty",
+    "estimated_finish_at": "1970-01-01T00:00:00.000Z"
+  },
+  "limits": {
+    "max_duration_hours": 24,
+    "max_lead_days": 30,
+    "note_max_length": 500
+  }
+}
+```
+
+</details>
+
+---
+
+### `putBulkImportWindow`
+
+Books the bulk import window of the caller's organisation. A window that
+has not started yet is replaced; one that is active is refused
+(`window-active`). A window lasts at most 24 hours and starts at
+
+`PUT /v1/bulk-imports/window`
+
+```ts
+const { data } = await client.putBulkImportWindow(
+  null,
+  {
+    starts_at: '2026-11-24T06:00:00Z',
+    ends_at: '2026-11-24T18:00:00Z',
+    note: 'Migration of all contracts from SAP'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "starts_at": "1970-01-01T00:00:00.000Z",
+  "ends_at": "1970-01-01T00:00:00.000Z",
+  "note": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": "string",
+  "status": "scheduled",
+  "started_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `deleteBulkImportWindow`
+
+Cancels the bulk import window of the caller's organisation. An active
+window may be cancelled too: its own lane is then given back by the
+normal rules, once the updates already on it are done.
+
+`DELETE /v1/bulk-imports/window`
+
+```ts
+const { data } = await client.deleteBulkImportWindow()
+```
+
+---
+
 ## Schemas
+
+### `CreateImportRequest`
+
+Register an already-uploaded file as an import. The import template is chosen later, via `:validate` — upload and interpretation are separate decisions.
+
+```ts
+type CreateImportRequest = {
+  s3_reference: {
+    bucket: string
+    key: string
+  }
+  include_preview?: boolean
+  import_id?: string
+  suggestion?: Record<string, unknown>
+}
+```
+
+### `CreateImportResponse`
+
+```ts
+type CreateImportResponse = {
+  job: {
+    import_id: string
+    org_id: string
+    created_by?: string
+    template_id?: string
+    template_name?: string
+    format: "csv" | "xlsx"
+    status: "PENDING" | "VALIDATING" | "READY" | "PROCESSING" | "IMPORTED" | "FAILED" | "CANCELLING" | "CANCELLED"
+    s3_input_ref: {
+      bucket: { ... }
+      key: { ... }
+    }
+    size_bytes?: number
+    column_count?: number
+    validation?: {
+      total_rows?: { ... }
+      blocking: { ... }
+      warnings: { ... }
+      entities: { ... }
+      entity_details?: { ... }
+      meter_readings?: { ... }
+      issues?: { ... }
+    }
+    progress?: {
+      processed_rows: { ... }
+      total_rows?: { ... }
+      events_published?: { ... }
+      waiting_for_capacity?: { ... }
+    }
+    error?: {
+      code: { ... }
+      message: { ... }
+    }
+    writing?: {
+      status: { ... }
+      started_at: { ... }
+      finished_at?: { ... }
+      events?: { ... }
+      succeeded?: { ... }
+      with_caveats?: { ... }
+      failed?: { ... }
+      unreported?: { ... }
+      results?: { ... }
+    }
+    notify?: boolean
+    suggestion?: Record<string, unknown>
+    correlation_id?: string
+    activity_id?: string
+    created_at: string // date-time
+    updated_at: string // date-time
+  }
+  preview?: {
+    columns: string[]
+    rows: string[][]
+  }
+}
+```
+
+### `ExecuteImportRequest`
+
+Confirmation options. Required only when the verdict carries warnings — a clean import needs no body at all.
+
+```ts
+type ExecuteImportRequest = {
+  ack_warnings?: boolean
+  notify?: boolean
+}
+```
+
+### `ImportJob`
+
+```ts
+type ImportJob = {
+  import_id: string
+  org_id: string
+  created_by?: string
+  template_id?: string
+  template_name?: string
+  format: "csv" | "xlsx"
+  status: "PENDING" | "VALIDATING" | "READY" | "PROCESSING" | "IMPORTED" | "FAILED" | "CANCELLING" | "CANCELLED"
+  s3_input_ref: {
+    bucket: string
+    key: string
+  }
+  size_bytes?: number
+  column_count?: number
+  validation?: {
+    total_rows?: number
+    blocking: number
+    warnings: number
+    entities: Record<string, number>
+    entity_details?: Array<{
+      mapping_index: { ... }
+      entity_schema: { ... }
+      business_key: { ... }
+      variants?: { ... }
+      versions?: { ... }
+      condition_attributes?: { ... }
+      version_attribute?: { ... }
+    }>
+    meter_readings?: {
+      readings: { ... }
+      meters: { ... }
+    }
+    issues?: Array<{
+      code: { ... }
+      severity: { ... }
+      columns?: { ... }
+      attributes?: { ... }
+      lines?: { ... }
+      subject?: { ... }
+      row?: { ... }
+      expected?: { ... }
+    }>
+  }
+  progress?: {
+    processed_rows: number
+    total_rows?: number
+    events_published?: number
+    waiting_for_capacity?: {
+      since: { ... }
+      retry_at?: { ... }
+      gives_up_at?: { ... }
+    }
+  }
+  error?: {
+    code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "CHUNK_TOO_LARGE" | "BULK_CAPACITY_EXHAUSTED" | "INTERNAL_ERROR"
+    message: string
+  }
+  writing?: {
+    status: "WRITING" | "DONE"
+    started_at: string // date-time
+    finished_at?: string // date-time
+    events?: number
+    succeeded?: number
+    with_caveats?: number
+    failed?: number
+    unreported?: number
+    results?: Array<{
+      code: { ... }
+      level: { ... }
+      entity_schema?: { ... }
+      count: { ... }
+    }>
+  }
+  notify?: boolean
+  suggestion?: Record<string, unknown>
+  correlation_id?: string
+  activity_id?: string
+  created_at: string // date-time
+  updated_at: string // date-time
+}
+```
+
+### `ImportList`
+
+```ts
+type ImportList = {
+  results: Array<{
+    import_id: string
+    org_id: string
+    created_by?: string
+    template_id?: string
+    template_name?: string
+    format: "csv" | "xlsx"
+    status: "PENDING" | "VALIDATING" | "READY" | "PROCESSING" | "IMPORTED" | "FAILED" | "CANCELLING" | "CANCELLED"
+    s3_input_ref: {
+      bucket: { ... }
+      key: { ... }
+    }
+    size_bytes?: number
+    column_count?: number
+    validation?: {
+      total_rows?: { ... }
+      blocking: { ... }
+      warnings: { ... }
+      entities: { ... }
+      entity_details?: { ... }
+      meter_readings?: { ... }
+      issues?: { ... }
+    }
+    progress?: {
+      processed_rows: { ... }
+      total_rows?: { ... }
+      events_published?: { ... }
+      waiting_for_capacity?: { ... }
+    }
+    error?: {
+      code: { ... }
+      message: { ... }
+    }
+    writing?: {
+      status: { ... }
+      started_at: { ... }
+      finished_at?: { ... }
+      events?: { ... }
+      succeeded?: { ... }
+      with_caveats?: { ... }
+      failed?: { ... }
+      unreported?: { ... }
+      results?: { ... }
+    }
+    notify?: boolean
+    suggestion?: Record<string, unknown>
+    correlation_id?: string
+    activity_id?: string
+    created_at: string // date-time
+    updated_at: string // date-time
+  }>
+  next_cursor?: string
+}
+```
+
+### `ImportResults`
+
+```ts
+type ImportResults = {
+  summary: {
+    succeeded: number
+    failed: number
+    total_rows?: number
+  }
+  failed_rows: Array<{
+    event_id: string
+    row_index?: number
+    code?: string
+    message: string
+    timestamp: string // date-time
+  }>
+  next_cursor?: string
+}
+```
+
+### `ImportFailedRow`
+
+```ts
+type ImportFailedRow = {
+  event_id: string
+  row_index?: number
+  code?: string
+  message: string
+  timestamp: string // date-time
+}
+```
+
+### `ImportTemplate`
+
+A saved mapping from file columns to entities. `mapping.entities[].fields[].field` names a file column.
+
+```ts
+type ImportTemplate = {
+  template_id: string
+  name: string
+  description?: string
+  mapping: {
+    direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
+    entities?: Array<{
+      entity_schema: { ... }
+      unique_ids: { ... }
+      jsonataExpression?: { ... }
+      enabled?: { ... }
+      mode?: { ... }
+      scope?: { ... }
+      fields?: { ... }
+      conditional?: { ... }
+      sharing?: { ... }
+    }>
+    meter_readings?: Array<{
+      jsonataExpression?: { ... }
+      reading_matching?: { ... }
+      mode?: { ... }
+      scope?: { ... }
+      meter: { ... }
+      meter_counter?: { ... }
+      fields: { ... }
+    }>
+  }
+  source_mapping?: Record<string, unknown>
+  group_by_column?: string
+  mapped_columns: string[]
+  entity_types: string[]
+  created_at: string // date-time
+  updated_at: string // date-time
+  created_by?: string
+}
+```
+
+### `ImportTemplateList`
+
+```ts
+type ImportTemplateList = {
+  results: Array<{
+    template_id: string
+    name: string
+    description?: string
+    mapping: {
+      direct?: { ... }
+      interactive?: { ... }
+      entities?: { ... }
+      meter_readings?: { ... }
+    }
+    source_mapping?: Record<string, unknown>
+    group_by_column?: string
+    mapped_columns: string[]
+    entity_types: string[]
+    created_at: string // date-time
+    updated_at: string // date-time
+    created_by?: string
+  }>
+  next_cursor?: string
+}
+```
+
+### `ImportTemplateSuggestion`
+
+```ts
+type ImportTemplateSuggestion = {
+  template_id: string
+  name: string
+  matched_columns: string[]
+  entity_types: string[]
+}
+```
+
+### `SuggestImportTemplatesResponse`
+
+```ts
+type SuggestImportTemplatesResponse = {
+  file_columns: string[]
+  suggestions: Array<{
+    template_id: string
+    name: string
+    matched_columns: string[]
+    entity_types: string[]
+  }>
+}
+```
+
+### `UpsertImportTemplateRequest`
+
+```ts
+type UpsertImportTemplateRequest = {
+  name: string
+  description?: string
+  mapping: {
+    direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
+    entities?: Array<{
+      entity_schema: { ... }
+      unique_ids: { ... }
+      jsonataExpression?: { ... }
+      enabled?: { ... }
+      mode?: { ... }
+      scope?: { ... }
+      fields?: { ... }
+      conditional?: { ... }
+      sharing?: { ... }
+    }>
+    meter_readings?: Array<{
+      jsonataExpression?: { ... }
+      reading_matching?: { ... }
+      mode?: { ... }
+      scope?: { ... }
+      meter: { ... }
+      meter_counter?: { ... }
+      fields: { ... }
+    }>
+  }
+  source_mapping?: Record<string, unknown>
+  group_by_column?: string
+}
+```
+
+### `ImportTemplateGroupByColumn`
+
+A file column whose value groups rows: rows with the same value are written one after another, in file order, while rows of different groups are written in parallel. Rows that create or relate the same entity belong in one group, or two of them can each find no existing entity and both create it. A 
+
+```ts
+type ImportTemplateGroupByColumn = string
+```
+
+### `ImportTemplateSourceMapping`
+
+What the mapping was made from, stored as given and returned unchanged: e.g. the column mapping and value transformations of the client that built `mapping`, so the template can be applied to a new raw file again. The import engine never reads it.
+
+```ts
+type ImportTemplateSourceMapping = Record<string, unknown>
+```
+
+### `ValidateImportRequest`
+
+```ts
+type ValidateImportRequest = {
+  template_id: string
+}
+```
 
 ### `S3Reference`
 
@@ -4221,6 +5627,7 @@ Confirmation options. Required only when the verdict carries warnings — a clea
 ```ts
 type ExecuteErpImportRequest = {
   ack_warnings?: boolean
+  notify?: boolean
 }
 ```
 
@@ -4235,7 +5642,7 @@ deliberately no message to display. Each code appears at most once (once per
 
 ```ts
 type ErpImportIssue = {
-  code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED" | "UNIQUE_ID_NOT_IN_SCHEMA" | "VALUE_FORMAT_INVALID" | "MAPPING_EXPRESSION_FAILED" | "FROM_ROWS_EXPRESSION_FAILED" | "VALID_FROM_NOT_MAPPED"
+  code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED" | "UNIQUE_ID_NOT_IN_SCHEMA" | "VALUE_FORMAT_INVALID" | "MAPPING_EXPRESSION_FAILED" | "FROM_ROWS_EXPRESSION_FAILED" | "ENTITY_REF_INVALID" | "VALID_FROM_NOT_MAPPED"
   severity: "warning" | "blocking"
   columns?: Array<{
     name: string
@@ -4271,8 +5678,12 @@ type ErpImportValidation = {
     condition_attributes?: string[]
     version_attribute?: string
   }>
+  meter_readings?: {
+    readings: number
+    meters: number
+  }
   issues?: Array<{
-    code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED" | "UNIQUE_ID_NOT_IN_SCHEMA" | "VALUE_FORMAT_INVALID" | "MAPPING_EXPRESSION_FAILED" | "FROM_ROWS_EXPRESSION_FAILED" | "VALID_FROM_NOT_MAPPED"
+    code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED" | "UNIQUE_ID_NOT_IN_SCHEMA" | "VALUE_FORMAT_INVALID" | "MAPPING_EXPRESSION_FAILED" | "FROM_ROWS_EXPRESSION_FAILED" | "ENTITY_REF_INVALID" | "VALID_FROM_NOT_MAPPED"
     severity: "warning" | "blocking"
     columns?: Array<{
       name: { ... }
@@ -4306,6 +5717,37 @@ type ErpImportEntityDetail = {
 }
 ```
 
+### `ImportSuggestion`
+
+A proposal for how to read the file, made for the client that finishes the import: e.g. an AI assistant's choice of entities, columns and identifiers, which Datastudio opens prefilled for the user to check. Set on `createImport` (with `import_id`, a given suggestion replaces the import's own; withou
+
+```ts
+type ImportSuggestion = Record<string, unknown>
+```
+
+### `ImportWriting`
+
+How far the platform got writing the rows an import handed over. IMPORTED (or CANCELLED) only means the rows were handed over; they are written afterwards, possibly for a while, with retries. Present once rows were handed over.
+
+```ts
+type ImportWriting = {
+  status: "WRITING" | "DONE"
+  started_at: string // date-time
+  finished_at?: string // date-time
+  events?: number
+  succeeded?: number
+  with_caveats?: number
+  failed?: number
+  unreported?: number
+  results?: Array<{
+    code: string
+    level: "success" | "error" | "warning" | "info"
+    entity_schema?: string
+    count: number
+  }>
+}
+```
+
 ### `ErpImportProgress`
 
 How far the currently running phase has got. Written at every batch boundary, so it advances during long runs rather than only at the end.
@@ -4316,16 +5758,22 @@ type ErpImportProgress = {
   processed_rows: number
   total_rows?: number
   events_published?: number
+  waiting_for_capacity?: {
+    since: string // date-time
+    retry_at?: string // date-time
+    gives_up_at?: string // date-time
+  }
 }
 ```
 
 ### `ErpImportError`
 
 Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`.
+`BULK_CAPACITY_EXHAUSTED` is retryable: the capacity for large data loads stayed in use for the whole waiting time. The import does not fail at onc
 
 ```ts
 type ErpImportError = {
-  code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "CHUNK_TOO_LARGE" | "INTERNAL_ERROR"
+  code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "CHUNK_TOO_LARGE" | "BULK_CAPACITY_EXHAUSTED" | "INTERNAL_ERROR"
   message: string
 }
 ```
@@ -4361,6 +5809,7 @@ type CreateErpImportResponse = {
     created_by?: string
     integration_id?: string
     use_case_slug?: string
+    template_name?: string
     format: "csv" | "xlsx"
     status: "PENDING" | "VALIDATING" | "READY" | "PROCESSING" | "IMPORTED" | "FAILED" | "CANCELLING" | "CANCELLED"
     s3_input_ref: {
@@ -4375,17 +5824,32 @@ type CreateErpImportResponse = {
       warnings: { ... }
       entities: { ... }
       entity_details?: { ... }
+      meter_readings?: { ... }
       issues?: { ... }
     }
     progress?: {
       processed_rows: { ... }
       total_rows?: { ... }
       events_published?: { ... }
+      waiting_for_capacity?: { ... }
     }
     error?: {
       code: { ... }
       message: { ... }
     }
+    writing?: {
+      status: { ... }
+      started_at: { ... }
+      finished_at?: { ... }
+      events?: { ... }
+      succeeded?: { ... }
+      with_caveats?: { ... }
+      failed?: { ... }
+      unreported?: { ... }
+      results?: { ... }
+    }
+    notify?: boolean
+    suggestion?: Record<string, unknown>
     correlation_id?: string
     activity_id?: string
     created_at: string // date-time
@@ -4407,6 +5871,7 @@ type ErpImportJob = {
   created_by?: string
   integration_id?: string
   use_case_slug?: string
+  template_name?: string
   format: "csv" | "xlsx"
   status: "PENDING" | "VALIDATING" | "READY" | "PROCESSING" | "IMPORTED" | "FAILED" | "CANCELLING" | "CANCELLED"
   s3_input_ref: {
@@ -4429,6 +5894,10 @@ type ErpImportJob = {
       condition_attributes?: { ... }
       version_attribute?: { ... }
     }>
+    meter_readings?: {
+      readings: { ... }
+      meters: { ... }
+    }
     issues?: Array<{
       code: { ... }
       severity: { ... }
@@ -4444,11 +5913,34 @@ type ErpImportJob = {
     processed_rows: number
     total_rows?: number
     events_published?: number
+    waiting_for_capacity?: {
+      since: { ... }
+      retry_at?: { ... }
+      gives_up_at?: { ... }
+    }
   }
   error?: {
-    code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "CHUNK_TOO_LARGE" | "INTERNAL_ERROR"
+    code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "CHUNK_TOO_LARGE" | "BULK_CAPACITY_EXHAUSTED" | "INTERNAL_ERROR"
     message: string
   }
+  writing?: {
+    status: "WRITING" | "DONE"
+    started_at: string // date-time
+    finished_at?: string // date-time
+    events?: number
+    succeeded?: number
+    with_caveats?: number
+    failed?: number
+    unreported?: number
+    results?: Array<{
+      code: { ... }
+      level: { ... }
+      entity_schema?: { ... }
+      count: { ... }
+    }>
+  }
+  notify?: boolean
+  suggestion?: Record<string, unknown>
   correlation_id?: string
   activity_id?: string
   created_at: string // date-time
@@ -4466,6 +5958,7 @@ type ErpImportList = {
     created_by?: string
     integration_id?: string
     use_case_slug?: string
+    template_name?: string
     format: "csv" | "xlsx"
     status: "PENDING" | "VALIDATING" | "READY" | "PROCESSING" | "IMPORTED" | "FAILED" | "CANCELLING" | "CANCELLED"
     s3_input_ref: {
@@ -4480,17 +5973,32 @@ type ErpImportList = {
       warnings: { ... }
       entities: { ... }
       entity_details?: { ... }
+      meter_readings?: { ... }
       issues?: { ... }
     }
     progress?: {
       processed_rows: { ... }
       total_rows?: { ... }
       events_published?: { ... }
+      waiting_for_capacity?: { ... }
     }
     error?: {
       code: { ... }
       message: { ... }
     }
+    writing?: {
+      status: { ... }
+      started_at: { ... }
+      finished_at?: { ... }
+      events?: { ... }
+      succeeded?: { ... }
+      with_caveats?: { ... }
+      failed?: { ... }
+      unreported?: { ... }
+      results?: { ... }
+    }
+    notify?: boolean
+    suggestion?: Record<string, unknown>
     correlation_id?: string
     activity_id?: string
     created_at: string // date-time
@@ -4763,7 +6271,7 @@ type ErpUpdateEventStatus = {
   correlation_id?: string
   integration_id?: string
   status: "accepted" | "processing" | "done" | "partial" | "error"
-  lane: "interactive" | "priority" | "default" | "deferred"
+  lane: "interactive" | "priority" | "default" | "deferred" | "sandbox"
   use_case_id?: string
   use_case_slug?: string
   event_name?: string
@@ -5010,7 +6518,7 @@ type IntegrationEditableFields = {
       muteUntil?: { ... }
     }
   }
-  integration_type?: "erp" | "connector"
+  integration_type?: "erp" | "connector" | "file_import"
   connector_config?: {
     base_url?: string
     auth?: {
@@ -5039,7 +6547,24 @@ type IntegrationEditableFields = {
     latest_types_package_name?: string
   }
   protected?: boolean
+  config_push?: {
+    enabled: boolean
+    webhook_url?: string // uri
+  }
+  api_key_role?: string
   _manifest?: string[]
+}
+```
+
+### `IntegrationConfigPush`
+
+Config push: whether the integration's middleware takes lifecycle webhooks (`CREATE` with apiKey and signing secret, signed `UPDATE` and `DELETE`; see `bootstrapIntegrationLifecycle`), and where they go. Absent or disabled: the Integration Hub offers no bootstrap for the integration.
+
+
+```ts
+type IntegrationConfigPush = {
+  enabled: boolean
+  webhook_url?: string // uri
 }
 ```
 
@@ -5141,7 +6666,7 @@ type Integration = {
       muteUntil?: { ... }
     }
   }
-  integration_type?: "erp" | "connector"
+  integration_type?: "erp" | "connector" | "file_import"
   connector_config?: {
     base_url?: string
     auth?: {
@@ -5170,6 +6695,11 @@ type Integration = {
     latest_types_package_name?: string
   }
   protected?: boolean
+  config_push?: {
+    enabled: boolean
+    webhook_url?: string // uri
+  }
+  api_key_role?: string
   _manifest?: string[]
 }
 ```
@@ -5212,7 +6742,7 @@ type CreateIntegrationRequest = {
       muteUntil?: { ... }
     }
   }
-  integration_type?: "erp" | "connector"
+  integration_type?: "erp" | "connector" | "file_import"
   connector_config?: {
     base_url?: string
     auth?: {
@@ -5241,6 +6771,11 @@ type CreateIntegrationRequest = {
     latest_types_package_name?: string
   }
   protected?: boolean
+  config_push?: {
+    enabled: boolean
+    webhook_url?: string // uri
+  }
+  api_key_role?: string
   _manifest?: string[]
 }
 ```
@@ -5283,7 +6818,7 @@ type UpdateIntegrationRequest = {
       muteUntil?: { ... }
     }
   }
-  integration_type?: "erp" | "connector"
+  integration_type?: "erp" | "connector" | "file_import"
   connector_config?: {
     base_url?: string
     auth?: {
@@ -5312,6 +6847,11 @@ type UpdateIntegrationRequest = {
     latest_types_package_name?: string
   }
   protected?: boolean
+  config_push?: {
+    enabled: boolean
+    webhook_url?: string // uri
+  }
+  api_key_role?: string
   _manifest?: string[]
 }
 ```
@@ -5340,6 +6880,52 @@ type EnvironmentFieldConfig = {
   description?: string
   required?: boolean
   order?: number
+}
+```
+
+### `IntegrationConfig`
+
+The configuration of an integration, as served to its middleware
+
+```ts
+type IntegrationConfig = {
+  org_id: string
+  integration_id: string // uuid
+  version: number
+  environment: Record<string, string>
+}
+```
+
+### `IntegrationLifecycleDelivery`
+
+One lifecycle webhook delivery, without its body
+
+```ts
+type IntegrationLifecycleDelivery = {
+  action: "CREATE" | "UPDATE" | "DELETE"
+  version: number
+  status_code: number
+  response: string
+  delivered_at: string // date-time
+}
+```
+
+### `IntegrationLifecycle`
+
+The bootstrap status of an integration's middleware
+
+```ts
+type IntegrationLifecycle = {
+  enabled: boolean
+  bootstrapped: boolean
+  version: number
+  last_delivery?: {
+    action: "CREATE" | "UPDATE" | "DELETE"
+    version: number
+    status_code: number
+    response: string
+    delivered_at: string // date-time
+  }
 }
 ```
 
@@ -5559,6 +7145,12 @@ type IntegrationWithUseCases = {
     enabled: boolean
     change_description?: string
     changed_by?: string
+    changed_by_actor?: {
+      type: { ... }
+      app_id?: { ... }
+      agent_id?: { ... }
+      agent_name?: { ... }
+    }
     created_at: string // date-time
     updated_at: string // date-time
     configuration?: {
@@ -5576,6 +7168,12 @@ type IntegrationWithUseCases = {
     enabled: boolean
     change_description?: string
     changed_by?: string
+    changed_by_actor?: {
+      type: { ... }
+      app_id?: { ... }
+      agent_id?: { ... }
+      agent_name?: { ... }
+    }
     created_at: string // date-time
     updated_at: string // date-time
     configuration?: {
@@ -5593,6 +7191,12 @@ type IntegrationWithUseCases = {
     enabled: boolean
     change_description?: string
     changed_by?: string
+    changed_by_actor?: {
+      type: { ... }
+      app_id?: { ... }
+      agent_id?: { ... }
+      agent_name?: { ... }
+    }
     created_at: string // date-time
     updated_at: string // date-time
     configuration?: {
@@ -5616,6 +7220,12 @@ type IntegrationWithUseCases = {
     enabled: boolean
     change_description?: string
     changed_by?: string
+    changed_by_actor?: {
+      type: { ... }
+      app_id?: { ... }
+      agent_id?: { ... }
+      agent_name?: { ... }
+    }
     created_at: string // date-time
     updated_at: string // date-time
     configuration?: {
@@ -5625,27 +7235,7 @@ type IntegrationWithUseCases = {
       inbound_use_case_slug?: { ... }
     }
     type_annotations?: {
-      request?: { ... }
-      response?: { ... }
-    }
-    types_locked?: boolean
-  } | {
-    id: string // uuid
-    integrationId: string // uuid
-    name: string
-    slug?: string
-    type: "secure_proxy"
-    enabled: boolean
-    change_description?: string
-    changed_by?: string
-    created_at: string // date-time
-    updated_at: string // date-time
-    configuration?: {
-      vpc_mode: { ... }
-      allowed_domains?: { ... }
-      allowed_ips?: { ... }
-    }
-  }>
+  // ...
 }
 ```
 
@@ -5687,7 +7277,7 @@ type UpsertIntegrationWithUseCasesRequest = {
       muteUntil?: { ... }
     }
   }
-  integration_type?: "erp" | "connector"
+  integration_type?: "erp" | "connector" | "file_import"
   connector_config?: {
     base_url?: string
     auth?: {
@@ -5716,6 +7306,11 @@ type UpsertIntegrationWithUseCasesRequest = {
     latest_types_package_name?: string
   }
   protected?: boolean
+  config_push?: {
+    enabled: boolean
+    webhook_url?: string // uri
+  }
+  api_key_role?: string
   _manifest?: string[]
   use_cases?: Array<{
     id?: string // uuid
@@ -5747,11 +7342,6 @@ type UpsertIntegrationWithUseCasesRequest = {
     id?: string // uuid
     name: string
     slug?: string
-    enabled: boolean
-    change_description?: string
-    type: "file_proxy"
-    configuration?: {
-      direction?: { ... }
   // ...
 }
 ```
@@ -5783,6 +7373,7 @@ type InboundIntegrationEventConfiguration = {
       constant?: { ... }
       _type?: { ... }
       enabled?: { ... }
+      resolve_refs?: { ... }
       relations?: { ... }
       relation_refs?: { ... }
       file_proxy_url?: { ... }
@@ -5793,7 +7384,9 @@ type InboundIntegrationEventConfiguration = {
       from_rows: { ... }
     }
     sharing?: {
-      partners: { ... }
+      partners?: { ... }
+      partner_lookups?: { ... }
+      exclusive?: { ... }
     }
   }>
   meter_readings?: Array<{
@@ -5816,6 +7409,7 @@ type InboundIntegrationEventConfiguration = {
       constant?: { ... }
       _type?: { ... }
       enabled?: { ... }
+      resolve_refs?: { ... }
       relations?: { ... }
       relation_refs?: { ... }
       file_proxy_url?: { ... }
@@ -5894,6 +7488,7 @@ type IntegrationEntity = {
     constant?: unknown
     _type?: "email" | "phone"
     enabled?: boolean | string
+    resolve_refs?: boolean
     relations?: {
       operation: { ... }
       items?: { ... }
@@ -5940,10 +7535,17 @@ type IntegrationEntity = {
     }>
   }
   sharing?: {
-    partners: Array<{
+    partners?: Array<{
       partner_org_id: { ... }
       enabled?: { ... }
     }>
+    partner_lookups?: Array<{
+      schema?: { ... }
+      unique_ids: { ... }
+      partner_org_id_attribute?: { ... }
+      enabled?: { ... }
+    }>
+    exclusive?: boolean
   }
 }
 ```
@@ -5954,10 +7556,23 @@ Keeps the mapped entity's sharing with partner organizations in sync. After the 
 
 ```ts
 type IntegrationEntitySharing = {
-  partners: Array<{
+  partners?: Array<{
     partner_org_id: string
     enabled?: boolean | string
   }>
+  partner_lookups?: Array<{
+    schema?: string
+    unique_ids: Array<{
+      attribute: { ... }
+      _type?: { ... }
+      field?: { ... }
+      jsonataExpression?: { ... }
+      constant?: { ... }
+    }>
+    partner_org_id_attribute?: string
+    enabled?: boolean | string
+  }>
+  exclusive?: boolean
 }
 ```
 
@@ -5966,6 +7581,25 @@ type IntegrationEntitySharing = {
 ```ts
 type IntegrationEntitySharingPartner = {
   partner_org_id: string
+  enabled?: boolean | string
+}
+```
+
+### `IntegrationEntitySharingPartnerLookup`
+
+Finds the partner org at runtime: the entity matched by `unique_ids` holds the partner org id in `partner_org_id_attribute`. Partner orgs created later are shared with without a mapping change. An item whose `unique_ids` evaluate to nothing has no partner and is skipped. No match, or a match without
+
+```ts
+type IntegrationEntitySharingPartnerLookup = {
+  schema?: string
+  unique_ids: Array<{
+    attribute: string
+    _type?: "email" | "phone"
+    field?: string
+    jsonataExpression?: string
+    constant?: unknown
+  }>
+  partner_org_id_attribute?: string
   enabled?: boolean | string
 }
 ```
@@ -6069,6 +7703,7 @@ type IntegrationMeterReading = {
     constant?: unknown
     _type?: "email" | "phone"
     enabled?: boolean | string
+    resolve_refs?: boolean
     relations?: {
       operation: { ... }
       items?: { ... }
@@ -6174,6 +7809,7 @@ type IntegrationEntityField = {
   constant?: unknown
   _type?: "email" | "phone"
   enabled?: boolean | string
+  resolve_refs?: boolean
   relations?: {
     operation: "_set" | "_append" | "_append_all"
     items?: Array<{
@@ -6677,6 +8313,12 @@ type UseCaseBase = {
   enabled: boolean
   change_description?: string
   changed_by?: string
+  changed_by_actor?: {
+    type: "app" | "agent"
+    app_id?: string
+    agent_id?: string
+    agent_name?: string
+  }
   created_at: string // date-time
   updated_at: string // date-time
 }
@@ -6694,6 +8336,12 @@ type InboundUseCase = {
   enabled: boolean
   change_description?: string
   changed_by?: string
+  changed_by_actor?: {
+    type: "app" | "agent"
+    app_id?: string
+    agent_id?: string
+    agent_name?: string
+  }
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -6735,6 +8383,12 @@ type OutboundUseCase = {
   enabled: boolean
   change_description?: string
   changed_by?: string
+  changed_by_actor?: {
+    type: "app" | "agent"
+    app_id?: string
+    agent_id?: string
+    agent_name?: string
+  }
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -6766,6 +8420,12 @@ type FileProxyUseCase = {
   enabled: boolean
   change_description?: string
   changed_by?: string
+  changed_by_actor?: {
+    type: "app" | "agent"
+    app_id?: string
+    agent_id?: string
+    agent_name?: string
+  }
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -6833,6 +8493,12 @@ type ManagedCallUseCase = {
   enabled: boolean
   change_description?: string
   changed_by?: string
+  changed_by_actor?: {
+    type: "app" | "agent"
+    app_id?: string
+    agent_id?: string
+    agent_name?: string
+  }
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -6866,6 +8532,12 @@ type SecureProxyUseCase = {
   enabled: boolean
   change_description?: string
   changed_by?: string
+  changed_by_actor?: {
+    type: "app" | "agent"
+    app_id?: string
+    agent_id?: string
+    agent_name?: string
+  }
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -6888,6 +8560,12 @@ type UseCase = {
   enabled: boolean
   change_description?: string
   changed_by?: string
+  changed_by_actor?: {
+    type: "app" | "agent"
+    app_id?: string
+    agent_id?: string
+    agent_name?: string
+  }
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -6923,6 +8601,12 @@ type UseCase = {
   enabled: boolean
   change_description?: string
   changed_by?: string
+  changed_by_actor?: {
+    type: "app" | "agent"
+    app_id?: string
+    agent_id?: string
+    agent_name?: string
+  }
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -6948,6 +8632,12 @@ type UseCase = {
   enabled: boolean
   change_description?: string
   changed_by?: string
+  changed_by_actor?: {
+    type: "app" | "agent"
+    app_id?: string
+    agent_id?: string
+    agent_name?: string
+  }
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -6961,24 +8651,6 @@ type UseCase = {
       enabled: { ... }
     }
     secure_proxy?: {
-      use_case_slug: { ... }
-    }
-    auth?: {
-      type: { ... }
-      token_url: { ... }
-      client_id: { ... }
-      client_secret: { ... }
-      scope?: { ... }
-      audience?: { ... }
-      resource?: { ... }
-      username?: { ... }
-      password?: { ... }
-      body_params?: { ... }
-      headers?: { ... }
-      query_params?: { ... }
-    }
-    params?: Array<{
-      name: { ... }
   // ...
 }
 ```
@@ -7545,6 +9217,20 @@ type UpdateSecureProxyUseCaseRequest = {
 }
 ```
 
+### `UseCaseChangeActor`
+
+The app or AI agent that made the change on behalf of the user in `changed_by`, taken from the `actor` claim of its access token. Absent when a user made the change directly.
+
+
+```ts
+type UseCaseChangeActor = {
+  type: "app" | "agent"
+  app_id?: string
+  agent_id?: string
+  agent_name?: string
+}
+```
+
 ### `UseCaseHistoryEntry`
 
 ```ts
@@ -7557,6 +9243,12 @@ type UseCaseHistoryEntry = {
   enabled: boolean
   change_description?: string
   changed_by?: string
+  changed_by_actor?: {
+    type: "app" | "agent"
+    app_id?: string
+    agent_id?: string
+    agent_name?: string
+  }
   created_at: string // date-time
   updated_at: string // date-time
   history_created_at: string // date-time
@@ -7594,6 +9286,12 @@ type UseCaseHistoryEntry = {
   enabled: boolean
   change_description?: string
   changed_by?: string
+  changed_by_actor?: {
+    type: "app" | "agent"
+    app_id?: string
+    agent_id?: string
+    agent_name?: string
+  }
   created_at: string // date-time
   updated_at: string // date-time
   history_created_at: string // date-time
@@ -7621,6 +9319,12 @@ type UseCaseHistoryEntry = {
   enabled: boolean
   change_description?: string
   changed_by?: string
+  changed_by_actor?: {
+    type: "app" | "agent"
+    app_id?: string
+    agent_id?: string
+    agent_name?: string
+  }
   created_at: string // date-time
   updated_at: string // date-time
   history_created_at: string // date-time
@@ -7630,24 +9334,6 @@ type UseCaseHistoryEntry = {
     upload?: {
       max_total_bytes?: { ... }
       max_file_bytes?: { ... }
-      max_delivery_attempts?: { ... }
-    }
-    fan_out?: {
-      enabled: { ... }
-    }
-    secure_proxy?: {
-      use_case_slug: { ... }
-    }
-    auth?: {
-      type: { ... }
-      token_url: { ... }
-      client_id: { ... }
-      client_secret: { ... }
-      scope?: { ... }
-      audience?: { ... }
-      resource?: { ... }
-      username?: { ... }
-      password?: { ... }
   // ...
 }
 ```
@@ -7664,6 +9350,12 @@ type UseCaseHistoryEntryBase = {
   enabled: boolean
   change_description?: string
   changed_by?: string
+  changed_by_actor?: {
+    type: "app" | "agent"
+    app_id?: string
+    agent_id?: string
+    agent_name?: string
+  }
   created_at: string // date-time
   updated_at: string // date-time
   history_created_at: string // date-time
@@ -7682,6 +9374,12 @@ type InboundUseCaseHistoryEntry = {
   enabled: boolean
   change_description?: string
   changed_by?: string
+  changed_by_actor?: {
+    type: "app" | "agent"
+    app_id?: string
+    agent_id?: string
+    agent_name?: string
+  }
   created_at: string // date-time
   updated_at: string // date-time
   history_created_at: string // date-time
@@ -7725,6 +9423,12 @@ type OutboundUseCaseHistoryEntry = {
   enabled: boolean
   change_description?: string
   changed_by?: string
+  changed_by_actor?: {
+    type: "app" | "agent"
+    app_id?: string
+    agent_id?: string
+    agent_name?: string
+  }
   created_at: string // date-time
   updated_at: string // date-time
   history_created_at: string // date-time
@@ -7758,6 +9462,12 @@ type FileProxyUseCaseHistoryEntry = {
   enabled: boolean
   change_description?: string
   changed_by?: string
+  changed_by_actor?: {
+    type: "app" | "agent"
+    app_id?: string
+    agent_id?: string
+    agent_name?: string
+  }
   created_at: string // date-time
   updated_at: string // date-time
   history_created_at: string // date-time
@@ -7827,6 +9537,12 @@ type ManagedCallUseCaseHistoryEntry = {
   enabled: boolean
   change_description?: string
   changed_by?: string
+  changed_by_actor?: {
+    type: "app" | "agent"
+    app_id?: string
+    agent_id?: string
+    agent_name?: string
+  }
   created_at: string // date-time
   updated_at: string // date-time
   history_created_at: string // date-time
@@ -7862,6 +9578,12 @@ type SecureProxyUseCaseHistoryEntry = {
   enabled: boolean
   change_description?: string
   changed_by?: string
+  changed_by_actor?: {
+    type: "app" | "agent"
+    app_id?: string
+    agent_id?: string
+    agent_name?: string
+  }
   created_at: string // date-time
   updated_at: string // date-time
   history_created_at: string // date-time
@@ -8054,82 +9776,10 @@ Describes the inferred type shape of a JSONata expression
 ```ts
 type TypeDescriptor = {
   kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union"
-  properties?: Record<string, {
-    kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union"
-    properties?: Record<string, {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
-    items?: {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }
-    source?: string
-    variants?: Array<{
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
-  }>
-  items?: {
-    kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union"
-    properties?: Record<string, {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
-    items?: {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }
-    source?: string
-    variants?: Array<{
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
-  }
+  properties?: Record<string, { ... }>
+  items?: { ... }
   source?: string
-  variants?: Array<{
-    kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union"
-    properties?: Record<string, {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
-    items?: {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }
-    source?: string
-    variants?: Array<{
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
-  }>
+  variants?: { ... }[]
 }
 ```
 
@@ -8143,53 +9793,17 @@ type UseCaseTypePreview = {
   name?: string
   request_shape: {
     kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union"
-    properties?: Record<string, {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
-    items?: {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }
+    properties?: Record<string, { ... }>
+    items?: { ... }
     source?: string
-    variants?: Array<{
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
+    variants?: { ... }[]
   }
   response_shape: {
     kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union"
-    properties?: Record<string, {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
-    items?: {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }
+    properties?: Record<string, { ... }>
+    items?: { ... }
     source?: string
-    variants?: Array<{
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
+    variants?: { ... }[]
   }
   existing_annotations?: {
     request?: Record<string, string>
@@ -9945,7 +11559,7 @@ type MonitoringTraceResponse = {
     use_case_id?: string
     use_case_type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | ""
     level: "success" | "error" | "info" | "warning"
-    code?: "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED" | string
+    code?: "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EVENT_TOO_WIDE" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SANDBOX_LANE" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_PARTNER_NOT_PROVISIONED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED" | string
     message?: string
     detail?: Record<string, unknown>
     created_at: string // date-time
@@ -9964,7 +11578,7 @@ This schema exists so consumers can import the union as a type. It never
 constrains
 
 ```ts
-type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED"
+type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EVENT_TOO_WIDE" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SANDBOX_LANE" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_PARTNER_NOT_PROVISIONED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED"
 ```
 
 ### `MonitoringEventV2`
@@ -9979,7 +11593,7 @@ type MonitoringEventV2 = {
   use_case_id?: string
   use_case_type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | ""
   level: "success" | "error" | "info" | "warning"
-  code?: "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED" | string
+  code?: "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EVENT_TOO_WIDE" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SANDBOX_LANE" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_PARTNER_NOT_PROVISIONED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED" | string
   message?: string
   detail?: Record<string, unknown>
   created_at: string // date-time
@@ -10188,5 +11802,89 @@ type DocumentationPage = {
 type UpsertDocumentationPageRequest = {
   title: string
   content: string
+}
+```
+
+### `BulkImportWindowRequest`
+
+```ts
+type BulkImportWindowRequest = {
+  starts_at: string // date-time
+  ends_at: string // date-time
+  note: string
+}
+```
+
+### `BulkImportWindow`
+
+```ts
+type BulkImportWindow = {
+  starts_at: string // date-time
+  ends_at: string // date-time
+  note: string
+  created_at: string // date-time
+  created_by: string
+  status: "scheduled" | "active" | "ended"
+  started_at?: string // date-time
+}
+```
+
+### `BulkImportLane`
+
+```ts
+type BulkImportLane = {
+  status: "shared" | "preparing" | "dedicated" | "finishing"
+  since?: string // date-time
+  backlog?: number
+  estimate: "empty" | "finishes" | "growing" | "not_draining" | "unknown"
+  estimated_finish_at?: string // date-time
+}
+```
+
+### `BulkImportWindowLimits`
+
+```ts
+type BulkImportWindowLimits = {
+  max_duration_hours: number
+  max_lead_days: number
+  note_max_length: number
+}
+```
+
+### `BulkImportWindowStatus`
+
+```ts
+type BulkImportWindowStatus = {
+  enabled: boolean
+  window: {
+    starts_at: string // date-time
+    ends_at: string // date-time
+    note: string
+    created_at: string // date-time
+    created_by: string
+    status: "scheduled" | "active" | "ended"
+    started_at?: string // date-time
+  }
+  lane: {
+    status: "shared" | "preparing" | "dedicated" | "finishing"
+    since?: string // date-time
+    backlog?: number
+    estimate: "empty" | "finishes" | "growing" | "not_draining" | "unknown"
+    estimated_finish_at?: string // date-time
+  }
+  limits: {
+    max_duration_hours: number
+    max_lead_days: number
+    note_max_length: number
+  }
+}
+```
+
+### `BulkImportWindowRefusal`
+
+```ts
+type BulkImportWindowRefusal = {
+  error_code: "bulk-imports-unavailable" | "window-active" | "too-many-windows" | "window-too-long" | "starts-in-the-past" | "ends-before-start" | "starts-too-far-ahead"
+  message: string
 }
 ```

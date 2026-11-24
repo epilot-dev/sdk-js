@@ -929,6 +929,9 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/SkipHealParam"
           }
         ],
         "responses": {
@@ -1256,7 +1259,7 @@
       "post": {
         "operationId": "bulkStartFlows",
         "summary": "bulkStartFlows",
-        "description": "Creates a job that starts one flow on many entities: the flow\n`flow_template_id` is started on every entity in `entities`, or on every\nentity `entities_query` matches. Every start is manual.\n\nLimits: up to 1,000 entities in `entities`, or up to 10,000 matched by\n`entities_query`.\n\nThe request only runs a preflight and returns `202` with the job. A job of\nat most 200 listed entities is returned in status `awaiting_approval`; a\nquery, or a longer list, is returned in status `preparing` while the\nentities are resolved in the background, then moves to\n`awaiting_approval` (or to `failed`, with `failure`). Poll\n`GET /v2/flows/bulk-jobs/{job_id}`. Nothing is started until the job is approved with\n`PATCH /v2/flows/bulk-jobs/{job_id}` (`action: APPROVE`); a job not approved\nwithin 24 hours expires.\n\nThe preflight checks the caller may trigger the flow, loads its template, and\nmatches each entity against the template's trigger. An entity whose type no\ntrigger accepts is recorded as a `skipped` item with `error_code:\ntrigger_entity_mismatch`. `flow` summarises how many starts the job will\nmake, which is what a confirmation dialog shows.\n\nAfter approval the job runs in the background, paced to protect the\ndatastore (roughly 5–10 starts per second). Poll\n`GET /v2/flows/bulk-jobs/{job_id}` for progress; the user who created the\njob is notified in-app when it finishes.\n",
+        "description": "Creates a job that starts one flow on many entities: the flow\n`flow_template_id` is started on every entity in `entities`, or on every\nentity `entities_query` matches. Every start is manual.\n\nLimits: up to 1,000 entities in `entities`, or up to 80,000 matched by\n`entities_query`.\n\nThe request only runs a preflight and returns `202` with the job. A job of\nat most 200 listed entities is returned in status `awaiting_approval`; a\nquery, or a longer list, is returned in status `preparing` while the\nentities are resolved in the background, then moves to\n`awaiting_approval` (or to `failed`, with `failure`). Poll\n`GET /v2/flows/bulk-jobs/{job_id}`. Nothing is started until the job is approved with\n`PATCH /v2/flows/bulk-jobs/{job_id}` (`action: APPROVE`); a job not approved\nwithin 24 hours expires.\n\nThe preflight checks the caller may trigger the flow, loads its template, and\nmatches each entity against the template's trigger. An entity whose type no\ntrigger accepts is recorded as a `skipped` item with `error_code:\ntrigger_entity_mismatch`. `flow` summarises how many starts the job will\nmake, which is what a confirmation dialog shows.\n\nAfter approval the job runs in the background, paced to protect the\ndatastore (roughly 5–10 starts per second). Poll\n`GET /v2/flows/bulk-jobs/{job_id}` for progress; the user who created the\njob is notified in-app when it finishes.\n",
         "tags": [
           "Flows V2"
         ],
@@ -1482,7 +1485,7 @@
       "patch": {
         "operationId": "patchBulkStartFlowsJob",
         "summary": "patchBulkStartFlowsJob",
-        "description": "Approves or cancels a bulk-start job.\n\n- `APPROVE`: only from `awaiting_approval`, before the job expires. Queues the\n  job; starts begin within seconds.\n- `CANCEL`: from `awaiting_approval` or `queued` the job is cancelled at once.\n  From `running` the job stops at its next checkpoint (a few seconds), or at\n  once when no worker currently holds it; flows already started are kept and\n  the remaining items become `cancelled`.\n",
+        "description": "Approves or cancels a bulk-start job.\n\n- `APPROVE`: only from `awaiting_approval`, before the job expires. Queues the\n  job; starts begin within seconds.\n- `CANCEL`: only by the job's creator, or by someone allowed to cancel workflows\n  (`workflow:execution:cancel`); anyone else gets `403`. From `awaiting_approval`\n  or `queued` the job is cancelled at once.\n  From `running` the job stops at its next checkpoint (a few seconds), or at\n  once when no worker currently holds it; flows already started are kept and\n  the remaining items become `cancelled`.\n",
         "tags": [
           "Flows V2"
         ],
@@ -2057,6 +2060,76 @@
         }
       }
     },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/hold/expire": {
+      "post": {
+        "operationId": "expireTaskHold",
+        "summary": "expireTaskHold",
+        "description": "Ends the task's hold once it expires (AL-3320): scheduler-api's `flow-task-hold-expiry` timer calls it with the hold it was booked for. A task still in that hold resumes in progress as the system and its assignees are notified; any other state is answered with `expired: false` and left alone, so a timer that outlived its hold changes nothing. Internal callers only.",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExpireTaskHoldReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The hold ended, or was no longer live and nothing changed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpireTaskHoldResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller is not an internal service",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The flow execution or the task does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/flows/executions/{execution_id}/phases/{phase_id}": {
       "patch": {
         "operationId": "patchPhase",
@@ -2197,6 +2270,104 @@
       }
     },
     "/v2/flows/executions/{execution_id}/tasks/{task_id}/schedule": {
+      "put": {
+        "operationId": "rescheduleTask",
+        "summary": "rescheduleTask",
+        "description": "Moves the execution date of a scheduled task that has not run yet (AL-3774). The task must be SCHEDULED with a booked timer, and its flow open. The task's timer is replaced by one for the new date, so the task runs once, on the new date; the change is recorded on the schedule as `rescheduled` and logged in the activity feed. Requires `workflow:execution:task:update_date`. Rescheduling again moves it from the date it has now. To run the task at once, use runTaskScheduleNow.",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RescheduleTaskReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - returns the rescheduled task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors - the date is not at least a minute in the future, or the task cannot be rescheduled (not booked, already run, not a scheduled automation or decision, or its flow is closed or done)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The task has already started, or it started or changed while it was being rescheduled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
       "delete": {
         "operationId": "cancelTaskSchedule",
         "summary": "cancelTaskSchedule",
@@ -2552,6 +2723,16 @@
         "required": false,
         "description": "When true, the execution is marked as deleted but retained in storage for archival\nand audit purposes. When false (default), the execution is permanently removed.\nSoft-deleted executions do not appear in normal queries.\n",
         "example": true
+      },
+      "SkipHealParam": {
+        "in": "query",
+        "name": "skip_heal",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        },
+        "description": "When true, the execution is not healed and nothing is written back. The response is otherwise the same as without it."
       }
     },
     "schemas": {
@@ -2648,6 +2829,25 @@
       },
       "ClosingReason": {
         "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/ClosingReasonCategoryRef"
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ]
+      },
+      "ClosingReasonCategoryRef": {
+        "type": "object",
+        "description": "The category a configured reason was grouped under when the flow started, snapshotted with its title. Absent on a reason without a category and on flows started before categories existed. Only `configured_reasons` carries it; a selected reason's category is the one its id has in `configured_reasons`.",
         "properties": {
           "id": {
             "type": "string"
@@ -3259,6 +3459,16 @@
           "OPEN",
           "IN_PROGRESS",
           "COMPLETED"
+        ]
+      },
+      "PhaseStatus": {
+        "type": "string",
+        "description": "Status of a phase of a flow execution. `SKIPPED`: every task in the\nphase was skipped and none ran, e.g. because the phase sits on a\nbranch of a decision that was not taken.\n",
+        "enum": [
+          "OPEN",
+          "IN_PROGRESS",
+          "COMPLETED",
+          "SKIPPED"
         ]
       },
       "StepType": {
@@ -4291,6 +4501,11 @@
               "type": "string"
             },
             "description": "Taxonomy purpose IDs to filter which phases and tasks are included in the execution.\nOnly phases/tasks tagged with matching purposes will be active. If empty or omitted,\nall phases and tasks from the template are included.\n"
+          },
+          "revision_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Starts this revision of the flow template instead of the published one, also\nwhile the template is disabled. Manual starts only. Needs\n`workflow:definition:edit` in addition to `workflow:execution:trigger`.\n"
           }
         }
       },
@@ -4400,7 +4615,7 @@
       },
       "BulkStartEntitiesQuery": {
         "type": "object",
-        "description": "The entities an entity search matches, as the entity table's \"select all\nmatching\" selects them. Resolved once, in the background, when the job is prepared: the\njob holds the entities matching at that time (at most 10,000).\n",
+        "description": "The entities an entity search matches, as the entity table's \"select all\nmatching\" selects them. Resolved once, in the background, when the job is prepared: the\njob holds the entities matching at that time (at most 80,000).\n",
         "required": [
           "entity_schema",
           "q"
@@ -4741,6 +4956,10 @@
           },
           "preparation": {
             "$ref": "#/components/schemas/BulkStartFlowsJobPreparation"
+          },
+          "cancelled_by": {
+            "type": "string",
+            "description": "The user who cancelled the job: its creator, or someone allowed to cancel\nworkflows (`workflow:execution:cancel`).\n"
           },
           "counts": {
             "$ref": "#/components/schemas/BulkStartFlowsJobCounts"
@@ -5198,7 +5417,7 @@
               "UPCOMING",
               "NOT_REACHED"
             ],
-            "description": "Derived progress status:\n- COMPLETED: the run moved past this stage, or finished in it\n- IN_PROGRESS: the flow's current work is inside this stage\n- UPCOMING: the flow has not reached this stage yet\n- NOT_REACHED: the flow finished (DONE or CLOSED) before reaching this stage — a run may legitimately end at any stage\n"
+            "description": "Derived progress status:\n- COMPLETED: the run moved past this stage, or finished in it, or — while an earlier stage is still open — all its tasks are already closed\n- IN_PROGRESS: the flow's current work is inside this stage — the lowest stage with an open task, or a later one already being worked on ahead of it. Several stages can be IN_PROGRESS at once\n- UPCOMING: the flow has not reached this stage yet\n- NOT_REACHED: the flow finished (DONE or CLOSED) before reaching this stage — a run may legitimately end at any stage\n"
           },
           "completed_at": {
             "type": "string",
@@ -5247,6 +5466,9 @@
           },
           "assigned_to": {
             "$ref": "#/components/schemas/Assignees"
+          },
+          "assignee_sync": {
+            "$ref": "#/components/schemas/AssigneeSync"
           },
           "closing_reason": {
             "$ref": "#/components/schemas/FlowClosingReason"
@@ -5314,6 +5536,10 @@
           "flow_template_id": {
             "$ref": "#/components/schemas/FlowTemplateId"
           },
+          "revision_id": {
+            "type": "string",
+            "description": "The revision of the flow template the execution was started from. Absent when none was recorded."
+          },
           "org_id": {
             "type": "string"
           },
@@ -5340,6 +5566,9 @@
           },
           "assigned_to": {
             "$ref": "#/components/schemas/Assignees"
+          },
+          "assignee_sync": {
+            "$ref": "#/components/schemas/AssigneeSync"
           },
           "analytics": {
             "type": "object",
@@ -5388,12 +5617,12 @@
               "background"
             ],
             "default": "entity_views",
-            "description": "Where this run is allowed to be seen, copied from the definition's\n`context_settings.visibility` when the run starts and re-read\nwhenever its visibility is re-resolved.\n\n`entity_views` — the run surfaces on entity pages and table views,\non the entities `visible_on` lists.\n\n`background` — the run is suppressed from every entity view. It\nstill holds contexts, still reads and writes them, and is still\nindexed against them so it can be found deliberately; it simply\nhas no surfaces, and `visible_on` is empty.\n\nRead THIS to tell a background run from a visible one. An empty\n`visible_on` is a consequence, not the statement — absent on runs\nthat predate visibility, and indistinguishable from a run that\nresolved to nothing.\n"
+            "description": "Where this run is allowed to be seen, copied from the definition's\n`context_settings.visibility` when the run starts and re-read\nwhenever its visibility is re-resolved. With flow versioning, a run\nwith a `revision_id` re-reads it from the settings it copied at its\nstart, and a run without one that is older than the template's base\nrevision from that revision, never from the definition.\n\n`entity_views` — the run surfaces on entity pages and table views,\non the entities `visible_on` lists.\n\n`background` — the run is suppressed from every entity view. It\nstill holds contexts, still reads and writes them, and is still\nindexed against them so it can be found deliberately; it simply\nhas no surfaces, and `visible_on` is empty.\n\nRead THIS to tell a background run from a visible one. An empty\n`visible_on` is a consequence, not the statement — absent on runs\nthat predate visibility, and indistinguishable from a run that\nresolved to nothing.\n"
           },
           "visible_on": {
             "type": "array",
             "maxItems": 50,
-            "description": "Every entity this run is SHOWN on — the COMPLETE set, not a delta\nagainst `contexts`. A context that is displayed appears here as\n`kind: context`; a context whose display was switched off simply is\nnot here, which is how hiding is expressed.\n\nResolved from `contexts` plus the definition's display rules: at\nstart, whenever the contexts change, and whenever a rule is edited.\nIt is the source of truth for the entity -> executions index, so an\nentity absent from this list does not surface the run at all.\n\nCallers that searched by entity read their own entry out of this\nlist to learn WHY the run is here — `kind`, `anchor_entity_id` and\n`rule_id` are what let a Contact page say \"runs on Ticket #4821\"\ninstead of implying the run belongs to the contact.\n\nCapped at 50. Contexts are never evicted by the cap — they are\nwhere the run actually runs. What is left is shared ROUND-ROBIN\nbetween the entries, so an entry with no labels, which matches\nevery related entity of its schema, cannot spend the whole budget\nand leave the entries after it with nothing.\n\nUnlike `contexts`, an entry here does NOT survive the relation that\nproduced it being removed: a surface is not a fact of the run. That\nrecomputation on entity-relation changes is not implemented yet.\n",
+            "description": "Every entity this run is SHOWN on — the COMPLETE set, not a delta\nagainst `contexts`. A context that is displayed appears here as\n`kind: context`; a context whose display was switched off simply is\nnot here, which is how hiding is expressed.\n\nResolved from `contexts` plus the definition's display rules: at\nstart, whenever the contexts change, and whenever a rule is edited.\nWith flow versioning the rules are read where `visibility` is read,\nso an edit of the definition does not change the list of such a run.\nIt is the source of truth for the entity -> executions index, so an\nentity absent from this list does not surface the run at all.\n\nCallers that searched by entity read their own entry out of this\nlist to learn WHY the run is here — `kind`, `anchor_entity_id` and\n`rule_id` are what let a Contact page say \"runs on Ticket #4821\"\ninstead of implying the run belongs to the contact.\n\nCapped at 50. Contexts are never evicted by the cap — they are\nwhere the run actually runs. What is left is shared ROUND-ROBIN\nbetween the entries, so an entry with no labels, which matches\nevery related entity of its schema, cannot spend the whole budget\nand leave the entries after it with nothing.\n\nUnlike `contexts`, an entry here does NOT survive the relation that\nproduced it being removed: a surface is not a fact of the run. That\nrecomputation on entity-relation changes is not implemented yet.\n",
             "items": {
               "$ref": "#/components/schemas/VisibleEntity"
             }
@@ -5954,6 +6183,218 @@
           "error_reason": {
             "type": "string",
             "description": "Set by the backend when scheduling this task FAILED (e.g. the\nreferenced date attribute is empty/unreadable, or the resolved fire\ntime is already in the past). A JSON string\n({ error_code, error_reason, error_info }) describing why, so the UI\ncan show a specific warning and ask the user to fix the date\nattribute and re-schedule. Cleared when the task is successfully\n(re-)armed. This is the decision-task counterpart of\nAutomationInfo.error_reason (decision tasks have no automation_config).\n"
+          },
+          "rescheduled": {
+            "$ref": "#/components/schemas/ScheduleChange"
+          }
+        }
+      },
+      "OnHoldConfig": {
+        "description": "What happens when a person puts the task on hold (AL-3320), snapshotted from the template at flow start: after `resume_after` the task resumes in progress on its own (absent: only by hand), `reason` is `disabled`, `optional` or `required` (absent is `disabled`), and a reason is typed (`text`, the default), picked from `reason_options` (`options`) or either (`options_and_text`). Not patchable.",
+        "type": "object",
+        "properties": {
+          "resume_after": {
+            "$ref": "#/components/schemas/OnHoldResumeAfter"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/OnHoldFieldMode"
+          },
+          "reason_input": {
+            "type": "string",
+            "enum": [
+              "text",
+              "options",
+              "options_and_text"
+            ]
+          },
+          "reason_options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OnHoldReasonOption"
+            }
+          }
+        }
+      },
+      "OnHoldResumeAfter": {
+        "type": "object",
+        "description": "How long after a task is put on hold it resumes in progress on its own (AL-3320), counted from the moment it is put on hold. A day is 24 hours and a week 7 days.",
+        "properties": {
+          "duration": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 365
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "hours",
+              "days",
+              "weeks"
+            ]
+          }
+        },
+        "required": [
+          "duration",
+          "unit"
+        ]
+      },
+      "OnHoldFieldMode": {
+        "type": "string",
+        "enum": [
+          "disabled",
+          "optional",
+          "required"
+        ]
+      },
+      "OnHoldReasonOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "label"
+        ]
+      },
+      "PutOnHoldReq": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "The reason of the hold this PATCH puts the task in (AL-3320). The expiry is not given: it follows from the task's `on_hold_config.resume_after`. Accepted only when the PATCH leaves the task on hold: with `status: ON_HOLD`, or with no status on a task that is on hold, which changes the reason of the current hold and keeps its expiry. Each field is held to the task's `on_hold_config`: a reason the config does not ask for is refused, a required one must be given, and an option must be one of the task's. Moving a task on hold without it starts a hold with no reason, which a config that requires one refuses.",
+        "properties": {
+          "reason_option_id": {
+            "type": "string",
+            "description": "The id of one of the task's `on_hold_config.reason_options`"
+          },
+          "reason_text": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "A typed reason"
+          }
+        }
+      },
+      "TaskHold": {
+        "type": "object",
+        "description": "The task's last hold (AL-3320), written each time a person puts it on hold. It describes the task only while its status is `ON_HOLD`: a task that resumed, was reset or was put on hold again without an expiry or reason keeps or loses the record, and readers must ignore it whenever the task is not on hold. Server-written, not patchable.",
+        "required": [
+          "id",
+          "set_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Names this hold; the expiry timer ends only the hold it names"
+          },
+          "set_at": {
+            "type": "string"
+          },
+          "set_by": {
+            "type": "string",
+            "description": "Who put the task on hold, as an assignee id"
+          },
+          "until": {
+            "type": "string",
+            "description": "When the hold expires and the task resumes on its own: the moment it was put on hold plus the config's `resume_after`"
+          },
+          "reason_option_id": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "description": "The label of the picked option as it read when the task was put on hold"
+          },
+          "reason_text": {
+            "type": "string"
+          },
+          "schedule_id": {
+            "type": "string",
+            "description": "The scheduler booking that expires the hold"
+          },
+          "expired_at": {
+            "type": "string",
+            "description": "When the hold expired and the engine resumed the task"
+          }
+        }
+      },
+      "ExpireTaskHoldReq": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "hold_id"
+        ],
+        "properties": {
+          "hold_id": {
+            "type": "string",
+            "description": "The hold the timer was booked for"
+          }
+        }
+      },
+      "ExpireTaskHoldResp": {
+        "type": "object",
+        "required": [
+          "expired"
+        ],
+        "properties": {
+          "expired": {
+            "type": "boolean",
+            "description": "Whether the hold ended now. False when the hold was no longer live: the task resumed, was reset, was put on hold again or its flow ended."
+          }
+        }
+      },
+      "RescheduleTaskReq": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "scheduled_at"
+        ],
+        "properties": {
+          "scheduled_at": {
+            "type": "string",
+            "description": "The new execution date, an ISO 8601 instant with an offset, at least a minute from now"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Why the date moved, shown with the change and in the activity feed"
+          }
+        }
+      },
+      "ScheduleChange": {
+        "type": "object",
+        "description": "A person moved the execution date of this booked schedule (AL-3774).\nIt describes the booking named by `schedule_id` only: once the task's\n`schedule.schedule_id` differs (the timer fired and a reset or re-arm\nbooked a new one, run-now released it, a revert cleared it), the change\nno longer applies and readers must ignore it. Server-written.\n",
+        "required": [
+          "schedule_id",
+          "original_scheduled_at",
+          "previous_scheduled_at",
+          "changed_by",
+          "changed_at"
+        ],
+        "properties": {
+          "schedule_id": {
+            "type": "string",
+            "description": "The booking this change produced"
+          },
+          "original_scheduled_at": {
+            "type": "string",
+            "description": "The execution date the schedule's configuration resolved to, before any change"
+          },
+          "previous_scheduled_at": {
+            "type": "string",
+            "description": "The execution date this change replaced"
+          },
+          "changed_by": {
+            "type": "string",
+            "description": "Who changed it, as an assignee id (the user id, prefixed with `<org id>_` for a partner user)"
+          },
+          "changed_at": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
           }
         }
       },
@@ -6020,6 +6461,9 @@
           "error_reason": {
             "type": "string",
             "description": "Set by the backend when scheduling this task FAILED (e.g. the\nreferenced date attribute is empty/unreadable, or the resolved fire\ntime is already in the past). A JSON string\n({ error_code, error_reason, error_info }) describing why, so the UI\ncan show a specific warning and ask the user to fix the date\nattribute and re-schedule. Cleared when the task is successfully\n(re-)armed. This is the decision-task counterpart of\nAutomationInfo.error_reason (decision tasks have no automation_config).\n"
+          },
+          "rescheduled": {
+            "$ref": "#/components/schemas/ScheduleChange"
           }
         },
         "required": [
@@ -6255,6 +6699,17 @@
           "start_date_config": {
             "$ref": "#/components/schemas/StartDateConfig"
           },
+          "on_hold_config": {
+            "$ref": "#/components/schemas/OnHoldConfig"
+          },
+          "hold": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TaskHold"
+              }
+            ]
+          },
           "requirements": {
             "type": "array",
             "description": "requirements that need to be fulfilled in order to enable the task while flow instances are running",
@@ -6265,6 +6720,10 @@
           "required": {
             "type": "boolean",
             "description": "When true, the task is required and users cannot skip it (enforced on PATCH and schedule cancellation). Snapshotted from the template at flow start. Unrelated to `requirements`, which gate when a task becomes enabled. System-driven skips are unaffected — tasks on a not-taken decision branch, and automation tasks whose automation execution itself reports a skipped verdict (e.g. unmet trigger conditions). Not patchable — ignored on client patches."
+          },
+          "only_assignee_can_complete": {
+            "type": "boolean",
+            "description": "When true, only the task's assignees may change its status (start, pause, complete, skip, clear or reopen it), or choose its branch on a manual decision: a user named in `assigned_to`, a member of a group or partner organisation named there, or a user a variable assignment resolves to. Read from the stored task's assignees, never from the request, so a caller cannot assign themselves and complete in one PATCH. Everyone else, org admins and service tokens included, gets 403; a task without an assignee keeps its status until someone is assigned. The engine's own scheduler dispatch and the completion from a submitted journey are exempt. Snapshotted from the template at flow start. Not patchable — ignored on client patches."
           },
           "subtasks": {
             "type": "array",
@@ -6311,6 +6770,9 @@
           },
           "assigned_to": {
             "$ref": "#/components/schemas/Assignees"
+          },
+          "assignee_sync": {
+            "$ref": "#/components/schemas/AssigneeSync"
           },
           "ecp_placeholder_assignees": {
             "$ref": "#/components/schemas/EcpPlaceholderAssignees"
@@ -6468,7 +6930,7 @@
             "type": "string"
           },
           "status": {
-            "$ref": "#/components/schemas/SectionStatus"
+            "$ref": "#/components/schemas/PhaseStatus"
           },
           "updated_at": {
             "type": "string",
@@ -6483,6 +6945,9 @@
           },
           "assigned_to": {
             "$ref": "#/components/schemas/Assignees"
+          },
+          "assignee_sync": {
+            "$ref": "#/components/schemas/AssigneeSync"
           },
           "analytics": {
             "$ref": "#/components/schemas/AnalyticsInfo"
@@ -6542,12 +7007,64 @@
           "to_id"
         ]
       },
+      "LegacyAutomationDefinition": {
+        "type": "object",
+        "description": "The task's automation as the flow template held it, when it is more than one plain action: several actions, or conditions, schedules or loops. Ignored in requests.",
+        "properties": {
+          "actions": {
+            "type": "array",
+            "description": "The automation's actions (automation API `AnyAction`).",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "conditions": {
+            "type": "array",
+            "description": "The automation's conditions (automation API `ActionCondition`).",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "schedules": {
+            "type": "array",
+            "description": "The automation's schedules (automation API `ActionSchedule`).",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "loops": {
+            "type": "array",
+            "description": "The automation's loops (automation API `AutomationLoop`).",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
       "AutomationInfo": {
         "type": "object",
         "properties": {
           "flow_id": {
             "type": "string",
             "description": "Id of the automation that should be run by this task"
+          },
+          "action_definition": {
+            "type": "object",
+            "additionalProperties": true,
+            "readOnly": true,
+            "description": "The task's automation action as the flow template held it when the task got its automation. Ignored in requests."
+          },
+          "legacy_definition": {
+            "readOnly": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LegacyAutomationDefinition"
+              }
+            ]
           },
           "execution_id": {
             "type": "string",
@@ -6656,9 +7173,10 @@
             "enum": [
               "main_context",
               "task",
-              "trigger"
+              "trigger",
+              "linked_entity"
             ],
-            "description": "`main_context` = the run's current main context (same as omitting `input_context`). It moves when a task promotes its output to main context. `task` = entity produced by an upstream task in the graph. `trigger` with `trigger_id` = that configured trigger's entity. The Flow Builder offers it while the task is in that one trigger's own sub-flow, before it merges with another trigger's path. Without `trigger_id` it is legacy and resolves like `main_context`.\n"
+            "description": "`main_context` = the run's current main context (same as omitting `input_context`). It moves when a task promotes its output to main context. `task` = entity produced by an upstream task in the graph. `trigger` with `trigger_id` = that configured trigger's entity. The Flow Builder offers it while the task is in that one trigger's own sub-flow, before it merges with another trigger's path. Without `trigger_id` it is legacy and resolves like `main_context`. `linked_entity` with `rule_id` and `schema` = an additional entity: the entity a display rule of the flow's Contexts settings finds by relation, a rule the workflow uses (`context_settings.displays[].id` with `attach_to_contexts`), like an `EvaluationSource` with `origin_type: linked_entity`. Resolved from the run's main context when the task runs. It needs exactly one entity: a rule matching none or several leaves the task without an input entity, so it fails; it never falls back to the main context, an entity of another schema.\n"
           },
           "task_id": {
             "type": "string",
@@ -6667,6 +7185,14 @@
           "trigger_id": {
             "type": "string",
             "description": "Only read when source is `trigger`. Pins the input to one specific configured trigger (primary or additional) by its id. When absent, the input resolves like `main_context`.\n"
+          },
+          "rule_id": {
+            "type": "string",
+            "description": "Required when source is `linked_entity`. The id of a display rule of the flow's Contexts settings (`context_settings.displays[].id`) that has `attach_to_contexts`.\n"
+          },
+          "schema": {
+            "type": "string",
+            "description": "Required when source is `linked_entity`. The rule's `entity_schema`.\n"
           },
           "with_relations": {
             "type": "boolean",
@@ -6682,6 +7208,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/AutomationInputExtraTaskRef"
+                },
+                {
+                  "$ref": "#/components/schemas/AutomationInputExtraLinkedEntityRef"
                 }
               ]
             }
@@ -6720,6 +7249,31 @@
           "task_id": {
             "type": "string",
             "description": "The id of the upstream task whose output entities are passed along."
+          }
+        }
+      },
+      "AutomationInputExtraLinkedEntityRef": {
+        "type": "object",
+        "description": "Every entity a display rule of the flow's Contexts settings finds by relation (an additional entity), resolved from the run's main context when the task runs. The rule must be one the workflow uses (`attach_to_contexts`). A rule matching nothing passes nothing.\n",
+        "required": [
+          "source",
+          "rule_id",
+          "schema"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "linked_entity"
+            ]
+          },
+          "rule_id": {
+            "type": "string",
+            "description": "The id of the display rule (`context_settings.displays[].id`)."
+          },
+          "schema": {
+            "type": "string",
+            "description": "The rule's `entity_schema`."
           }
         }
       },
@@ -6984,9 +7538,10 @@
               "journey_block",
               "trigger_source",
               "main_context",
-              "flow_trait"
+              "flow_trait",
+              "linked_entity"
             ],
-            "description": "`trigger_source` (with origin `trigger`) marks a \"started by\" statement: the run's fired trigger is compared against the configured trigger ids in `values` — no entity attribute is involved.\n`main_context` (with origin `trigger`, no `id`) marks a statement evaluated against the run's PRIMARY context: the fired trigger's entity, re-bound by any completed task that promotes its output to main context (`output_context.set_as_primary`). `schema` carries the subject's schema for attribute selection only — resolution is by the primary flag, never by schema.\n`flow_trait` (with origin `flow_runtime`) marks a statement on a value of the running flow: `attribute` is the trait key, `id` and `attribute_sub_field` name its subject. `loop.iteration` is the lap a loop is in (1 on the first pass); `id` is the decision that owns the loop and `attribute_sub_field` the loop's id, a loop the evaluating decision is inside.\n"
+            "description": "`trigger_source` (with origin `trigger`) marks a \"started by\" statement: the run's fired trigger is compared against the configured trigger ids in `values` — no entity attribute is involved.\n`main_context` (with origin `trigger`, no `id`) marks a statement evaluated against the run's PRIMARY context: the fired trigger's entity, re-bound by any completed task that promotes its output to main context (`output_context.set_as_primary`). `schema` carries the subject's schema for attribute selection only — resolution is by the primary flag, never by schema.\n`flow_trait` (with origin `flow_runtime`) marks a statement on a value of the running flow: `attribute` is the trait key, `id` and `attribute_sub_field` name its subject. `loop.iteration` is the lap a loop is in (1 on the first pass); `id` is the decision that owns the loop and `attribute_sub_field` the loop's id, a loop the evaluating decision is inside.\n`linked_entity` (with origin `trigger`) marks a statement on an entity the flow's Contexts settings find by relation: `id` is a display rule the workflow uses (`context_settings.displays[].id` with `attach_to_contexts`) and `schema` its `entity_schema`. The engine resolves the rule from the run's main context when the decision runs. A rule matching no entity, or several, leaves the statement without an entity; it never falls back to the main context.\n"
           },
           "schema": {
             "type": "string"
@@ -7017,7 +7572,8 @@
               "relation_user",
               "purpose",
               "label",
-              "message_email_address"
+              "message_email_address",
+              "consent"
             ]
           },
           "attribute_repeatable": {
@@ -7272,6 +7828,14 @@
           }
         }
       },
+      "AssigneeSync": {
+        "type": "string",
+        "description": "`fill_empty` (also when absent) only resolves a variable that has no\nvalue yet. `follow_attribute` re-resolves a variable whenever its\nentity attribute changes, and clears it when the attribute is\nemptied or the entity is unshared from every partner. Only the\nvariable's own entries change; other assignees are kept. The server\nnever sets a default.\n",
+        "enum": [
+          "follow_attribute",
+          "fill_empty"
+        ]
+      },
       "VariableAssignment": {
         "type": "object",
         "description": "Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution.",
@@ -7466,6 +8030,9 @@
           "status": {
             "$ref": "#/components/schemas/StepStatus"
           },
+          "put_on_hold": {
+            "$ref": "#/components/schemas/PutOnHoldReq"
+          },
           "due_date": {
             "type": "string",
             "description": "Explicit due date for the task. Takes precedence over\ndue_date_config if both are provided.\n\nNote: intentionally typed as plain `string` (not\n`format: date-time`). For day/week/month-precision due\ndates the server stores a \"floating\" datetime without a\ntimezone designator (e.g. `2026-05-28T00:00:00.000`) so\nthat the UI can render it as a date in the user's local\ntimezone without shifting the displayed day. Tightening\nthis to `format: date-time` causes openapi-zod-client to\nemit `z.string().datetime({ offset: true })` in\n`validators-generated.ts`, which then trips\n`safeParse(body)` in `patch-task.ts` whenever the\nsidebar sends a stored task back with a tz-less\n`due_date`. See commit 4aca299c (Aug 2024) for the\noriginal date-only display rationale and the May 2026\nincident (513ed597 added the format, ee574b43\nunintentionally activated it via an unrelated regen) for\nthe history. Long-term, day-precision due dates should\nmigrate to a separate `format: date` field.\n",
@@ -7476,6 +8043,9 @@
           },
           "assigned_to": {
             "$ref": "#/components/schemas/Assignees"
+          },
+          "assignee_sync": {
+            "$ref": "#/components/schemas/AssigneeSync"
           },
           "enabled": {
             "type": "boolean",
@@ -7558,6 +8128,9 @@
           },
           "assigned_to": {
             "$ref": "#/components/schemas/Assignees"
+          },
+          "assignee_sync": {
+            "$ref": "#/components/schemas/AssigneeSync"
           }
         }
       },

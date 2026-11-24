@@ -55,6 +55,9 @@
     "/v2/portal/portal": {
       "post": {
         "operationId": "upsertPortal",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "deprecated": true,
         "summary": "upsertPortal",
         "description": "Upserts the settings for a portal of an organization.",
@@ -103,7 +106,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PortalConfig"
+                  "$ref": "#/components/schemas/PortalConfigWriteResult"
                 }
               }
             }
@@ -113,13 +116,13 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PortalConfig"
+                  "$ref": "#/components/schemas/PortalConfigWriteResult"
                 }
               }
             }
           },
           "400": {
-            "$ref": "#/components/responses/InvalidRequest"
+            "$ref": "#/components/responses/InvalidPortalConfigWrite"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -506,7 +509,7 @@
         "operationId": "createExport",
         "x-portal-preview-read": true,
         "summary": "createExport",
-        "description": "Request an asynchronous CSV export of the portal user's entities for one schema. Columns come from the request Returns a job id to poll.\n",
+        "description": "Request an asynchronous CSV or XLSX export of the portal user's entities for one schema. Columns come from the request Returns a job id to poll.\n",
         "tags": [
           "ECP"
         ],
@@ -550,6 +553,20 @@
                           "type": "object"
                         }
                       },
+                      "targets": {
+                        "type": "array",
+                        "description": "Target ids the list is scoped to. Every target must match.",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "match_any_targets": {
+                        "type": "array",
+                        "description": "Target ids of which at least one must match.",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
                       "sort": {}
                     }
                   },
@@ -566,6 +583,15 @@
                   "language": {
                     "type": "string",
                     "example": "de"
+                  },
+                  "format": {
+                    "type": "string",
+                    "description": "File format of the export. Defaults to csv.",
+                    "enum": [
+                      "csv",
+                      "xlsx"
+                    ],
+                    "default": "csv"
                   }
                 }
               }
@@ -660,6 +686,14 @@
                         "ready",
                         "failed",
                         "expired"
+                      ]
+                    },
+                    "format": {
+                      "type": "string",
+                      "description": "File format of the export, as requested on createExport.",
+                      "enum": [
+                        "csv",
+                        "xlsx"
                       ]
                     },
                     "downloadUrl": {
@@ -1673,134 +1707,6 @@
         }
       }
     },
-    "/v2/portal/external-links": {
-      "get": {
-        "operationId": "getExternalLinks",
-        "deprecated": true,
-        "summary": "getExternalLinks",
-        "description": "Retrieves the portal configuration external links.",
-        "tags": [
-          "ECP Admin",
-          "ECP"
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/Origin"
-            },
-            "description": "Origin of the portal"
-          },
-          {
-            "in": "query",
-            "name": "contactId",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            },
-            "description": "Contact ID of the user"
-          }
-        ],
-        "security": [
-          {
-            "EitherAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Portal config links retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ExternalLink"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/v2/portal/resolve:external-link/{id}": {
-      "get": {
-        "operationId": "getResolvedExternalLink",
-        "summary": "getResolvedExternalLink",
-        "deprecated": true,
-        "description": "Retrieves a resolved portal external link. Use /v2/portal/resolve:seamless-link/{id} instead.",
-        "tags": [
-          "ECP Admin",
-          "ECP"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            },
-            "description": "ID of the External Link"
-          },
-          {
-            "in": "query",
-            "name": "origin",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/Origin"
-            },
-            "description": "Origin of the portal"
-          },
-          {
-            "in": "query",
-            "name": "contactId",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            },
-            "description": "Contact ID of the user"
-          }
-        ],
-        "security": [
-          {
-            "EitherAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Resolved portal config link retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExternalLink"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
     "/v3/portal/external-links": {
       "get": {
         "operationId": "getExternalLinksV3",
@@ -1845,73 +1751,6 @@
                   "items": {
                     "$ref": "#/components/schemas/ExternalLink"
                   }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/v3/portal/resolve:external-link/{id}": {
-      "get": {
-        "operationId": "getResolvedExternalLinkV3",
-        "summary": "getResolvedExternalLinkV3",
-        "deprecated": true,
-        "description": "Retrieves a resolved portal external link. Use /v2/portal/resolve:seamless-link/{id} instead.",
-        "tags": [
-          "ECP Admin",
-          "ECP"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            },
-            "description": "ID of the External Link"
-          },
-          {
-            "in": "query",
-            "name": "portal_id",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/PortalId"
-            },
-            "description": "PortalId of the portal"
-          },
-          {
-            "in": "query",
-            "name": "contactId",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            },
-            "description": "Contact ID of the user"
-          }
-        ],
-        "security": [
-          {
-            "EitherAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Resolved portal config link retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExternalLink"
                 }
               }
             }
@@ -2298,7 +2137,7 @@
       "get": {
         "operationId": "getAllPortalConfigs",
         "summary": "getAllPortalConfigs",
-        "description": "Retrieves all portal configurations.",
+        "description": "Retrieves all portal configurations, each with its pages, email templates and grants.\n\nThe response grows with the number and size of the portals and has a size limit. To list\nthe portals, use `listPortalConfigSummaries`, and read a single portal's full\nconfiguration with `getPortalConfigV3`.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -2332,6 +2171,9 @@
           "403": {
             "$ref": "#/components/responses/Forbidden"
           },
+          "413": {
+            "$ref": "#/components/responses/ResponseTooLarge"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -2341,9 +2183,12 @@
     "/v2/portal/email-templates": {
       "post": {
         "operationId": "upsertEmailTemplates",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "deprecated": true,
         "summary": "upsertEmailTemplates",
-        "description": "Upserts the email templates of a portal",
+        "description": "Upserts the email templates of a portal. A slot can only be set to an email template of the organization (or to `null`): a template id the organization does not have fails with `400` (`reason: EMAIL_TEMPLATE_NOT_FOUND`) and nothing is changed. Ids the portal already stores never fail the call.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -2399,6 +2244,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -2464,6 +2312,9 @@
     "/v3/portal/email-templates:migrate-references": {
       "post": {
         "operationId": "migrateEmailTemplateReferences",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "migrateEmailTemplateReferences",
         "description": "Walk every email-template config row in the caller's org and re-point any\nfield on `email_templates` that currently references `source_template_id`\nat `destination_template_id`. Intended to be called from the email-template\nmigration flow when a duplicated template is refined.\n\nRows are keyed by portal id (`portal_sk_v3`); a row without one is skipped.\nReturns the portal IDs that were rewritten and any whose update failed.\n",
         "tags": [
@@ -2631,8 +2482,11 @@
     "/v3/portal/email-templates/{portal_id}": {
       "post": {
         "operationId": "upsertEmailTemplatesByPortalId",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "upsertEmailTemplatesByPortalId",
-        "description": "Upserts the email templates of a portal by portal ID. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
+        "description": "Upserts the email templates of a portal by portal ID. A slot can only be set to an email template of the organization (or to `null`): a template id the organization does not have fails with `400` (`reason: EMAIL_TEMPLATE_NOT_FOUND`) and nothing is changed. Ids the portal already stores never fail the call. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -2688,6 +2542,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -2868,6 +2725,9 @@
     "/v2/portal/widgets": {
       "post": {
         "operationId": "upsertPortalWidget",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "upsertPortalWidget",
         "description": "Upsert widget for a portal of an organization.",
         "deprecated": true,
@@ -3041,6 +2901,9 @@
       },
       "post": {
         "operationId": "upsertPortalWidgetV3",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "upsertPortalWidgetV3",
         "description": "Upsert widget for a portal by portal_id.",
         "security": [
@@ -3326,6 +3189,23 @@
                           ],
                           "items": {
                             "type": "string"
+                          }
+                        },
+                        "origin": {
+                          "type": "string",
+                          "description": "The origin of the resolved portal, e.g. for `{{linkToPortal \"END_CUSTOMER_PORTAL\" \"contracts\"}}`",
+                          "example": "END_CUSTOMER_PORTAL"
+                        },
+                        "pagePaths": {
+                          "type": "object",
+                          "description": "The path of each visible page by its slug, nested pages included. Pages the portal opens an entity on\nby its id end in `/:id`; on the others the entity goes in `?<schema>Id=<id>`.\n",
+                          "additionalProperties": {
+                            "type": "string"
+                          },
+                          "example": {
+                            "documents": "/documents",
+                            "contract": "/contract/:id",
+                            "opportunities": "/requests/opportunities/:id"
                           }
                         }
                       }
@@ -4337,7 +4217,7 @@
       "get": {
         "operationId": "getPortalUser",
         "summary": "getPortalUser",
-        "description": "Get the portal user details",
+        "description": "Get the portal user details. For a portal with portal roles, also the user's roles and\ntheir grants, so the portal shows what those roles allow without another request.\n",
         "tags": [
           "ECP"
         ],
@@ -4356,6 +4236,34 @@
                   "properties": {
                     "data": {
                       "$ref": "#/components/schemas/PortalUser"
+                    },
+                    "portal_roles": {
+                      "type": "object",
+                      "description": "Present only for a portal with portal roles. Replaces the grants of the\nportal config for this user.\n",
+                      "required": [
+                        "roles",
+                        "grants"
+                      ],
+                      "properties": {
+                        "roles": {
+                          "type": "array",
+                          "description": "Slugs of the user's portal roles (at least one)",
+                          "items": {
+                            "type": "string"
+                          },
+                          "example": [
+                            "b2b_admin",
+                            "b2b_billing"
+                          ]
+                        },
+                        "grants": {
+                          "type": "array",
+                          "description": "Grants of all of `roles` together",
+                          "items": {
+                            "$ref": "#/components/schemas/Grant"
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -4405,6 +4313,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The login is SSO-managed and no `deleteAccount` portal extension hook is configured - its identity provider would provision it again."
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -4476,6 +4387,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The login is SSO-managed and no `changeEmail` portal extension hook is configured - the built-in change needs a password the login doesn't have."
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -4608,6 +4522,10 @@
                   "in_app": {
                     "type": "boolean",
                     "description": "Whether the portal user wants to receive in-app notifications."
+                  },
+                  "email": {
+                    "type": "boolean",
+                    "description": "Whether the portal user wants to additionally receive engagement center notifications by email (opt-in)."
                   }
                 }
               }
@@ -5528,87 +5446,6 @@
         }
       }
     },
-    "/v2/portal/order": {
-      "get": {
-        "operationId": "getAllOrders",
-        "summary": "getAllOrders",
-        "description": "Get all orders for the portal user. Use searchPortalUserEntities instead.",
-        "deprecated": true,
-        "tags": [
-          "ECP"
-        ],
-        "security": [
-          {
-            "PortalAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "required": false,
-            "schema": {
-              "type": "number",
-              "description": "Initial offset to set for the search results",
-              "example": 0,
-              "default": 0
-            }
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "required": false,
-            "schema": {
-              "type": "number",
-              "description": "Size of the search results",
-              "example": 100,
-              "default": 100
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The orders for the portal user returned successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "allOf": [
-                          {
-                            "$ref": "#/components/schemas/Order"
-                          },
-                          {
-                            "type": "object",
-                            "properties": {
-                              "journey_actions": {
-                                "$ref": "#/components/schemas/JourneyActions"
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
     "/v2/portal/order/{id}/acceptance": {
       "post": {
         "operationId": "postOrderAcceptance",
@@ -5773,273 +5610,6 @@
         }
       }
     },
-    "/v2/portal/opportunity": {
-      "get": {
-        "operationId": "getAllOpportunities",
-        "summary": "getAllOpportunities",
-        "description": "Get all opportunities of a portal user. Use searchPortalUserEntities instead.",
-        "deprecated": true,
-        "tags": [
-          "ECP"
-        ],
-        "security": [
-          {
-            "PortalAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "required": false,
-            "schema": {
-              "type": "number",
-              "description": "Initial offset to set for the search results",
-              "example": 0,
-              "default": 0
-            }
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "required": false,
-            "schema": {
-              "type": "number",
-              "description": "Size of the search results",
-              "example": 100,
-              "default": 100
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The opportunities is retrieved successfully for the portal user.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "allOf": [
-                          {
-                            "$ref": "#/components/schemas/Opportunity"
-                          },
-                          {
-                            "type": "object",
-                            "properties": {
-                              "journey_actions": {
-                                "$ref": "#/components/schemas/JourneyActions"
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/v2/portal/opportunities/searchable-attributes": {
-      "get": {
-        "operationId": "getSearchableAttributesForOpportunities",
-        "summary": "getSearchableAttributesForOpportunities",
-        "description": "Get all opportunity searchable attributes for a portal user. Use searchPortalUserEntities instead.",
-        "deprecated": true,
-        "tags": [
-          "ECP"
-        ],
-        "security": [
-          {
-            "PortalAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "required": false,
-            "schema": {
-              "type": "number",
-              "description": "Initial offset to set for the search results",
-              "example": 0,
-              "default": 0
-            }
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "required": false,
-            "schema": {
-              "type": "number",
-              "description": "Size of the search results",
-              "example": 1000,
-              "default": 1000
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The opportunities is retrieved successfully for the portal user.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Opportunity"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/v2/portal/opportunities/search": {
-      "post": {
-        "operationId": "getSearchResultsForOpportunities",
-        "x-portal-preview-read": true,
-        "summary": "getSearchResultsForOpportunities",
-        "description": "Get all opportunity with the given searched attributes. Use searchPortalUserEntities instead.",
-        "deprecated": true,
-        "tags": [
-          "ECP"
-        ],
-        "security": [
-          {
-            "PortalAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "required": false,
-            "schema": {
-              "type": "number",
-              "description": "Initial offset to set for the search results",
-              "example": 0,
-              "default": 0
-            }
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "required": false,
-            "schema": {
-              "type": "number",
-              "description": "Size of the search results",
-              "example": 1000,
-              "default": 1000
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "addresses": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "customers": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "purposes": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/EntityId"
-                    }
-                  },
-                  "workflows": {
-                    "type": "array",
-                    "items": {
-                      "items": {
-                        "$ref": "#/components/schemas/WorfklowIdentifier"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The opportunities is retrieved successfully for the portal user.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Opportunity"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
     "/v2/portal/opportunities/{id}": {
       "get": {
         "operationId": "getOpportunity",
@@ -6108,103 +5678,6 @@
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/JourneyActions"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/v2/portal/request": {
-      "get": {
-        "operationId": "getAllRequests",
-        "summary": "getAllRequests",
-        "description": "Get all opportunities & orders of a portal user. Use searchPortalUserEntities instead.",
-        "deprecated": true,
-        "tags": [
-          "ECP"
-        ],
-        "security": [
-          {
-            "PortalAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "required": false,
-            "schema": {
-              "type": "number",
-              "description": "Initial offset to set for the search results",
-              "example": 0,
-              "default": 0
-            }
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "required": false,
-            "schema": {
-              "type": "number",
-              "description": "Size of the search results",
-              "example": 100,
-              "default": 200
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The opportunities is retrieved successfully for the portal user.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "hits": {
-                      "type": "number",
-                      "description": "Total number of hits",
-                      "example": 1
-                    },
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "allOf": [
-                          {
-                            "type": "object",
-                            "oneOf": [
-                              {
-                                "$ref": "#/components/schemas/Opportunity"
-                              },
-                              {
-                                "$ref": "#/components/schemas/Order"
-                              }
-                            ]
-                          },
-                          {
-                            "type": "object",
-                            "properties": {
-                              "journey_actions": {
-                                "$ref": "#/components/schemas/JourneyActions"
-                              }
-                            }
-                          }
-                        ]
                       }
                     }
                   }
@@ -6742,116 +6215,6 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/v2/portal/entity/{slug}/{id}/activity": {
-      "get": {
-        "operationId": "getEntityActivityFeed",
-        "summary": "getEntityActivityFeed",
-        "description": "Get activity feed for an entity\n",
-        "tags": [
-          "Activity"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Type",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "description": "Entity id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            }
-          },
-          {
-            "in": "query",
-            "name": "after",
-            "description": "Get activities after this timestamp",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "in": "query",
-            "name": "before",
-            "description": "get activities before this timestamp",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "in": "query",
-            "name": "from",
-            "description": "start from page",
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "default": 0
-            }
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "description": "max number of results to return",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 25
-            }
-          },
-          {
-            "in": "query",
-            "name": "type",
-            "description": "Filter by activity type",
-            "schema": {
-              "type": "string",
-              "example": "SyncActivity"
-            }
-          },
-          {
-            "in": "query",
-            "name": "include_relations",
-            "description": "Include activities from related entities",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "total": {
-                      "type": "integer",
-                      "example": 1
-                    },
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/ActivityItem"
-                      }
-                    }
-                  }
-                }
-              }
-            }
           }
         }
       }
@@ -8811,7 +8174,7 @@
                   "include_counter": {
                     "type": "boolean",
                     "default": false,
-                    "description": "When true, the response includes `counter` with the counter's unit, OBIS number, direction and tariff type. Access is checked by metering-api on the counter's parent meter."
+                    "description": "When true, the response includes `counter` with the counter's unit, OBIS number, direction and tariff type, if the caller has access to the counter's meter."
                   },
                   "templates_ref": {
                     "$ref": "#/components/schemas/TemplatesRef",
@@ -8857,6 +8220,417 @@
                     },
                     "counter": {
                       "$ref": "#/components/schemas/MeterReadingCounterDetails"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/metering/meter/{meter_id}": {
+      "get": {
+        "operationId": "getMeter",
+        "summary": "getMeter",
+        "description": "Retrieves a meter of the portal user, with its journey actions and related entities.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the meter."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The meter with its journey actions and relations.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "entity": {
+                          "$ref": "#/components/schemas/Meter"
+                        },
+                        "journey_actions": {
+                          "$ref": "#/components/schemas/JourneyActions"
+                        },
+                        "relations": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/EntityItem"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/metering/meter/{meter_id}/counters": {
+      "get": {
+        "operationId": "getMeterCounters",
+        "summary": "getMeterCounters",
+        "description": "Retrieves the counters of a meter of the portal user.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the meter."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The counters of the meter.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MeterCounter"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/metering/meter/{meter_id}/readings": {
+      "post": {
+        "operationId": "createMeterReadings",
+        "summary": "createMeterReadings",
+        "description": "Inserts readings for several counters of a meter of the portal user at once, one reading per\ncounter and at most 100 per request. Use `createMeterReading` instead when the portal has a\nmeter reading plausibility check hook configured.\n",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the meter."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "readings"
+                ],
+                "properties": {
+                  "readings": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 100,
+                    "items": {
+                      "$ref": "#/components/schemas/PortalMeterReading"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The created meter readings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MeterReading"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/metering/meter/{meter_id}/allowed-reading": {
+      "get": {
+        "operationId": "getAllowedMeterReading",
+        "summary": "getAllowedMeterReading",
+        "x-contact-identification-token": true,
+        "description": "Returns the allowed min/max reading per counter of the meter, derived from its reading history.\nUnlike `getAllowedMeterReadingRange`, this needs no plausibility check hook.\n",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the meter."
+          },
+          {
+            "in": "query",
+            "name": "timestamp",
+            "required": false,
+            "description": "If not provided, the system will default to now.",
+            "schema": {
+              "type": "string",
+              "example": "2022-10-01T10:10:00.000Z"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Allowed reading per counter of the meter.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "counter_id": {
+                            "type": "string"
+                          },
+                          "min_value": {
+                            "type": "number"
+                          },
+                          "max_value": {
+                            "type": "number"
+                          },
+                          "last_reading": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/metering/counter/{counter_id}": {
+      "get": {
+        "operationId": "getMeterCounter",
+        "summary": "getMeterCounter",
+        "description": "Retrieves a counter of a meter of the portal user, incl. its unit and last reading.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "counter_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the meter counter."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The meter counter.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MeterCounter"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/metering/contract/{contract_id}/meters": {
+      "get": {
+        "operationId": "getContractMeters",
+        "summary": "getContractMeters",
+        "description": "Retrieves the meters of a contract of the portal user.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contract_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the contract."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The meters of the contract.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Meter"
+                      }
                     }
                   }
                 }
@@ -9418,6 +9192,9 @@
       },
       "put": {
         "operationId": "updatePortalPage",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "updatePortalPage",
         "description": "Update a portal page by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
@@ -9516,6 +9293,9 @@
       ],
       "post": {
         "operationId": "detachPortalPage",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "detachPortalPage",
         "description": "Detach a blueprint-managed page from its blueprint. The page and all of its blocks become local (editable, no longer updated by the blueprint) and the page's lineage is tombstoned on the portal so future syncs skip it. One-way. Idempotent for pages that are not managed.\n",
         "tags": [
@@ -9577,6 +9357,9 @@
       ],
       "post": {
         "operationId": "detachPortalPageBlock",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "detachPortalPageBlock",
         "description": "Detach a blueprint-managed block. The block becomes the customer's and its lineage is tombstoned on the page so future syncs skip it. A managed page stays managed and keeps receiving blueprint updates for everything else. One-way. Idempotent for blocks that are not managed.\n",
         "tags": [
@@ -9708,6 +9491,9 @@
       },
       "post": {
         "operationId": "createPortalPage",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "createPortalPage",
         "description": "Create a new portal page. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
@@ -10038,6 +9824,9 @@
       ],
       "post": {
         "operationId": "createPortalPageBlock",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "createPortalPageBlock",
         "description": "Create a new portal page block. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
@@ -10192,6 +9981,9 @@
       },
       "put": {
         "operationId": "updatePortalPageBlock",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "updatePortalPageBlock",
         "description": "Update a portal page block by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
@@ -10416,6 +10208,81 @@
                     "message": {
                       "type": "string",
                       "example": "Password set successfully."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/TemporaryPasswordInvalidRequest"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/public/user/temporary-password/resend": {
+      "post": {
+        "operationId": "resendTemporaryPasswordLink",
+        "summary": "resendTemporaryPasswordLink",
+        "description": "Sends a fresh set-password link to a portal user whose link has expired. A new link is only sent when the temporary password of that login has expired; the response is the same in every other case.\n",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "org_id",
+                  "portal_id",
+                  "email",
+                  "temporary_password"
+                ],
+                "properties": {
+                  "org_id": {
+                    "type": "string",
+                    "description": "Organization ID",
+                    "example": "123"
+                  },
+                  "portal_id": {
+                    "type": "string",
+                    "description": "ID of the portal the user belongs to",
+                    "example": "7hj28akg-97fb-4f5c-b2a1-3e4fbc1d8c7a"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "Email address of the portal user",
+                    "example": "user@example.com"
+                  },
+                  "temporary_password": {
+                    "type": "string",
+                    "description": "Temporary password from the expired link"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request was accepted. A new link was sent if the previous one had expired.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "If the link has expired, a new one has been sent."
                     }
                   }
                 }
@@ -10980,7 +10847,7 @@
       "post": {
         "operationId": "createPortalConfig",
         "summary": "createPortalConfig",
-        "description": "Creates a new portal configuration.",
+        "description": "Creates a new portal configuration. Only `name` and `origin` are required; keys left out\nget these defaults (a value that is sent is always stored as sent):\n\n| Field | Default when omitted |\n| --- | --- |\n| `registration_identifiers` | `[{ \"name\": \"email\", \"schema\": \"contact\" }]` |\n| `self_registration_entity` | `contact` |\n| `config` | `{\"available_languages\":[\"german\"]}` |\n| `meter_reading_grace_period` | `30` |\n| `user_account_self_management` | `false` |\n| `prevent_search_engine_indexing` | `true` outside production and for sandbox organizations |\n| `design_id` | The organization's default design, if it has one |\n| `pages` | The default pages (the ones `getDefaultPages` returns) |\n\n`self_registration_setting` has no default and reads as `DENY`.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -11006,7 +10873,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PortalConfigV3"
+                  "$ref": "#/components/schemas/PortalConfigV3WriteResult"
                 }
               }
             }
@@ -11083,6 +10950,9 @@
       },
       "put": {
         "operationId": "putPortalConfig",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "putPortalConfig",
         "description": "Updates a specific portal configuration by ID. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
@@ -11147,13 +11017,13 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PortalConfigV3"
+                  "$ref": "#/components/schemas/PortalConfigV3WriteResult"
                 }
               }
             }
           },
           "400": {
-            "$ref": "#/components/responses/InvalidRequest"
+            "$ref": "#/components/responses/InvalidPortalConfigWrite"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -11222,6 +11092,9 @@
     "/v3/portal/config/{portal_id}/revisions": {
       "post": {
         "operationId": "createPortalRevision",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "createPortalRevision",
         "description": "Creates a new revision — a complete, immutable snapshot of the portal's configuration, pages and email templates. Nothing about the live portal changes; the snapshot only becomes live when it is published.\n\nThe payload must be COMPLETE. This endpoint does not merge against live or against the previous revision: publishing a revision deletes every live page the revision does not contain. The server validates structure only — `pages` present, each page carrying `id`, `slug`, `order` and `blocks`, and no two pages sharing an `id` or a `slug`. Semantic completeness of the config is a promise the caller makes, and a partial payload is honoured rather than rejected.\n\n`email_templates` is optional, and absence means \"keep the portal's current templates\", never \"no templates\". A present but partial map is taken verbatim.\n\nWith `publish`, the revision is published in the same call: save and publish in one step.\n",
         "tags": [
@@ -11268,7 +11141,7 @@
             }
           },
           "400": {
-            "$ref": "#/components/responses/InvalidRequest"
+            "$ref": "#/components/responses/InvalidPortalConfigWrite"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -11572,6 +11445,9 @@
     "/v3/portal/config/{portal_id}/publish": {
       "post": {
         "operationId": "publishPortalRevision",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "publishPortalRevision",
         "description": "Makes one revision the portal's live configuration, atomically: either everything below takes effect or nothing does. Publish is a full-snapshot replace: it writes config, every page and email templates to match the revision exactly, and deletes every live page the revision does not contain.\n\nAccepts any valid `revision_id` for the portal, old or new. There is no separate rollback endpoint and none is needed.\n\nThe same atomic publish stamps `name`, `description` and `published_at` onto the revision being published — permanently, on that revision, and not on any later one that supersedes it as live. `name` is generated server-side when the request omits it, so every published revision carries one.\n\nPublish is rejected with `409` (`reason: PORTAL_CHANGED`) when the revision was built on a published revision that is no longer live: publishing it would revert every write published since. Reload, re-apply the change and save again, or send `force: true` to publish it anyway. A revision that was published before is a rollback and is never refused for this. Publish is also rejected with `409` when the live config changed after publish read it. Every write to a versioned portal publishes a revision, so these checks cover pages and email templates too. `409` is also returned when the revision's stored config or email templates cannot be read, or when two of its pages would resolve to the same slug. A domain the revision claims that another portal already owns is a `400`.\n",
         "tags": [
@@ -11618,7 +11494,7 @@
             }
           },
           "400": {
-            "$ref": "#/components/responses/InvalidRequest"
+            "$ref": "#/components/responses/InvalidPortalConfigWrite"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -11641,11 +11517,108 @@
         }
       }
     },
+    "/v3/portal/config/{portal_id}/validate": {
+      "post": {
+        "operationId": "validatePortalConfig",
+        "summary": "validatePortalConfig",
+        "description": "Dry run: reports what would leave the portal broken (`error`) or degraded (`warning`). Writes nothing, although it is a `POST`.\n\n- no body: the stored portal;\n- a candidate body, as `putPortalConfig` takes it: the portal that body would leave behind;\n- `revision_id`: the portal that publishing this revision would make live (no body allowed).\n\nFindings have a stable `code` and `path`; the portal config writes return the same findings as `validation`. Besides the settings and pages, every block is checked: an unknown block type, a block placed, nested or sectioned where the portal does not render it, a missing block it depends on, and a block that is not allowed on a public page.\n",
+        "tags": [
+          "ECP Admin"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+            },
+            "description": "Portal ID (readonly UUID generated on portal creation)"
+          },
+          {
+            "in": "query",
+            "name": "revision_id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "2026-08-25T14:03:11.482Z-a7f3c1d9"
+            },
+            "description": "Validate this saved revision instead of the live portal (it contains `:`, so percent-encode it).\n"
+          },
+          {
+            "in": "query",
+            "name": "page_upsert_mode",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id",
+                "slug"
+              ],
+              "default": "id"
+            },
+            "description": "How the pages of the request body are matched against the stored pages, as on `putPortalConfig`."
+          }
+        ],
+        "requestBody": {
+          "description": "Optional candidate, as `putPortalConfig` takes it; leave it out to validate the stored portal.\n",
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortalConfigV3"
+              }
+            },
+            "text/plain": {
+              "schema": {
+                "type": "string",
+                "maxLength": 0,
+                "description": "No body — validates the stored portal."
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The validation result; `200` also when the portal has errors (see `valid`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalValidationResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v3/portal/configs": {
       "get": {
         "operationId": "listAllPortalConfigs",
         "summary": "listAllPortalConfigs",
-        "description": "Retrieves all portal configurations.",
+        "description": "Retrieves all portal configurations, each with its pages, email templates and grants.\n\nThe response grows with the number and size of the portals and has a size limit. To list\nthe portals, use `listPortalConfigSummaries`, and read a single portal's full\nconfiguration with `getPortalConfigV3`.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -11678,6 +11651,9 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "413": {
+            "$ref": "#/components/responses/ResponseTooLarge"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -11732,6 +11708,9 @@
     "/v3/portal/config/swap": {
       "post": {
         "operationId": "swapPortalConfig",
+        "x-epilot-agent": {
+          "effect": "destructive"
+        },
         "summary": "swapPortalConfig",
         "description": "Swaps the portal configuration of two portals. Without `mode` both portals exchange pages and experience config live, as before. With `mode: copy` (portal versioning only) nothing live changes: the source's setup is saved as an unpublished revision on the target to review and publish. Domain and access/security settings never move.",
         "tags": [
@@ -11845,6 +11824,9 @@
     "/v3/portal/config/clone": {
       "post": {
         "operationId": "clonePortalConfig",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "clonePortalConfig",
         "description": "Creates a new portal by cloning configuration and pages from an existing portal. The new portal gets its own domain, users, email templates, and authentication settings.",
         "tags": [
@@ -11907,6 +11889,136 @@
         }
       }
     },
+    "/v3/portal/user/role": {
+      "get": {
+        "operationId": "getPortalUserRole",
+        "summary": "getPortalUserRole",
+        "description": "The signed-in portal user's roles and their grants together.\n",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The caller's roles and grants",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "roles",
+                    "role",
+                    "grants"
+                  ],
+                  "properties": {
+                    "roles": {
+                      "type": "array",
+                      "description": "Slugs of the caller's portal roles (at least one)",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "b2b_admin",
+                        "b2b_billing"
+                      ]
+                    },
+                    "role": {
+                      "type": "string",
+                      "deprecated": true,
+                      "description": "First of `roles`",
+                      "example": "b2b_admin"
+                    },
+                    "grants": {
+                      "description": "Grants of all of `roles` together",
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Grant"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/roles": {
+      "get": {
+        "operationId": "listPortalRoles",
+        "summary": "listPortalRoles",
+        "description": "Roles the caller may give to users they invite: the portal's default role first, then each\nof the portal's `allowed_roles` that the caller's role holds a `portal_user:assign_role`\ngrant for (resource = role slug or `*`). `can_invite` says whether the caller may invite\nusers at all.\n",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The portal's selectable roles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "can_invite",
+                    "default_role",
+                    "roles"
+                  ],
+                  "properties": {
+                    "can_invite": {
+                      "type": "boolean",
+                      "description": "Whether the caller may invite users"
+                    },
+                    "default_role": {
+                      "type": "string",
+                      "description": "Slug of the portal's default role"
+                    },
+                    "roles": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "slug",
+                          "name"
+                        ],
+                        "properties": {
+                          "slug": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v3/portal/partner/invite": {
       "post": {
         "operationId": "invitePartner",
@@ -11952,9 +12064,26 @@
                       ]
                     }
                   },
+                  "roles": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Portal roles (slugs) to give the invited user. Omitted or empty means the\nportal's default role. Each must be the portal's default role or one of its\n`allowed_roles`, else 400 (`ROLE_NOT_ALLOWED`). Any other role needs a\n`portal_user:assign_role` grant on the inviter's roles whose resource is the\nrole slug or `*`, else 403 (`ROLE_ASSIGNMENT_NOT_PERMITTED`). An inviter\nwithout permission to invite gets 403 (`INVITE_NOT_PERMITTED`).\n",
+                    "example": [
+                      "b2b_admin",
+                      "b2b_billing"
+                    ]
+                  },
+                  "role": {
+                    "type": "string",
+                    "deprecated": true,
+                    "description": "A single role to give the invited user; use `roles`. Ignored when `roles` is set.",
+                    "example": "b2b_admin"
+                  },
                   "portal_user_data": {
                     "type": "object",
-                    "description": "Additional portal user entity fields to set when creating the portal user for the invited user.\nThese are mapped directly to portal_user entity attributes.\nValues can be strings or arrays of strings (for multiselect attributes).\n",
+                    "description": "Additional portal user entity fields to set when creating the portal user for the invited user.\n`role` is ignored here; use the top-level `roles` instead.\nThese are mapped directly to portal_user entity attributes.\nValues can be strings or arrays of strings (for multiselect attributes).\n",
                     "additionalProperties": {
                       "oneOf": [
                         {
@@ -12206,6 +12335,109 @@
                     "message": {
                       "type": "string",
                       "example": "Partner disabled from portal successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/partner/{partner_id}/role": {
+      "put": {
+        "operationId": "setPartnerRole",
+        "summary": "setPartnerRole",
+        "description": "Changes the portal roles of another user on the caller's account.\n\nEvery new role must be the portal's default role or one of its `allowed_roles` (400\n`ROLE_NOT_ALLOWED`). The caller's roles need `portal_user:assign_role` grants covering\nevery role the change adds or removes (403 `ROLE_ASSIGNMENT_NOT_PERMITTED`). Callers\ncannot change their own roles (403 `ROLE_SELF_CHANGE`). `roles: []` resets the user to the\nportal's default role. The new roles apply from the user's next sign-in or session refresh.\n",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Portal user ID of the account user"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "roles": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "nullable": true,
+                    "description": "Role slugs the user holds from now on; empty or null for the portal's default role",
+                    "example": [
+                      "b2b_billing"
+                    ]
+                  },
+                  "role": {
+                    "type": "string",
+                    "nullable": true,
+                    "deprecated": true,
+                    "description": "A single role to give the user (null for the default role); use `roles`. Ignored when `roles` is set.",
+                    "example": "b2b_billing"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Roles changed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "roles": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PortalRoleRef"
+                      }
+                    },
+                    "role": {
+                      "type": "string",
+                      "deprecated": true,
+                      "description": "First of `roles`",
+                      "example": "b2b_billing"
+                    },
+                    "role_name": {
+                      "type": "string",
+                      "deprecated": true,
+                      "description": "Name of `role`",
+                      "example": "Billing"
                     }
                   }
                 }
@@ -12492,6 +12724,9 @@
       },
       "put": {
         "operationId": "putMobileConfig",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "putMobileConfig",
         "description": "Merges the provided fields into the portal's mobile app configuration\n(deep merge). Only mobile_config is modified; all other portal settings\nare left untouched.\n\nWith portal versioning on, the change is published as a revision, like\nevery other write to a versioned portal. `409` when the portal kept\nchanging while the write was retried.\n",
         "tags": [
@@ -12565,6 +12800,23 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
+      "InvalidPortalConfigWrite": {
+        "description": "The request is invalid or, where the portal config validation is enforced, the write would leave a live portal broken (`reason: PORTAL_VALIDATION_FAILED`).\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "$ref": "#/components/schemas/PortalValidationFailedResp"
+                }
+              ]
             }
           }
         }
@@ -12690,6 +12942,41 @@
           }
         }
       },
+      "ResponseTooLarge": {
+        "description": "The response would be too large to return (`RESPONSE_TOO_LARGE`). Request less data, for\nexample a summary listing or a single item.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "RESPONSE_TOO_LARGE"
+                      ]
+                    },
+                    "size_bytes": {
+                      "type": "integer",
+                      "description": "Size of the response that was not returned"
+                    },
+                    "max_size_bytes": {
+                      "type": "integer",
+                      "description": "The largest response that can be returned"
+                    }
+                  },
+                  "required": [
+                    "code"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
       "NotFound": {
         "description": "The specified resource was not found",
         "content": {
@@ -12746,6 +13033,32 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
+      "TemporaryPasswordInvalidRequest": {
+        "description": "The password could not be set. `reason` is present when the link cannot be used: `temporary_password_expired` (a new link can be requested), `password_already_set` (the user can sign in) or `invalid_link` (anything else, e.g. replaced by a newer link).\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "invalid_link",
+                        "temporary_password_expired",
+                        "password_already_set"
+                      ]
+                    }
+                  }
+                }
+              ]
             }
           }
         }
@@ -13009,15 +13322,21 @@
       },
       "PortalUserNotificationPreferences": {
         "type": "object",
-        "description": "Resolved notification preferences of a portal user. Notifications are opt-out: a channel that was never stored on the portal user resolves to enabled (true).",
+        "description": "Resolved notification preferences of a portal user. In-app notifications are opt-out: when never stored on the portal user they resolve to enabled (true). Email notifications are opt-in: when never stored they resolve to disabled (false).",
         "required": [
-          "in_app"
+          "in_app",
+          "email"
         ],
         "properties": {
           "in_app": {
             "type": "boolean",
             "description": "Whether the portal user receives in-app notifications.",
             "example": true
+          },
+          "email": {
+            "type": "boolean",
+            "description": "Whether the portal user additionally receives engagement center notifications by email. Only sent for notification templates that reference an email template.",
+            "example": false
           }
         }
       },
@@ -13226,7 +13545,7 @@
       },
       "MobileOtaConfig": {
         "type": "object",
-        "description": "OTA (over-the-air) update settings for the portal's mobile app. Drives the OTA build pipeline and the per-portal manifest. channel / update_strategy / min_native_version are epilot-internal controls.",
+        "description": "OTA (over-the-air) update settings for the portal's mobile app. Drives the OTA build pipeline and the per-portal manifest. channel / update_strategy / recommended_native_version / min_supported_native_version are epilot-internal controls.",
         "additionalProperties": true,
         "properties": {
           "enabled": {
@@ -13253,45 +13572,17 @@
             ],
             "description": "When to apply a downloaded bundle."
           },
-          "min_native_version": {
+          "recommended_native_version": {
             "type": "string",
-            "description": "Minimum native app version required to load OTA bundles."
-          }
-        }
-      },
-      "NewDesignMigrationResult": {
-        "type": "object",
-        "properties": {
-          "org_id": {
-            "type": "string"
+            "pattern": "^\\d+(\\.\\d+){0,2}(-[0-9A-Za-z.-]+)?$",
+            "description": "Native app versions below this see a dismissible \"update available\" prompt linking to the App Store / Play Store.",
+            "example": "2.0.0"
           },
-          "portal_id": {
-            "type": "string"
-          },
-          "origin": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "is_v3_item": {
-            "type": "boolean"
-          },
-          "dry_run": {
-            "type": "boolean"
-          },
-          "migrated": {
-            "type": "boolean",
-            "description": "True when the migration was written (false for dry_run)"
-          },
-          "summary": {
-            "type": "object",
-            "additionalProperties": true
-          },
-          "before": {
-            "type": "object",
-            "description": "Stored feature_settings and pages before the migration, for rollback",
-            "additionalProperties": true
+          "min_supported_native_version": {
+            "type": "string",
+            "pattern": "^\\d+(\\.\\d+){0,2}(-[0-9A-Za-z.-]+)?$",
+            "description": "Minimum native app version. Versions below this are blocked until the user updates from the App Store / Play Store and load no new OTA bundle.",
+            "example": "1.4.0"
           }
         }
       },
@@ -13327,9 +13618,21 @@
               "immediate"
             ]
           },
-          "minNativeVersion": {
+          "recommendedNativeVersion": {
             "type": "string",
-            "example": "1.0.0"
+            "example": "2.0.0"
+          },
+          "minSupportedNativeVersion": {
+            "type": "string",
+            "example": "1.4.0"
+          },
+          "iosStoreUrl": {
+            "type": "string",
+            "example": "https://apps.apple.com/app/id1234567890"
+          },
+          "androidStoreUrl": {
+            "type": "string",
+            "example": "https://play.google.com/store/apps/details?id=com.example.portal"
           }
         }
       },
@@ -13953,6 +14256,9 @@
               "account"
             ]
           },
+          "registration_target_group": {
+            "$ref": "#/components/schemas/RegistrationTargetGroup"
+          },
           "user_account_self_management": {
             "type": "boolean",
             "description": "Enable or disable user account self management",
@@ -14023,7 +14329,7 @@
           },
           "cognito_details": {
             "type": "object",
-            "description": "AWS Cognito Pool details for the portal",
+            "description": "AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.",
             "properties": {
               "cognito_user_pool_client_id": {
                 "type": "string",
@@ -14278,6 +14584,28 @@
               }
             ]
           },
+          "default_role": {
+            "type": "string",
+            "description": "Slug of the portal role portal users of this portal get unless they have their own\n`role`. Unset means the built-in default role of the portal type, e.g.\n`default_end_customer_portal_role`.\n",
+            "example": "default_end_customer_portal_role"
+          },
+          "allowed_roles": {
+            "type": "array",
+            "description": "Slugs of the portal roles a portal user of this portal may be given (portal_user\n`role`). The default role is always allowed, whether or not it is listed.\n",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "b2b_admin",
+              "b2b_viewer"
+            ]
+          },
+          "record_access": {
+            "$ref": "#/components/schemas/RecordAccess"
+          },
+          "record_access_defaults": {
+            "$ref": "#/components/schemas/RecordAccessDefaults"
+          },
           "surfaces": {
             "type": "array",
             "description": "Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.\n",
@@ -14467,7 +14795,7 @@
           },
           "notification_triggers": {
             "type": "array",
-            "description": "Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. Admin/builder-only — never exposed via the public portal config.",
+            "description": "Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. When the notification template references an email template (`email_template_id`), portal users who opted in to email notifications additionally receive that email. Admin/builder-only — never exposed via the public portal config.",
             "items": {
               "$ref": "#/components/schemas/NotificationTriggerConfig"
             }
@@ -16008,22 +16336,6 @@
           }
         ]
       },
-      "WorfklowIdentifier": {
-        "description": "Workflow identifier object",
-        "allOf": [
-          {
-            "type": "object",
-            "properties": {
-              "defition_id": {
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              }
-            }
-          }
-        ]
-      },
       "Meter": {
         "description": "The meter entity",
         "allOf": [
@@ -16704,7 +17016,7 @@
           },
           "identifiers": {
             "type": "array",
-            "description": "Identifier attributes a caller must supply on this surface to be identified. Only\nused with `authentication: registration_identifiers`.\n\nOmitted or empty means the surface uses the portal's `registration_identifiers`.\nWhen set, these replace the portal's `registration_identifiers` on this surface\nonly: `identifyContact` requires a value for each of them (400 listing the missing\nones otherwise), runs the contact lookup and the `registrationIdentifiersCheck`\nhook on them, and refuses to issue tokens (403) unless there are at least two.\nEntries without `name` or `schema` are ignored. A `validation_rule_id` on an\nidentifier (own or inherited) is checked before the lookup.\n",
+            "description": "Identifier attributes a caller must supply on this surface to be identified. Only\nused with `authentication: registration_identifiers`.\n\nOmitted or empty means the surface uses the portal's `registration_identifiers`.\nWhen set, these replace the portal's `registration_identifiers` on this surface\nonly: `identifyContact` requires a value for each of them (400 listing the missing\nones otherwise), runs the contact lookup and the `registrationIdentifiersCheck`\nhook on them, and refuses to issue tokens (403) unless there are at least two.\nEntries without `name` or `schema` are ignored. A `validation_rule_id` on an\nidentifier (own or inherited) is checked before the lookup. An own identifier without\na `validation_rule_id` uses the rule of the portal's registration identifier for the\nsame field (`schema` and `name`), if that has one.\n",
             "items": {
               "$ref": "#/components/schemas/RegistrationIdentifier"
             },
@@ -16737,8 +17049,8 @@
           },
           "role_id": {
             "type": "string",
-            "description": "360 role whose grants apply on this surface (`<org_id>:<slug>`), giving\nvertical permissions - which attributes and actions are permitted. Omitted\nmeans the portal's default role.\n",
-            "example": "728:public_journeys_readonly"
+            "description": "Slug of the portal role whose grants apply on this surface, giving vertical\npermissions - which attributes and actions are permitted. Omitted means the\nportal's default role.\n",
+            "example": "public_journeys_readonly"
           }
         }
       },
@@ -20309,6 +20621,102 @@
           }
         }
       },
+      "PortalMeterReading": {
+        "type": "object",
+        "description": "A meter reading submitted by a portal user for a counter of the meter in the path.",
+        "required": [
+          "value",
+          "counter_id"
+        ],
+        "properties": {
+          "value": {
+            "type": "number"
+          },
+          "counter_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/Direction"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "read_by": {
+            "$ref": "#/components/schemas/ReadBy"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/Reason"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Source"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReadingStatus"
+          },
+          "remark": {
+            "type": "string",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "MeterCounter": {
+        "description": "A counter (measurement channel) of a meter",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "type": "object",
+            "required": [
+              "_schema"
+            ],
+            "properties": {
+              "_schema": {
+                "type": "string",
+                "enum": [
+                  "meter_counter"
+                ]
+              },
+              "obis_number": {
+                "type": "string"
+              },
+              "direction": {
+                "$ref": "#/components/schemas/Direction"
+              },
+              "transformer_ratio": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              },
+              "forecast_reading_value": {
+                "type": "string"
+              },
+              "forecast_as_of": {
+                "type": "string"
+              },
+              "current_consumption": {
+                "type": "number"
+              },
+              "last_reading": {
+                "type": "string"
+              },
+              "conversion_factor": {
+                "type": "number"
+              },
+              "tariff_type": {
+                "$ref": "#/components/schemas/TariffType"
+              }
+            }
+          }
+        ]
+      },
       "MeterReadingPhoto": {
         "type": "object",
         "required": [
@@ -21084,9 +21492,10 @@
           },
           "schema": {
             "type": "array",
+            "description": "The entities the page offers its blocks: contact and portal user, the entity of a detail page, and what selectors on the page select. The API derives it from the page and its blocks when the page is read; a value sent in a request is ignored.\n",
             "items": {
               "type": "string",
-              "description": "The schema of the page"
+              "description": "An entity schema slug"
             }
           },
           "visibility": {
@@ -21167,7 +21576,7 @@
           },
           "is_system": {
             "type": "boolean",
-            "description": "Whether the page is a system page",
+            "description": "Whether the page is a system page. Server-managed on createPortalPage and updatePortalPage.",
             "example": false
           },
           "is_detail": {
@@ -21335,42 +21744,15 @@
               "icon_actions": {
                 "type": "object",
                 "additionalProperties": false,
-                "description": "Icon buttons in the header bar",
+                "description": "Icon buttons in the header bar (inbox, profile, menu). They draw as the Button variant picked here, with that variant's look in the portal design; unset keeps the icon variant.\n",
                 "properties": {
-                  "style": {
+                  "variant": {
                     "type": "string",
                     "enum": [
-                      "solid",
-                      "soft",
-                      "surface",
-                      "outline",
-                      "ghost"
-                    ]
-                  },
-                  "color": {
-                    "description": "A button colour, or a custom colour of the portal's design by id",
-                    "oneOf": [
-                      {
-                        "type": "string",
-                        "enum": [
-                          "primary",
-                          "neutral",
-                          "danger"
-                        ]
-                      },
-                      {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                          "custom"
-                        ],
-                        "properties": {
-                          "custom": {
-                            "type": "string",
-                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
-                          }
-                        }
-                      }
+                      "primary",
+                      "secondary",
+                      "tertiary",
+                      "icon"
                     ]
                   }
                 }
@@ -21388,8 +21770,7 @@
           },
           "elements": {
             "icon_actions": {
-              "style": "ghost",
-              "color": "primary"
+              "variant": "icon"
             }
           }
         }
@@ -21549,7 +21930,7 @@
           },
           "cognito_details": {
             "type": "object",
-            "description": "AWS Cognito Pool details for the portal",
+            "description": "AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.",
             "properties": {
               "cognito_user_pool_client_id": {
                 "type": "string",
@@ -21804,6 +22185,28 @@
               }
             ]
           },
+          "default_role": {
+            "type": "string",
+            "description": "Slug of the portal role portal users of this portal get unless they have their own\n`role`. Unset means the built-in default role of the portal type, e.g.\n`default_end_customer_portal_role`.\n",
+            "example": "default_end_customer_portal_role"
+          },
+          "allowed_roles": {
+            "type": "array",
+            "description": "Slugs of the portal roles a portal user of this portal may be given (portal_user\n`role`). The default role is always allowed, whether or not it is listed.\n",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "b2b_admin",
+              "b2b_viewer"
+            ]
+          },
+          "record_access": {
+            "$ref": "#/components/schemas/RecordAccess"
+          },
+          "record_access_defaults": {
+            "$ref": "#/components/schemas/RecordAccessDefaults"
+          },
           "surfaces": {
             "type": "array",
             "description": "Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.\n",
@@ -21994,11 +22397,10 @@
       },
       "PortalDataExportColumn": {
         "type": "object",
-        "description": "One column of the portal data export CSV.",
+        "description": "One column of the portal data export. Send the column value as `template`; `source` is the older single-attribute shape, still accepted.\n",
         "required": [
           "key",
-          "header",
-          "source"
+          "header"
         ],
         "properties": {
           "key": {
@@ -22019,7 +22421,7 @@
           },
           "source": {
             "type": "object",
-            "description": "Where the value comes from: relation hops from the anchor entity plus the attribute to read on the resolved entity. An empty path means the anchor itself.\n",
+            "description": "Older single-attribute shape (use `template`): relation hops from the anchor entity plus the attribute to read on the resolved entity. An empty path means the anchor itself.\n",
             "required": [
               "attribute"
             ],
@@ -22053,6 +22455,25 @@
                 ]
               }
             }
+          },
+          "template": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "The column value as a Handlebars template, rendered per row with the portal's block template engine and helpers, e.g. `{{#if contract.customer.name}}{{contract.customer.name}}{{else}}{{contract.customer.first_name}}{{/if}}`. Variables are anchor-relative paths with up to 3 relation hops; a relation resolves to its first entity, and block-style indices (`contract.customer.0.name`) are accepted. A template that is exactly one variable is read as that attribute and can use any `formatter`; any other template renders as text.\n",
+            "example": "{{contract.customer.last_name}}"
+          },
+          "address_field": {
+            "type": "string",
+            "description": "Address part for the `address` formatter on a single-variable template.",
+            "enum": [
+              "full",
+              "street",
+              "street_number",
+              "postal_code",
+              "city",
+              "additional_info",
+              "country"
+            ]
           },
           "formatter": {
             "type": "string",
@@ -22196,7 +22617,8 @@
           },
           "new_design": {
             "type": "boolean",
-            "description": "Enable or disable the new design for the portal"
+            "deprecated": true,
+            "description": "Ignored, every portal runs the new design."
           },
           "mcp_enabled": {
             "type": "boolean",
@@ -22248,6 +22670,42 @@
               "type": "string"
             },
             "description": "Target IDs that if matched deny the portal user the chat"
+          },
+          "hidden_for_operator": {
+            "type": "string",
+            "enum": [
+              "and",
+              "or"
+            ],
+            "description": "Operator for hidden_for_targets matching"
+          }
+        }
+      },
+      "RegistrationTargetGroup": {
+        "type": "object",
+        "description": "Limits who can get a portal user to existing contacts or accounts matching targets,\nwith the same rules as page and block visibility. Targets are evaluated against the\nregistration entity (`self_registration_entity`): the contact in contact mode, the\naccount in account mode. Applies wherever an existing record is resolved for a new\nportal user: self-registration, SSO sign-in, journeys and invitations by contact id.\nContacts and accounts created during registration (per `self_registration_setting`\nor `self_registration_account_setting`) are not checked. A self-registration outside\nthe group is rejected exactly like one with no matching record\n(`SELF_REGISTRATION_NOT_ALLOWED`, or `ACCOUNT_NOT_VERIFIED` in account mode); a\nrequest naming the contact explicitly fails with `NOT_IN_REGISTRATION_TARGET_GROUP`.\nThe registration pre-check (`checkContactExists`) answers `exists: false` for a\nrecord outside the group, so sign-up stops at the identification step.\nIf target matching fails, registration is rejected. Without targets every matching\nrecord can register. The group also applies to `identifyContact`.\n",
+        "properties": {
+          "visible_for_targets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Target IDs the contact or account must match to register"
+          },
+          "visible_for_operator": {
+            "type": "string",
+            "enum": [
+              "and",
+              "or"
+            ],
+            "description": "Operator for visible_for_targets matching"
+          },
+          "hidden_for_targets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Target IDs that if matched deny registration"
           },
           "hidden_for_operator": {
             "type": "string",
@@ -22404,6 +22862,28 @@
               "$ref": "#/components/schemas/ContractIdentifier"
             }
           },
+          "default_role": {
+            "type": "string",
+            "description": "Slug of the portal role portal users of this portal get unless they have their own\n`role`. Unset means the built-in default role of the portal type, e.g.\n`default_end_customer_portal_role`.\n",
+            "example": "default_end_customer_portal_role"
+          },
+          "allowed_roles": {
+            "type": "array",
+            "description": "Slugs of the portal roles a portal user of this portal may be given (portal_user\n`role`). The default role is always allowed, whether or not it is listed.\n",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "b2b_admin",
+              "b2b_viewer"
+            ]
+          },
+          "record_access": {
+            "$ref": "#/components/schemas/RecordAccess"
+          },
+          "record_access_defaults": {
+            "$ref": "#/components/schemas/RecordAccessDefaults"
+          },
           "surfaces": {
             "type": "array",
             "description": "Surfaces this portal's data is reached from besides the portal UI itself.",
@@ -22447,7 +22927,8 @@
           },
           "is_legacy_design": {
             "type": "boolean",
-            "description": "Whether the portal still runs the old design (the `new_design` feature setting is off). Legacy portals are always served the frozen legacy bundle, even when the org is in canary."
+            "deprecated": true,
+            "description": "Always false: every portal runs the new design."
           },
           "redirect_to": {
             "type": "string",
@@ -22694,6 +23175,39 @@
           }
         }
       },
+      "PortalRevisionActor": {
+        "type": "object",
+        "description": "The AI agent or API token that made a write. Absent when a person used their own login.",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "agent",
+              "api_token"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The agent's name, or the name of the API token.",
+            "example": "Claude"
+          },
+          "on_behalf_of": {
+            "type": "string",
+            "description": "Agent only. Id of the epilot user who approved the agent."
+          },
+          "purpose": {
+            "type": "string",
+            "description": "Agent only. The purpose the agent gave for its access."
+          },
+          "host": {
+            "type": "string",
+            "description": "Agent only. Where the agent runs."
+          }
+        }
+      },
       "PortalRevisionSummary": {
         "type": "object",
         "required": [
@@ -22714,6 +23228,9 @@
           "created_by": {
             "type": "string",
             "description": "May be absent — an internal-auth caller carries no user id."
+          },
+          "created_by_actor": {
+            "$ref": "#/components/schemas/PortalRevisionActor"
           },
           "name": {
             "type": "string",
@@ -22737,6 +23254,9 @@
           "published_by": {
             "type": "string",
             "description": "Who performed the last publish of this revision."
+          },
+          "published_by_actor": {
+            "$ref": "#/components/schemas/PortalRevisionActor"
           },
           "is_published": {
             "type": "boolean",
@@ -22782,6 +23302,14 @@
                 "allOf": [
                   {
                     "$ref": "#/components/schemas/PublishResult"
+                  }
+                ]
+              },
+              "validation": {
+                "description": "Findings of the portal config validation for this revision; response only.\n",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PortalValidationResult"
                   }
                 ]
               }
@@ -22896,6 +23424,129 @@
           }
         ]
       },
+      "PortalValidationFinding": {
+        "type": "object",
+        "description": "One thing the portal config validation found.",
+        "required": [
+          "code",
+          "severity",
+          "path",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Stable, machine-readable code. New codes can be added; treat an unknown code by its `severity`.\n",
+            "example": "BLOCK_PARENT_UNRESOLVED"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning"
+            ],
+            "description": "`error`: the portal is broken for its users; `warning`: it works but is degraded or looks unintended.\n"
+          },
+          "path": {
+            "type": "string",
+            "description": "Stable locator of the offending value: pages are addressed by slug, blocks by id.\n",
+            "example": "pages[slug=login].blocks[id=c495fef9-eeca-4019-a989-8390dcd9825b].parentId"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable explanation; not stable, do not parse it."
+          }
+        }
+      },
+      "PortalValidationResult": {
+        "type": "object",
+        "description": "Result of the portal config validation.",
+        "required": [
+          "valid",
+          "findings"
+        ],
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "description": "`true` when there is no finding with severity `error`."
+          },
+          "findings": {
+            "type": "array",
+            "description": "Errors first, then warnings.",
+            "items": {
+              "$ref": "#/components/schemas/PortalValidationFinding"
+            }
+          }
+        }
+      },
+      "PortalWriteValidation": {
+        "type": "object",
+        "description": "What a portal config write adds to its response; never stored and never returned by a read.\n",
+        "properties": {
+          "validation": {
+            "description": "Findings for the portal this write leaves behind; absent when the validation could not run.\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PortalValidationResult"
+              }
+            ]
+          }
+        }
+      },
+      "PortalConfigWriteResult": {
+        "description": "The portal config as `upsertPortal` returns it, with the validation of what was written.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PortalConfig"
+          },
+          {
+            "$ref": "#/components/schemas/PortalWriteValidation"
+          }
+        ]
+      },
+      "PortalConfigV3WriteResult": {
+        "description": "The portal config as `createPortalConfig` and `putPortalConfig` return it, with the validation of what was written.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PortalConfigV3"
+          },
+          {
+            "$ref": "#/components/schemas/PortalWriteValidation"
+          }
+        ]
+      },
+      "PortalValidationFailedResp": {
+        "description": "A write refused by the portal config validation (`reason: PORTAL_VALIDATION_FAILED`); nothing was saved.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ErrorResp"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "validation": {
+                "description": "All findings for the portal the write would have left behind, with the errors that refused it in `blocking`.\n",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PortalValidationResult"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "blocking": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/PortalValidationFinding"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
       "PublishResult": {
         "type": "object",
         "required": [
@@ -22913,6 +23564,9 @@
           },
           "published_by": {
             "type": "string"
+          },
+          "published_by_actor": {
+            "$ref": "#/components/schemas/PortalRevisionActor"
           },
           "name": {
             "type": "string",
@@ -22934,6 +23588,14 @@
             },
             "example": [
               "allowed_entities_change"
+            ]
+          },
+          "validation": {
+            "description": "Findings for the portal this publish made live; response only.\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PortalValidationResult"
+              }
             ]
           }
         }
@@ -23059,6 +23721,198 @@
           "access_status": {
             "type": "boolean",
             "example": true
+          },
+          "roles": {
+            "type": "array",
+            "description": "The user's portal roles: their own roles the portal allows, else the portal's default\nrole.\n",
+            "items": {
+              "$ref": "#/components/schemas/PortalRoleRef"
+            }
+          },
+          "role": {
+            "type": "string",
+            "deprecated": true,
+            "description": "Slug of the first of `roles`.",
+            "example": "b2b_admin"
+          },
+          "role_name": {
+            "type": "string",
+            "deprecated": true,
+            "description": "Display name of `role`.",
+            "example": "B2B admin"
+          }
+        }
+      },
+      "RecordAccess": {
+        "type": "object",
+        "description": "Which records portal users see in the portal's lists, per record type (schema slug). A\nrecord type without an entry uses its default rule (`record_access_defaults`), or else any\nof its relation attributes that can hold a contact. Entries for `contact`, `account`,\n`file` and `portal_user` are ignored.\n",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/RecordAccessRule"
+        },
+        "example": {
+          "contract": {
+            "conditions": [
+              {
+                "type": "relation_attribute",
+                "attribute": "customer"
+              },
+              {
+                "type": "relation_attribute",
+                "attribute": "property_manager"
+              }
+            ]
+          },
+          "meter": {
+            "conditions": [
+              {
+                "type": "relation_attribute",
+                "attribute": "customer"
+              },
+              {
+                "type": "relation_attribute",
+                "through": "contract",
+                "attribute": "customer"
+              },
+              {
+                "type": "relation_attribute",
+                "through": "contract",
+                "attribute": "property_manager"
+              }
+            ]
+          },
+          "ticket": {
+            "conditions": [
+              {
+                "type": "relation_attribute",
+                "attribute": "customer"
+              }
+            ]
+          }
+        }
+      },
+      "RecordAccessRule": {
+        "type": "object",
+        "description": "A record is visible when one of the conditions applies.",
+        "additionalProperties": false,
+        "required": [
+          "conditions"
+        ],
+        "properties": {
+          "conditions": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "$ref": "#/components/schemas/RecordAccessCondition"
+            }
+          }
+        }
+      },
+      "RecordAccessCondition": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/RecordAccessRelationAttributeCondition"
+          }
+        ]
+      },
+      "RecordAccessRelationAttributeCondition": {
+        "type": "object",
+        "description": "The record's relation attribute `attribute` contains the user's contact. With `through`,\nthe record related through the attribute `through` must contain it instead, e.g. on meters\n`through: contract, attribute: customer`.\n",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "attribute"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "relation_attribute"
+            ]
+          },
+          "attribute": {
+            "$ref": "#/components/schemas/RecordAccessName"
+          },
+          "through": {
+            "$ref": "#/components/schemas/RecordAccessName"
+          }
+        }
+      },
+      "RecordAccessName": {
+        "type": "string",
+        "description": "A schema slug or attribute name. Letters, digits and underscores only.",
+        "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$"
+      },
+      "RecordAccessDefaults": {
+        "type": "object",
+        "readOnly": true,
+        "description": "Read-only. The default rule per record type, in the shape of `record_access`. Ignored on\nwrite.\n",
+        "additionalProperties": {
+          "type": "object",
+          "required": [
+            "conditions"
+          ],
+          "properties": {
+            "conditions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "attribute"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "relation_attribute"
+                    ]
+                  },
+                  "attribute": {
+                    "type": "string"
+                  },
+                  "through": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "never_listed": {
+              "type": "array",
+              "description": "Records with one of these attribute values are never listed.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "attribute",
+                  "value"
+                ],
+                "properties": {
+                  "attribute": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "PortalRoleRef": {
+        "type": "object",
+        "required": [
+          "slug",
+          "name"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "example": "b2b_admin"
+          },
+          "name": {
+            "type": "string",
+            "example": "B2B admin"
           }
         }
       },

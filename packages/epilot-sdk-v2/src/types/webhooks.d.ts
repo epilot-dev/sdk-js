@@ -425,11 +425,11 @@ export declare namespace Components {
              */
             event_id?: string;
             /**
-             * Filter by event outcome
+             * Filter by event outcome. `retrying` matches events whose delivery failed transiently and is waiting for its next automatic retry.
              * example:
              * succeeded
              */
-            status?: "succeeded" | "failed" | "skipped";
+            status?: "succeeded" | "failed" | "skipped" | "retrying";
         }
         export interface TestOAuthResponse {
             /**
@@ -529,6 +529,7 @@ export declare namespace Components {
         /**
          * example:
          * {
+         *   "name": "Customer Request Created Webhook",
          *   "eventName": "CustomerRequest_Created",
          *   "url": "https://my-partner-service.api.com",
          *   "httpMethod": "POST",
@@ -596,6 +597,21 @@ export declare namespace Components {
                 integration_id: string; // uuid
                 use_case_slug: string;
             };
+            /**
+             * The integration (Integration Hub) that owns this webhook, set by the
+             * integration's outbound mapping sync. When set, every JSON delivery
+             * carries `_integration: { id }` at the top level of the signed body,
+             * after the JSONata transform, so the receiver can rely on the signed
+             * integration id instead of one rendered into the expression. A value
+             * the expression put there is overwritten. Not added when the
+             * transformed body is not a JSON object, and not part of
+             * `binary_multipart` deliveries (their signature covers the files only).
+             * On update: omit to keep the current owner, pass null to clear it.
+             *
+             * example:
+             * 6f1c2a4e-0000-4000-8000-000000000001
+             */
+            integrationId?: string | null; // uuid
             status?: "active" | "inactive" | "incomplete";
             /**
              * JSONata expression to transform the payload
@@ -683,12 +699,128 @@ export declare namespace Components {
              * Per-webhook signing secret following the Standard Webhooks specification.
              * Only returned once during webhook creation. Use this secret to verify
              * webhook signatures using the `webhook-id`, `webhook-timestamp`, and
-             * `webhook-signature` headers.
+             * `webhook-signature` headers. `webhook-id` stays the same across
+             * automatic retries of an event, so receivers can deduplicate on it.
+             * Each request also carries an informational, unsigned
+             * `x-epilot-webhook-attempt` header (1 = first delivery, 2 = first
+             * retry, ...).
              *
              * example:
              * whsec_C2FVsBQIhrscChlQIMV+b5sSYspob7oD
              */
             signingSecret?: string;
+        }
+        /**
+         * One saved change to a webhook configuration.
+         */
+        export interface WebhookConfigRevision {
+            /**
+             * Opaque, URL-safe id of the revision.
+             * example:
+             * MjAyNi0xMS0wOVQxNDozMjowMC4wMDBaIzdoajI4YWFz
+             */
+            revision_id: string;
+            created_at: string; // date-time
+            /**
+             * User id of whoever made the change. Absent when the change was made by an internal or system caller.
+             */
+            created_by?: string;
+            /**
+             * `create` for the revision recorded when the webhook was created, `restore` for an update that brought back an earlier revision.
+             */
+            source: "create" | "update" | "restore";
+            /**
+             * The earlier revision a `restore` brought back.
+             */
+            restored_from?: {
+                revision_id: string;
+                created_at: string; // date-time
+            };
+            /**
+             * The fields this save changed. Empty for `create`.
+             */
+            changes: WebhookConfigRevisionChange[];
+            /**
+             * Set when long values were shortened to fit the storage limit.
+             */
+            truncated?: boolean;
+        }
+        export interface WebhookConfigRevisionChange {
+            /**
+             * Dot path of the changed field, e.g. `url`, `retryPolicy.maxAttempts`, `auth.basicAuthConfig.username`, `filterConditions.conditions`, or `auth.credentials` for a redacted credential change.
+             * example:
+             * url
+             */
+            field: string;
+            kind: "added" | "removed" | "changed";
+            /**
+             * For key/value fields (custom headers, extra form fields), the entry that changed.
+             */
+            key?: string;
+            /**
+             * The previous value. Absent when the field was added.
+             */
+            before?: any;
+            /**
+             * The new value. Absent when the field was removed.
+             */
+            after?: any;
+            /**
+             * Set for credential changes; no values are recorded.
+             */
+            redacted?: boolean;
+        }
+        export interface WebhookConfigRevisionConflict {
+            message: string;
+            latest_revision?: /* One saved change to a webhook configuration. */ WebhookConfigRevision;
+        }
+        /**
+         * One saved change to a webhook configuration.
+         */
+        export interface WebhookConfigRevisionDetail {
+            /**
+             * Opaque, URL-safe id of the revision.
+             * example:
+             * MjAyNi0xMS0wOVQxNDozMjowMC4wMDBaIzdoajI4YWFz
+             */
+            revision_id: string;
+            created_at: string; // date-time
+            /**
+             * User id of whoever made the change. Absent when the change was made by an internal or system caller.
+             */
+            created_by?: string;
+            /**
+             * `create` for the revision recorded when the webhook was created, `restore` for an update that brought back an earlier revision.
+             */
+            source: "create" | "update" | "restore";
+            /**
+             * The earlier revision a `restore` brought back.
+             */
+            restored_from?: {
+                revision_id: string;
+                created_at: string; // date-time
+            };
+            /**
+             * The fields this save changed. Empty for `create`.
+             */
+            changes: WebhookConfigRevisionChange[];
+            /**
+             * Set when long values were shortened to fit the storage limit.
+             */
+            truncated?: boolean;
+            /**
+             * The webhook configuration after this change, without secret values or infrastructure fields.
+             */
+            configuration: {
+                [name: string]: any;
+            };
+        }
+        export interface WebhookConfigRevisionList {
+            results: /* One saved change to a webhook configuration. */ WebhookConfigRevision[];
+            /**
+             * Opaque cursor to pass back as `cursor` to fetch the next page. Absent when there are no older revisions.
+             */
+            next_cursor?: string;
         }
         export interface WebhookEvent {
             event_id: string;
@@ -716,7 +848,10 @@ export declare namespace Components {
                 code?: string;
             };
             metadata?: /* Contains the metadata about the configured event */ Metadata;
-            status?: "succeeded" | "failed" | "in_progress" | "skipped";
+            /**
+             * Outcome of the delivery. `retrying` means the latest attempt failed transiently and another automatic retry is scheduled (see next_retry_at); the event moves to succeeded or failed once the retry loop ends.
+             */
+            status?: "succeeded" | "failed" | "in_progress" | "skipped" | "retrying";
             http_method?: "GET" | "POST" | "PUT";
             /**
              * stringified payload of the webhook request
@@ -727,9 +862,21 @@ export declare namespace Components {
              */
             original_payload?: string;
             /**
-             * Number of automatic delivery retries that preceded this terminal outcome. 0 means the event was delivered (or finally failed) on the first attempt.
+             * Number of automatic delivery retries that preceded this outcome. 0 means the event was delivered (or finally failed) on the first attempt. For a `retrying` event, the attempt that last failed.
              */
             retry_attempt?: number;
+            /**
+             * When the next automatic retry is due. Present only while the event is `retrying`.
+             */
+            next_retry_at?: string; // date-time
+            /**
+             * The automatic retry limit that applied when this event was delivered (0 when retries were disabled). Unaffected by later changes to the webhook's retry policy. Absent for events recorded before this field existed.
+             */
+            max_retry_attempts?: number;
+            /**
+             * Every delivery attempt of this event, oldest first. Returned by getEventById only for events that were retried (retry_attempt > 0).
+             */
+            attempts?: /* Summary of a single delivery attempt of a webhook event. */ WebhookEventAttempt[];
             /**
              * Whether this event can be replayed with the JSONata transform re-applied. True only when the webhook config has a non-empty jsonataExpression AND a usable original source exists (a catalog reference or a locally stored original payload). Computed without a synchronous catalog round-trip.
              */
@@ -738,6 +885,37 @@ export declare namespace Components {
              * Reason explaining the can_reapply_transform value.
              */
             can_reapply_transform_reason?: "available" | "no_transform_configured" | "no_original_source";
+        }
+        /**
+         * Summary of a single delivery attempt of a webhook event.
+         */
+        export interface WebhookEventAttempt {
+            /**
+             * 0 for the first delivery, n for the n-th automatic retry.
+             */
+            retry_attempt: number;
+            /**
+             * `retrying` for an attempt that failed transiently and was followed (or will be followed) by another attempt; otherwise the final outcome.
+             */
+            status: "succeeded" | "failed" | "skipped" | "retrying";
+            /**
+             * example:
+             * 2021-04-27T12:01:13.000Z
+             */
+            created_at?: string;
+            /**
+             * HTTP status returned by the endpoint for this attempt. Absent when no HTTP response was received (network/TLS errors, internal errors).
+             */
+            status_code?: number;
+            message?: string;
+            /**
+             * Machine-readable classification of the attempt outcome.
+             */
+            code?: string;
+            /**
+             * When the following retry was scheduled for (retrying attempts only).
+             */
+            next_retry_at?: string; // date-time
         }
     }
 }
@@ -766,6 +944,7 @@ export declare namespace Paths {
         export type RequestBody = /**
          * example:
          * {
+         *   "name": "Customer Request Created Webhook",
          *   "eventName": "CustomerRequest_Created",
          *   "url": "https://my-partner-service.api.com",
          *   "httpMethod": "POST",
@@ -791,6 +970,7 @@ export declare namespace Paths {
             export type $201 = /**
              * example:
              * {
+             *   "name": "Customer Request Created Webhook",
              *   "eventName": "CustomerRequest_Created",
              *   "url": "https://my-partner-service.api.com",
              *   "httpMethod": "POST",
@@ -843,6 +1023,7 @@ export declare namespace Paths {
             export type $200 = /**
              * example:
              * {
+             *   "name": "Customer Request Created Webhook",
              *   "eventName": "CustomerRequest_Created",
              *   "url": "https://my-partner-service.api.com",
              *   "httpMethod": "POST",
@@ -868,6 +1049,44 @@ export declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace GetConfigRevision {
+        namespace Parameters {
+            export type ConfigId = string;
+            export type RevisionId = string;
+        }
+        export interface PathParameters {
+            configId: Parameters.ConfigId;
+            revisionId: Parameters.RevisionId;
+        }
+        namespace Responses {
+            export type $200 = /* One saved change to a webhook configuration. */ Components.Schemas.WebhookConfigRevisionDetail;
+            export type $403 = Components.Schemas.ErrorResp;
+            export type $404 = Components.Schemas.ErrorResp;
+            export type $422 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
+    namespace GetConfigRevisions {
+        namespace Parameters {
+            export type ConfigId = string;
+            export type Cursor = string;
+            export type Limit = number;
+        }
+        export interface PathParameters {
+            configId: Parameters.ConfigId;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+            cursor?: Parameters.Cursor;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.WebhookConfigRevisionList;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $403 = Components.Schemas.ErrorResp;
+            export type $404 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace GetConfigs {
         namespace Parameters {
             export type EventName = string;
@@ -879,6 +1098,7 @@ export declare namespace Paths {
             export type $200 = /**
              * example:
              * {
+             *   "name": "Customer Request Created Webhook",
              *   "eventName": "CustomerRequest_Created",
              *   "url": "https://my-partner-service.api.com",
              *   "httpMethod": "POST",
@@ -1048,14 +1268,21 @@ export declare namespace Paths {
     }
     namespace UpdateConfig {
         namespace Parameters {
+            export type BasedOnRevisionId = string;
             export type ConfigId = string;
+            export type RestoredFromRevisionId = string;
         }
         export interface PathParameters {
             configId: Parameters.ConfigId;
         }
+        export interface QueryParameters {
+            based_on_revision_id?: Parameters.BasedOnRevisionId;
+            restored_from_revision_id?: Parameters.RestoredFromRevisionId;
+        }
         export type RequestBody = /**
          * example:
          * {
+         *   "name": "Customer Request Created Webhook",
          *   "eventName": "CustomerRequest_Created",
          *   "url": "https://my-partner-service.api.com",
          *   "httpMethod": "POST",
@@ -1081,6 +1308,7 @@ export declare namespace Paths {
             export type $200 = /**
              * example:
              * {
+             *   "name": "Customer Request Created Webhook",
              *   "eventName": "CustomerRequest_Created",
              *   "url": "https://my-partner-service.api.com",
              *   "httpMethod": "POST",
@@ -1104,6 +1332,7 @@ export declare namespace Paths {
             Components.Schemas.WebhookConfig;
             export type $400 = Components.Schemas.ErrorResp;
             export type $401 = Components.Schemas.ErrorResp;
+            export type $409 = Components.Schemas.WebhookConfigRevisionConflict;
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
@@ -1169,7 +1398,7 @@ export interface OperationMethods {
    * Update Webhook Client Config
    */
   'updateConfig'(
-    parameters?: Parameters<Paths.UpdateConfig.PathParameters> | null,
+    parameters?: Parameters<Paths.UpdateConfig.QueryParameters & Paths.UpdateConfig.PathParameters> | null,
     data?: Paths.UpdateConfig.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateConfig.Responses.$200>
@@ -1184,7 +1413,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteConfig.Responses.$204>
   /**
-   * testOAuth - Test OAuth connection
+   * testOAuth - testOAuth
    * 
    * Tests the OAuth client credentials configuration for a saved webhook by attempting
    * a token exchange against the configured OAuth endpoint. Returns success with token
@@ -1198,9 +1427,9 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TestOAuth.Responses.$200>
   /**
-   * triggerWebhook - triggers a webhook event either async or sync
+   * triggerWebhook - triggerWebhook
    * 
-   * Trigger a webhook
+   * Triggers a webhook event either async or sync
    */
   'triggerWebhook'(
     parameters?: Parameters<Paths.TriggerWebhook.QueryParameters & Paths.TriggerWebhook.PathParameters> | null,
@@ -1247,6 +1476,26 @@ export interface OperationMethods {
     data?: Paths.ReplayEvent.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ReplayEvent.Responses.$204>
+  /**
+   * getConfigRevisions - getConfigRevisions
+   * 
+   * List the change history of a webhook configuration, newest first. Each revision records who made the change and which fields changed, with before/after values. Secret values (passwords, API keys, client secrets) are never included; a credential change is reported as a redacted `auth.credentials` entry. Saves that change nothing do not create a revision. Revisions are kept for 365 days.
+   */
+  'getConfigRevisions'(
+    parameters?: Parameters<Paths.GetConfigRevisions.QueryParameters & Paths.GetConfigRevisions.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetConfigRevisions.Responses.$200>
+  /**
+   * getConfigRevision - getConfigRevision
+   * 
+   * One revision of a webhook configuration, including the configuration as it was after that change. Secret values are never included. Used to review or restore an earlier version.
+   */
+  'getConfigRevision'(
+    parameters?: Parameters<Paths.GetConfigRevision.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetConfigRevision.Responses.$200>
   /**
    * getWebhookExample - getWebhookExample
    * 
@@ -1335,7 +1584,7 @@ export interface PathsDictionary {
      * Update Webhook Client Config
      */
     'put'(
-      parameters?: Parameters<Paths.UpdateConfig.PathParameters> | null,
+      parameters?: Parameters<Paths.UpdateConfig.QueryParameters & Paths.UpdateConfig.PathParameters> | null,
       data?: Paths.UpdateConfig.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateConfig.Responses.$200>
@@ -1352,7 +1601,7 @@ export interface PathsDictionary {
   }
   ['/v1/webhooks/configs/{configId}/test-oauth']: {
     /**
-     * testOAuth - Test OAuth connection
+     * testOAuth - testOAuth
      * 
      * Tests the OAuth client credentials configuration for a saved webhook by attempting
      * a token exchange against the configured OAuth endpoint. Returns success with token
@@ -1368,9 +1617,9 @@ export interface PathsDictionary {
   }
   ['/v1/webhooks/configs/{configId}/trigger']: {
     /**
-     * triggerWebhook - triggers a webhook event either async or sync
+     * triggerWebhook - triggerWebhook
      * 
-     * Trigger a webhook
+     * Triggers a webhook event either async or sync
      */
     'post'(
       parameters?: Parameters<Paths.TriggerWebhook.QueryParameters & Paths.TriggerWebhook.PathParameters> | null,
@@ -1425,6 +1674,30 @@ export interface PathsDictionary {
       data?: Paths.ReplayEvent.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ReplayEvent.Responses.$204>
+  }
+  ['/v1/webhooks/configs/{configId}/revisions']: {
+    /**
+     * getConfigRevisions - getConfigRevisions
+     * 
+     * List the change history of a webhook configuration, newest first. Each revision records who made the change and which fields changed, with before/after values. Secret values (passwords, API keys, client secrets) are never included; a credential change is reported as a redacted `auth.credentials` entry. Saves that change nothing do not create a revision. Revisions are kept for 365 days.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetConfigRevisions.QueryParameters & Paths.GetConfigRevisions.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetConfigRevisions.Responses.$200>
+  }
+  ['/v1/webhooks/configs/{configId}/revisions/{revisionId}']: {
+    /**
+     * getConfigRevision - getConfigRevision
+     * 
+     * One revision of a webhook configuration, including the configuration as it was after that change. Secret values are never included. Used to review or restore an earlier version.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetConfigRevision.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetConfigRevision.Responses.$200>
   }
   ['/v1/webhooks/configs/{configId}/example']: {
     /**
@@ -1482,4 +1755,10 @@ export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
 export type WebhookCondition = Components.Schemas.WebhookCondition;
 export type WebhookConditionGroup = Components.Schemas.WebhookConditionGroup;
 export type WebhookConfig = Components.Schemas.WebhookConfig;
+export type WebhookConfigRevision = Components.Schemas.WebhookConfigRevision;
+export type WebhookConfigRevisionChange = Components.Schemas.WebhookConfigRevisionChange;
+export type WebhookConfigRevisionConflict = Components.Schemas.WebhookConfigRevisionConflict;
+export type WebhookConfigRevisionDetail = Components.Schemas.WebhookConfigRevisionDetail;
+export type WebhookConfigRevisionList = Components.Schemas.WebhookConfigRevisionList;
 export type WebhookEvent = Components.Schemas.WebhookEvent;
+export type WebhookEventAttempt = Components.Schemas.WebhookEventAttempt;

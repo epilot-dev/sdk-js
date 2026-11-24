@@ -5,6 +5,7 @@ import {
   getEntityContext,
   getPageContext,
   getSession,
+  getOptions,
   initialize,
   isInitialized,
   navigate,
@@ -130,6 +131,27 @@ describe('app-bridge', () => {
     it('should timeout if no response received', async () => {
       await expect(initialize({ timeout: 50 })).rejects.toThrow(AppBridgeTimeoutError);
     });
+
+    it('should retry the handshake when the parent listener attaches late', async () => {
+      const initPromise = initialize({ timeout: 50 });
+
+      // Parent only becomes ready after the first attempt timed out
+      setTimeout(() => {
+        simulateParentMessage('app-bridge:init', { token: 'late-token', lang: 'de' });
+      }, 80);
+
+      await expect(initPromise).resolves.toEqual({ token: 'late-token', lang: 'de' });
+      expect(postMessageMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should reject after exhausting retries and allow initializing again', async () => {
+      await expect(initialize({ timeout: 20, retries: 1 })).rejects.toThrow(AppBridgeTimeoutError);
+      expect(postMessageMock).toHaveBeenCalledTimes(2);
+
+      const again = initialize({ timeout: 50 });
+      setTimeout(() => simulateParentMessage('app-bridge:init', { token: 't', lang: 'en' }), 10);
+      await expect(again).resolves.toEqual({ token: 't', lang: 'en' });
+    });
   });
 
   describe('getSession', () => {
@@ -148,6 +170,44 @@ describe('app-bridge', () => {
 
       const session = getSession();
       expect(session).toEqual({ token: 'test-token', lang: 'de' });
+    });
+  });
+
+  describe('getOptions', () => {
+    it('should throw if not initialized', () => {
+      expect(() => getOptions()).toThrow(AppBridgeNotInitializedError);
+    });
+
+    it('should return the options delivered with the init handshake', async () => {
+      const initPromise = initialize();
+
+      setTimeout(() => {
+        simulateParentMessage('app-bridge:init', {
+          token: 'test-token',
+          lang: 'de',
+          options: { wms_host: 'example.com', max_zoom: 18 },
+        });
+      }, 10);
+
+      const session = await initPromise;
+
+      expect(session.options).toEqual({ wms_host: 'example.com', max_zoom: 18 });
+      expect(getOptions<{ wms_host: string; max_zoom: number }>()).toEqual({
+        wms_host: 'example.com',
+        max_zoom: 18,
+      });
+    });
+
+    it('should return an empty object when the host provides no options', async () => {
+      const initPromise = initialize();
+
+      setTimeout(() => {
+        simulateParentMessage('app-bridge:init', { token: 'test-token', lang: 'de' });
+      }, 10);
+
+      await initPromise;
+
+      expect(getOptions()).toEqual({});
     });
   });
 

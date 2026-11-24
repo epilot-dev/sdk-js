@@ -44,9 +44,14 @@ epilot organization getCurrentOrganization
 - [`getSettings`](#getsettings) — Retrieves all configuration settings for an organization.
 - [`putSettingsValue`](#putsettingsvalue) — Creates or updates a specific organization setting identified by its key.
 - [`deleteSettingsValue`](#deletesettingsvalue) — Removes a specific organization setting identified by its key.
+- [`notifySettingsValueUpdated`](#notifysettingsvalueupdated) — Sends an internal notification that an organization setting was updated.
 
 **Feature Settings**
-- [`getOrganizationFeatureSettings`](#getorganizationfeaturesettings) — Returns feature flag metadata for the organization UI.
+- [`getOrganizationFeatureSettings`](#getorganizationfeaturesettings) — Get organization feature settings.
+
+**Announcements**
+- [`getActiveAnnouncement`](#getactiveannouncement) — Returns the announcement (e.g. a subprocessor change notice) to show as a portal banner for the
+- [`acknowledgeAnnouncement`](#acknowledgeannouncement) — Acknowledges an announcement on behalf of the caller's organization. Only org admins
 
 ### `getCurrentOrganization`
 
@@ -424,9 +429,64 @@ epilot organization deleteSettingsValue -p org_id=739224 -p key=double_opt_in --
 
 ---
 
+### `notifySettingsValueUpdated`
+
+Sends an internal notification that an organization setting was updated.
+
+`POST /v2/organization/{org_id}/settings/{key}/notifications`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `org_id` | path | string | Yes | The unique identifier of the organization |
+| `key` | path | string | Yes | The setting key that was updated |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot organization notifySettingsValueUpdated \
+  -p org_id=739224 \
+  -p key=360_features \
+  -d '{"user_email":"string","org_name":"string","value":{"enabled":true}}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot organization notifySettingsValueUpdated 739224 360_features
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot organization notifySettingsValueUpdated -p org_id=739224 -p key=360_features
+```
+
+With JSONata filter:
+
+```bash
+epilot organization notifySettingsValueUpdated -p org_id=739224 -p key=360_features --jsonata 'delivered'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "delivered": true
+}
+```
+
+</details>
+
+---
+
 ### `getOrganizationFeatureSettings`
 
-Returns feature flag metadata for the organization UI.
+Get organization feature settings.
 
 `GET /v2/organization/feature-settings`
 
@@ -441,5 +501,123 @@ With JSONata filter:
 ```bash
 epilot organization getOrganizationFeatureSettings --jsonata 'version'
 ```
+
+---
+
+### `getActiveAnnouncement`
+
+Returns the announcement (e.g. a subprocessor change notice) to show as a portal banner for the
+
+`GET /v2/organization/announcements/active`
+
+**Sample Call**
+
+```bash
+epilot organization getActiveAnnouncement
+```
+
+With JSONata filter:
+
+```bash
+epilot organization getActiveAnnouncement --jsonata 'announcement'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "announcement": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "type": "subprocessor_change",
+    "message": {
+      "de": "Wir haben unsere Liste der Subdienstleister aktualisiert (gültig ab 01.11.2026). Bitte prüfe die Änderungen.",
+      "en": "We have updated our list of subprocessors (effective 01.11.2026). Please review the changes."
+    },
+    "link_url": "string",
+    "list_version": "string",
+    "effective_date": "1970-01-01",
+    "window_days": 0,
+    "status": "draft",
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "created_by": "string",
+    "updated_at": "1970-01-01T00:00:00.000Z",
+    "published_at": "1970-01-01T00:00:00.000Z",
+    "published_by": "string",
+    "expires_at": "1970-01-01T00:00:00.000Z",
+    "archived_at": "1970-01-01T00:00:00.000Z",
+    "archived_by": "string",
+    "materialized_at": "1970-01-01T00:00:00.000Z"
+  },
+  "can_acknowledge": true
+}
+```
+
+</details>
+
+---
+
+### `acknowledgeAnnouncement`
+
+Acknowledges an announcement on behalf of the caller's organization. Only org admins
+
+`POST /v2/organization/announcements/{announcement_id}/acknowledge`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `announcement_id` | path | string | Yes | Announcement id |
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot organization acknowledgeAnnouncement \
+  -p announcement_id=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"portal":"360"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot organization acknowledgeAnnouncement 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot organization acknowledgeAnnouncement -p announcement_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot organization acknowledgeAnnouncement -p announcement_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'announcement_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "announcement_id": "string",
+  "org_id": "string",
+  "org_name": "string",
+  "status": "acknowledged",
+  "acknowledged_by": {
+    "user_id": "string",
+    "name": "string",
+    "email": "string"
+  },
+  "acknowledged_at": "1970-01-01T00:00:00.000Z",
+  "portal": "360",
+  "list_version": "string",
+  "recorded_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
 
 ---

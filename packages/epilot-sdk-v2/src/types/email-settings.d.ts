@@ -191,6 +191,13 @@ export declare namespace Components {
              * User who connected this mailbox
              */
             connected_by_user_id?: string;
+            /**
+             * Set when Microsoft Graph can no longer reach the mailbox, for example because it was
+             * deactivated, unlicensed or deleted in the Microsoft 365 tenant. New emails are not synced
+             * while it is set. Cleared automatically once the mailbox is reachable again.
+             *
+             */
+            mailbox_unavailable_since?: string; // date-time
             sync_options?: /**
              * Per-mailbox options for what happens in epilot when a mail is deleted in Outlook.
              *
