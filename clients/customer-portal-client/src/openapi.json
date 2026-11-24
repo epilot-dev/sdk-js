@@ -14600,6 +14600,12 @@
               "b2b_viewer"
             ]
           },
+          "record_access": {
+            "$ref": "#/components/schemas/RecordAccess"
+          },
+          "record_access_defaults": {
+            "$ref": "#/components/schemas/RecordAccessDefaults"
+          },
           "surfaces": {
             "type": "array",
             "description": "Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.\n",
@@ -22195,6 +22201,12 @@
               "b2b_viewer"
             ]
           },
+          "record_access": {
+            "$ref": "#/components/schemas/RecordAccess"
+          },
+          "record_access_defaults": {
+            "$ref": "#/components/schemas/RecordAccessDefaults"
+          },
           "surfaces": {
             "type": "array",
             "description": "Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.\n",
@@ -22847,6 +22859,12 @@
               "b2b_admin",
               "b2b_viewer"
             ]
+          },
+          "record_access": {
+            "$ref": "#/components/schemas/RecordAccess"
+          },
+          "record_access_defaults": {
+            "$ref": "#/components/schemas/RecordAccessDefaults"
           },
           "surfaces": {
             "type": "array",
@@ -23704,6 +23722,162 @@
             "deprecated": true,
             "description": "Display name of `role`.",
             "example": "B2B admin"
+          }
+        }
+      },
+      "RecordAccess": {
+        "type": "object",
+        "description": "Which records portal users see in the portal's lists, per record type (schema slug). A\nrecord type without an entry uses its default rule (`record_access_defaults`), or else any\nof its relation attributes that can hold a contact. Entries for `contact`, `account`,\n`file` and `portal_user` are ignored.\n",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/RecordAccessRule"
+        },
+        "example": {
+          "contract": {
+            "conditions": [
+              {
+                "type": "relation_attribute",
+                "attribute": "customer"
+              },
+              {
+                "type": "relation_attribute",
+                "attribute": "property_manager"
+              }
+            ]
+          },
+          "meter": {
+            "conditions": [
+              {
+                "type": "relation_attribute",
+                "attribute": "customer"
+              },
+              {
+                "type": "relation_attribute",
+                "through": "contract",
+                "attribute": "customer"
+              },
+              {
+                "type": "relation_attribute",
+                "through": "contract",
+                "attribute": "property_manager"
+              }
+            ]
+          },
+          "ticket": {
+            "conditions": [
+              {
+                "type": "relation_attribute",
+                "attribute": "customer"
+              }
+            ]
+          }
+        }
+      },
+      "RecordAccessRule": {
+        "type": "object",
+        "description": "A record is visible when one of the conditions applies.",
+        "additionalProperties": false,
+        "required": [
+          "conditions"
+        ],
+        "properties": {
+          "conditions": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "$ref": "#/components/schemas/RecordAccessCondition"
+            }
+          }
+        }
+      },
+      "RecordAccessCondition": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/RecordAccessRelationAttributeCondition"
+          }
+        ]
+      },
+      "RecordAccessRelationAttributeCondition": {
+        "type": "object",
+        "description": "The record's relation attribute `attribute` contains the user's contact. With `through`,\nthe record related through the attribute `through` must contain it instead, e.g. on meters\n`through: contract, attribute: customer`.\n",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "attribute"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "relation_attribute"
+            ]
+          },
+          "attribute": {
+            "$ref": "#/components/schemas/RecordAccessName"
+          },
+          "through": {
+            "$ref": "#/components/schemas/RecordAccessName"
+          }
+        }
+      },
+      "RecordAccessName": {
+        "type": "string",
+        "description": "A schema slug or attribute name. Letters, digits and underscores only.",
+        "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$"
+      },
+      "RecordAccessDefaults": {
+        "type": "object",
+        "readOnly": true,
+        "description": "Read-only. The default rule per record type, in the shape of `record_access`. Ignored on\nwrite.\n",
+        "additionalProperties": {
+          "type": "object",
+          "required": [
+            "conditions"
+          ],
+          "properties": {
+            "conditions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "attribute"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "relation_attribute"
+                    ]
+                  },
+                  "attribute": {
+                    "type": "string"
+                  },
+                  "through": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "never_listed": {
+              "type": "array",
+              "description": "Records with one of these attribute values are never listed.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "attribute",
+                  "value"
+                ],
+                "properties": {
+                  "attribute": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
           }
         }
       },
