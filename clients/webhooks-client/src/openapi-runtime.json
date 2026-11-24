@@ -66,6 +66,16 @@
             "in": "path",
             "name": "configId",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "based_on_revision_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "restored_from_revision_id",
+            "required": false
           }
         ],
         "requestBody": {
@@ -205,6 +215,47 @@
             "application/json": {}
           }
         },
+        "responses": {}
+      }
+    },
+    "/v1/webhooks/configs/{configId}/revisions": {
+      "get": {
+        "operationId": "getConfigRevisions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/webhooks/configs/{configId}/revisions/{revisionId}": {
+      "get": {
+        "operationId": "getConfigRevision",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "revisionId",
+            "required": true
+          }
+        ],
         "responses": {}
       }
     },

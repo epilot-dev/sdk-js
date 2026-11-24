@@ -2744,7 +2744,7 @@
           }
         ],
         "summary": "bootstrapIntegrationLifecycle",
-        "description": "Bootstraps the integration's middleware, or re-bootstraps it: issues a\nnew apiKey with the org role the integration names (the previous key is\nrevoked), a new signing secret and a new lifecycle version, and sends the\nlifecycle webhook `CREATE` to the integration's lifecycle webhook URL.\n\nThe URL and the role are environment variables the integration declares\nin its `environment_config`, under keys ending in `lifecycle_webhook_url`\nand `lifecycle_api_key_role` (e.g. `tap.lifecycle_webhook_url`).\n\n`CREATE` carries the apiKey and the signing secret and is not signed; the\nmiddleware authenticates it by reading the configuration with the apiKey.\nLifecycle webhooks are never stored with their body.\n\nAnswers `200` with the middleware's response whenever the webhook was\nsent, whatever the middleware answered: that is the bootstrap status.\nBehind the feature flag `integration-middleware-config` during rollout.\n",
+        "description": "Bootstraps the integration's middleware, or re-bootstraps it: issues a\nnew apiKey with the org role the integration names (the previous key is\nrevoked), a new signing secret and a new lifecycle version, and sends the\nlifecycle webhook `CREATE` to the integration's lifecycle webhook URL.\n\nThe URL comes from the integration's `config_push.webhook_url`, the role\nfrom its `api_key_role`. `409 config_push_not_enabled` when the\nintegration's `config_push` is not enabled. Integrations without\n`config_push` may still declare both as environment variables in their\n`environment_config` (keys ending in `lifecycle_webhook_url` and\n`lifecycle_api_key_role`); that fallback goes once they are migrated.\n\n`CREATE` carries the apiKey and the signing secret and is not signed; the\nmiddleware authenticates it by reading the configuration with the apiKey.\nLifecycle webhooks are never stored with their body.\n\nAnswers `200` with the middleware's response whenever the webhook was\nsent, whatever the middleware answered: that is the bootstrap status.\nBehind the feature flag `integration-middleware-config` during rollout.\n",
         "tags": [
           "integrations"
         ],
@@ -2780,6 +2780,9 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
           "422": {
             "$ref": "#/components/responses/InvalidLifecycleSettings"
           },
@@ -2798,7 +2801,7 @@
           }
         ],
         "summary": "notifyIntegrationConfigChanged",
-        "description": "Tells the integration's middleware that its configuration changed: sends\nthe lifecycle webhook `UPDATE`, signed with the integration's signing\nsecret (Standard Webhooks `v1`) and with a new lifecycle version. The\nIntegration Hub calls it after saving the integration's values. `409`\nwhen the integration was never bootstrapped.\n",
+        "description": "Tells the integration's middleware that its configuration changed: sends\nthe lifecycle webhook `UPDATE`, signed with the integration's signing\nsecret (Standard Webhooks `v1`) and with a new lifecycle version. The\nIntegration Hub calls it after saving the integration's values. `409`\nwhen the integration was never bootstrapped (`not_bootstrapped`) or its\n`config_push` is not enabled (`config_push_not_enabled`).\n",
         "tags": [
           "integrations"
         ],
@@ -2855,7 +2858,7 @@
           }
         ],
         "summary": "getIntegrationLifecycle",
-        "description": "The integration's bootstrap status: whether lifecycle webhooks are\nenabled for the org, whether the middleware is bootstrapped, the current\nlifecycle version and the last delivery (without its body).\n",
+        "description": "The integration's bootstrap status: whether lifecycle webhooks are\nenabled (the integration's `config_push` and the org's rollout flag),\nwhether the middleware is bootstrapped, the current lifecycle version and\nthe last delivery (without its body).\n",
         "tags": [
           "integrations"
         ],
@@ -8999,12 +9002,40 @@
             "type": "boolean",
             "description": "If true, integration is displayed in read-only mode in the UI to discourage changes"
           },
+          "config_push": {
+            "$ref": "#/components/schemas/IntegrationConfigPush"
+          },
+          "api_key_role": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+            "description": "Slug of the org role the middleware's apiKey gets when the integration is bootstrapped (see `config_push`). Keep it narrow: it is what a leaked key can do.\n"
+          },
           "_manifest": {
             "type": "array",
             "description": "The manifest IDs associated with this integration",
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "IntegrationConfigPush": {
+        "type": "object",
+        "description": "Config push: whether the integration's middleware takes lifecycle webhooks (`CREATE` with apiKey and signing secret, signed `UPDATE` and `DELETE`; see `bootstrapIntegrationLifecycle`), and where they go. Absent or disabled: the Integration Hub offers no bootstrap for the integration.\n",
+        "required": [
+          "enabled"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the middleware takes lifecycle webhooks."
+          },
+          "webhook_url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2048,
+            "description": "Where lifecycle webhooks go: https, a public address. Required to bootstrap. Whoever can change it receives the apiKey on the next bootstrap.\n"
           }
         }
       },
@@ -9355,7 +9386,7 @@
         "properties": {
           "enabled": {
             "type": "boolean",
-            "description": "Whether lifecycle webhooks are enabled for the org (rollout feature flag)."
+            "description": "Whether lifecycle webhooks are enabled: the integration's `config_push` is enabled, and so is the org (rollout feature flag).\n"
           },
           "bootstrapped": {
             "type": "boolean",

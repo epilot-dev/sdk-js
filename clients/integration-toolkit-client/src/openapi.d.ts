@@ -2032,6 +2032,16 @@ declare namespace Components {
              * If true, integration is displayed in read-only mode in the UI to discourage changes
              */
             protected?: boolean;
+            config_push?: /**
+             * Config push: whether the integration's middleware takes lifecycle webhooks (`CREATE` with apiKey and signing secret, signed `UPDATE` and `DELETE`; see `bootstrapIntegrationLifecycle`), and where they go. Absent or disabled: the Integration Hub offers no bootstrap for the integration.
+             *
+             */
+            IntegrationConfigPush;
+            /**
+             * Slug of the org role the middleware's apiKey gets when the integration is bootstrapped (see `config_push`). Keep it narrow: it is what a leaked key can do.
+             *
+             */
+            api_key_role?: string; // ^[a-z0-9][a-z0-9_-]{0,63}$
             /**
              * The manifest IDs associated with this integration
              */
@@ -6164,6 +6174,16 @@ declare namespace Components {
              * If true, integration is displayed in read-only mode in the UI to discourage changes
              */
             protected?: boolean;
+            config_push?: /**
+             * Config push: whether the integration's middleware takes lifecycle webhooks (`CREATE` with apiKey and signing secret, signed `UPDATE` and `DELETE`; see `bootstrapIntegrationLifecycle`), and where they go. Absent or disabled: the Integration Hub offers no bootstrap for the integration.
+             *
+             */
+            IntegrationConfigPush;
+            /**
+             * Slug of the org role the middleware's apiKey gets when the integration is bootstrapped (see `config_push`). Keep it narrow: it is what a leaked key can do.
+             *
+             */
+            api_key_role?: string; // ^[a-z0-9][a-z0-9_-]{0,63}$
             /**
              * The manifest IDs associated with this integration
              */
@@ -6204,6 +6224,21 @@ declare namespace Components {
             environment: {
                 [name: string]: string;
             };
+        }
+        /**
+         * Config push: whether the integration's middleware takes lifecycle webhooks (`CREATE` with apiKey and signing secret, signed `UPDATE` and `DELETE`; see `bootstrapIntegrationLifecycle`), and where they go. Absent or disabled: the Integration Hub offers no bootstrap for the integration.
+         *
+         */
+        export interface IntegrationConfigPush {
+            /**
+             * Whether the middleware takes lifecycle webhooks.
+             */
+            enabled: boolean;
+            /**
+             * Where lifecycle webhooks go: https, a public address. Required to bootstrap. Whoever can change it receives the apiKey on the next bootstrap.
+             *
+             */
+            webhook_url?: string; // uri
         }
         export interface IntegrationConfigurationV1 {
             /**
@@ -6274,6 +6309,16 @@ declare namespace Components {
              * If true, integration is displayed in read-only mode in the UI to discourage changes
              */
             protected?: boolean;
+            config_push?: /**
+             * Config push: whether the integration's middleware takes lifecycle webhooks (`CREATE` with apiKey and signing secret, signed `UPDATE` and `DELETE`; see `bootstrapIntegrationLifecycle`), and where they go. Absent or disabled: the Integration Hub offers no bootstrap for the integration.
+             *
+             */
+            IntegrationConfigPush;
+            /**
+             * Slug of the org role the middleware's apiKey gets when the integration is bootstrapped (see `config_push`). Keep it narrow: it is what a leaked key can do.
+             *
+             */
+            api_key_role?: string; // ^[a-z0-9][a-z0-9_-]{0,63}$
             /**
              * The manifest IDs associated with this integration
              */
@@ -6520,7 +6565,8 @@ declare namespace Components {
          */
         export interface IntegrationLifecycle {
             /**
-             * Whether lifecycle webhooks are enabled for the org (rollout feature flag).
+             * Whether lifecycle webhooks are enabled: the integration's `config_push` is enabled, and so is the org (rollout feature flag).
+             *
              */
             enabled: boolean;
             /**
@@ -6722,6 +6768,16 @@ declare namespace Components {
              * If true, integration is displayed in read-only mode in the UI to discourage changes
              */
             protected?: boolean;
+            config_push?: /**
+             * Config push: whether the integration's middleware takes lifecycle webhooks (`CREATE` with apiKey and signing secret, signed `UPDATE` and `DELETE`; see `bootstrapIntegrationLifecycle`), and where they go. Absent or disabled: the Integration Hub offers no bootstrap for the integration.
+             *
+             */
+            IntegrationConfigPush;
+            /**
+             * Slug of the org role the middleware's apiKey gets when the integration is bootstrapped (see `config_push`). Keep it narrow: it is what a leaked key can do.
+             *
+             */
+            api_key_role?: string; // ^[a-z0-9][a-z0-9_-]{0,63}$
             /**
              * The manifest IDs associated with this integration
              */
@@ -9991,6 +10047,16 @@ declare namespace Components {
              * If true, integration is displayed in read-only mode in the UI to discourage changes
              */
             protected?: boolean;
+            config_push?: /**
+             * Config push: whether the integration's middleware takes lifecycle webhooks (`CREATE` with apiKey and signing secret, signed `UPDATE` and `DELETE`; see `bootstrapIntegrationLifecycle`), and where they go. Absent or disabled: the Integration Hub offers no bootstrap for the integration.
+             *
+             */
+            IntegrationConfigPush;
+            /**
+             * Slug of the org role the middleware's apiKey gets when the integration is bootstrapped (see `config_push`). Keep it narrow: it is what a leaked key can do.
+             *
+             */
+            api_key_role?: string; // ^[a-z0-9][a-z0-9_-]{0,63}$
             /**
              * The manifest IDs associated with this integration
              */
@@ -10265,6 +10331,7 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
             export type $422 = Components.Responses.InvalidLifecycleSettings;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -12401,9 +12468,12 @@ export interface OperationMethods {
    * revoked), a new signing secret and a new lifecycle version, and sends the
    * lifecycle webhook `CREATE` to the integration's lifecycle webhook URL.
    * 
-   * The URL and the role are environment variables the integration declares
-   * in its `environment_config`, under keys ending in `lifecycle_webhook_url`
-   * and `lifecycle_api_key_role` (e.g. `tap.lifecycle_webhook_url`).
+   * The URL comes from the integration's `config_push.webhook_url`, the role
+   * from its `api_key_role`. `409 config_push_not_enabled` when the
+   * integration's `config_push` is not enabled. Integrations without
+   * `config_push` may still declare both as environment variables in their
+   * `environment_config` (keys ending in `lifecycle_webhook_url` and
+   * `lifecycle_api_key_role`); that fallback goes once they are migrated.
    * 
    * `CREATE` carries the apiKey and the signing secret and is not signed; the
    * middleware authenticates it by reading the configuration with the apiKey.
@@ -12426,7 +12496,8 @@ export interface OperationMethods {
    * the lifecycle webhook `UPDATE`, signed with the integration's signing
    * secret (Standard Webhooks `v1`) and with a new lifecycle version. The
    * Integration Hub calls it after saving the integration's values. `409`
-   * when the integration was never bootstrapped.
+   * when the integration was never bootstrapped (`not_bootstrapped`) or its
+   * `config_push` is not enabled (`config_push_not_enabled`).
    * 
    */
   'notifyIntegrationConfigChanged'(
@@ -12438,8 +12509,9 @@ export interface OperationMethods {
    * getIntegrationLifecycle - getIntegrationLifecycle
    * 
    * The integration's bootstrap status: whether lifecycle webhooks are
-   * enabled for the org, whether the middleware is bootstrapped, the current
-   * lifecycle version and the last delivery (without its body).
+   * enabled (the integration's `config_push` and the org's rollout flag),
+   * whether the middleware is bootstrapped, the current lifecycle version and
+   * the last delivery (without its body).
    * 
    */
   'getIntegrationLifecycle'(
@@ -13937,9 +14009,12 @@ export interface PathsDictionary {
      * revoked), a new signing secret and a new lifecycle version, and sends the
      * lifecycle webhook `CREATE` to the integration's lifecycle webhook URL.
      * 
-     * The URL and the role are environment variables the integration declares
-     * in its `environment_config`, under keys ending in `lifecycle_webhook_url`
-     * and `lifecycle_api_key_role` (e.g. `tap.lifecycle_webhook_url`).
+     * The URL comes from the integration's `config_push.webhook_url`, the role
+     * from its `api_key_role`. `409 config_push_not_enabled` when the
+     * integration's `config_push` is not enabled. Integrations without
+     * `config_push` may still declare both as environment variables in their
+     * `environment_config` (keys ending in `lifecycle_webhook_url` and
+     * `lifecycle_api_key_role`); that fallback goes once they are migrated.
      * 
      * `CREATE` carries the apiKey and the signing secret and is not signed; the
      * middleware authenticates it by reading the configuration with the apiKey.
@@ -13964,7 +14039,8 @@ export interface PathsDictionary {
      * the lifecycle webhook `UPDATE`, signed with the integration's signing
      * secret (Standard Webhooks `v1`) and with a new lifecycle version. The
      * Integration Hub calls it after saving the integration's values. `409`
-     * when the integration was never bootstrapped.
+     * when the integration was never bootstrapped (`not_bootstrapped`) or its
+     * `config_push` is not enabled (`config_push_not_enabled`).
      * 
      */
     'post'(
@@ -13978,8 +14054,9 @@ export interface PathsDictionary {
      * getIntegrationLifecycle - getIntegrationLifecycle
      * 
      * The integration's bootstrap status: whether lifecycle webhooks are
-     * enabled for the org, whether the middleware is bootstrapped, the current
-     * lifecycle version and the last delivery (without its body).
+     * enabled (the integration's `config_push` and the org's rollout flag),
+     * whether the middleware is bootstrapped, the current lifecycle version and
+     * the last delivery (without its body).
      * 
      */
     'get'(
@@ -15115,6 +15192,7 @@ export type IngestExternalMonitoringEventsResponse = Components.Schemas.IngestEx
 export type Integration = Components.Schemas.Integration;
 export type IntegrationAppMapping = Components.Schemas.IntegrationAppMapping;
 export type IntegrationConfig = Components.Schemas.IntegrationConfig;
+export type IntegrationConfigPush = Components.Schemas.IntegrationConfigPush;
 export type IntegrationConfigurationV1 = Components.Schemas.IntegrationConfigurationV1;
 export type IntegrationConfigurationV2 = Components.Schemas.IntegrationConfigurationV2;
 export type IntegrationEditableFields = Components.Schemas.IntegrationEditableFields;

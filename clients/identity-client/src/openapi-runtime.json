@@ -261,6 +261,22 @@
         ],
         "responses": {}
       }
+    },
+    "/v1/identity/sector-identifier/{client_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        }
+      ],
+      "get": {
+        "operationId": "getSectorIdentifier",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AnyOtherQueryParameters"
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {

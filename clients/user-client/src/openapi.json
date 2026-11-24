@@ -495,7 +495,7 @@
           }
         ],
         "summary": "inviteUser",
-        "description": "Creates a new user in the caller's organization and sends an invite email to activate the user.\n\nThe caller can only invite users with roles they could assign themselves: their own roles, or other\norg roles with `role:assign`. Only an organization owner can invite a user with the `owner` role (403 otherwise).\n\n`invitation_type: preview_org_ready` sends a \"Your preview org is ready\" email instead of the default\ninvitation (same invite link). It is reserved for internal epilot services (internal-auth tokens);\nany other caller gets 403.\n",
+        "description": "Creates a new user in the caller's organization and sends an invite email to activate the user.\n\nThe caller can only invite users with roles they could assign themselves: their own roles, or other\norg roles with `role:assign`. Only an organization owner can invite a user with the `owner` role (403 otherwise).\n\n`invitation_type: preview_org_ready` sends a \"Your preview org is ready\" email instead of the default\ninvitation (same invite link). It is reserved for internal epilot services (internal-auth tokens);\nany other caller gets 403.\n\n`send_email: false` (internal epilot services only) creates the invite without sending an email.\n",
         "tags": [
           "User V2"
         ],
@@ -1860,6 +1860,63 @@
         }
       }
     },
+    "/v2/users/me/organizations/{org_id}/leave": {
+      "post": {
+        "operationId": "leaveOrganization",
+        "x-epilot-agent": {
+          "expose": false
+        },
+        "x-epilot-permissions": [],
+        "summary": "leaveOrganization",
+        "description": "Leave an organization the calling user is a member of. The user's membership in that organization is\ndeactivated (status `Deactivated`), so it no longer shows up in the org switcher and can't be logged into.\nAn admin of the organization can reactivate it.\n\nRules:\n- The user's primary organization can't be left (`cannot_leave_primary_org`)\n- The last active owner can't leave (`last_owner`), unless the organization is a Preview org or is scheduled\n  for deletion. Preview orgs can be left at any time.\n",
+        "tags": [
+          "User V2"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The user left the organization"
+          },
+          "403": {
+            "description": "Leaving an organization requires a user login session"
+          },
+          "404": {
+            "description": "The user is not an active member of the organization"
+          },
+          "409": {
+            "description": "The organization can't be left (`cannot_leave_primary_org` or `last_owner`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "enum": [
+                        "cannot_leave_primary_org",
+                        "last_owner"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/users/me": {
       "get": {
         "operationId": "getMe",
@@ -2271,6 +2328,11 @@
                 "example": "epilot GmbH"
               }
             }
+          },
+          "send_email": {
+            "type": "boolean",
+            "description": "`false` creates the invite (user, roles, invite link) without sending an invitation email, e.g. when\nthe caller accepts the invite on the user's behalf right away. Only internal epilot services\n(internal-auth tokens) may set it; other callers get 403.\n",
+            "default": true
           }
         }
       },
@@ -2566,6 +2628,12 @@
               "assigned_task": true
             }
           },
+          "in_app_notification_popups": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether new in-app notifications pop up on screen (top-right toasts in the 360 app) in addition to the bell counter. Written by the my-account notification settings UI and honored by the topbar. Absent or null means enabled; only `false` turns the popups off. Only has an effect while the org has the `on-screen-notifications` feature flag.",
+            "example": false
+          },
           "properties": {
             "type": "array",
             "items": {
@@ -2715,6 +2783,10 @@
             "nullable": true,
             "description": "For a Sandbox or Preview org, the id of its Production parent (its brand);\nnull/absent for Production orgs. Lets the org switcher group a\nsandbox or preview under its brand without relying on list order.\n",
             "example": "123"
+          },
+          "is_primary_org": {
+            "type": "boolean",
+            "description": "Whether this is the user's primary organization (the one they signed up with or were moved to).\nThe primary organization can't be left.\n"
           },
           "cognito_region": {
             "type": "string",

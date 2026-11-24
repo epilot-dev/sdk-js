@@ -470,6 +470,14 @@
           "application/json": {}
         }
       },
+      "TooManyRequests": {
+        "headers": {
+          "Retry-After": {}
+        },
+        "content": {
+          "application/json": {}
+        }
+      },
       "InvalidRequestUpdateMeter": {
         "content": {
           "application/json": {}

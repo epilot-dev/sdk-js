@@ -400,6 +400,63 @@
         "responses": {}
       }
     },
+    "/v1/files:meterReadingSuggestions": {
+      "get": {
+        "operationId": "listMeterReadingSuggestions",
+        "parameters": [
+          {
+            "name": "meter_id",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "schema",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createMeterReadingSuggestionJob",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/files:meterReadingSuggestions/{meter_id}/{file_id}/{suggestion_id}": {
+      "patch": {
+        "operationId": "updateMeterReadingSuggestionStatus",
+        "parameters": [
+          {
+            "name": "meter_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "suggestion_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/files/{id}/text": {
       "get": {
         "operationId": "getFileText",
@@ -759,6 +816,11 @@
       }
     },
     "responses": {
+      "MeterReadingSuggestionErrorResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
       "FileAttributeSuggestionErrorResponse": {
         "content": {
           "application/json": {}

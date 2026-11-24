@@ -223,7 +223,14 @@
             }
           },
           "400": {
-            "description": "Definition is invalid or the body event_name differs from the path"
+            "description": "Definition is invalid or the body event_name differs from the path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
           },
           "404": {
             "description": "Custom event not found"
@@ -316,7 +323,14 @@
             }
           },
           "400": {
-            "description": "Projection or schema validation failed"
+            "description": "The preview failed where publishing would fail: the seed entity does not exist in this\norganization or has the wrong schema, the projection failed, or the payload does not\nmatch the event schema. `issues` names each problem.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
           },
           "404": {
             "description": "Custom event not found"
@@ -367,6 +381,16 @@
               }
             }
           },
+          "400": {
+            "description": "The stored definition or its example payload no longer validates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
           "409": {
             "description": "Definition is not a draft or base publication choice is invalid"
           }
@@ -376,6 +400,11 @@
     "/v1/events/{event_name}/version_draft": {
       "get": {
         "operationId": "getCustomEventVersionDraft",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:manage"
+          }
+        ],
         "summary": "getCustomEventVersionDraft",
         "description": "Read the in-progress successor of a published custom event, together with the version it\nwould be published as. The live version keeps firing while the successor is authored.\n",
         "tags": [
@@ -409,6 +438,11 @@
       },
       "put": {
         "operationId": "putCustomEventVersionDraft",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:manage"
+          }
+        ],
         "summary": "putCustomEventVersionDraft",
         "description": "Create or replace the successor of a published custom event. The published definition stays\nimmutable and keeps firing; only publishing the draft promotes it.\n\nThe response classifies the change against the live version: additive changes mint a MINOR,\na changed projection mints a MAJOR (the schema is identical, so nothing else would warn a\npinned consumer that the values moved), and removals, retypes and loosened requiredness are\nrejected as `blocked` because no sound downgrade can be generated for them.\n",
         "tags": [
@@ -446,7 +480,14 @@
             }
           },
           "400": {
-            "description": "Definition is invalid or the body event_name differs from the path"
+            "description": "Definition is invalid or the body event_name differs from the path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
           },
           "404": {
             "description": "Custom event not found"
@@ -461,6 +502,11 @@
       },
       "delete": {
         "operationId": "deleteCustomEventVersionDraft",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:manage"
+          }
+        ],
         "summary": "deleteCustomEventVersionDraft",
         "description": "Discard the next-version draft. The published version is untouched.",
         "tags": [
@@ -489,6 +535,11 @@
     "/v1/events/{event_name}/version_draft:publish": {
       "post": {
         "operationId": "publishCustomEventVersion",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:manage"
+          }
+        ],
         "summary": "publishCustomEventVersion",
         "description": "Publish the next-version draft as the event's new live version.\n\nThe version label, the declared field changes and the JSONata downgrade back to the previous\nversion are all derived from the diff — never supplied by the caller — so the downgrade\ncannot disagree with the definition it accompanies. Consumers pinned to an earlier version\nkeep receiving their own shape through the stamped downgrade chain.\n",
         "tags": [
@@ -918,7 +969,14 @@
             }
           },
           "400": {
-            "description": "Invalid input (validation error, missing seed, or missing required fields)"
+            "description": "Invalid input (validation error, missing seed, or missing required fields)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
           },
           "403": {
             "description": "Event is disabled for this organization, or the user is not allowed to trigger events"
@@ -1366,15 +1424,53 @@
         "type": "object",
         "properties": {
           "path": {
-            "type": "string"
+            "type": "string",
+            "description": "The rejected or reported value, for example `customer_number`, `contact.email`,\n`seed.entity_id` or `schema_fields.customer_number.graph_source`. `<root>` for the\npayload as a whole.\n",
+            "example": "customer_number"
           },
           "message": {
-            "type": "string"
+            "type": "string",
+            "example": "must be string, but the value is a number"
           }
         },
         "required": [
           "path",
           "message"
+        ]
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "description": "A rejected request. `issues` lists every problem for clients; `error` summarises them for\npeople reading the response (payload and definition errors repeat each issue in it). A body\nthat does not match the request schema is rejected before any of this, with `error` holding\nthe request validator's own list instead of a string.\n",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "example": 400
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            ],
+            "example": "Custom event payload failed JSON Schema validation: customer_number must be string, but the value is a number"
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationIssue"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "error"
         ]
       },
       "PreviewEventResponse": {
@@ -1386,6 +1482,14 @@
           },
           "errors": {
             "type": "array",
+            "description": "Always empty. A preview that fails returns 400 with `issues` instead.",
+            "items": {
+              "$ref": "#/components/schemas/ValidationIssue"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "description": "What the event leaves out for this sample without failing: optional fields that have no\nvalue (`path` is the field name) and, unless the mapping replaces the entity data,\nrelated cardinality-one nodes the sample does not have (`path` is the node ID). Publishing\nomits both silently; they never block it.\n",
             "items": {
               "$ref": "#/components/schemas/ValidationIssue"
             }
@@ -1393,7 +1497,8 @@
         },
         "required": [
           "payload",
-          "errors"
+          "errors",
+          "warnings"
         ]
       },
       "UpdateEventPayload": {
@@ -2008,6 +2113,31 @@
             "items": {
               "$ref": "#/components/schemas/PurposeFilterSnapshot"
             }
+          },
+          "attribute_values": {
+            "type": "object",
+            "description": "Optional value filter for watched attributes, keyed by attribute name. The event only\ntriggers when a watched attribute listed here takes one of the given values — its value\nin the entity payload on createEntity, its new value in diff.added / diff.updated on\nupdateEntity. A removed attribute never matches. Watched attributes not listed here\nmatch on any change. Not applied on deleteEntity.\nInherited value filters cannot be changed by derived custom events.\n",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ]
+              }
+            },
+            "example": {
+              "registration_status": [
+                "Registered"
+              ]
+            }
           }
         },
         "required": [
@@ -2032,7 +2162,7 @@
               "event_time": {
                 "type": "string",
                 "description": "Timestamp from the last event in the previous page",
-                "example": "2025-10-31 12:34:56"
+                "example": "2025-10-31T12:34:56Z"
               },
               "event_id": {
                 "type": "string",

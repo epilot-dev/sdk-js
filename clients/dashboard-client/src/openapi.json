@@ -31,6 +31,11 @@
     "/v1/dashboard/dashboards": {
       "get": {
         "operationId": "listDashboards",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listDashboards",
         "description": "List dashboards available to the user",
         "tags": [
@@ -113,8 +118,13 @@
       },
       "post": {
         "operationId": "createDashboard",
+        "x-epilot-permissions": [
+          {
+            "action": "dashboard:create"
+          }
+        ],
         "summary": "createDashboard",
-        "description": "Create new dashboard",
+        "description": "Create new dashboard.\nTiles that only reference an insight (`insight_id`) need no further permission. A tile with an\ninline `visualisation_id`/`visualisation_config` (with or without `insight_id`) authors a chart,\nso it additionally requires `dashboard:insight:create`.\n",
         "tags": [
           "Dashboards"
         ],
@@ -138,6 +148,36 @@
                 }
               }
             }
+          },
+          "403": {
+            "$ref": "#/components/responses/QuotaExceeded"
+          }
+        }
+      }
+    },
+    "/v1/dashboard/dashboards/quota": {
+      "get": {
+        "operationId": "getDashboardQuota",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "getDashboardQuota",
+        "description": "Current dashboard quota and usage for the caller's organization, so a client can show the\nlimit before a write is attempted rather than discovering it on a 403.\n\n`dashboards.limit` is `null` when unlimited or not enforced. `dashboards.current` counts\nonly analytics dashboards (`version >= 2`) and is org-wide, not scoped to what the caller\ncan see.\n",
+        "tags": [
+          "Dashboards"
+        ],
+        "responses": {
+          "200": {
+            "description": "Quota and current usage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardQuota"
+                }
+              }
+            }
           }
         }
       }
@@ -145,6 +185,11 @@
     "/v1/dashboard/dashboards/favorites": {
       "get": {
         "operationId": "listFavoriteDashboardIds",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listFavoriteDashboardIds",
         "description": "Returns the current user's favorited dashboard ids, with no dashboard metadata. Lets a\nclient decide whether to default to a favorites-only view without first fetching the full\ndashboards list.\n",
         "tags": [
@@ -192,6 +237,18 @@
       ],
       "put": {
         "operationId": "favoriteDashboard",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "access": "owner"
+              },
+              {
+                "access": "org"
+              }
+            ]
+          }
+        ],
         "summary": "favoriteDashboard",
         "description": "Marks the dashboard as favorited by the current user. Idempotent — favoriting an\nalready-favorited dashboard is not an error. Requires only view-level access to the\ndashboard (unlike the edit-level check on `PATCH .../dashboards/{id}`).\n",
         "tags": [
@@ -205,6 +262,11 @@
       },
       "delete": {
         "operationId": "unfavoriteDashboard",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
         "summary": "unfavoriteDashboard",
         "description": "Removes the current user's favorite for the dashboard. Idempotent — unfavoriting a\ndashboard that was not favorited is not an error, and neither is unfavoriting one that no\nlonger exists or is no longer shared with you. Requires no access to the dashboard, so that\na stale favorite always remains removable.\n",
         "tags": [
@@ -230,6 +292,18 @@
       ],
       "get": {
         "operationId": "getDashboard",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "access": "owner"
+              },
+              {
+                "access": "org"
+              }
+            ]
+          }
+        ],
         "summary": "getDashboard",
         "description": "Get dashboard by ID",
         "tags": [
@@ -250,8 +324,13 @@
       },
       "put": {
         "operationId": "putDashboard",
+        "x-epilot-permissions": [
+          {
+            "action": "dashboard:edit"
+          }
+        ],
         "summary": "putDashboard",
-        "description": "Update a dashboard by ID",
+        "description": "Update a dashboard by ID.\nTiles that only reference an insight (`insight_id`) need no further permission, and unchanged\ntiles with an inline `visualisation_id`/`visualisation_config` are kept as they are. Adding an\ninline tile (a new tile `id`, or one that was not inline) requires `dashboard:insight:create`;\nchanging the inline visualisation of an existing tile requires `dashboard:insight:edit`.\n",
         "tags": [
           "Dashboards"
         ],
@@ -275,13 +354,21 @@
                 }
               }
             }
+          },
+          "403": {
+            "$ref": "#/components/responses/QuotaExceeded"
           }
         }
       },
       "patch": {
         "operationId": "patchDashboard",
+        "x-epilot-permissions": [
+          {
+            "action": "dashboard:edit"
+          }
+        ],
         "summary": "patchDashboard",
-        "description": "Partially update a dashboard by ID. Update content (title/tiles) and/or manage sharing\n(owners, shared_with, org_access) — only owners may change sharing.\n`owners` and `shared_with` replace the whole array (send the complete list); omit them to leave\nsharing unchanged, or send `shared_with: []` to revoke all per-user grants.\n",
+        "description": "Partially update a dashboard by ID. Update content (title/tiles/filters) and/or manage sharing\n(owners, shared_with, org_access) — only owners may change sharing.\n`owners` and `shared_with` replace the whole array (send the complete list); omit them to leave\nsharing unchanged, or send `shared_with: []` to revoke all per-user grants.\nTiles that only reference an insight (`insight_id`) need no further permission, and unchanged\ntiles with an inline `visualisation_id`/`visualisation_config` are kept as they are. Adding an\ninline tile (a new tile `id`, or one that was not inline) requires `dashboard:insight:create`;\nchanging the inline visualisation of an existing tile requires `dashboard:insight:edit`.\n",
         "tags": [
           "Dashboards"
         ],
@@ -305,11 +392,19 @@
                 }
               }
             }
+          },
+          "403": {
+            "$ref": "#/components/responses/QuotaExceeded"
           }
         }
       },
       "delete": {
         "operationId": "deleteDashboard",
+        "x-epilot-permissions": [
+          {
+            "action": "dashboard:delete"
+          }
+        ],
         "summary": "deleteDashboard",
         "description": "Delete a dashboard by ID",
         "tags": [
@@ -332,6 +427,11 @@
     "/v1/dashboard/insights": {
       "get": {
         "operationId": "listInsights",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listInsights",
         "description": "List insights (saved charts) available to the user",
         "tags": [
@@ -417,6 +517,11 @@
       },
       "post": {
         "operationId": "createInsight",
+        "x-epilot-permissions": [
+          {
+            "action": "dashboard:insight:create"
+          }
+        ],
         "summary": "createInsight",
         "description": "Create a new insight (saved chart). The caller becomes the owner.",
         "tags": [
@@ -449,6 +554,11 @@
     "/v1/dashboard/insights/tags": {
       "get": {
         "operationId": "listInsightTags",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listInsightTags",
         "description": "List the distinct tags used by insights in the organization (for filter facets)",
         "tags": [
@@ -489,6 +599,18 @@
       ],
       "get": {
         "operationId": "getInsight",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "access": "owner"
+              },
+              {
+                "access": "org"
+              }
+            ]
+          }
+        ],
         "summary": "getInsight",
         "description": "Get insight by ID",
         "tags": [
@@ -509,6 +631,11 @@
       },
       "put": {
         "operationId": "putInsight",
+        "x-epilot-permissions": [
+          {
+            "action": "dashboard:insight:edit"
+          }
+        ],
         "summary": "putInsight",
         "description": "Replace an insight's content by ID. Sharing is managed via patchInsight.",
         "tags": [
@@ -539,6 +666,11 @@
       },
       "patch": {
         "operationId": "patchInsight",
+        "x-epilot-permissions": [
+          {
+            "action": "dashboard:insight:edit"
+          }
+        ],
         "summary": "patchInsight",
         "description": "Partially update an insight by ID. Update content (name/description/visualisation/tags) and/or\nmanage sharing (owners, shared_with, org_access) — only owners may change sharing.\n`owners` and `shared_with` replace the whole array (send the complete list); omit them to leave\nsharing unchanged, or send `shared_with: []` to revoke all per-user grants.\n",
         "tags": [
@@ -569,6 +701,11 @@
       },
       "delete": {
         "operationId": "deleteInsight",
+        "x-epilot-permissions": [
+          {
+            "action": "dashboard:insight:delete"
+          }
+        ],
         "summary": "deleteInsight",
         "description": "Delete an insight by ID. Only owners may delete.",
         "tags": [
@@ -591,6 +728,11 @@
     "/v1/dashboard/visualisations": {
       "get": {
         "operationId": "listAvailableVisualisations",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listAvailableVisualisations",
         "description": "Returns list of available Visualisations to configure new dashboard tiles",
         "tags": [
@@ -635,6 +777,11 @@
     "/v1/dashboard/examples": {
       "get": {
         "operationId": "listAvailableExamples",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listAvailableExamples",
         "description": "Returns list of available exampless for visualisations to configure new dashboard tiles",
         "tags": [
@@ -664,7 +811,118 @@
     }
   },
   "components": {
+    "responses": {
+      "QuotaExceeded": {
+        "description": "A pricing-tier or guardrail limit would be exceeded",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/QuotaError"
+            }
+          }
+        }
+      }
+    },
     "schemas": {
+      "DashboardQuota": {
+        "type": "object",
+        "properties": {
+          "dashboards": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "description": "Maximum analytics dashboards for the org; `null` when unlimited.",
+                "type": "integer",
+                "nullable": true,
+                "example": 10
+              },
+              "current": {
+                "description": "Analytics dashboards (`version >= 2`) currently in the org, org-wide rather than\nscoped to the caller. `null` when no limit applies or the count is unavailable.\n",
+                "type": "integer",
+                "nullable": true,
+                "example": 3
+              }
+            },
+            "required": [
+              "limit",
+              "current"
+            ]
+          },
+          "tiles_per_dashboard": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "integer",
+                "example": 20
+              }
+            },
+            "required": [
+              "limit"
+            ]
+          },
+          "tier": {
+            "type": "string",
+            "nullable": true,
+            "example": "Professional"
+          }
+        },
+        "required": [
+          "dashboards",
+          "tiles_per_dashboard"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "example": 403
+          },
+          "error": {
+            "type": "string",
+            "example": "Dashboard limit reached for this plan"
+          }
+        },
+        "required": [
+          "status",
+          "error"
+        ]
+      },
+      "QuotaError": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "description": "Machine-readable reason, distinguishing a quota refusal from a permission one.",
+                "type": "string",
+                "enum": [
+                  "DASHBOARD_LIMIT_EXCEEDED",
+                  "TILE_LIMIT_EXCEEDED"
+                ]
+              },
+              "limit": {
+                "type": "integer",
+                "example": 10
+              },
+              "current": {
+                "type": "integer",
+                "example": 10
+              },
+              "tier": {
+                "type": "string",
+                "example": "Professional"
+              }
+            },
+            "required": [
+              "code"
+            ]
+          }
+        ]
+      },
       "DashboardID": {
         "description": "Unique identifier for dashboard",
         "type": "string",
@@ -700,11 +958,45 @@
                   }
                 ]
               },
+              "filters": {
+                "description": "Global filter definitions shown above the tiles. Optional, and stored and returned\nexactly as sent: omitted on create, nothing is stored and the field is absent on\nread, while `[]` is stored as an explicit \"no filters\". On PUT and PATCH, omit it to\nkeep the stored list or send an array to replace it whole.\n",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DashboardFilter"
+                },
+                "example": [
+                  {
+                    "id": "time_range",
+                    "kind": "time_range",
+                    "label": "Zeitraum",
+                    "default_value": {
+                      "preset": "last_30_days"
+                    }
+                  },
+                  {
+                    "id": "6f1c2d3e-4b5a-4c6d-8e7f-9a0b1c2d3e4f",
+                    "kind": "dimension",
+                    "label": "Status",
+                    "field": "current_opportunities.status",
+                    "field_type": "string",
+                    "operator": "in",
+                    "default_value": [
+                      "won"
+                    ]
+                  }
+                ]
+              },
               "favorited": {
                 "description": "Whether the requesting user has favorited this dashboard.",
                 "type": "boolean",
                 "readOnly": true,
                 "example": false
+              },
+              "version": {
+                "description": "Schema version of the dashboard. `1` is a dashboard authored in the classic\ndashboard UI, `2` in the analytics surface. Omit on create to default to `1`.\nMay only move forward: a PUT carrying a higher version upgrades the dashboard\n(this is how a legacy dashboard is converted), while a lower or absent value\nleaves the stored version untouched. Ignored on PATCH.\n",
+                "type": "integer",
+                "minimum": 1,
+                "example": 2
               }
             },
             "required": [
@@ -860,6 +1152,13 @@
                 "items": {
                   "$ref": "#/components/schemas/DashboardTile"
                 }
+              },
+              "filters": {
+                "description": "Replaces the dashboard's global filter definitions whole (`[]` clears them). Omit to\nleave them unchanged.\n",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DashboardFilter"
+                }
               }
             }
           }
@@ -999,8 +1298,119 @@
           },
           "visualisation_config": {
             "$ref": "#/components/schemas/VisualisationConfig"
+          },
+          "filter_settings": {
+            "$ref": "#/components/schemas/DashboardTileFilterSettings"
           }
         }
+      },
+      "DashboardFilter": {
+        "description": "Definition of a global dashboard filter: a control shown above the tiles that narrows the\ntiles it applies to. Only the definition and its default are stored — the values a viewer\npicks while looking at the dashboard are client-local and never stored here. Stored and\nreturned exactly as sent, including keys not listed below.\n",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "Identifier of the filter, unique within the dashboard. Tiles reference it as the key of\n`filter_settings.bindings`.\n",
+            "type": "string",
+            "example": "time_range"
+          },
+          "kind": {
+            "description": "`time_range` narrows a date column to a range; `dimension` narrows a column to the\nselected values.\n",
+            "type": "string",
+            "enum": [
+              "time_range",
+              "dimension"
+            ],
+            "example": "dimension"
+          },
+          "label": {
+            "description": "Display label of the filter control",
+            "type": "string",
+            "example": "Status"
+          },
+          "field": {
+            "description": "Column the filter applies to, as `<dataset>.<column>`",
+            "type": "string",
+            "example": "current_opportunities.status"
+          },
+          "field_type": {
+            "description": "Data type of `field`, e.g. `string`, `number` or `date`",
+            "type": "string",
+            "example": "string"
+          },
+          "operator": {
+            "description": "Comparison the selected value(s) are applied with, e.g. `in`",
+            "type": "string",
+            "example": "in"
+          },
+          "default_value": {
+            "description": "Applied until a viewer picks a value; `null` or absent means no default. The shape\ndepends on `kind` and `operator`, e.g. `{ \"preset\": \"last_30_days\" }` for a time range\nor a list of values for `in`.\n",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "array",
+                "items": {}
+              },
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "enum": [
+                  null
+                ]
+              }
+            ],
+            "example": [
+              "won"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "kind"
+        ],
+        "additionalProperties": true
+      },
+      "DashboardTileFilterSettings": {
+        "description": "How a tile takes part in its dashboard's global filters (`Dashboard.filters`). Stored and\nreturned exactly as sent.\n",
+        "type": "object",
+        "properties": {
+          "bindings": {
+            "description": "Per-filter settings, keyed by `DashboardFilter.id`. `field` is the `<dataset>.<column>`\nof this tile the filter applies to; `ignore: true` exempts the tile from the filter.\n",
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "example": "current_opportunities._created_at"
+                },
+                "ignore": {
+                  "type": "boolean",
+                  "example": true
+                }
+              },
+              "additionalProperties": true
+            },
+            "example": {
+              "time_range": {
+                "field": "current_opportunities._created_at"
+              },
+              "6f1c2d3e-4b5a-4c6d-8e7f-9a0b1c2d3e4f": {
+                "ignore": true
+              }
+            }
+          }
+        },
+        "additionalProperties": true
       },
       "VisualisationConfig": {
         "anyOf": [
@@ -1096,7 +1506,8 @@
           "entity_list",
           "markdown",
           "news_feed",
-          "workflow"
+          "workflow",
+          "notes"
         ]
       },
       "Visualisation": {

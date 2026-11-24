@@ -217,7 +217,7 @@
       "post": {
         "operationId": "setupCampaign",
         "summary": "setupCampaign",
-        "description": "Creates a `campaign` entity together with its related entities and configurations in a single call.\nUsed by the campaign wizard UI, but not restricted to it.\n\nThe campaign is created as a `draft`. Its optional `start_date` and `end_date` take effect when it is\nlaunched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,\n`CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and\nnothing is created.\n\nA campaign has exactly one audience: `campaign.target_ids` must contain exactly one target ID.\nA request with no or more than one entry fails request validation with 400 (the error points at\n`/requestBody/campaign/target_ids`), and nothing is created.\nRequest validation errors (400) are returned before anything is created.\n\nWith `channels.portal_widget`, the portal block must exist: otherwise the request fails with 400\n`PORTAL_BLOCK_NOT_FOUND` before anything is created. Setup points the block at the new campaign; if a\nlater step fails, the block is pointed back at the campaign it pointed at before.\n\nA new product recommendation can carry a rule table (`rules`). It is validated before anything is created.\n",
+        "description": "Creates a `campaign` entity together with its related entities and configurations in a single call.\nUsed by the campaign wizard UI, but not restricted to it.\n\nThe campaign is created as a `draft`. Its optional `start_date` and `end_date` take effect when it is\nlaunched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,\n`CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and\nnothing is created.\n\nA campaign has exactly one audience: `campaign.target_ids` must contain exactly one target ID.\nA request with no or more than one entry fails request validation with 400 (the error points at\n`/requestBody/campaign/target_ids`), and nothing is created.\nRequest validation errors (400) are returned before anything is created.\n\nWith `channels.portal_widget`, the portal block must exist: otherwise the request fails with 400\n`PORTAL_BLOCK_NOT_FOUND` before anything is created. Setup points the block at the new campaign; if a\nlater step fails, the block is pointed back at the campaign it pointed at before.\n\nA new product recommendation can carry a rule table (`rules`). It is validated before anything is created.\nIts offer products and prices must exist and not be archived (otherwise 400 `PRODUCT_OR_PRICE_UNAVAILABLE`);\nits sources (the current product and price) may be archived or missing.\n",
         "tags": [
           "Campaign"
         ],
@@ -2285,14 +2285,14 @@
           },
           "product_ids": {
             "type": "array",
-            "description": "Products that do not exist or are archived",
+            "description": "Offer products that do not exist or are archived. Sources (the current product) may be archived or\nmissing and are not listed.\n",
             "items": {
               "type": "string"
             }
           },
           "price_ids": {
             "type": "array",
-            "description": "Prices that do not exist or are archived",
+            "description": "Offer prices that do not exist or are archived. Sources (the current price) may be archived or\nmissing and are not listed.\n",
             "items": {
               "type": "string"
             }
