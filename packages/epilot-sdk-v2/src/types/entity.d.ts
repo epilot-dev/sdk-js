@@ -857,7 +857,8 @@ export declare namespace Components {
             journey_id: string;
         }
         export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Dynamic data table with configurable columns. Data is stored as an array of objects where each object represents a row. */ TableAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Portal access configuration */ PortalAccessAttribute | /**
-         * Portal role of a portal user. The value is a portal role slug (e.g. `default_end_customer_portal_role`).
+         * Portal roles of a portal user. The value is a list of portal role slugs (e.g. `["b2b_admin", "b2b_billing"]`);
+         * a single slug string is also accepted. The user's permissions are the union of all their roles.
          * An empty value means the portal's default role is used.
          *
          */
@@ -878,7 +879,8 @@ export declare namespace Components {
              */
             schema?: string;
         } & (/* a readonly computed ID for the attribute including schema slug and the attribute ID */ /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Dynamic data table with configurable columns. Data is stored as an array of objects where each object represents a row. */ TableAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Portal access configuration */ PortalAccessAttribute | /**
-         * Portal role of a portal user. The value is a portal role slug (e.g. `default_end_customer_portal_role`).
+         * Portal roles of a portal user. The value is a list of portal role slugs (e.g. `["b2b_admin", "b2b_billing"]`);
+         * a single slug string is also accepted. The user's permissions are the union of all their roles.
          * An empty value means the portal's default role is used.
          *
          */
@@ -3507,6 +3509,12 @@ export declare namespace Components {
                  * entity_address_maps
                  */
                 pricing_tier_setting?: string;
+                /**
+                 * The `field` of the table column this column goes right after, e.g. the attribute it describes. Only meaningful on the `EntityTable:Column` hook. Without it the column goes to the end of the table (or, with `order`, to the start). It only shapes the default column layout: a saved table view keeps its own column order and adds a column it doesn't know yet hidden, like any new column, for the user to switch on. Ignored when no column has that field.
+                 * example:
+                 * status
+                 */
+                insert_after?: string;
             }[];
             /**
              * This capability should only be active when the feature flag is enabled
@@ -3696,6 +3704,12 @@ export declare namespace Components {
                  * entity_address_maps
                  */
                 pricing_tier_setting?: string;
+                /**
+                 * The `field` of the table column this column goes right after, e.g. the attribute it describes. Only meaningful on the `EntityTable:Column` hook. Without it the column goes to the end of the table (or, with `order`, to the start). It only shapes the default column layout: a saved table view keeps its own column order and adds a column it doesn't know yet hidden, like any new column, for the user to switch on. Ignored when no column has that field.
+                 * example:
+                 * status
+                 */
+                insert_after?: string;
             }[];
             /**
              * This capability should only be active when the feature flag is enabled
@@ -3997,6 +4011,9 @@ export declare namespace Components {
              * The offset from which to start the search results.
              * Only one of `from` or `search_after` should be used.
              *
+             * `from + size` is limited to 25000. A larger `from` is clamped to the last available window instead of
+             * returning an error. Use `search_after` to paginate deeper.
+             *
              */
             from?: number;
             /**
@@ -4063,9 +4080,14 @@ export declare namespace Components {
             highlight?: any;
             /**
              * A TTL (in seconds) that specifies how long the context should be maintained.
-             * Defaults to 30 seconds; configurable up to 60 seconds to prevent abuse.
+             * Configurable up to 60 seconds to prevent abuse.
              * A value of 0 can be provided the close the context after the query.
              * Defaults to none.
+             *
+             * A stable query reads from a snapshot of the index taken at the first request: paginating it with
+             * `stable_query_id` and `search_after` returns every match exactly once, and writes made after the
+             * first request are not visible. Passing `stable_for` again extends the context. An expired context
+             * fails with `400`.
              *
              */
             stable_for?: number;
@@ -5530,6 +5552,9 @@ export declare namespace Components {
              * The offset from which to start the search results.
              * Only one of `from` or `search_after` should be used.
              *
+             * `from + size` is limited to 25000. A larger `from` is clamped to the last available window instead of
+             * returning an error. Use `search_after` to paginate deeper.
+             *
              */
             from?: number;
             /**
@@ -5595,9 +5620,14 @@ export declare namespace Components {
             include_scores?: boolean;
             /**
              * A TTL (in seconds) that specifies how long the context should be maintained.
-             * Defaults to 30 seconds; configurable up to 60 seconds to prevent abuse.
+             * Configurable up to 60 seconds to prevent abuse.
              * A value of 0 can be provided the close the context after the query.
              * Defaults to none.
+             *
+             * A stable query reads from a snapshot of the index taken at the first request: paginating it with
+             * `stable_query_id` and `search_after` returns every match exactly once, and writes made after the
+             * first request are not visible. Passing `stable_for` again extends the context. An expired context
+             * fails with `400`.
              *
              */
             stable_for?: number;
@@ -5636,6 +5666,9 @@ export declare namespace Components {
             /**
              * The offset from which to start the search results.
              * Only one of `from` or `search_after` should be used.
+             *
+             * `from + size` is limited to 25000. A larger `from` is clamped to the last available window instead of
+             * returning an error. Use `search_after` to paginate deeper.
              *
              */
             from?: number;
@@ -5699,9 +5732,14 @@ export declare namespace Components {
             highlight?: any;
             /**
              * A TTL (in seconds) that specifies how long the context should be maintained.
-             * Defaults to 30 seconds; configurable up to 60 seconds to prevent abuse.
+             * Configurable up to 60 seconds to prevent abuse.
              * A value of 0 can be provided the close the context after the query.
              * Defaults to none.
+             *
+             * A stable query reads from a snapshot of the index taken at the first request: paginating it with
+             * `stable_query_id` and `search_after` returns every match exactly once, and writes made after the
+             * first request are not visible. Passing `stable_for` again extends the context. An expired context
+             * fails with `400`.
              *
              */
             stable_for?: number;
@@ -10432,7 +10470,8 @@ export declare namespace Components {
             type: "portal_access";
         }
         /**
-         * Portal role of a portal user. The value is a portal role slug (e.g. `default_end_customer_portal_role`).
+         * Portal roles of a portal user. The value is a list of portal role slugs (e.g. `["b2b_admin", "b2b_billing"]`);
+         * a single slug string is also accepted. The user's permissions are the union of all their roles.
          * An empty value means the portal's default role is used.
          *
          */
@@ -16666,7 +16705,7 @@ export declare namespace Paths {
             /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00Z
+             * 2023-01-01T00:00:00.000Z
              */
             export type CreatedAfter = string; // date-time
             /**
@@ -16692,7 +16731,7 @@ export declare namespace Paths {
             created_after?: /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00Z
+             * 2023-01-01T00:00:00.000Z
              */
             Parameters.CreatedAfter /* date-time */;
             sort_pending_first?: /* When true, sorts PENDING status jobs to the top of the results. */ Parameters.SortPendingFirst;
@@ -18874,6 +18913,20 @@ export interface OperationMethods {
    * 
    * Passing comma-separated `x-epilot-org-id` is supported for cross-org entity search.
    * 
+   * ## Consistency
+   * 
+   * Reads from the search index, not from the primary store.
+   * 
+   * - Entities written with default settings are searchable when the write call returns.
+   * - Entities written with `?async=true` become searchable eventually, usually within seconds.
+   * - Matching and sorting on data of related entities can lag behind, as related entities are re-indexed asynchronously.
+   * - Only attributes defined in the entity schema are indexed. Other properties are stored but cannot be searched, filtered or sorted.
+   * - The query, sort and `hits` are evaluated against the index; the entities in `results` are loaded from the primary store, so they can be newer than the state that matched.
+   * - `hits` is the exact number of matches.
+   * 
+   * To read an entity you just wrote, use `getEntity` with its id.
+   * See [Search Indexing Guarantees](https://docs.epilot.io/docs/entities/indexing-guarantees).
+   * 
    * ## Relations
    * 
    * When `hydrate=true`, relation attributes are replaced in-place with nested entity values.
@@ -18948,6 +19001,20 @@ export interface OperationMethods {
    * List entities that meet the specified conditions.
    * 
    * Supports the same options as entity search but utilizes filtering using a subset of [Elastic Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html) and does not perform scoring.
+   * 
+   * ## Consistency
+   * 
+   * Reads from the search index, not from the primary store.
+   * 
+   * - Entities written with default settings are searchable when the write call returns.
+   * - Entities written with `?async=true` become searchable eventually, usually within seconds.
+   * - Matching and sorting on data of related entities can lag behind, as related entities are re-indexed asynchronously.
+   * - Only attributes defined in the entity schema are indexed. Other properties are stored but cannot be searched, filtered or sorted.
+   * - The query, sort and `hits` are evaluated against the index; the entities in `results` are loaded from the primary store, so they can be newer than the state that matched.
+   * - `hits` is the exact number of matches.
+   * 
+   * To read an entity you just wrote, use `getEntity` with its id.
+   * See [Search Indexing Guarantees](https://docs.epilot.io/docs/entities/indexing-guarantees).
    * 
    */
   'listEntities'(
@@ -19034,6 +19101,12 @@ export interface OperationMethods {
    * - If no entities are matched, a new entity is created.
    * - If exactly one entity is matched, a `PATCH`-style update is applied to the existing entity.
    * 
+   * ## Consistency
+   * 
+   * Existing entities are matched by `unique_key` through the search index, so uniqueness is not enforced transactionally.
+   * Concurrent upserts with the same key, or an upsert right after an `?async=true` write of the same key, can create duplicates.
+   * Run upserts for the same key sequentially and without `?async=true` to avoid this.
+   * 
    * ## Activity
    * 
    * If no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityCreated` or `EntityUpdated`
@@ -19050,6 +19123,8 @@ export interface OperationMethods {
    * Gets Entity by id.
    * 
    * Supports `hydrate` and `fields` parameters to control the shape of the response.
+   * 
+   * Reads from the primary store: always returns the latest stored state, independent of search indexing.
    * 
    */
   'getEntityV2'(
@@ -19077,6 +19152,9 @@ export interface OperationMethods {
    * 
    * Triggers a reindex for the Entity for search.
    * 
+   * Synchronously re-indexes the entity from its latest stored state and queues a re-index of all entities related to it.
+   * Use it to repair an entity that is out of date in `searchEntities` / `listEntities`.
+   * 
    */
   'reindexEntity'(
     parameters?: Parameters<Paths.ReindexEntity.PathParameters> | null,
@@ -19087,6 +19165,8 @@ export interface OperationMethods {
    * getEntity - getEntity
    * 
    * Gets Entity and relations by id.
+   * 
+   * Reads from the primary store: always returns the latest stored state, independent of search indexing.
    * 
    * ## Relations
    * 
@@ -19434,6 +19514,8 @@ export interface OperationMethods {
    * You can control whether to return the full entity or just the relation item with the `?hydrate` query param.
    * 
    * Reverse relations i.e. entities referring to this entity are included with the `?include_reverse` query param.
+   * 
+   * Reads from the search index: relations written with `?async=true` appear eventually.
    * 
    */
   'getRelationsV2'(
@@ -20193,6 +20275,20 @@ export interface PathsDictionary {
      * 
      * Passing comma-separated `x-epilot-org-id` is supported for cross-org entity search.
      * 
+     * ## Consistency
+     * 
+     * Reads from the search index, not from the primary store.
+     * 
+     * - Entities written with default settings are searchable when the write call returns.
+     * - Entities written with `?async=true` become searchable eventually, usually within seconds.
+     * - Matching and sorting on data of related entities can lag behind, as related entities are re-indexed asynchronously.
+     * - Only attributes defined in the entity schema are indexed. Other properties are stored but cannot be searched, filtered or sorted.
+     * - The query, sort and `hits` are evaluated against the index; the entities in `results` are loaded from the primary store, so they can be newer than the state that matched.
+     * - `hits` is the exact number of matches.
+     * 
+     * To read an entity you just wrote, use `getEntity` with its id.
+     * See [Search Indexing Guarantees](https://docs.epilot.io/docs/entities/indexing-guarantees).
+     * 
      * ## Relations
      * 
      * When `hydrate=true`, relation attributes are replaced in-place with nested entity values.
@@ -20269,6 +20365,20 @@ export interface PathsDictionary {
      * List entities that meet the specified conditions.
      * 
      * Supports the same options as entity search but utilizes filtering using a subset of [Elastic Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html) and does not perform scoring.
+     * 
+     * ## Consistency
+     * 
+     * Reads from the search index, not from the primary store.
+     * 
+     * - Entities written with default settings are searchable when the write call returns.
+     * - Entities written with `?async=true` become searchable eventually, usually within seconds.
+     * - Matching and sorting on data of related entities can lag behind, as related entities are re-indexed asynchronously.
+     * - Only attributes defined in the entity schema are indexed. Other properties are stored but cannot be searched, filtered or sorted.
+     * - The query, sort and `hits` are evaluated against the index; the entities in `results` are loaded from the primary store, so they can be newer than the state that matched.
+     * - `hits` is the exact number of matches.
+     * 
+     * To read an entity you just wrote, use `getEntity` with its id.
+     * See [Search Indexing Guarantees](https://docs.epilot.io/docs/entities/indexing-guarantees).
      * 
      */
     'post'(
@@ -20365,6 +20475,12 @@ export interface PathsDictionary {
      * - If no entities are matched, a new entity is created.
      * - If exactly one entity is matched, a `PATCH`-style update is applied to the existing entity.
      * 
+     * ## Consistency
+     * 
+     * Existing entities are matched by `unique_key` through the search index, so uniqueness is not enforced transactionally.
+     * Concurrent upserts with the same key, or an upsert right after an `?async=true` write of the same key, can create duplicates.
+     * Run upserts for the same key sequentially and without `?async=true` to avoid this.
+     * 
      * ## Activity
      * 
      * If no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityCreated` or `EntityUpdated`
@@ -20383,6 +20499,8 @@ export interface PathsDictionary {
      * Gets Entity by id.
      * 
      * Supports `hydrate` and `fields` parameters to control the shape of the response.
+     * 
+     * Reads from the primary store: always returns the latest stored state, independent of search indexing.
      * 
      */
     'get'(
@@ -20414,6 +20532,9 @@ export interface PathsDictionary {
      * 
      * Triggers a reindex for the Entity for search.
      * 
+     * Synchronously re-indexes the entity from its latest stored state and queues a re-index of all entities related to it.
+     * Use it to repair an entity that is out of date in `searchEntities` / `listEntities`.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.ReindexEntity.PathParameters> | null,
@@ -20426,6 +20547,8 @@ export interface PathsDictionary {
      * getEntity - getEntity
      * 
      * Gets Entity and relations by id.
+     * 
+     * Reads from the primary store: always returns the latest stored state, independent of search indexing.
      * 
      * ## Relations
      * 
@@ -20799,6 +20922,8 @@ export interface PathsDictionary {
      * You can control whether to return the full entity or just the relation item with the `?hydrate` query param.
      * 
      * Reverse relations i.e. entities referring to this entity are included with the `?include_reverse` query param.
+     * 
+     * Reads from the search index: relations written with `?async=true` appear eventually.
      * 
      */
     'get'(

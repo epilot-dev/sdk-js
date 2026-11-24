@@ -27,6 +27,7 @@ const { data } = await dashboardClient.listDashboards(...)
 **Dashboards**
 - [`listDashboards`](#listdashboards)
 - [`createDashboard`](#createdashboard)
+- [`getDashboardQuota`](#getdashboardquota)
 - [`listFavoriteDashboardIds`](#listfavoritedashboardids)
 - [`favoriteDashboard`](#favoritedashboard)
 - [`unfavoriteDashboard`](#unfavoritedashboard)
@@ -51,6 +52,9 @@ const { data } = await dashboardClient.listDashboards(...)
 - [`listAvailableExamples`](#listavailableexamples)
 
 **Schemas**
+- [`DashboardQuota`](#dashboardquota)
+- [`Error`](#error)
+- [`QuotaError`](#quotaerror)
 - [`DashboardID`](#dashboardid)
 - [`Dashboard`](#dashboard)
 - [`DashboardTileID`](#dashboardtileid)
@@ -66,6 +70,8 @@ const { data } = await dashboardClient.listDashboards(...)
 - [`Tags`](#tags)
 - [`Pagination`](#pagination)
 - [`DashboardTile`](#dashboardtile)
+- [`DashboardFilter`](#dashboardfilter)
+- [`DashboardTileFilterSettings`](#dashboardtilefiltersettings)
 - [`VisualisationConfig`](#visualisationconfig)
 - [`timechartVisualisationConfig`](#timechartvisualisationconfig)
 - [`ExampleID`](#exampleid)
@@ -129,7 +135,27 @@ const { data } = await client.listDashboards({
           "insight_id": "8d2e1c7a-3b4f-4a2e-9c1d-2f3a4b5c6d7e"
         }
       ],
-      "favorited": false
+      "filters": [
+        {
+          "id": "time_range",
+          "kind": "time_range",
+          "label": "Zeitraum",
+          "default_value": {
+            "preset": "last_30_days"
+          }
+        },
+        {
+          "id": "6f1c2d3e-4b5a-4c6d-8e7f-9a0b1c2d3e4f",
+          "kind": "dimension",
+          "label": "Status",
+          "field": "current_opportunities.status",
+          "field_type": "string",
+          "operator": "in",
+          "default_value": ["won"]
+        }
+      ],
+      "favorited": false,
+      "version": 2
     }
   ],
   "pagination": {
@@ -147,7 +173,9 @@ const { data } = await client.listDashboards({
 
 ### `createDashboard`
 
-Create new dashboard
+Create new dashboard.
+Tiles that only reference an insight (`insight_id`) need no further permission. A tile with an
+inline `visualisation_id`/`visualisation_config` (with or without `insight_id`) aut
 
 `POST /v1/dashboard/dashboards`
 
@@ -177,7 +205,27 @@ const { data } = await client.createDashboard(
         insight_id: '8d2e1c7a-3b4f-4a2e-9c1d-2f3a4b5c6d7e'
       }
     ],
-    favorited: false
+    filters: [
+      {
+        id: 'time_range',
+        kind: 'time_range',
+        label: 'Zeitraum',
+        default_value: {
+          preset: 'last_30_days'
+        }
+      },
+      {
+        id: '6f1c2d3e-4b5a-4c6d-8e7f-9a0b1c2d3e4f',
+        kind: 'dimension',
+        label: 'Status',
+        field: 'current_opportunities.status',
+        field_type: 'string',
+        operator: 'in',
+        default_value: ['won']
+      }
+    ],
+    favorited: false,
+    version: 2
   },
 )
 ```
@@ -209,7 +257,58 @@ const { data } = await client.createDashboard(
       "insight_id": "8d2e1c7a-3b4f-4a2e-9c1d-2f3a4b5c6d7e"
     }
   ],
-  "favorited": false
+  "filters": [
+    {
+      "id": "time_range",
+      "kind": "time_range",
+      "label": "Zeitraum",
+      "default_value": {
+        "preset": "last_30_days"
+      }
+    },
+    {
+      "id": "6f1c2d3e-4b5a-4c6d-8e7f-9a0b1c2d3e4f",
+      "kind": "dimension",
+      "label": "Status",
+      "field": "current_opportunities.status",
+      "field_type": "string",
+      "operator": "in",
+      "default_value": ["won"]
+    }
+  ],
+  "favorited": false,
+  "version": 2
+}
+```
+
+</details>
+
+---
+
+### `getDashboardQuota`
+
+Current dashboard quota and usage for the caller's organization, so a client can show the
+limit before a write is attempted rather than discovering it on a 403.
+
+`GET /v1/dashboard/dashboards/quota`
+
+```ts
+const { data } = await client.getDashboardQuota()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "dashboards": {
+    "limit": 10,
+    "current": 3
+  },
+  "tiles_per_dashboard": {
+    "limit": 20
+  },
+  "tier": "Professional"
 }
 ```
 
@@ -314,7 +413,27 @@ const { data } = await client.getDashboard({
       "insight_id": "8d2e1c7a-3b4f-4a2e-9c1d-2f3a4b5c6d7e"
     }
   ],
-  "favorited": false
+  "filters": [
+    {
+      "id": "time_range",
+      "kind": "time_range",
+      "label": "Zeitraum",
+      "default_value": {
+        "preset": "last_30_days"
+      }
+    },
+    {
+      "id": "6f1c2d3e-4b5a-4c6d-8e7f-9a0b1c2d3e4f",
+      "kind": "dimension",
+      "label": "Status",
+      "field": "current_opportunities.status",
+      "field_type": "string",
+      "operator": "in",
+      "default_value": ["won"]
+    }
+  ],
+  "favorited": false,
+  "version": 2
 }
 ```
 
@@ -324,7 +443,9 @@ const { data } = await client.getDashboard({
 
 ### `putDashboard`
 
-Update a dashboard by ID
+Update a dashboard by ID.
+Tiles that only reference an insight (`insight_id`) need no further permission, and unchanged
+tiles with an inline `visualisation_id`/`visualisation_config` are kept as they 
 
 `PUT /v1/dashboard/dashboards/{id}`
 
@@ -356,7 +477,27 @@ const { data } = await client.putDashboard(
         insight_id: '8d2e1c7a-3b4f-4a2e-9c1d-2f3a4b5c6d7e'
       }
     ],
-    favorited: false
+    filters: [
+      {
+        id: 'time_range',
+        kind: 'time_range',
+        label: 'Zeitraum',
+        default_value: {
+          preset: 'last_30_days'
+        }
+      },
+      {
+        id: '6f1c2d3e-4b5a-4c6d-8e7f-9a0b1c2d3e4f',
+        kind: 'dimension',
+        label: 'Status',
+        field: 'current_opportunities.status',
+        field_type: 'string',
+        operator: 'in',
+        default_value: ['won']
+      }
+    ],
+    favorited: false,
+    version: 2
   },
 )
 ```
@@ -388,7 +529,27 @@ const { data } = await client.putDashboard(
       "insight_id": "8d2e1c7a-3b4f-4a2e-9c1d-2f3a4b5c6d7e"
     }
   ],
-  "favorited": false
+  "filters": [
+    {
+      "id": "time_range",
+      "kind": "time_range",
+      "label": "Zeitraum",
+      "default_value": {
+        "preset": "last_30_days"
+      }
+    },
+    {
+      "id": "6f1c2d3e-4b5a-4c6d-8e7f-9a0b1c2d3e4f",
+      "kind": "dimension",
+      "label": "Status",
+      "field": "current_opportunities.status",
+      "field_type": "string",
+      "operator": "in",
+      "default_value": ["won"]
+    }
+  ],
+  "favorited": false,
+  "version": 2
 }
 ```
 
@@ -398,9 +559,9 @@ const { data } = await client.putDashboard(
 
 ### `patchDashboard`
 
-Partially update a dashboard by ID. Update content (title/tiles) and/or manage sharing
+Partially update a dashboard by ID. Update content (title/tiles/filters) and/or manage sharing
 (owners, shared_with, org_access) — only owners may change sharing.
-`owners` and `shared_with` replace the whole 
+`owners` and `shared_with` replace th
 
 `PATCH /v1/dashboard/dashboards/{id}`
 
@@ -444,7 +605,28 @@ const { data } = await client.patchDashboard(
           options: {
             type: 'bar'
           }
+        },
+        filter_settings: {
+          bindings: {
+            time_range: {
+              field: 'current_opportunities._created_at'
+            },
+            '6f1c2d3e-4b5a-4c6d-8e7f-9a0b1c2d3e4f': {
+              ignore: true
+            }
+          }
         }
+      }
+    ],
+    filters: [
+      {
+        id: 'time_range',
+        kind: 'dimension',
+        label: 'Status',
+        field: 'current_opportunities.status',
+        field_type: 'string',
+        operator: 'in',
+        default_value: ['won']
       }
     ]
   },
@@ -478,7 +660,27 @@ const { data } = await client.patchDashboard(
       "insight_id": "8d2e1c7a-3b4f-4a2e-9c1d-2f3a4b5c6d7e"
     }
   ],
-  "favorited": false
+  "filters": [
+    {
+      "id": "time_range",
+      "kind": "time_range",
+      "label": "Zeitraum",
+      "default_value": {
+        "preset": "last_30_days"
+      }
+    },
+    {
+      "id": "6f1c2d3e-4b5a-4c6d-8e7f-9a0b1c2d3e4f",
+      "kind": "dimension",
+      "label": "Status",
+      "field": "current_opportunities.status",
+      "field_type": "string",
+      "operator": "in",
+      "default_value": ["won"]
+    }
+  ],
+  "favorited": false,
+  "version": 2
 }
 ```
 
@@ -525,7 +727,27 @@ const { data } = await client.deleteDashboard({
       "insight_id": "8d2e1c7a-3b4f-4a2e-9c1d-2f3a4b5c6d7e"
     }
   ],
-  "favorited": false
+  "filters": [
+    {
+      "id": "time_range",
+      "kind": "time_range",
+      "label": "Zeitraum",
+      "default_value": {
+        "preset": "last_30_days"
+      }
+    },
+    {
+      "id": "6f1c2d3e-4b5a-4c6d-8e7f-9a0b1c2d3e4f",
+      "kind": "dimension",
+      "label": "Status",
+      "field": "current_opportunities.status",
+      "field_type": "string",
+      "operator": "in",
+      "default_value": ["won"]
+    }
+  ],
+  "favorited": false,
+  "version": 2
 }
 ```
 
@@ -1145,6 +1367,43 @@ const { data } = await client.listAvailableExamples()
 
 ## Schemas
 
+### `DashboardQuota`
+
+```ts
+type DashboardQuota = {
+  dashboards: {
+    limit: number
+    current: number
+  }
+  tiles_per_dashboard: {
+    limit: number
+  }
+  tier?: string
+}
+```
+
+### `Error`
+
+```ts
+type Error = {
+  status: number
+  error: string
+}
+```
+
+### `QuotaError`
+
+```ts
+type QuotaError = {
+  status: number
+  error: string
+  code: "DASHBOARD_LIMIT_EXCEEDED" | "TILE_LIMIT_EXCEEDED"
+  limit?: number
+  current?: number
+  tier?: string
+}
+```
+
 ### `DashboardID`
 
 Unique identifier for dashboard
@@ -1180,13 +1439,26 @@ type Dashboard = {
     coordinates?: object
     title?: string
     insight_id?: string // uuid
-    visualisation_id?: "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow"
+    visualisation_id?: "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow" | "notes"
     visualisation_config?: {
       query?: { ... }
       options?: { ... }
     }
+    filter_settings?: {
+      bindings?: { ... }
+    }
+  }>
+  filters?: Array<{
+    id: string
+    kind: "time_range" | "dimension"
+    label?: string
+    field?: string
+    field_type?: string
+    operator?: string
+    default_value?: string | number | boolean | unknown[] | Record<string, unknown> | null
   }>
   favorited?: boolean
+  version?: number
 }
 ```
 
@@ -1289,11 +1561,23 @@ type DashboardPatch = {
     coordinates?: object
     title?: string
     insight_id?: string // uuid
-    visualisation_id?: "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow"
+    visualisation_id?: "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow" | "notes"
     visualisation_config?: {
       query?: { ... }
       options?: { ... }
     }
+    filter_settings?: {
+      bindings?: { ... }
+    }
+  }>
+  filters?: Array<{
+    id: string
+    kind: "time_range" | "dimension"
+    label?: string
+    field?: string
+    field_type?: string
+    operator?: string
+    default_value?: string | number | boolean | unknown[] | Record<string, unknown> | null
   }>
 }
 ```
@@ -1329,7 +1613,7 @@ type Insight = {
   id?: string // uuid
   name: string
   description?: string
-  visualisation_id: "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow"
+  visualisation_id: "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow" | "notes"
   visualisation_config?: {
     query?: {
       dataset?: { ... }
@@ -1357,7 +1641,7 @@ type InsightPatch = {
   org_access?: "view" | "edit" | null
   name?: string
   description?: string
-  visualisation_id?: "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow"
+  visualisation_id?: "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow" | "notes"
   visualisation_config?: {
     query?: {
       dataset?: { ... }
@@ -1405,7 +1689,7 @@ type DashboardTile = {
   coordinates?: object
   title?: string
   insight_id?: string // uuid
-  visualisation_id?: "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow"
+  visualisation_id?: "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow" | "notes"
   visualisation_config?: {
     query?: {
       dataset?: { ... }
@@ -1415,6 +1699,46 @@ type DashboardTile = {
     }
     options?: Record<string, unknown>
   }
+  filter_settings?: {
+    bindings?: Record<string, {
+      field?: { ... }
+      ignore?: { ... }
+    }>
+  }
+}
+```
+
+### `DashboardFilter`
+
+Definition of a global dashboard filter: a control shown above the tiles that narrows the
+tiles it applies to. Only the definition and its default are stored — the values a viewer
+picks while looking at the dashboard are client-local and never stored here. Stored and
+returned exactly as sent, includ
+
+```ts
+type DashboardFilter = {
+  id: string
+  kind: "time_range" | "dimension"
+  label?: string
+  field?: string
+  field_type?: string
+  operator?: string
+  default_value?: string | number | boolean | unknown[] | Record<string, unknown> | null
+}
+```
+
+### `DashboardTileFilterSettings`
+
+How a tile takes part in its dashboard's global filters (`Dashboard.filters`). Stored and
+returned exactly as sent.
+
+
+```ts
+type DashboardTileFilterSettings = {
+  bindings?: Record<string, {
+    field?: string
+    ignore?: boolean
+  }>
 }
 ```
 
@@ -1460,7 +1784,7 @@ type ExampleID = string // uuid
 type Example = {
   id?: string // uuid
   title?: string
-  visualisation?: "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow"
+  visualisation?: "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow" | "notes"
   query?: {
     dataset?: string
     measure?: string
@@ -1486,7 +1810,7 @@ type DatalakeQuery = {
 Unique identifier for a Visualisation
 
 ```ts
-type VisualisationId = "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow"
+type VisualisationId = "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow" | "notes"
 ```
 
 ### `Visualisation`
@@ -1495,7 +1819,7 @@ A Visualisation that can be used to configure tiles in dashboards
 
 ```ts
 type Visualisation = {
-  visualisation?: "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow"
+  visualisation?: "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow" | "notes"
   title?: string
   description?: string
   package_name?: string

@@ -5262,7 +5262,8 @@ const { data } = await client.createSchemaCapability(
         requiredPermission: { /* ... */ },
         default_visible: false,
         default_width: 'half_width',
-        pricing_tier_setting: 'entity_address_maps'
+        pricing_tier_setting: 'entity_address_maps',
+        insert_after: 'status'
       }
     ],
     feature_flag: 'FF_MY_FEATURE_FLAG',
@@ -5399,7 +5400,8 @@ const { data } = await client.createSchemaCapability(
       "requiredPermission": {},
       "default_visible": false,
       "default_width": "half_width",
-      "pricing_tier_setting": "entity_address_maps"
+      "pricing_tier_setting": "entity_address_maps",
+      "insert_after": "status"
     }
   ],
   "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -5551,7 +5553,8 @@ const { data } = await client.getSchemaCapability({
       "requiredPermission": {},
       "default_visible": false,
       "default_width": "half_width",
-      "pricing_tier_setting": "entity_address_maps"
+      "pricing_tier_setting": "entity_address_maps",
+      "insert_after": "status"
     }
   ],
   "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -5699,7 +5702,8 @@ const { data } = await client.putSchemaCapability(
         requiredPermission: { /* ... */ },
         default_visible: false,
         default_width: 'half_width',
-        pricing_tier_setting: 'entity_address_maps'
+        pricing_tier_setting: 'entity_address_maps',
+        insert_after: 'status'
       }
     ],
     feature_flag: 'FF_MY_FEATURE_FLAG',
@@ -5836,7 +5840,8 @@ const { data } = await client.putSchemaCapability(
       "requiredPermission": {},
       "default_visible": false,
       "default_width": "half_width",
-      "pricing_tier_setting": "entity_address_maps"
+      "pricing_tier_setting": "entity_address_maps",
+      "insert_after": "status"
     }
   ],
   "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -5988,7 +5993,8 @@ const { data } = await client.deleteSchemaCapability({
       "requiredPermission": {},
       "default_visible": false,
       "default_width": "half_width",
-      "pricing_tier_setting": "entity_address_maps"
+      "pricing_tier_setting": "entity_address_maps",
+      "insert_after": "status"
     }
   ],
   "feature_flag": "FF_MY_FEATURE_FLAG",

@@ -51,6 +51,9 @@ const { data } = await identityClient.listClients(...)
 **Launch**
 - [`launchClient`](#launchclient)
 
+**Sector Identifier**
+- [`getSectorIdentifier`](#getsectoridentifier)
+
 **Schemas**
 - [`Error`](#error)
 - [`PartnerClientId`](#partnerclientid)
@@ -927,6 +930,31 @@ const { data } = await client.launchClient({
   extra: 'example',
 })
 ```
+
+---
+
+### `getSectorIdentifier`
+
+The client's managed sector identifier document: a JSON array of its registered `redirect_uris`
+(OpenID Connect Registration §5). Public, like every sector identifier document.
+
+`GET /v1/identity/sector-identifier/{client_id}`
+
+```ts
+const { data } = await client.getSectorIdentifier({
+  client_id: 'example',
+  extra: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+["https://example.com/path"]
+```
+
+</details>
 
 ---
 

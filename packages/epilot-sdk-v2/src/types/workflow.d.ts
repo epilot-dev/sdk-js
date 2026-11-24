@@ -254,6 +254,39 @@ export declare namespace Components {
              */
             start_date?: string | null;
             start_date_config?: /* Relative start date of a task (AL-3678): `duration` `unit` after the most recent occurrence of the reference event. `THIS_TASK_LAST_COMPLETED` is the task's own previous completion (a loop's earlier pass); there is no wait while the reference event has not happened. Durations are positive whole numbers and are added as exact calendar time (no business days); `years` is not accepted. */ StartDateConfig;
+            on_hold_config?: /* What happens when a person puts the task on hold (AL-3320), snapshotted from the template at flow start: after `resume_after` the task resumes in progress on its own (absent: only by hand), `reason` is `disabled`, `optional` or `required` (absent is `disabled`), and a reason is typed (`text`, the default), picked from `reason_options` (`options`) or either (`options_and_text`). Not patchable. */ OnHoldConfig;
+            /**
+             * The task's last hold (AL-3320), written each time a person puts it on hold. It describes the task only while its status is `ON_HOLD`: a task that resumed, was reset or was put on hold again without an expiry or reason keeps or loses the record, and readers must ignore it whenever the task is not on hold. Server-written, not patchable.
+             */
+            hold?: {
+                /**
+                 * Names this hold; the expiry timer ends only the hold it names
+                 */
+                id: string;
+                set_at: string;
+                /**
+                 * Who put the task on hold, as an assignee id
+                 */
+                set_by?: string;
+                /**
+                 * When the hold expires and the task resumes on its own: the moment it was put on hold plus the config's `resume_after`
+                 */
+                until?: string;
+                reason_option_id?: string;
+                /**
+                 * The label of the picked option as it read when the task was put on hold
+                 */
+                reason?: string;
+                reason_text?: string;
+                /**
+                 * The scheduler booking that expires the hold
+                 */
+                schedule_id?: string;
+                /**
+                 * When the hold expired and the engine resumed the task
+                 */
+                expired_at?: string;
+            } | null;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
@@ -298,6 +331,16 @@ export declare namespace Components {
              */
             journey_gate_waived_at?: string | null; // date-time
             assigned_to?: /* The user ids or variable assignments */ Assignees;
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
             ecp_placeholder_assignees?: /* Server-managed, execution-only: for each customer / installer portal placeholder the task is configured with (`placeholder_ecp_customers`, `placeholder_ecp_installers`), the portal user ids it put on the task and still manages. An empty list means the placeholder matches nobody yet. Written at flow start and updated while the task is open: when the task becomes current, and when a relation of the flow's primary context changes (for opportunity, order, contact, account, contract and ticket contexts) — matches are added, portal users who no longer match are removed, recorded ones missing from `assigned_to` are put back, and ids assigned by hand are never touched. A patch of `assigned_to` that leaves out one of a placeholder's portal users drops that placeholder, as does one that only matches people already assigned; it is then left to people. Absent when the task has no placeholder, empty once every placeholder was taken over. Not patchable — ignored on client patches. */ EcpPlaceholderAssignees;
             analytics: AnalyticsInfo;
             /**
@@ -452,6 +495,16 @@ export declare namespace Components {
             on_hold_by?: /* The user id */ UserId;
         }
         /**
+         * `fill_empty` (also when absent) only resolves a variable that has no
+         * value yet. `follow_attribute` re-resolves a variable whenever its
+         * entity attribute changes, and clears it when the attribute is
+         * emptied or the entity is unshared from every partner. Only the
+         * variable's own entries change; other assignees are kept. The server
+         * never sets a default.
+         *
+         */
+        export type AssigneeSync = "follow_attribute" | "fill_empty";
+        /**
          * The user ids or variable assignments
          */
         export type Assignees = (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
@@ -481,6 +534,41 @@ export declare namespace Components {
              * Id of the automation that should be run by this task
              */
             flow_id: string;
+            /**
+             * The task's automation action as the flow template held it when the task got its automation. Ignored in requests.
+             */
+            action_definition?: {
+                [name: string]: any;
+            };
+            /**
+             * The task's automation as the flow template held it, when it is more than one plain action: several actions, or conditions, schedules or loops. Ignored in requests.
+             */
+            legacy_definition?: {
+                /**
+                 * The automation's actions (automation API `AnyAction`).
+                 */
+                actions?: {
+                    [name: string]: any;
+                }[];
+                /**
+                 * The automation's conditions (automation API `ActionCondition`).
+                 */
+                conditions?: {
+                    [name: string]: any;
+                }[];
+                /**
+                 * The automation's schedules (automation API `ActionSchedule`).
+                 */
+                schedules?: {
+                    [name: string]: any;
+                }[];
+                /**
+                 * The automation's loops (automation API `AutomationLoop`).
+                 */
+                loops?: {
+                    [name: string]: any;
+                }[];
+            };
             /**
              * Id of the automation execution, when it already ran
              */
@@ -537,10 +625,10 @@ export declare namespace Components {
          */
         export interface AutomationInputContext {
             /**
-             * `main_context` = the run's current main context (same as omitting `input_context`). It moves when a task promotes its output to main context. `task` = entity produced by an upstream task in the graph. `trigger` with `trigger_id` = that configured trigger's entity. The Flow Builder offers it while the task is in that one trigger's own sub-flow, before it merges with another trigger's path. Without `trigger_id` it is legacy and resolves like `main_context`.
+             * `main_context` = the run's current main context (same as omitting `input_context`). It moves when a task promotes its output to main context. `task` = entity produced by an upstream task in the graph. `trigger` with `trigger_id` = that configured trigger's entity. The Flow Builder offers it while the task is in that one trigger's own sub-flow, before it merges with another trigger's path. Without `trigger_id` it is legacy and resolves like `main_context`. `linked_entity` with `rule_id` and `schema` = an additional entity: the entity a display rule of the flow's Contexts settings finds by relation, a rule the workflow uses (`context_settings.displays[].id` with `attach_to_contexts`), like an `EvaluationSource` with `origin_type: linked_entity`. Resolved from the run's main context when the task runs. It needs exactly one entity: a rule matching none or several leaves the task without an input entity, so it fails; it never falls back to the main context, an entity of another schema.
              *
              */
-            source: "main_context" | "task" | "trigger";
+            source: "main_context" | "task" | "trigger" | "linked_entity";
             /**
              * Required when source is `task`. The id of the upstream task whose output entity should feed this task.
              */
@@ -550,6 +638,16 @@ export declare namespace Components {
              *
              */
             trigger_id?: string;
+            /**
+             * Required when source is `linked_entity`. The id of a display rule of the flow's Contexts settings (`context_settings.displays[].id`) that has `attach_to_contexts`.
+             *
+             */
+            rule_id?: string;
+            /**
+             * Required when source is `linked_entity`. The rule's `entity_schema`.
+             *
+             */
+            schema?: string;
             /**
              * Whether the input entity brings its direct relations along. Every action honours it. When neither `with_relations` nor `also_pass` is set, the automation receives the legacy payload, unchanged.
              *
@@ -563,7 +661,11 @@ export declare namespace Components {
              * One of the run's own entities. `main_context` = the run's current main context.
              *
              */
-            AutomationInputExtraContextRef | /* Every entity produced by an upstream task. */ AutomationInputExtraTaskRef)[];
+            AutomationInputExtraContextRef | /* Every entity produced by an upstream task. */ AutomationInputExtraTaskRef | /**
+             * Every entity a display rule of the flow's Contexts settings finds by relation (an additional entity), resolved from the run's main context when the task runs. The rule must be one the workflow uses (`attach_to_contexts`). A rule matching nothing passes nothing.
+             *
+             */
+            AutomationInputExtraLinkedEntityRef)[];
         }
         /**
          * One of the run's own entities. `main_context` = the run's current main context.
@@ -571,6 +673,21 @@ export declare namespace Components {
          */
         export interface AutomationInputExtraContextRef {
             source: "main_context";
+        }
+        /**
+         * Every entity a display rule of the flow's Contexts settings finds by relation (an additional entity), resolved from the run's main context when the task runs. The rule must be one the workflow uses (`attach_to_contexts`). A rule matching nothing passes nothing.
+         *
+         */
+        export interface AutomationInputExtraLinkedEntityRef {
+            source: "linked_entity";
+            /**
+             * The id of the display rule (`context_settings.displays[].id`).
+             */
+            rule_id: string;
+            /**
+             * The rule's `entity_schema`.
+             */
+            schema: string;
         }
         /**
          * Every entity produced by an upstream task.
@@ -639,6 +756,39 @@ export declare namespace Components {
              */
             start_date?: string | null;
             start_date_config?: /* Relative start date of a task (AL-3678): `duration` `unit` after the most recent occurrence of the reference event. `THIS_TASK_LAST_COMPLETED` is the task's own previous completion (a loop's earlier pass); there is no wait while the reference event has not happened. Durations are positive whole numbers and are added as exact calendar time (no business days); `years` is not accepted. */ StartDateConfig;
+            on_hold_config?: /* What happens when a person puts the task on hold (AL-3320), snapshotted from the template at flow start: after `resume_after` the task resumes in progress on its own (absent: only by hand), `reason` is `disabled`, `optional` or `required` (absent is `disabled`), and a reason is typed (`text`, the default), picked from `reason_options` (`options`) or either (`options_and_text`). Not patchable. */ OnHoldConfig;
+            /**
+             * The task's last hold (AL-3320), written each time a person puts it on hold. It describes the task only while its status is `ON_HOLD`: a task that resumed, was reset or was put on hold again without an expiry or reason keeps or loses the record, and readers must ignore it whenever the task is not on hold. Server-written, not patchable.
+             */
+            hold?: {
+                /**
+                 * Names this hold; the expiry timer ends only the hold it names
+                 */
+                id: string;
+                set_at: string;
+                /**
+                 * Who put the task on hold, as an assignee id
+                 */
+                set_by?: string;
+                /**
+                 * When the hold expires and the task resumes on its own: the moment it was put on hold plus the config's `resume_after`
+                 */
+                until?: string;
+                reason_option_id?: string;
+                /**
+                 * The label of the picked option as it read when the task was put on hold
+                 */
+                reason?: string;
+                reason_text?: string;
+                /**
+                 * The scheduler booking that expires the hold
+                 */
+                schedule_id?: string;
+                /**
+                 * When the hold expired and the engine resumed the task
+                 */
+                expired_at?: string;
+            } | null;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
@@ -683,6 +833,16 @@ export declare namespace Components {
              */
             journey_gate_waived_at?: string | null; // date-time
             assigned_to?: /* The user ids or variable assignments */ Assignees;
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
             ecp_placeholder_assignees?: /* Server-managed, execution-only: for each customer / installer portal placeholder the task is configured with (`placeholder_ecp_customers`, `placeholder_ecp_installers`), the portal user ids it put on the task and still manages. An empty list means the placeholder matches nobody yet. Written at flow start and updated while the task is open: when the task becomes current, and when a relation of the flow's primary context changes (for opportunity, order, contact, account, contract and ticket contexts) — matches are added, portal users who no longer match are removed, recorded ones missing from `assigned_to` are put back, and ids assigned by hand are never touched. A patch of `assigned_to` that leaves out one of a placeholder's portal users drops that placeholder, as does one that only matches people already assigned; it is then left to people. Absent when the task has no placeholder, empty once every placeholder was taken over. Not patchable — ignored on client patches. */ EcpPlaceholderAssignees;
             analytics: AnalyticsInfo;
             /**
@@ -2298,6 +2458,14 @@ export declare namespace Components {
         export interface ClosingReason {
             id: string;
             title: string;
+            category?: /* The category a configured reason was grouped under when the flow started, snapshotted with its title. Absent on a reason without a category and on flows started before categories existed. Only `configured_reasons` carries it; a selected reason's category is the one its id has in `configured_reasons`. */ ClosingReasonCategoryRef;
+        }
+        /**
+         * The category a configured reason was grouped under when the flow started, snapshotted with its title. Absent on a reason without a category and on flows started before categories existed. Only `configured_reasons` carries it; a selected reason's category is the one its id has in `configured_reasons`.
+         */
+        export interface ClosingReasonCategoryRef {
+            id: string;
+            title: string;
         }
         export interface ClosingReasonResp {
             reasons?: ClosingReason[];
@@ -2465,6 +2633,39 @@ export declare namespace Components {
              */
             start_date?: string | null;
             start_date_config?: /* Relative start date of a task (AL-3678): `duration` `unit` after the most recent occurrence of the reference event. `THIS_TASK_LAST_COMPLETED` is the task's own previous completion (a loop's earlier pass); there is no wait while the reference event has not happened. Durations are positive whole numbers and are added as exact calendar time (no business days); `years` is not accepted. */ StartDateConfig;
+            on_hold_config?: /* What happens when a person puts the task on hold (AL-3320), snapshotted from the template at flow start: after `resume_after` the task resumes in progress on its own (absent: only by hand), `reason` is `disabled`, `optional` or `required` (absent is `disabled`), and a reason is typed (`text`, the default), picked from `reason_options` (`options`) or either (`options_and_text`). Not patchable. */ OnHoldConfig;
+            /**
+             * The task's last hold (AL-3320), written each time a person puts it on hold. It describes the task only while its status is `ON_HOLD`: a task that resumed, was reset or was put on hold again without an expiry or reason keeps or loses the record, and readers must ignore it whenever the task is not on hold. Server-written, not patchable.
+             */
+            hold?: {
+                /**
+                 * Names this hold; the expiry timer ends only the hold it names
+                 */
+                id: string;
+                set_at: string;
+                /**
+                 * Who put the task on hold, as an assignee id
+                 */
+                set_by?: string;
+                /**
+                 * When the hold expires and the task resumes on its own: the moment it was put on hold plus the config's `resume_after`
+                 */
+                until?: string;
+                reason_option_id?: string;
+                /**
+                 * The label of the picked option as it read when the task was put on hold
+                 */
+                reason?: string;
+                reason_text?: string;
+                /**
+                 * The scheduler booking that expires the hold
+                 */
+                schedule_id?: string;
+                /**
+                 * When the hold expired and the engine resumed the task
+                 */
+                expired_at?: string;
+            } | null;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
@@ -2509,6 +2710,16 @@ export declare namespace Components {
              */
             journey_gate_waived_at?: string | null; // date-time
             assigned_to?: /* The user ids or variable assignments */ Assignees;
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
             ecp_placeholder_assignees?: /* Server-managed, execution-only: for each customer / installer portal placeholder the task is configured with (`placeholder_ecp_customers`, `placeholder_ecp_installers`), the portal user ids it put on the task and still manages. An empty list means the placeholder matches nobody yet. Written at flow start and updated while the task is open: when the task becomes current, and when a relation of the flow's primary context changes (for opportunity, order, contact, account, contract and ticket contexts) — matches are added, portal users who no longer match are removed, recorded ones missing from `assigned_to` are put back, and ids assigned by hand are never touched. A patch of `assigned_to` that leaves out one of a placeholder's portal users drops that placeholder, as does one that only matches people already assigned; it is then left to people. Absent when the task has no placeholder, empty once every placeholder was taken over. Not patchable — ignored on client patches. */ EcpPlaceholderAssignees;
             analytics: AnalyticsInfo;
             /**
@@ -2835,12 +3046,13 @@ export declare namespace Components {
              * `trigger_source` (with origin `trigger`) marks a "started by" statement: the run's fired trigger is compared against the configured trigger ids in `values` — no entity attribute is involved.
              * `main_context` (with origin `trigger`, no `id`) marks a statement evaluated against the run's PRIMARY context: the fired trigger's entity, re-bound by any completed task that promotes its output to main context (`output_context.set_as_primary`). `schema` carries the subject's schema for attribute selection only — resolution is by the primary flag, never by schema.
              * `flow_trait` (with origin `flow_runtime`) marks a statement on a value of the running flow: `attribute` is the trait key, `id` and `attribute_sub_field` name its subject. `loop.iteration` is the lap a loop is in (1 on the first pass); `id` is the decision that owns the loop and `attribute_sub_field` the loop's id, a loop the evaluating decision is inside.
+             * `linked_entity` (with origin `trigger`) marks a statement on an entity the flow's Contexts settings find by relation: `id` is a display rule the workflow uses (`context_settings.displays[].id` with `attach_to_contexts`) and `schema` its `entity_schema`. The engine resolves the rule from the run's main context when the decision runs. A rule matching no entity, or several, leaves the statement without an entity; it never falls back to the main context.
              *
              */
-            origin_type?: "entity" | "workflow" | "journey_block" | "trigger_source" | "main_context" | "flow_trait";
+            origin_type?: "entity" | "workflow" | "journey_block" | "trigger_source" | "main_context" | "flow_trait" | "linked_entity";
             schema?: string;
             attribute?: string;
-            attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address";
+            attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address" | "consent";
             attribute_repeatable?: boolean;
             attribute_operation?: "all" | "updated" | "added" | "deleted";
             /**
@@ -2893,6 +3105,18 @@ export declare namespace Components {
             orgId?: string;
             creationTime?: string;
         }
+        export interface ExpireTaskHoldReq {
+            /**
+             * The hold the timer was booked for
+             */
+            hold_id: string;
+        }
+        export interface ExpireTaskHoldResp {
+            /**
+             * Whether the hold ended now. False when the hold was no longer live: the task resumed, was reset, was put on hold again or its flow ended.
+             */
+            expired: boolean;
+        }
         export interface Flow {
             flow: (/* A group of Steps that define the progress of the Workflow */ Section | Step)[];
         }
@@ -2909,6 +3133,10 @@ export declare namespace Components {
              */
             loop_source?: "loops" | "loop_config";
             flow_template_id: FlowTemplateId;
+            /**
+             * The revision of the flow template the execution was started from. Absent when none was recorded.
+             */
+            revision_id?: string;
             org_id: string;
             name: string;
             /**
@@ -2926,6 +3154,16 @@ export declare namespace Components {
             due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678). A template may set it only on a task that has a start date; sent on a task, phase or flow without one, it is stored but has no effect, and the stored due date stays. */ DueDateConfig;
             status: WorkflowStatus;
             assigned_to?: /* The user ids or variable assignments */ Assignees;
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
             analytics: {
                 /**
                  * Timestamp when the flow execution started
@@ -2977,7 +3215,10 @@ export declare namespace Components {
             /**
              * Where this run is allowed to be seen, copied from the definition's
              * `context_settings.visibility` when the run starts and re-read
-             * whenever its visibility is re-resolved.
+             * whenever its visibility is re-resolved. With flow versioning, a run
+             * with a `revision_id` re-reads it from the settings it copied at its
+             * start, and a run without one that is older than the template's base
+             * revision from that revision, never from the definition.
              *
              * `entity_views` — the run surfaces on entity pages and table views,
              * on the entities `visible_on` lists.
@@ -3002,6 +3243,8 @@ export declare namespace Components {
              *
              * Resolved from `contexts` plus the definition's display rules: at
              * start, whenever the contexts change, and whenever a rule is edited.
+             * With flow versioning the rules are read where `visibility` is read,
+             * so an edit of the definition does not change the list of such a run.
              * It is the source of truth for the entity -> executions index, so an
              * entity absent from this list does not surface the run at all.
              *
@@ -3244,6 +3487,35 @@ export declare namespace Components {
             orgId?: string;
             creationTime?: string;
         }
+        /**
+         * The task's automation as the flow template held it, when it is more than one plain action: several actions, or conditions, schedules or loops. Ignored in requests.
+         */
+        export interface LegacyAutomationDefinition {
+            /**
+             * The automation's actions (automation API `AnyAction`).
+             */
+            actions?: {
+                [name: string]: any;
+            }[];
+            /**
+             * The automation's conditions (automation API `ActionCondition`).
+             */
+            conditions?: {
+                [name: string]: any;
+            }[];
+            /**
+             * The automation's schedules (automation API `ActionSchedule`).
+             */
+            schedules?: {
+                [name: string]: any;
+            }[];
+            /**
+             * The automation's loops (automation API `AutomationLoop`).
+             */
+            loops?: {
+                [name: string]: any;
+            }[];
+        }
         export interface ListBulkStartFlowsJobItemsResp {
             results: /* One entity's start of a bulk-start job's flow. */ BulkStartFlowsItem[];
             /**
@@ -3377,6 +3649,39 @@ export declare namespace Components {
              */
             start_date?: string | null;
             start_date_config?: /* Relative start date of a task (AL-3678): `duration` `unit` after the most recent occurrence of the reference event. `THIS_TASK_LAST_COMPLETED` is the task's own previous completion (a loop's earlier pass); there is no wait while the reference event has not happened. Durations are positive whole numbers and are added as exact calendar time (no business days); `years` is not accepted. */ StartDateConfig;
+            on_hold_config?: /* What happens when a person puts the task on hold (AL-3320), snapshotted from the template at flow start: after `resume_after` the task resumes in progress on its own (absent: only by hand), `reason` is `disabled`, `optional` or `required` (absent is `disabled`), and a reason is typed (`text`, the default), picked from `reason_options` (`options`) or either (`options_and_text`). Not patchable. */ OnHoldConfig;
+            /**
+             * The task's last hold (AL-3320), written each time a person puts it on hold. It describes the task only while its status is `ON_HOLD`: a task that resumed, was reset or was put on hold again without an expiry or reason keeps or loses the record, and readers must ignore it whenever the task is not on hold. Server-written, not patchable.
+             */
+            hold?: {
+                /**
+                 * Names this hold; the expiry timer ends only the hold it names
+                 */
+                id: string;
+                set_at: string;
+                /**
+                 * Who put the task on hold, as an assignee id
+                 */
+                set_by?: string;
+                /**
+                 * When the hold expires and the task resumes on its own: the moment it was put on hold plus the config's `resume_after`
+                 */
+                until?: string;
+                reason_option_id?: string;
+                /**
+                 * The label of the picked option as it read when the task was put on hold
+                 */
+                reason?: string;
+                reason_text?: string;
+                /**
+                 * The scheduler booking that expires the hold
+                 */
+                schedule_id?: string;
+                /**
+                 * When the hold expired and the engine resumed the task
+                 */
+                expired_at?: string;
+            } | null;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
@@ -3421,6 +3726,16 @@ export declare namespace Components {
              */
             journey_gate_waived_at?: string | null; // date-time
             assigned_to?: /* The user ids or variable assignments */ Assignees;
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
             ecp_placeholder_assignees?: /* Server-managed, execution-only: for each customer / installer portal placeholder the task is configured with (`placeholder_ecp_customers`, `placeholder_ecp_installers`), the portal user ids it put on the task and still manages. An empty list means the placeholder matches nobody yet. Written at flow start and updated while the task is open: when the task becomes current, and when a relation of the flow's primary context changes (for opportunity, order, contact, account, contract and ticket contexts) — matches are added, portal users who no longer match are removed, recorded ones missing from `assigned_to` are put back, and ids assigned by hand are never touched. A patch of `assigned_to` that leaves out one of a placeholder's portal users drops that placeholder, as does one that only matches people already assigned; it is then left to people. Absent when the task has no placeholder, empty once every placeholder was taken over. Not patchable — ignored on client patches. */ EcpPlaceholderAssignees;
             analytics: AnalyticsInfo;
             /**
@@ -3467,6 +3782,27 @@ export declare namespace Components {
             task_type: TaskType;
             loop_config?: /* Information about loop iterations, when task is part of a loop branch */ LoopInfo;
         }
+        /**
+         * What happens when a person puts the task on hold (AL-3320), snapshotted from the template at flow start: after `resume_after` the task resumes in progress on its own (absent: only by hand), `reason` is `disabled`, `optional` or `required` (absent is `disabled`), and a reason is typed (`text`, the default), picked from `reason_options` (`options`) or either (`options_and_text`). Not patchable.
+         */
+        export interface OnHoldConfig {
+            resume_after?: /* How long after a task is put on hold it resumes in progress on its own (AL-3320), counted from the moment it is put on hold. A day is 24 hours and a week 7 days. */ OnHoldResumeAfter;
+            reason?: OnHoldFieldMode;
+            reason_input?: "text" | "options" | "options_and_text";
+            reason_options?: OnHoldReasonOption[];
+        }
+        export type OnHoldFieldMode = "disabled" | "optional" | "required";
+        export interface OnHoldReasonOption {
+            id: string;
+            label: string;
+        }
+        /**
+         * How long after a task is put on hold it resumes in progress on its own (AL-3320), counted from the moment it is put on hold. A day is 24 hours and a week 7 days.
+         */
+        export interface OnHoldResumeAfter {
+            duration: number;
+            unit: "hours" | "days" | "weeks";
+        }
         export type Operator = "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
         /**
          * Details regarding partner for the workflow step
@@ -3482,6 +3818,16 @@ export declare namespace Components {
         export interface PatchFlowReq {
             status?: WorkflowStatus;
             assigned_to?: /* The user ids or variable assignments */ Assignees;
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
             closing_reason?: FlowClosingReason;
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678). A template may set it only on a task that has a start date; sent on a task, phase or flow without one, it is stored but has no effect, and the stored due date stays. */ DueDateConfig;
@@ -3555,6 +3901,16 @@ export declare namespace Components {
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678). A template may set it only on a task that has a start date; sent on a task, phase or flow without one, it is stored but has no effect, and the stored due date stays. */ DueDateConfig;
             assigned_to?: /* The user ids or variable assignments */ Assignees;
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
         }
         /**
          * Request payload for updating a task within a flow execution.
@@ -3585,6 +3941,7 @@ export declare namespace Components {
              *
              */
             StepStatus;
+            put_on_hold?: /* The reason of the hold this PATCH puts the task in (AL-3320). The expiry is not given: it follows from the task's `on_hold_config.resume_after`. Accepted only when the PATCH leaves the task on hold: with `status: ON_HOLD`, or with no status on a task that is on hold, which changes the reason of the current hold and keeps its expiry. Each field is held to the task's `on_hold_config`: a reason the config does not ask for is refused, a required one must be given, and an option must be one of the task's. Moving a task on hold without it starts a hold with no reason, which a config that requires one refuses. */ PutOnHoldReq;
             /**
              * Explicit due date for the task. Takes precedence over
              * due_date_config if both are provided.
@@ -3613,6 +3970,16 @@ export declare namespace Components {
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678). A template may set it only on a task that has a start date; sent on a task, phase or flow without one, it is stored but has no effect, and the stored due date stays. */ DueDateConfig;
             assigned_to?: /* The user ids or variable assignments */ Assignees;
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
             /**
              * Controls whether the task is enabled (can be worked on) or disabled (grayed out).
              * Disabled tasks cannot have their status changed until re-enabled.
@@ -3705,7 +4072,13 @@ export declare namespace Components {
             id: PhaseId;
             template_id: string;
             name: string;
-            status?: SectionStatus;
+            status?: /**
+             * Status of a phase of a flow execution. `SKIPPED`: every task in the
+             * phase was skipped and none ran, e.g. because the phase sits on a
+             * branch of a decision that was not taken.
+             *
+             */
+            PhaseStatus;
             /**
              * Last Update timestamp
              */
@@ -3717,6 +4090,16 @@ export declare namespace Components {
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678). A template may set it only on a task that has a start date; sent on a task, phase or flow without one, it is stored but has no effect, and the stored due date stays. */ DueDateConfig;
             assigned_to?: /* The user ids or variable assignments */ Assignees;
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
             analytics?: AnalyticsInfo;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
@@ -3735,6 +4118,13 @@ export declare namespace Components {
             phase_progress?: number;
             phase_assignees?: string[];
         }
+        /**
+         * Status of a phase of a flow execution. `SKIPPED`: every task in the
+         * phase was skipped and none ran, e.g. because the phase sits on a
+         * branch of a decision that was not taken.
+         *
+         */
+        export type PhaseStatus = "OPEN" | "IN_PROGRESS" | "COMPLETED" | "SKIPPED";
         /**
          * Which portal audience the workflows are loaded for. Controls which task-level
          * portal config (`ecp` or `installer`) determines task visibility. `all` returns
@@ -4029,6 +4419,19 @@ export declare namespace Components {
              *
              */
             PortalWorkflow[];
+        }
+        /**
+         * The reason of the hold this PATCH puts the task in (AL-3320). The expiry is not given: it follows from the task's `on_hold_config.resume_after`. Accepted only when the PATCH leaves the task on hold: with `status: ON_HOLD`, or with no status on a task that is on hold, which changes the reason of the current hold and keeps its expiry. Each field is held to the task's `on_hold_config`: a reason the config does not ask for is refused, a required one must be given, and an option must be one of the task's. Moving a task on hold without it starts a hold with no reason, which a config that requires one refuses.
+         */
+        export interface PutOnHoldReq {
+            /**
+             * The id of one of the task's `on_hold_config.reason_options`
+             */
+            reason_option_id?: string;
+            /**
+             * A typed reason
+             */
+            reason_text?: string;
         }
         export interface RelativeSchedule {
             mode: "relative";
@@ -4484,6 +4887,13 @@ export declare namespace Components {
              *
              */
             purposes?: string[];
+            /**
+             * Starts this revision of the flow template instead of the published one, also
+             * while the template is disabled. Manual starts only. Needs
+             * `workflow:definition:edit` in addition to `workflow:execution:trigger`.
+             *
+             */
+            revision_id?: string;
         }
         export interface Statement {
             id: string;
@@ -4822,6 +5232,39 @@ export declare namespace Components {
              */
             start_date?: string | null;
             start_date_config?: /* Relative start date of a task (AL-3678): `duration` `unit` after the most recent occurrence of the reference event. `THIS_TASK_LAST_COMPLETED` is the task's own previous completion (a loop's earlier pass); there is no wait while the reference event has not happened. Durations are positive whole numbers and are added as exact calendar time (no business days); `years` is not accepted. */ StartDateConfig;
+            on_hold_config?: /* What happens when a person puts the task on hold (AL-3320), snapshotted from the template at flow start: after `resume_after` the task resumes in progress on its own (absent: only by hand), `reason` is `disabled`, `optional` or `required` (absent is `disabled`), and a reason is typed (`text`, the default), picked from `reason_options` (`options`) or either (`options_and_text`). Not patchable. */ OnHoldConfig;
+            /**
+             * The task's last hold (AL-3320), written each time a person puts it on hold. It describes the task only while its status is `ON_HOLD`: a task that resumed, was reset or was put on hold again without an expiry or reason keeps or loses the record, and readers must ignore it whenever the task is not on hold. Server-written, not patchable.
+             */
+            hold?: {
+                /**
+                 * Names this hold; the expiry timer ends only the hold it names
+                 */
+                id: string;
+                set_at: string;
+                /**
+                 * Who put the task on hold, as an assignee id
+                 */
+                set_by?: string;
+                /**
+                 * When the hold expires and the task resumes on its own: the moment it was put on hold plus the config's `resume_after`
+                 */
+                until?: string;
+                reason_option_id?: string;
+                /**
+                 * The label of the picked option as it read when the task was put on hold
+                 */
+                reason?: string;
+                reason_text?: string;
+                /**
+                 * The scheduler booking that expires the hold
+                 */
+                schedule_id?: string;
+                /**
+                 * When the hold expired and the engine resumed the task
+                 */
+                expired_at?: string;
+            } | null;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
@@ -4866,6 +5309,16 @@ export declare namespace Components {
              */
             journey_gate_waived_at?: string | null; // date-time
             assigned_to?: /* The user ids or variable assignments */ Assignees;
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
             ecp_placeholder_assignees?: /* Server-managed, execution-only: for each customer / installer portal placeholder the task is configured with (`placeholder_ecp_customers`, `placeholder_ecp_installers`), the portal user ids it put on the task and still manages. An empty list means the placeholder matches nobody yet. Written at flow start and updated while the task is open: when the task becomes current, and when a relation of the flow's primary context changes (for opportunity, order, contact, account, contract and ticket contexts) — matches are added, portal users who no longer match are removed, recorded ones missing from `assigned_to` are put back, and ids assigned by hand are never touched. A patch of `assigned_to` that leaves out one of a placeholder's portal users drops that placeholder, as does one that only matches people already assigned; it is then left to people. Absent when the task has no placeholder, empty once every placeholder was taken over. Not patchable — ignored on client patches. */ EcpPlaceholderAssignees;
             analytics: AnalyticsInfo;
             /**
@@ -4946,6 +5399,38 @@ export declare namespace Components {
                 cid: string;
                 url: string;
             }[];
+        }
+        /**
+         * The task's last hold (AL-3320), written each time a person puts it on hold. It describes the task only while its status is `ON_HOLD`: a task that resumed, was reset or was put on hold again without an expiry or reason keeps or loses the record, and readers must ignore it whenever the task is not on hold. Server-written, not patchable.
+         */
+        export interface TaskHold {
+            /**
+             * Names this hold; the expiry timer ends only the hold it names
+             */
+            id: string;
+            set_at: string;
+            /**
+             * Who put the task on hold, as an assignee id
+             */
+            set_by?: string;
+            /**
+             * When the hold expires and the task resumes on its own: the moment it was put on hold plus the config's `resume_after`
+             */
+            until?: string;
+            reason_option_id?: string;
+            /**
+             * The label of the picked option as it read when the task was put on hold
+             */
+            reason?: string;
+            reason_text?: string;
+            /**
+             * The scheduler booking that expires the hold
+             */
+            schedule_id?: string;
+            /**
+             * When the hold expired and the engine resumed the task
+             */
+            expired_at?: string;
         }
         export type TaskId = string;
         export interface TaskInEntity {
@@ -5913,6 +6398,38 @@ export declare namespace Paths {
              */
             Components.Schemas.ErrorResp;
             export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+        }
+    }
+    namespace ExpireTaskHold {
+        namespace Parameters {
+            export type ExecutionId = string;
+            export type TaskId = string;
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId;
+            task_id: Parameters.TaskId;
+        }
+        export type RequestBody = Components.Schemas.ExpireTaskHoldReq;
+        namespace Responses {
+            export type $200 = Components.Schemas.ExpireTaskHoldResp;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $403 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $404 = /**
              * Standard error response returned when an API request fails.
              * Contains a human-readable message describing the error.
              *
@@ -7255,6 +7772,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExecuteTask.Responses.$200>
   /**
+   * expireTaskHold - expireTaskHold
+   * 
+   * Ends the task's hold once it expires (AL-3320): scheduler-api's `flow-task-hold-expiry` timer calls it with the hold it was booked for. A task still in that hold resumes in progress as the system and its assignees are notified; any other state is answered with `expired: false` and left alone, so a timer that outlived its hold changes nothing. Internal callers only.
+   */
+  'expireTaskHold'(
+    parameters?: Parameters<Paths.ExpireTaskHold.PathParameters> | null,
+    data?: Paths.ExpireTaskHold.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ExpireTaskHold.Responses.$200>
+  /**
    * patchPhase - patchPhase
    * 
    * Apply updates to a phase within flow execution
@@ -7879,6 +8406,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ExecuteTask.Responses.$200>
   }
+  ['/v2/flows/executions/{execution_id}/tasks/{task_id}/hold/expire']: {
+    /**
+     * expireTaskHold - expireTaskHold
+     * 
+     * Ends the task's hold once it expires (AL-3320): scheduler-api's `flow-task-hold-expiry` timer calls it with the hold it was booked for. A task still in that hold resumes in progress as the system and its assignees are notified; any other state is answered with `expired: false` and left alone, so a timer that outlived its hold changes nothing. Internal callers only.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ExpireTaskHold.PathParameters> | null,
+      data?: Paths.ExpireTaskHold.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ExpireTaskHold.Responses.$200>
+  }
   ['/v2/flows/executions/{execution_id}/phases/{phase_id}']: {
     /**
      * patchPhase - patchPhase
@@ -8000,12 +8539,14 @@ export type AiPrefillConfig = Components.Schemas.AiPrefillConfig;
 export type AiPrefillExtractionField = Components.Schemas.AiPrefillExtractionField;
 export type AiPrefillMapping = Components.Schemas.AiPrefillMapping;
 export type AnalyticsInfo = Components.Schemas.AnalyticsInfo;
+export type AssigneeSync = Components.Schemas.AssigneeSync;
 export type Assignees = Components.Schemas.Assignees;
 export type AutomationConfig = Components.Schemas.AutomationConfig;
 export type AutomationFailurePolicy = Components.Schemas.AutomationFailurePolicy;
 export type AutomationInfo = Components.Schemas.AutomationInfo;
 export type AutomationInputContext = Components.Schemas.AutomationInputContext;
 export type AutomationInputExtraContextRef = Components.Schemas.AutomationInputExtraContextRef;
+export type AutomationInputExtraLinkedEntityRef = Components.Schemas.AutomationInputExtraLinkedEntityRef;
 export type AutomationInputExtraTaskRef = Components.Schemas.AutomationInputExtraTaskRef;
 export type AutomationOutputContext = Components.Schemas.AutomationOutputContext;
 export type AutomationTask = Components.Schemas.AutomationTask;
@@ -8024,6 +8565,7 @@ export type BulkStartFlowsJobSummary = Components.Schemas.BulkStartFlowsJobSumma
 export type BulkStartFlowsReq = Components.Schemas.BulkStartFlowsReq;
 export type CancelFlowExecutionInputs = Components.Schemas.CancelFlowExecutionInputs;
 export type ClosingReason = Components.Schemas.ClosingReason;
+export type ClosingReasonCategoryRef = Components.Schemas.ClosingReasonCategoryRef;
 export type ClosingReasonResp = Components.Schemas.ClosingReasonResp;
 export type Condition = Components.Schemas.Condition;
 export type ConditionId = Components.Schemas.ConditionId;
@@ -8045,6 +8587,8 @@ export type EntitySync = Components.Schemas.EntitySync;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type EvaluationSource = Components.Schemas.EvaluationSource;
 export type ExecutionPaginationDynamo = Components.Schemas.ExecutionPaginationDynamo;
+export type ExpireTaskHoldReq = Components.Schemas.ExpireTaskHoldReq;
+export type ExpireTaskHoldResp = Components.Schemas.ExpireTaskHoldResp;
 export type Flow = Components.Schemas.Flow;
 export type FlowClosingReason = Components.Schemas.FlowClosingReason;
 export type FlowContext = Components.Schemas.FlowContext;
@@ -8059,6 +8603,7 @@ export type JourneyContextParameter = Components.Schemas.JourneyContextParameter
 export type JourneyExecutionInfo = Components.Schemas.JourneyExecutionInfo;
 export type JourneyPrefill = Components.Schemas.JourneyPrefill;
 export type LastEvaluatedKey = Components.Schemas.LastEvaluatedKey;
+export type LegacyAutomationDefinition = Components.Schemas.LegacyAutomationDefinition;
 export type ListBulkStartFlowsJobItemsResp = Components.Schemas.ListBulkStartFlowsJobItemsResp;
 export type ListBulkStartFlowsJobsResp = Components.Schemas.ListBulkStartFlowsJobsResp;
 export type LoopConfig = Components.Schemas.LoopConfig;
@@ -8067,6 +8612,10 @@ export type LoopInfo = Components.Schemas.LoopInfo;
 export type LoopMembership = Components.Schemas.LoopMembership;
 export type LoopOutcome = Components.Schemas.LoopOutcome;
 export type ManualTask = Components.Schemas.ManualTask;
+export type OnHoldConfig = Components.Schemas.OnHoldConfig;
+export type OnHoldFieldMode = Components.Schemas.OnHoldFieldMode;
+export type OnHoldReasonOption = Components.Schemas.OnHoldReasonOption;
+export type OnHoldResumeAfter = Components.Schemas.OnHoldResumeAfter;
 export type Operator = Components.Schemas.Operator;
 export type PartnerDetails = Components.Schemas.PartnerDetails;
 export type PatchBulkStartFlowsJobReq = Components.Schemas.PatchBulkStartFlowsJobReq;
@@ -8076,6 +8625,7 @@ export type PatchTaskReq = Components.Schemas.PatchTaskReq;
 export type Phase = Components.Schemas.Phase;
 export type PhaseId = Components.Schemas.PhaseId;
 export type PhaseInEntity = Components.Schemas.PhaseInEntity;
+export type PhaseStatus = Components.Schemas.PhaseStatus;
 export type PortalAudience = Components.Schemas.PortalAudience;
 export type PortalEntityRef = Components.Schemas.PortalEntityRef;
 export type PortalWorkflow = Components.Schemas.PortalWorkflow;
@@ -8085,6 +8635,7 @@ export type PortalWorkflowsBatchSearchReq = Components.Schemas.PortalWorkflowsBa
 export type PortalWorkflowsBatchSearchResp = Components.Schemas.PortalWorkflowsBatchSearchResp;
 export type PortalWorkflowsSearchReq = Components.Schemas.PortalWorkflowsSearchReq;
 export type PortalWorkflowsSearchResp = Components.Schemas.PortalWorkflowsSearchResp;
+export type PutOnHoldReq = Components.Schemas.PutOnHoldReq;
 export type RelativeSchedule = Components.Schemas.RelativeSchedule;
 export type RescheduleTaskReq = Components.Schemas.RescheduleTaskReq;
 export type RunTaskAutomationReq = Components.Schemas.RunTaskAutomationReq;
@@ -8121,6 +8672,7 @@ export type TaskAudience = Components.Schemas.TaskAudience;
 export type TaskAutomationActionInputs = Components.Schemas.TaskAutomationActionInputs;
 export type TaskBase = Components.Schemas.TaskBase;
 export type TaskEmailPreview = Components.Schemas.TaskEmailPreview;
+export type TaskHold = Components.Schemas.TaskHold;
 export type TaskId = Components.Schemas.TaskId;
 export type TaskInEntity = Components.Schemas.TaskInEntity;
 export type TaskIteration = Components.Schemas.TaskIteration;

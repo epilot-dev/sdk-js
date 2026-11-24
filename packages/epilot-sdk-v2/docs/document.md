@@ -44,6 +44,7 @@ const { data } = await documentClient.getTemplateMeta(...)
 - [`TemplateValidationResponse`](#templatevalidationresponse)
 - [`TemplateIssue`](#templateissue)
 - [`TemplateSettings`](#templatesettings)
+- [`LayoutMode`](#layoutmode)
 - [`DocumentMetaRequest`](#documentmetarequest)
 - [`DocumentMetaResponse`](#documentmetaresponse)
 - [`DocumentGenerationV2Request`](#documentgenerationv2request)
@@ -111,7 +112,8 @@ const { data } = await client.generateDocumentV2(
       s3ref: {
         bucket: 'document-api-prod',
         key: 'uploads/my-template.pdf'
-      }
+      },
+      file_entity_id: '123e4567-e89b-12d3-a456-426614174000'
     },
     context_entity_id: 'bcd0aab9-b544-42b0-8bfb-6d449d02eacc',
     user_id: '100321',
@@ -136,7 +138,8 @@ const { data } = await client.generateDocumentV2(
       template_with_datatable: false,
       enabled_template_settings_persistence: false,
       misconfigured_margins: false,
-      file_entity_id: '123e4567-e89b-12d3-a456-426614174000'
+      file_entity_id: '123e4567-e89b-12d3-a456-426614174000',
+      layout_mode: 'legacy'
     }
   },
 )
@@ -219,7 +222,8 @@ const { data } = await client.generateDocumentV2(
     "template_with_datatable": false,
     "enabled_template_settings_persistence": false,
     "misconfigured_margins": false,
-    "file_entity_id": "123e4567-e89b-12d3-a456-426614174000"
+    "file_entity_id": "123e4567-e89b-12d3-a456-426614174000",
+    "layout_mode": "legacy"
   }
 }
 ```
@@ -488,32 +492,32 @@ type TemplateValidationRequest = {
 
 ```ts
 type TemplateValidationResponse = {
-  valid?: boolean
-  fixed?: boolean
-  issues?: Array<{
-    id?: string
-    file?: string
+  valid: boolean
+  fixed: boolean
+  issues: Array<{
+    id: string
+    file: string
     location?: string
-    context?: string
-    explanation?: string
-    fixable?: boolean
+    context: string
+    explanation: string
+    fixable: boolean
     confidence?: "high" | "medium" | "low"
     rule?: string
     before?: string
     after?: string
   }>
-  unresolved_errors?: Array<{
+  unresolved_errors: Array<{
     id?: string
     context?: string
     explanation?: string
   }>
   fixed_document?: {
-    s3ref?: {
+    s3ref: {
       bucket: { ... }
       key: { ... }
     }
-    filename?: string
-    preview_url?: string // uri
+    filename: string
+    preview_url: string // uri
   }
 }
 ```
@@ -524,12 +528,12 @@ A single template syntax problem, and the repair proposed for it
 
 ```ts
 type TemplateIssue = {
-  id?: string
-  file?: string
+  id: string
+  file: string
   location?: string
-  context?: string
-  explanation?: string
-  fixable?: boolean
+  context: string
+  explanation: string
+  fixable: boolean
   confidence?: "high" | "medium" | "low"
   rule?: string
   before?: string
@@ -557,7 +561,19 @@ type TemplateSettings = {
   enabled_template_settings_persistence?: boolean
   misconfigured_margins?: boolean
   file_entity_id?: string // uuid
+  layout_mode?: "org_default" | "legacy" | "improved"
 }
+```
+
+### `LayoutMode`
+
+Layout flow for this generation. Overrides the `docgen_layout_mode` attribute of the template's
+file entity and the organization default.
+- org_default - no override; use the template's setting, else the organization default
+- legacy - previous layout flow (no reserved-whitespace page removal, HTML 
+
+```ts
+type LayoutMode = "org_default" | "legacy" | "improved"
 ```
 
 ### `DocumentMetaRequest`
@@ -599,6 +615,7 @@ type DocumentGenerationV2Request = {
       bucket: { ... }
       key: { ... }
     }
+    file_entity_id?: string // uuid
   }
   context_entity_id?: string // uuid
   user_id?: string
@@ -624,6 +641,7 @@ type DocumentGenerationV2Request = {
     enabled_template_settings_persistence?: boolean
     misconfigured_margins?: boolean
     file_entity_id?: string // uuid
+    layout_mode?: "org_default" | "legacy" | "improved"
   }
 }
 ```
@@ -694,6 +712,7 @@ type DocumentGenerationV2Response = {
     enabled_template_settings_persistence?: boolean
     misconfigured_margins?: boolean
     file_entity_id?: string // uuid
+    layout_mode?: "org_default" | "legacy" | "improved"
   }
 }
 ```

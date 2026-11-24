@@ -234,6 +234,24 @@ export declare namespace Components {
              * Stable purpose IDs plus immutable display-name snapshots for custom events. Additive to inherited purpose names (OR). Inherited unfiltered triggers cannot be narrowed.
              */
             purpose_filters?: PurposeFilterSnapshot[];
+            /**
+             * Optional value filter for watched attributes, keyed by attribute name. The event only
+             * triggers when a watched attribute listed here takes one of the given values — its value
+             * in the entity payload on createEntity, its new value in diff.added / diff.updated on
+             * updateEntity. A removed attribute never matches. Watched attributes not listed here
+             * match on any change. Not applied on deleteEntity.
+             * Inherited value filters cannot be changed by derived custom events.
+             *
+             * example:
+             * {
+             *   "registration_status": [
+             *     "Registered"
+             *   ]
+             * }
+             */
+            attribute_values?: {
+                [name: string]: (string | number | boolean)[];
+            };
         }
         /**
          * An event instance in the event history
@@ -496,6 +514,24 @@ export declare namespace Components {
                  * Stable purpose IDs plus immutable display-name snapshots for custom events. Additive to inherited purpose names (OR). Inherited unfiltered triggers cannot be narrowed.
                  */
                 purpose_filters?: PurposeFilterSnapshot[];
+                /**
+                 * Optional value filter for watched attributes, keyed by attribute name. The event only
+                 * triggers when a watched attribute listed here takes one of the given values — its value
+                 * in the entity payload on createEntity, its new value in diff.added / diff.updated on
+                 * updateEntity. A removed attribute never matches. Watched attributes not listed here
+                 * match on any change. Not applied on deleteEntity.
+                 * Inherited value filters cannot be changed by derived custom events.
+                 *
+                 * example:
+                 * {
+                 *   "registration_status": [
+                 *     "Registered"
+                 *   ]
+                 * }
+                 */
+                attribute_values?: {
+                    [name: string]: (string | number | boolean)[];
+                };
             };
             /**
              * Whether this event is enabled for the organization.
@@ -724,6 +760,24 @@ export declare namespace Components {
                  * Stable purpose IDs plus immutable display-name snapshots for custom events. Additive to inherited purpose names (OR). Inherited unfiltered triggers cannot be narrowed.
                  */
                 purpose_filters?: PurposeFilterSnapshot[];
+                /**
+                 * Optional value filter for watched attributes, keyed by attribute name. The event only
+                 * triggers when a watched attribute listed here takes one of the given values — its value
+                 * in the entity payload on createEntity, its new value in diff.added / diff.updated on
+                 * updateEntity. A removed attribute never matches. Watched attributes not listed here
+                 * match on any change. Not applied on deleteEntity.
+                 * Inherited value filters cannot be changed by derived custom events.
+                 *
+                 * example:
+                 * {
+                 *   "registration_status": [
+                 *     "Registered"
+                 *   ]
+                 * }
+                 */
+                attribute_values?: {
+                    [name: string]: (string | number | boolean)[];
+                };
             };
             /**
              * Whether this event is enabled for the organization.
@@ -1195,7 +1249,18 @@ export declare namespace Components {
             payload: {
                 [name: string]: any;
             };
+            /**
+             * Always empty. A preview that fails returns 400 with `issues` instead.
+             */
             errors: ValidationIssue[];
+            /**
+             * What the event leaves out for this sample without failing: optional fields that have no
+             * value (`path` is the field name) and, unless the mapping replaces the entity data,
+             * related cardinality-one nodes the sample does not have (`path` is the node ID). Publishing
+             * omits both silently; they never block it.
+             *
+             */
+            warnings: ValidationIssue[];
         }
         /**
          * A primitive JSON Schema field definition
@@ -1277,7 +1342,7 @@ export declare namespace Components {
                 /**
                  * Timestamp from the last event in the previous page
                  * example:
-                 * 2025-10-31 12:34:56
+                 * 2025-10-31T12:34:56Z
                  */
                 event_time?: string;
                 /**
@@ -1334,7 +1399,7 @@ export declare namespace Components {
                 /**
                  * Timestamp from the last event in the previous page
                  * example:
-                 * 2025-10-31 12:34:56
+                 * 2025-10-31T12:34:56Z
                  */
                 event_time?: string;
                 /**
@@ -1516,8 +1581,46 @@ export declare namespace Components {
              */
             SuccessCriterion[];
         }
+        /**
+         * A rejected request. `issues` lists every problem for clients; `error` summarises them for
+         * people reading the response (payload and definition errors repeat each issue in it). A body
+         * that does not match the request schema is rejected before any of this, with `error` holding
+         * the request validator's own list instead of a string.
+         *
+         */
+        export interface ValidationErrorResponse {
+            /**
+             * example:
+             * 400
+             */
+            status: number;
+            /**
+             * example:
+             * Custom event payload failed JSON Schema validation: customer_number must be string, but the value is a number
+             */
+            error: /**
+             * example:
+             * Custom event payload failed JSON Schema validation: customer_number must be string, but the value is a number
+             */
+            string | {
+                [name: string]: any;
+            }[];
+            issues?: ValidationIssue[];
+        }
         export interface ValidationIssue {
+            /**
+             * The rejected or reported value, for example `customer_number`, `contact.email`,
+             * `seed.entity_id` or `schema_fields.customer_number.graph_source`. `<root>` for the
+             * payload as a whole.
+             *
+             * example:
+             * customer_number
+             */
             path: string;
+            /**
+             * example:
+             * must be string, but the value is a number
+             */
             message: string;
         }
         /**
@@ -1903,8 +2006,14 @@ export declare namespace Paths {
         Components.Schemas.TriggerEventPayload;
         namespace Responses {
             export type $200 = Components.Schemas.PreviewEventResponse;
-            export interface $400 {
-            }
+            export type $400 = /**
+             * A rejected request. `issues` lists every problem for clients; `error` summarises them for
+             * people reading the response (payload and definition errors repeat each issue in it). A body
+             * that does not match the request schema is rejected before any of this, with `error` holding
+             * the request validator's own list instead of a string.
+             *
+             */
+            Components.Schemas.ValidationErrorResponse;
             export interface $404 {
             }
         }
@@ -1919,6 +2028,14 @@ export declare namespace Paths {
         export type RequestBody = Components.Schemas.PublishCustomEventPayload;
         namespace Responses {
             export type $200 = /* Event configuration with required fields */ Components.Schemas.EventConfig;
+            export type $400 = /**
+             * A rejected request. `issues` lists every problem for clients; `error` summarises them for
+             * people reading the response (payload and definition errors repeat each issue in it). A body
+             * that does not match the request schema is rejected before any of this, with `error` holding
+             * the request validator's own list instead of a string.
+             *
+             */
+            Components.Schemas.ValidationErrorResponse;
             export interface $409 {
             }
         }
@@ -1955,8 +2072,14 @@ export declare namespace Paths {
              *
              */
             Components.Schemas.CustomEventVersionDraft;
-            export interface $400 {
-            }
+            export type $400 = /**
+             * A rejected request. `issues` lists every problem for clients; `error` summarises them for
+             * people reading the response (payload and definition errors repeat each issue in it). A body
+             * that does not match the request schema is rejected before any of this, with `error` holding
+             * the request validator's own list instead of a string.
+             *
+             */
+            Components.Schemas.ValidationErrorResponse;
             export interface $404 {
             }
             export interface $409 {
@@ -1975,8 +2098,14 @@ export declare namespace Paths {
         export type RequestBody = /* Complete immutable custom-event v1.0 definition projected from a required entity graph. Publication is a separate conditional action. */ Components.Schemas.CreateCustomEventPayload;
         namespace Responses {
             export type $200 = /* Event configuration with required fields */ Components.Schemas.EventConfig;
-            export interface $400 {
-            }
+            export type $400 = /**
+             * A rejected request. `issues` lists every problem for clients; `error` summarises them for
+             * people reading the response (payload and definition errors repeat each issue in it). A body
+             * that does not match the request schema is rejected before any of this, with `error` holding
+             * the request validator's own list instead of a string.
+             *
+             */
+            Components.Schemas.ValidationErrorResponse;
             export interface $404 {
             }
             export interface $409 {
@@ -2120,8 +2249,14 @@ export declare namespace Paths {
         Components.Schemas.TriggerEventPayload;
         namespace Responses {
             export type $200 = /* Response from triggering an event */ Components.Schemas.TriggerEventResponse;
-            export interface $400 {
-            }
+            export type $400 = /**
+             * A rejected request. `issues` lists every problem for clients; `error` summarises them for
+             * people reading the response (payload and definition errors repeat each issue in it). A body
+             * that does not match the request schema is rejected before any of this, with `error` holding
+             * the request validator's own list instead of a string.
+             *
+             */
+            Components.Schemas.ValidationErrorResponse;
             export interface $403 {
             }
             export interface $404 {
@@ -2674,5 +2809,6 @@ export type SuccessCriterion = Components.Schemas.SuccessCriterion;
 export type TriggerEventPayload = Components.Schemas.TriggerEventPayload;
 export type TriggerEventResponse = Components.Schemas.TriggerEventResponse;
 export type UpdateEventPayload = Components.Schemas.UpdateEventPayload;
+export type ValidationErrorResponse = Components.Schemas.ValidationErrorResponse;
 export type ValidationIssue = Components.Schemas.ValidationIssue;
 export type VersionMeta = Components.Schemas.VersionMeta;

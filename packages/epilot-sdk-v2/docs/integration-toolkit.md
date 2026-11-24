@@ -192,6 +192,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`TriggerErpActionRequest`](#triggererpactionrequest)
 - [`TriggerWebhookResp`](#triggerwebhookresp)
 - [`IntegrationEditableFields`](#integrationeditablefields)
+- [`IntegrationConfigPush`](#integrationconfigpush)
 - [`ConnectorConfig`](#connectorconfig)
 - [`ManagedCallAuth`](#managedcallauth)
 - [`Integration`](#integration)
@@ -1035,6 +1036,8 @@ const { data } = await client.listIntegrations()
       "integration_type": "erp",
       "connector_config": {},
       "protected": true,
+      "config_push": {},
+      "api_key_role": "string",
       "_manifest": ["string"]
     }
   ]
@@ -1118,6 +1121,11 @@ const { data } = await client.createIntegration(
       latest_types_package_name: 'string'
     },
     protected: true,
+    config_push: {
+      enabled: true,
+      webhook_url: 'https://example.com/path'
+    },
+    api_key_role: 'string',
     _manifest: ['string']
   },
 )
@@ -1195,6 +1203,11 @@ const { data } = await client.createIntegration(
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "config_push": {
+    "enabled": true,
+    "webhook_url": "https://example.com/path"
+  },
+  "api_key_role": "string",
   "_manifest": ["string"]
 }
 ```
@@ -1287,6 +1300,11 @@ const { data } = await client.getIntegration({
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "config_push": {
+    "enabled": true,
+    "webhook_url": "https://example.com/path"
+  },
+  "api_key_role": "string",
   "_manifest": ["string"]
 }
 ```
@@ -1382,6 +1400,11 @@ const { data } = await client.updateIntegration(
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "config_push": {
+    "enabled": true,
+    "webhook_url": "https://example.com/path"
+  },
+  "api_key_role": "string",
   "_manifest": ["string"]
 }
 ```
@@ -2020,6 +2043,8 @@ const { data } = await client.listIntegrationsV2()
       "integration_type": "erp",
       "connector_config": {},
       "protected": true,
+      "config_push": {},
+      "api_key_role": "string",
       "_manifest": ["string"],
       "use_cases": []
     }
@@ -2104,6 +2129,11 @@ const { data } = await client.createIntegrationV2(
       latest_types_package_name: 'string'
     },
     protected: true,
+    config_push: {
+      enabled: true,
+      webhook_url: 'https://example.com/path'
+    },
+    api_key_role: 'string',
     _manifest: ['string'],
     use_cases: [
       {
@@ -2192,6 +2222,11 @@ const { data } = await client.createIntegrationV2(
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "config_push": {
+    "enabled": true,
+    "webhook_url": "https://example.com/path"
+  },
+  "api_key_role": "string",
   "_manifest": ["string"],
   "use_cases": [
     {
@@ -2300,6 +2335,11 @@ const { data } = await client.getIntegrationV2({
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "config_push": {
+    "enabled": true,
+    "webhook_url": "https://example.com/path"
+  },
+  "api_key_role": "string",
   "_manifest": ["string"],
   "use_cases": [
     {
@@ -2403,6 +2443,11 @@ const { data } = await client.updateIntegrationV2(
       latest_types_package_name: 'string'
     },
     protected: true,
+    config_push: {
+      enabled: true,
+      webhook_url: 'https://example.com/path'
+    },
+    api_key_role: 'string',
     _manifest: ['string'],
     use_cases: [
       {
@@ -2491,6 +2536,11 @@ const { data } = await client.updateIntegrationV2(
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "config_push": {
+    "enabled": true,
+    "webhook_url": "https://example.com/path"
+  },
+  "api_key_role": "string",
   "_manifest": ["string"],
   "use_cases": [
     {
@@ -2605,8 +2655,8 @@ const { data } = await client.notifyIntegrationConfigChanged({
 ### `getIntegrationLifecycle`
 
 The integration's bootstrap status: whether lifecycle webhooks are
-enabled for the org, whether the middleware is bootstrapped, the current
-lifecycle version and the last delivery (without its body).
+enabled (the integration's `config_push` and the org's rollout flag),
+whether the middleware is bootstrapped, the current lifecycle v
 
 `GET /v2/integrations/{integrationId}/lifecycle`
 
@@ -6497,7 +6547,24 @@ type IntegrationEditableFields = {
     latest_types_package_name?: string
   }
   protected?: boolean
+  config_push?: {
+    enabled: boolean
+    webhook_url?: string // uri
+  }
+  api_key_role?: string
   _manifest?: string[]
+}
+```
+
+### `IntegrationConfigPush`
+
+Config push: whether the integration's middleware takes lifecycle webhooks (`CREATE` with apiKey and signing secret, signed `UPDATE` and `DELETE`; see `bootstrapIntegrationLifecycle`), and where they go. Absent or disabled: the Integration Hub offers no bootstrap for the integration.
+
+
+```ts
+type IntegrationConfigPush = {
+  enabled: boolean
+  webhook_url?: string // uri
 }
 ```
 
@@ -6628,6 +6695,11 @@ type Integration = {
     latest_types_package_name?: string
   }
   protected?: boolean
+  config_push?: {
+    enabled: boolean
+    webhook_url?: string // uri
+  }
+  api_key_role?: string
   _manifest?: string[]
 }
 ```
@@ -6699,6 +6771,11 @@ type CreateIntegrationRequest = {
     latest_types_package_name?: string
   }
   protected?: boolean
+  config_push?: {
+    enabled: boolean
+    webhook_url?: string // uri
+  }
+  api_key_role?: string
   _manifest?: string[]
 }
 ```
@@ -6770,6 +6847,11 @@ type UpdateIntegrationRequest = {
     latest_types_package_name?: string
   }
   protected?: boolean
+  config_push?: {
+    enabled: boolean
+    webhook_url?: string // uri
+  }
+  api_key_role?: string
   _manifest?: string[]
 }
 ```
@@ -7224,6 +7306,11 @@ type UpsertIntegrationWithUseCasesRequest = {
     latest_types_package_name?: string
   }
   protected?: boolean
+  config_push?: {
+    enabled: boolean
+    webhook_url?: string // uri
+  }
+  api_key_role?: string
   _manifest?: string[]
   use_cases?: Array<{
     id?: string // uuid
@@ -7255,11 +7342,6 @@ type UpsertIntegrationWithUseCasesRequest = {
     id?: string // uuid
     name: string
     slug?: string
-    enabled: boolean
-    change_description?: string
-    type: "file_proxy"
-    configuration?: {
-      direction?: { ... }
   // ...
 }
 ```

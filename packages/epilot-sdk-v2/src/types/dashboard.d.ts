@@ -53,6 +53,9 @@ export declare namespace Components {
         Limit?: Parameters.Limit;
         Offset?: Parameters.Offset;
     }
+    namespace Responses {
+        export type QuotaExceeded = Schemas.QuotaError;
+    }
     namespace Schemas {
         /**
          * Ownership and sharing metadata common to dashboards and insights. `created_*`/`updated_*`
@@ -212,11 +215,132 @@ export declare namespace Components {
              */
             DashboardTile[];
             /**
+             * Global filter definitions shown above the tiles. Optional, and stored and returned
+             * exactly as sent: omitted on create, nothing is stored and the field is absent on
+             * read, while `[]` is stored as an explicit "no filters". On PUT and PATCH, omit it to
+             * keep the stored list or send an array to replace it whole.
+             *
+             * example:
+             * [
+             *   {
+             *     "id": "time_range",
+             *     "kind": "time_range",
+             *     "label": "Zeitraum",
+             *     "default_value": {
+             *       "preset": "last_30_days"
+             *     }
+             *   },
+             *   {
+             *     "id": "6f1c2d3e-4b5a-4c6d-8e7f-9a0b1c2d3e4f",
+             *     "kind": "dimension",
+             *     "label": "Status",
+             *     "field": "current_opportunities.status",
+             *     "field_type": "string",
+             *     "operator": "in",
+             *     "default_value": [
+             *       "won"
+             *     ]
+             *   }
+             * ]
+             */
+            filters?: /**
+             * Definition of a global dashboard filter: a control shown above the tiles that narrows the
+             * tiles it applies to. Only the definition and its default are stored — the values a viewer
+             * picks while looking at the dashboard are client-local and never stored here. Stored and
+             * returned exactly as sent, including keys not listed below.
+             *
+             */
+            DashboardFilter[];
+            /**
              * Whether the requesting user has favorited this dashboard.
              * example:
              * false
              */
             favorited?: boolean;
+            /**
+             * Schema version of the dashboard. `1` is a dashboard authored in the classic
+             * dashboard UI, `2` in the analytics surface. Omit on create to default to `1`.
+             * May only move forward: a PUT carrying a higher version upgrades the dashboard
+             * (this is how a legacy dashboard is converted), while a lower or absent value
+             * leaves the stored version untouched. Ignored on PATCH.
+             *
+             * example:
+             * 2
+             */
+            version?: number;
+        }
+        /**
+         * Definition of a global dashboard filter: a control shown above the tiles that narrows the
+         * tiles it applies to. Only the definition and its default are stored — the values a viewer
+         * picks while looking at the dashboard are client-local and never stored here. Stored and
+         * returned exactly as sent, including keys not listed below.
+         *
+         */
+        export interface DashboardFilter {
+            [name: string]: any;
+            /**
+             * Identifier of the filter, unique within the dashboard. Tiles reference it as the key of
+             * `filter_settings.bindings`.
+             *
+             * example:
+             * time_range
+             */
+            id: string;
+            /**
+             * `time_range` narrows a date column to a range; `dimension` narrows a column to the
+             * selected values.
+             *
+             * example:
+             * dimension
+             */
+            kind: "time_range" | "dimension";
+            /**
+             * Display label of the filter control
+             * example:
+             * Status
+             */
+            label?: string;
+            /**
+             * Column the filter applies to, as `<dataset>.<column>`
+             * example:
+             * current_opportunities.status
+             */
+            field?: string;
+            /**
+             * Data type of `field`, e.g. `string`, `number` or `date`
+             * example:
+             * string
+             */
+            field_type?: string;
+            /**
+             * Comparison the selected value(s) are applied with, e.g. `in`
+             * example:
+             * in
+             */
+            operator?: string;
+            /**
+             * Applied until a viewer picks a value; `null` or absent means no default. The shape
+             * depends on `kind` and `operator`, e.g. `{ "preset": "last_30_days" }` for a time range
+             * or a list of values for `in`.
+             *
+             * example:
+             * [
+             *   "won"
+             * ]
+             */
+            default_value?: /**
+             * Applied until a viewer picks a value; `null` or absent means no default. The shape
+             * depends on `kind` and `operator`, e.g. `{ "preset": "last_30_days" }` for a time range
+             * or a list of values for `in`.
+             *
+             * example:
+             * [
+             *   "won"
+             * ]
+             */
+            string | number | boolean | any[] | {
+                [name: string]: any;
+            } | (null);
         }
         /**
          * Unique identifier for dashboard
@@ -261,6 +385,49 @@ export declare namespace Components {
              *
              */
             DashboardTile[];
+            /**
+             * Replaces the dashboard's global filter definitions whole (`[]` clears them). Omit to
+             * leave them unchanged.
+             *
+             */
+            filters?: /**
+             * Definition of a global dashboard filter: a control shown above the tiles that narrows the
+             * tiles it applies to. Only the definition and its default are stored — the values a viewer
+             * picks while looking at the dashboard are client-local and never stored here. Stored and
+             * returned exactly as sent, including keys not listed below.
+             *
+             */
+            DashboardFilter[];
+        }
+        export interface DashboardQuota {
+            dashboards: {
+                /**
+                 * Maximum analytics dashboards for the org; `null` when unlimited.
+                 * example:
+                 * 10
+                 */
+                limit: number | null;
+                /**
+                 * Analytics dashboards (`version >= 2`) currently in the org, org-wide rather than
+                 * scoped to the caller. `null` when no limit applies or the count is unavailable.
+                 *
+                 * example:
+                 * 3
+                 */
+                current: number | null;
+            };
+            tiles_per_dashboard: {
+                /**
+                 * example:
+                 * 20
+                 */
+                limit: number;
+            };
+            /**
+             * example:
+             * Professional
+             */
+            tier?: string | null;
         }
         /**
          * A positioned tile on a dashboard canvas. A tile references a saved insight via
@@ -299,6 +466,49 @@ export declare namespace Components {
              */
             VisualisationId;
             visualisation_config?: VisualisationConfig;
+            filter_settings?: /**
+             * How a tile takes part in its dashboard's global filters (`Dashboard.filters`). Stored and
+             * returned exactly as sent.
+             *
+             */
+            DashboardTileFilterSettings;
+        }
+        /**
+         * How a tile takes part in its dashboard's global filters (`Dashboard.filters`). Stored and
+         * returned exactly as sent.
+         *
+         */
+        export interface DashboardTileFilterSettings {
+            [name: string]: any;
+            /**
+             * Per-filter settings, keyed by `DashboardFilter.id`. `field` is the `<dataset>.<column>`
+             * of this tile the filter applies to; `ignore: true` exempts the tile from the filter.
+             *
+             * example:
+             * {
+             *   "time_range": {
+             *     "field": "current_opportunities._created_at"
+             *   },
+             *   "6f1c2d3e-4b5a-4c6d-8e7f-9a0b1c2d3e4f": {
+             *     "ignore": true
+             *   }
+             * }
+             */
+            bindings?: {
+                [name: string]: {
+                    [name: string]: any;
+                    /**
+                     * example:
+                     * current_opportunities._created_at
+                     */
+                    field?: string;
+                    /**
+                     * example:
+                     * true
+                     */
+                    ignore?: boolean;
+                };
+            };
         }
         /**
          * Unique identifier for a tile in a dashboard
@@ -324,6 +534,18 @@ export declare namespace Components {
             filters?: {
                 [name: string]: any;
             }[];
+        }
+        export interface Error {
+            /**
+             * example:
+             * 403
+             */
+            status: number;
+            /**
+             * example:
+             * Dashboard limit reached for this plan
+             */
+            error: string;
         }
         export interface Example {
             id?: /**
@@ -523,6 +745,37 @@ export declare namespace Components {
              */
             has_more: boolean;
         }
+        export interface QuotaError {
+            /**
+             * example:
+             * 403
+             */
+            status: number;
+            /**
+             * example:
+             * Dashboard limit reached for this plan
+             */
+            error: string;
+            /**
+             * Machine-readable reason, distinguishing a quota refusal from a permission one.
+             */
+            code: "DASHBOARD_LIMIT_EXCEEDED" | "TILE_LIMIT_EXCEEDED";
+            /**
+             * example:
+             * 10
+             */
+            limit?: number;
+            /**
+             * example:
+             * 10
+             */
+            current?: number;
+            /**
+             * example:
+             * Professional
+             */
+            tier?: string;
+        }
         /**
          * Grants a single user a permission level on a resource
          */
@@ -608,7 +861,7 @@ export declare namespace Components {
          * example:
          * timechart
          */
-        export type VisualisationId = "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow";
+        export type VisualisationId = "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow" | "notes";
     }
 }
 export declare namespace Paths {
@@ -628,6 +881,7 @@ export declare namespace Paths {
              *
              */
             Components.Schemas.Dashboard;
+            export type $403 = Components.Responses.QuotaExceeded;
         }
     }
     namespace CreateInsight {
@@ -685,6 +939,11 @@ export declare namespace Paths {
              *
              */
             Components.Schemas.Dashboard;
+        }
+    }
+    namespace GetDashboardQuota {
+        namespace Responses {
+            export type $200 = Components.Schemas.DashboardQuota;
         }
     }
     namespace GetInsight {
@@ -862,6 +1121,7 @@ export declare namespace Paths {
              *
              */
             Components.Schemas.Dashboard;
+            export type $403 = Components.Responses.QuotaExceeded;
         }
     }
     namespace PatchInsight {
@@ -892,6 +1152,7 @@ export declare namespace Paths {
              *
              */
             Components.Schemas.Dashboard;
+            export type $403 = Components.Responses.QuotaExceeded;
         }
     }
     namespace PutInsight {
@@ -974,13 +1235,33 @@ export interface OperationMethods {
   /**
    * createDashboard - createDashboard
    * 
-   * Create new dashboard
+   * Create new dashboard.
+   * Tiles that only reference an insight (`insight_id`) need no further permission. A tile with an
+   * inline `visualisation_id`/`visualisation_config` (with or without `insight_id`) authors a chart,
+   * so it additionally requires `dashboard:insight:create`.
+   * 
    */
   'createDashboard'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateDashboard.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateDashboard.Responses.$201>
+  /**
+   * getDashboardQuota - getDashboardQuota
+   * 
+   * Current dashboard quota and usage for the caller's organization, so a client can show the
+   * limit before a write is attempted rather than discovering it on a 403.
+   * 
+   * `dashboards.limit` is `null` when unlimited or not enforced. `dashboards.current` counts
+   * only analytics dashboards (`version >= 2`) and is org-wide, not scoped to what the caller
+   * can see.
+   * 
+   */
+  'getDashboardQuota'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetDashboardQuota.Responses.$200>
   /**
    * listFavoriteDashboardIds - listFavoriteDashboardIds
    * 
@@ -1034,7 +1315,12 @@ export interface OperationMethods {
   /**
    * putDashboard - putDashboard
    * 
-   * Update a dashboard by ID
+   * Update a dashboard by ID.
+   * Tiles that only reference an insight (`insight_id`) need no further permission, and unchanged
+   * tiles with an inline `visualisation_id`/`visualisation_config` are kept as they are. Adding an
+   * inline tile (a new tile `id`, or one that was not inline) requires `dashboard:insight:create`;
+   * changing the inline visualisation of an existing tile requires `dashboard:insight:edit`.
+   * 
    */
   'putDashboard'(
     parameters?: Parameters<Paths.V1DashboardDashboards$Id.PathParameters> | null,
@@ -1044,10 +1330,14 @@ export interface OperationMethods {
   /**
    * patchDashboard - patchDashboard
    * 
-   * Partially update a dashboard by ID. Update content (title/tiles) and/or manage sharing
+   * Partially update a dashboard by ID. Update content (title/tiles/filters) and/or manage sharing
    * (owners, shared_with, org_access) — only owners may change sharing.
    * `owners` and `shared_with` replace the whole array (send the complete list); omit them to leave
    * sharing unchanged, or send `shared_with: []` to revoke all per-user grants.
+   * Tiles that only reference an insight (`insight_id`) need no further permission, and unchanged
+   * tiles with an inline `visualisation_id`/`visualisation_config` are kept as they are. Adding an
+   * inline tile (a new tile `id`, or one that was not inline) requires `dashboard:insight:create`;
+   * changing the inline visualisation of an existing tile requires `dashboard:insight:edit`.
    * 
    */
   'patchDashboard'(
@@ -1176,13 +1466,35 @@ export interface PathsDictionary {
     /**
      * createDashboard - createDashboard
      * 
-     * Create new dashboard
+     * Create new dashboard.
+     * Tiles that only reference an insight (`insight_id`) need no further permission. A tile with an
+     * inline `visualisation_id`/`visualisation_config` (with or without `insight_id`) authors a chart,
+     * so it additionally requires `dashboard:insight:create`.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateDashboard.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateDashboard.Responses.$201>
+  }
+  ['/v1/dashboard/dashboards/quota']: {
+    /**
+     * getDashboardQuota - getDashboardQuota
+     * 
+     * Current dashboard quota and usage for the caller's organization, so a client can show the
+     * limit before a write is attempted rather than discovering it on a 403.
+     * 
+     * `dashboards.limit` is `null` when unlimited or not enforced. `dashboards.current` counts
+     * only analytics dashboards (`version >= 2`) and is org-wide, not scoped to what the caller
+     * can see.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetDashboardQuota.Responses.$200>
   }
   ['/v1/dashboard/dashboards/favorites']: {
     /**
@@ -1242,7 +1554,12 @@ export interface PathsDictionary {
     /**
      * putDashboard - putDashboard
      * 
-     * Update a dashboard by ID
+     * Update a dashboard by ID.
+     * Tiles that only reference an insight (`insight_id`) need no further permission, and unchanged
+     * tiles with an inline `visualisation_id`/`visualisation_config` are kept as they are. Adding an
+     * inline tile (a new tile `id`, or one that was not inline) requires `dashboard:insight:create`;
+     * changing the inline visualisation of an existing tile requires `dashboard:insight:edit`.
+     * 
      */
     'put'(
       parameters?: Parameters<Paths.V1DashboardDashboards$Id.PathParameters> | null,
@@ -1252,10 +1569,14 @@ export interface PathsDictionary {
     /**
      * patchDashboard - patchDashboard
      * 
-     * Partially update a dashboard by ID. Update content (title/tiles) and/or manage sharing
+     * Partially update a dashboard by ID. Update content (title/tiles/filters) and/or manage sharing
      * (owners, shared_with, org_access) — only owners may change sharing.
      * `owners` and `shared_with` replace the whole array (send the complete list); omit them to leave
      * sharing unchanged, or send `shared_with: []` to revoke all per-user grants.
+     * Tiles that only reference an insight (`insight_id`) need no further permission, and unchanged
+     * tiles with an inline `visualisation_id`/`visualisation_config` are kept as they are. Adding an
+     * inline tile (a new tile `id`, or one that was not inline) requires `dashboard:insight:create`;
+     * changing the inline visualisation of an existing tile requires `dashboard:insight:edit`.
      * 
      */
     'patch'(
@@ -1386,11 +1707,15 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type AccessControl = Components.Schemas.AccessControl;
 export type AccessControlUpdate = Components.Schemas.AccessControlUpdate;
 export type Dashboard = Components.Schemas.Dashboard;
+export type DashboardFilter = Components.Schemas.DashboardFilter;
 export type DashboardID = Components.Schemas.DashboardID;
 export type DashboardPatch = Components.Schemas.DashboardPatch;
+export type DashboardQuota = Components.Schemas.DashboardQuota;
 export type DashboardTile = Components.Schemas.DashboardTile;
+export type DashboardTileFilterSettings = Components.Schemas.DashboardTileFilterSettings;
 export type DashboardTileID = Components.Schemas.DashboardTileID;
 export type DatalakeQuery = Components.Schemas.DatalakeQuery;
+export type Error = Components.Schemas.Error;
 export type Example = Components.Schemas.Example;
 export type ExampleID = Components.Schemas.ExampleID;
 export type Insight = Components.Schemas.Insight;
@@ -1398,6 +1723,7 @@ export type InsightID = Components.Schemas.InsightID;
 export type InsightPatch = Components.Schemas.InsightPatch;
 export type OrgAccess = Components.Schemas.OrgAccess;
 export type Pagination = Components.Schemas.Pagination;
+export type QuotaError = Components.Schemas.QuotaError;
 export type ShareGrant = Components.Schemas.ShareGrant;
 export type SharePermission = Components.Schemas.SharePermission;
 export type Tags = Components.Schemas.Tags;

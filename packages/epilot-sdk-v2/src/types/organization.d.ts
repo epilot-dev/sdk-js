@@ -10,9 +10,16 @@ import type {
 export declare namespace Components {
     namespace Parameters {
         export type AnnouncementIdPathParam = string;
+        export type StrictOrgIdPathParam = /**
+         * Unique identifier for an organization (tenant) in the epilot platform
+         * example:
+         * 739224
+         */
+        Schemas.OrganizationId;
     }
     export interface PathParameters {
         AnnouncementIdPathParam?: Parameters.AnnouncementIdPathParam;
+        StrictOrgIdPathParam?: Parameters.StrictOrgIdPathParam;
     }
     namespace Schemas {
         export interface ActiveAnnouncementResponse {

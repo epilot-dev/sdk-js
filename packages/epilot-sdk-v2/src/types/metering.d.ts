@@ -80,6 +80,13 @@ export declare namespace Components {
             reason?: "missing_params" | "timestamp_future" | "less_than_previous" | "greater_than_subsequent";
         }
         export type NotFound = Schemas.ErrorResp;
+        export interface TooManyRequests {
+            /**
+             * Error message
+             */
+            message?: string;
+            reason?: "event_publish_throttled";
+        }
         export type Unauthorized = Schemas.ErrorResp;
     }
     namespace Schemas {
@@ -499,7 +506,7 @@ export declare namespace Components {
             /**
              * The calibration date of the meter
              * example:
-             * 2022-10-10
+             * 2022-10-10T00:00:00.000Z
              */
             calibration_date?: string;
             /**
@@ -574,7 +581,7 @@ export declare namespace Components {
             /**
              * The date as of which the forecast reading value is applicable
              * example:
-             * 2022-12-10
+             * 2022-12-10T00:00:00.000Z
              */
             forecast_as_of?: string;
             /**
@@ -586,7 +593,7 @@ export declare namespace Components {
             /**
              * The timestamp of the last reading
              * example:
-             * 2022-10-10
+             * 2022-10-10T00:00:00.000Z
              */
             last_reading?: string;
             /**
@@ -622,7 +629,7 @@ export declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10
+             * 2022-10-10T00:00:00.000Z
              */
             timestamp?: string; // date-time
             source: Source;
@@ -752,7 +759,7 @@ export declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10
+             * 2022-10-10T00:00:00.000Z
              */
             timestamp?: string; // date-time
             source: Source;
@@ -862,7 +869,7 @@ export declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10
+             * 2022-10-10T00:00:00.000Z
              */
             timestamp?: string; // date-time
             /**
@@ -1153,7 +1160,7 @@ export declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10
+             * 2022-10-10T00:00:00.000Z
              */
             timestamp?: string; // date-time
             /**
@@ -1257,6 +1264,7 @@ export declare namespace Paths {
             export type $400 = Components.Responses.InvalidRequestCreateMeterReadings;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $429 = Components.Responses.TooManyRequests;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -1473,6 +1481,12 @@ export declare namespace Paths {
                      */
                     min_value?: number;
                     /**
+                     * Timestamp of the latest reading before the given timestamp, i.e. the reading min_value comes from
+                     * example:
+                     * 2022-10-01T10:10:00.000Z
+                     */
+                    last_reading?: string; // date-time
+                    /**
                      * Maximum allowed reading value for the meter
                      */
                     max_value?: number;
@@ -1615,7 +1629,7 @@ export declare namespace Paths {
                     /**
                      * The calibration date of the meter
                      * example:
-                     * 2022-10-10
+                     * 2022-10-10T00:00:00.000Z
                      */
                     calibration_date?: string;
                     /**
@@ -1634,7 +1648,7 @@ export declare namespace Paths {
                     /**
                      * The timestamp of the last reading
                      * example:
-                     * 2022-10-10
+                     * 2022-10-10T00:00:00.000Z
                      */
                     last_reading?: string;
                     /**

@@ -137,7 +137,7 @@ const { data } = await client.getCustomerMeters({
       ],
       "used_for": "Domestic Usage",
       "manufacturer": "Energy One",
-      "calibration_date": "2022-10-10",
+      "calibration_date": "2022-10-10T00:00:00.000Z",
       "contract": {
         "$relation": [
           {
@@ -169,7 +169,7 @@ const { data } = await client.getCustomerMeters({
           }
         ]
       },
-      "last_reading": "2022-10-10",
+      "last_reading": "2022-10-10T00:00:00.000Z",
       "current_consumption": 100.5
     }
   ]
@@ -225,7 +225,7 @@ const { data } = await client.getMetersByContractId({
       ],
       "used_for": "Domestic Usage",
       "manufacturer": "Energy One",
-      "calibration_date": "2022-10-10",
+      "calibration_date": "2022-10-10T00:00:00.000Z",
       "contract": {
         "$relation": [
           {
@@ -298,7 +298,7 @@ const { data } = await client.updateMeter(
     ],
     "used_for": "Domestic Usage",
     "manufacturer": "Energy One",
-    "calibration_date": "2022-10-10",
+    "calibration_date": "2022-10-10T00:00:00.000Z",
     "contract": {
       "$relation": [
         {
@@ -368,7 +368,7 @@ const { data } = await client.getMeter({
       ],
       "used_for": "Domestic Usage",
       "manufacturer": "Energy One",
-      "calibration_date": "2022-10-10",
+      "calibration_date": "2022-10-10T00:00:00.000Z",
       "contract": {
         "$relation": [
           {
@@ -450,9 +450,9 @@ const { data } = await client.getMeterCounters({
       "transformer_ratio": 70,
       "unit": "string",
       "forecast_reading_value": 270,
-      "forecast_as_of": "2022-12-10",
+      "forecast_as_of": "2022-12-10T00:00:00.000Z",
       "current_consumption": 240,
-      "last_reading": "2022-10-10",
+      "last_reading": "2022-10-10T00:00:00.000Z",
       "conversion_factor": 3,
       "tariff_type": "ht"
     }
@@ -494,9 +494,9 @@ const { data } = await client.getCounterDetails({
     "transformer_ratio": 70,
     "unit": "string",
     "forecast_reading_value": 270,
-    "forecast_as_of": "2022-12-10",
+    "forecast_as_of": "2022-12-10T00:00:00.000Z",
     "current_consumption": 240,
-    "last_reading": "2022-10-10",
+    "last_reading": "2022-10-10T00:00:00.000Z",
     "conversion_factor": 3,
     "tariff_type": "ht"
   }
@@ -525,7 +525,7 @@ const { data } = await client.createMeterReading(
     meter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     counter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     direction: 'feed-in',
-    timestamp: '2022-10-10',
+    timestamp: '2022-10-10T00:00:00.000Z',
     source: 'ECP',
     status: 'valid',
     external_id: 'string',
@@ -552,7 +552,7 @@ const { data } = await client.createMeterReading(
     "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "direction": "feed-in",
-    "timestamp": "2022-10-10",
+    "timestamp": "2022-10-10T00:00:00.000Z",
     "source": "ECP",
     "status": "valid",
     "external_id": "string",
@@ -595,7 +595,7 @@ const { data } = await client.createMeterReadings(
         meter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         counter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         direction: 'feed-in',
-        timestamp: '2022-10-10',
+        timestamp: '2022-10-10T00:00:00.000Z',
         source: 'ECP',
         status: 'valid',
         external_id: 'string',
@@ -625,7 +625,7 @@ const { data } = await client.createMeterReadings(
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10",
+      "timestamp": "2022-10-10T00:00:00.000Z",
       "source": "ECP",
       "status": "valid",
       "external_id": "string",
@@ -667,7 +667,7 @@ const { data } = await client.createPortalMeterReadings(
         meter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         counter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         direction: 'feed-in',
-        timestamp: '2022-10-10',
+        timestamp: '2022-10-10T00:00:00.000Z',
         source: 'ECP',
         status: 'valid',
         external_id: 'string',
@@ -697,7 +697,7 @@ const { data } = await client.createPortalMeterReadings(
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10",
+      "timestamp": "2022-10-10T00:00:00.000Z",
       "source": "ECP",
       "status": "valid",
       "external_id": "string",
@@ -773,7 +773,7 @@ const { data } = await client.batchWriteMeterReadings(
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10",
+      "timestamp": "2022-10-10T00:00:00.000Z",
       "source": "ECP",
       "status": "valid",
       "external_id": "string",
@@ -910,6 +910,7 @@ const { data } = await client.getAllowedReadingForMeter({
     {
       "counter_id": "string",
       "min_value": 0,
+      "last_reading": "2022-10-01T10:10:00.000Z",
       "max_value": 0
     }
   ]
@@ -957,7 +958,7 @@ const { data } = await client.createReadingWithMeter(
     "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "direction": "feed-in",
-    "timestamp": "2022-10-10",
+    "timestamp": "2022-10-10T00:00:00.000Z",
     "source": "ECP",
     "status": "valid",
     "external_id": "string",
@@ -1012,7 +1013,7 @@ const { data } = await client.getReadingsByInterval({
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10",
+      "timestamp": "2022-10-10T00:00:00.000Z",
       "source": "ECP",
       "status": "valid",
       "external_id": "string",
@@ -1054,7 +1055,7 @@ const { data } = await client.updateMeterReading(
     meter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     counter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     direction: 'feed-in',
-    timestamp: '2022-10-10',
+    timestamp: '2022-10-10T00:00:00.000Z',
     source: 'ECP',
     status: 'valid',
     external_id: 'string',
@@ -1079,7 +1080,7 @@ const { data } = await client.updateMeterReading(
     "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "direction": "feed-in",
-    "timestamp": "2022-10-10",
+    "timestamp": "2022-10-10T00:00:00.000Z",
     "source": "ECP",
     "status": "valid",
     "external_id": "string",
@@ -1222,7 +1223,7 @@ const { data } = await client.applyReadingChangeset({
     "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "direction": "feed-in",
-    "timestamp": "2022-10-10",
+    "timestamp": "2022-10-10T00:00:00.000Z",
     "source": "ECP",
     "status": "valid",
     "external_id": "string",

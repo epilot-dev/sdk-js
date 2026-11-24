@@ -11,11 +11,17 @@ export declare namespace Components {
     namespace Parameters {
         export type ClientSupportsAdvLoopsParam = boolean;
         export type EnforceLimitsParam = boolean;
+        export type FlowRevisionIdParam = string;
+        export type IncludeRevisionParam = boolean;
         export type SkipHealParam = boolean;
+    }
+    export interface PathParameters {
+        FlowRevisionIdParam?: Parameters.FlowRevisionIdParam;
     }
     export interface QueryParameters {
         ClientSupportsAdvLoopsParam?: Parameters.ClientSupportsAdvLoopsParam;
         EnforceLimitsParam?: Parameters.EnforceLimitsParam;
+        IncludeRevisionParam?: Parameters.IncludeRevisionParam;
         SkipHealParam?: Parameters.SkipHealParam;
     }
     namespace Schemas {
@@ -48,6 +54,7 @@ export declare namespace Components {
              */
             start_date?: string;
             start_date_config?: /* Relative start date of a task (AL-3678): `duration` `unit` after the most recent occurrence of the reference event. `THIS_TASK_LAST_COMPLETED` is the task's own previous completion (a loop's earlier pass); there is no wait while the reference event has not happened. Durations are positive whole numbers and are added as exact calendar time (no business days); `years` is not accepted. `TASK_FINISHED` must name another task that comes before this one in the flow: one reached by following the edges back from it, never a loop back edge, where the edge leaving a phase stands for every task in the phase. A task after it, on a parallel branch or later in its own loop is refused. Only a manual task, an automation a person runs and a manual decision may carry one. */ StartDateConfig;
+            on_hold_config?: /* What happens when a person puts the running task on hold (AL-3320). `resume_after` is how long after that the task resumes in progress on its own and its assignees are notified; an absent one never resumes it. `reason` is why it is on hold: `disabled` (not asked), `optional` or `required`, and absent is `disabled`, so a task without the config asks for nothing and resumes only by hand, as before. A reason is typed (`text`), picked from `reason_options` (`options`) or either (`options_and_text`); an absent input is `text`. An input that offers options needs at least one while the reason is asked for. Only a manual task, a manual decision and an automation or AI task a person runs may carry it, and never a scheduled manual task. The config is stored as sent. */ OnHoldConfig;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
@@ -65,6 +72,16 @@ export declare namespace Components {
              */
             subtasks?: /* One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup. */ Subtask[];
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
             partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
@@ -132,6 +149,16 @@ export declare namespace Components {
             country_code?: string;
         }
         /**
+         * `fill_empty` (also when absent) only resolves a variable that has no
+         * value yet. `follow_attribute` re-resolves a variable whenever its
+         * entity attribute changes, and clears it when the attribute is
+         * emptied or the entity is unshared from every partner. Only the
+         * variable's own entries change; other assignees are kept. The server
+         * never sets a default.
+         *
+         */
+        export type AssigneeSync = "follow_attribute" | "fill_empty";
+        /**
          * Configuration for automation execution to run
          */
         export interface AutomationConfig {
@@ -161,6 +188,23 @@ export declare namespace Components {
              *
              */
             duplicated_flow_id?: string;
+            /**
+             * The task's automation action, in the shape of `action_config`, when the automation `flow_id` points to is one action without a condition, schedule or loop. Set from that automation on every save. In a request, a definition that differs from the stored one is written to the task's automation, which is created from it when the task has none or it no longer exists. One equal to the stored definition is ignored. `action_config` has priority.
+             */
+            action_definition?: {
+                [name: string]: any;
+                /**
+                 * The action type (e.g. send-email, trigger-workflow)
+                 */
+                type: string;
+                /**
+                 * Action-specific configuration
+                 */
+                config?: {
+                    [name: string]: any;
+                };
+            };
+            legacy_definition?: /* The task's automation when it is more than one plain action: several actions, or conditions, schedules or loops. Set from the automation `flow_id` points to on every save. Read from a request as described on `action_definition`. */ LegacyAutomationDefinition;
             input_context?: /**
              * Optional. Source of the entity fed into this automation task. If omitted, the run's current main context is used.
              *
@@ -191,10 +235,10 @@ export declare namespace Components {
          */
         export interface AutomationInputContext {
             /**
-             * `main_context` = the run's current main context (same as omitting `input_context`). It moves when a task promotes its output to main context. `task` = entity produced by an upstream task in the graph. `trigger` with `trigger_id` = that configured trigger's entity. The Flow Builder offers it while the task is in that one trigger's own sub-flow, before it merges with another trigger's path. Without `trigger_id` it is legacy and resolves like `main_context`.
+             * `main_context` = the run's current main context (same as omitting `input_context`). It moves when a task promotes its output to main context. `task` = entity produced by an upstream task in the graph. `trigger` with `trigger_id` = that configured trigger's entity. The Flow Builder offers it while the task is in that one trigger's own sub-flow, before it merges with another trigger's path. Without `trigger_id` it is legacy and resolves like `main_context`. `linked_entity` with `rule_id` and `schema` = an additional entity: the entity a display rule of the flow's Contexts settings finds by relation, a rule the workflow uses (`context_settings.displays[].id` with `attach_to_contexts`), like an `EvaluationSource` with `origin_type: linked_entity`. Resolved from the run's main context when the task runs. It needs exactly one entity: a rule matching none or several leaves the task without an input entity, so it fails; it never falls back to the main context, an entity of another schema.
              *
              */
-            source: "main_context" | "task" | "trigger";
+            source: "main_context" | "task" | "trigger" | "linked_entity";
             /**
              * Required when source is `task`. The id of the upstream task whose output entity should feed this task.
              */
@@ -204,6 +248,16 @@ export declare namespace Components {
              *
              */
             trigger_id?: string;
+            /**
+             * Required when source is `linked_entity`. The id of a display rule of the flow's Contexts settings (`context_settings.displays[].id`) that has `attach_to_contexts`.
+             *
+             */
+            rule_id?: string;
+            /**
+             * Required when source is `linked_entity`. The rule's `entity_schema`.
+             *
+             */
+            schema?: string;
             /**
              * Whether the input entity brings its direct relations along. Every action honours it. When neither `with_relations` nor `also_pass` is set, the automation receives the legacy payload, unchanged.
              *
@@ -217,7 +271,11 @@ export declare namespace Components {
              * One of the run's own entities. `main_context` = the run's current main context.
              *
              */
-            AutomationInputExtraContextRef | /* Every entity produced by an upstream task. */ AutomationInputExtraTaskRef)[];
+            AutomationInputExtraContextRef | /* Every entity produced by an upstream task. */ AutomationInputExtraTaskRef | /**
+             * Every entity a display rule of the flow's Contexts settings finds by relation (an additional entity), resolved from the run's main context when the task runs. The rule must be one the workflow uses (`attach_to_contexts`). A rule matching nothing passes nothing.
+             *
+             */
+            AutomationInputExtraLinkedEntityRef)[];
         }
         /**
          * One of the run's own entities. `main_context` = the run's current main context.
@@ -225,6 +283,21 @@ export declare namespace Components {
          */
         export interface AutomationInputExtraContextRef {
             source: "main_context";
+        }
+        /**
+         * Every entity a display rule of the flow's Contexts settings finds by relation (an additional entity), resolved from the run's main context when the task runs. The rule must be one the workflow uses (`attach_to_contexts`). A rule matching nothing passes nothing.
+         *
+         */
+        export interface AutomationInputExtraLinkedEntityRef {
+            source: "linked_entity";
+            /**
+             * The id of the display rule (`context_settings.displays[].id`).
+             */
+            rule_id: string;
+            /**
+             * The rule's `entity_schema`.
+             */
+            schema: string;
         }
         /**
          * Every entity produced by an upstream task.
@@ -270,6 +343,7 @@ export declare namespace Components {
              */
             start_date?: string;
             start_date_config?: /* Relative start date of a task (AL-3678): `duration` `unit` after the most recent occurrence of the reference event. `THIS_TASK_LAST_COMPLETED` is the task's own previous completion (a loop's earlier pass); there is no wait while the reference event has not happened. Durations are positive whole numbers and are added as exact calendar time (no business days); `years` is not accepted. `TASK_FINISHED` must name another task that comes before this one in the flow: one reached by following the edges back from it, never a loop back edge, where the edge leaving a phase stands for every task in the phase. A task after it, on a parallel branch or later in its own loop is refused. Only a manual task, an automation a person runs and a manual decision may carry one. */ StartDateConfig;
+            on_hold_config?: /* What happens when a person puts the running task on hold (AL-3320). `resume_after` is how long after that the task resumes in progress on its own and its assignees are notified; an absent one never resumes it. `reason` is why it is on hold: `disabled` (not asked), `optional` or `required`, and absent is `disabled`, so a task without the config asks for nothing and resumes only by hand, as before. A reason is typed (`text`), picked from `reason_options` (`options`) or either (`options_and_text`); an absent input is `text`. An input that offers options needs at least one while the reason is asked for. Only a manual task, a manual decision and an automation or AI task a person runs may carry it, and never a scheduled manual task. The config is stored as sent. */ OnHoldConfig;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
@@ -287,6 +361,16 @@ export declare namespace Components {
              */
             subtasks?: /* One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup. */ Subtask[];
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
             partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
@@ -327,7 +411,7 @@ export declare namespace Components {
              */
             input_entity?: "thread" | "first_email" | "last_email";
             /**
-             * Transient field. Trigger configurations for creating or updating the trigger automation flow. Each item follows the automation API trigger schema. Processed by the backend during create/update and stripped before storage.
+             * Trigger configurations for creating or updating the trigger automation flow. Each item follows the automation API trigger schema. Processed by the backend during create/update. Stored on the trigger, on the flow and in its revisions, while flow versioning is on for the organization, otherwise stripped before storage. Only the `flow` of a flow revision returns it.
              *
              */
             trigger_config?: {
@@ -451,6 +535,197 @@ export declare namespace Components {
          * as blueprints that can be instantiated as flow executions.
          *
          */
+        export interface CreateFlowRevisionReq {
+            /**
+             * Unique identifier for the flow template, generated by the system.
+             */
+            id?: string;
+            /**
+             * Organization identifier that owns this flow template.
+             */
+            org_id?: string;
+            /**
+             * Display name for the workflow, shown to users in the UI.
+             */
+            name: string;
+            /**
+             * Optional detailed description of the workflow's purpose and behavior.
+             */
+            description?: string;
+            /**
+             * Portal-facing overrides of the flow name. Portal surfaces (the End Customer and Installer portals, and the builder's portal views) show the matching override instead of `name`; an absent key falls back to `name`. Has no effect on execution behaviour.
+             */
+            portal_titles?: {
+                /**
+                 * Flow title shown to end customers.
+                 */
+                ecp?: string;
+                /**
+                 * Flow title shown to installers.
+                 */
+                installer?: string;
+            };
+            trigger?: /**
+             * example:
+             * {
+             *   "type": "automation",
+             *   "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
+             * }
+             */
+            Trigger;
+            /**
+             * Whether the workflow is enabled or not
+             */
+            enabled?: boolean;
+            version?: /**
+             * Version of the workflow schema.
+             *
+             * - `v1` – *Deprecated*. The initial version of workflows with limited structure and automation capabilities.
+             * - `v2` – Linear workflows. Supports sequential task execution with basic automation triggers.
+             * - `v3` – Advanced workflows. Adds support for branching logic (conditions), parallel paths, and enhanced automation features such as dynamic triggers and flow control.
+             *
+             * example:
+             * 2
+             */
+            Version;
+            /**
+             * ISO String Date & Time
+             * example:
+             * 2021-04-27T12:01:13.000Z
+             */
+            created_at?: string;
+            /**
+             * ISO String Date & Time
+             * example:
+             * 2021-04-27T12:01:13.000Z
+             */
+            updated_at?: string;
+            /**
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            due_date?: string;
+            due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678) and is valid only on a task that has a start date. */ DueDateConfig;
+            assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
+            /**
+             * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
+             */
+            available_in_ecp?: boolean;
+            /**
+             * Additional trigger configurations that can also start this flow.
+             * Useful for flows that should be startable via multiple methods
+             * (e.g., both automation AND manual). Each additional trigger may
+             * target its own entity and may carry its own entry edge (an edge
+             * whose `from_id` is the trigger's `id`); without an entry edge of
+             * its own it starts the flow at the primary entry. Triggers must be
+             * complementary — no two triggers on a flow may cover the same
+             * entity and event.
+             *
+             */
+            additional_triggers?: /**
+             * example:
+             * {
+             *   "type": "automation",
+             *   "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
+             * }
+             */
+            Trigger[];
+            phases?: Phase[];
+            /**
+             * Customer-facing progress segments layered on top of the flow graph. Stages are strictly ordered boundaries: the first is anchored at the trigger, every later one is an edge cut (or a legacy entry-node anchor whose in-edges form the cut). The array order is the boundary order and must match the graph. Per-node stage membership is always computed from the graph, never stored, and a run may end in any stage.
+             */
+            stages?: /* A customer-facing progress segment layered on top of the flow graph. Unlike phases (internal task grouping), stages exist to communicate progress to outside users (e.g. end customers) with a title and description. Stages form a strict total order; the array order is the boundary order and must match the graph. The first stage's entry node is always the trigger node. */ Stage[];
+            tasks: Task[];
+            edges: Edge[];
+            closing_reasons?: /* One Closing reason for a workflow */ ClosingReason[];
+            entity_sync?: /**
+             * example:
+             * {
+             *   "trigger": {
+             *     "event": "FlowStarted"
+             *   },
+             *   "target": {
+             *     "entitySchema": "opportunity",
+             *     "entityAttribute": "title"
+             *   },
+             *   "value": {
+             *     "source": "workflow_name"
+             *   }
+             * }
+             */
+            EntitySync[];
+            /**
+             * Taxonomy ids that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
+            /**
+             * Whether only a single closing reason can be selected
+             */
+            singleClosingReasonSelection?: boolean;
+            /**
+             * The manifest IDs associated with this workflow
+             */
+            _manifest?: string[];
+            /**
+             * When true, this is a linear flow: task enablement is computed at runtime from the graph — a task is enabled only when all of its direct predecessor tasks in its branch are done. This fully overrides any explicit per-task requirements.
+             */
+            linear?: boolean;
+            context_settings?: /**
+             * Where a flow runs, and where people see it.
+             * A run is ALWAYS visible on the entities it runs on — the entity its trigger supplied and every context it picks up. That is not configurable: it is what running there means, and hiding a run from its own entity is what `visibility: background` is for.
+             * `displays` lists ADDITIONAL entity kinds, reached by relation. It is written once and holds for every trigger: which entry point started a run says how it began, not who the process concerns. A flow that finance must see on the Account must be seen there whether it started from a web form or an inbound email.
+             *
+             */
+            FlowContextSettings;
+            /**
+             * Non-blocking warnings for configuration limits the flow exceeds. Returned on read (get-flow) and on create/update responses. Size/count limits are soft: a flow exceeding them is still accepted and stored, and the violations are reported here so the UI can surface an informational banner. The flow is still fully editable and usable.
+             */
+            limit_warnings?: /* A configuration limit that the flow currently exceeds. Returned by the get-flow endpoint and by create/update responses so the UI can show a non-blocking banner. Size/count limit violations never cause a 400 — only structural errors do. The flow remains fully usable; users are encouraged to bring values within the limits. */ FlowLimitWarning[];
+            /**
+             * Non-blocking warnings about the flow's structure. Returned on read (get-flow) and on create/update responses, whether or not the client sends `client_supports_adv_loops`. A flow with structural warnings is still accepted and stored; the warnings are reported here so the UI can point the user at the part of the flow to fix. Ignored on write and never stored.
+             */
+            structural_warnings?: /* A structural problem the flow has that does not block a save. Returned by the get-flow endpoint and by create/update responses. Today the only one is errors.loop_id_after_exit: a loop connection can be reached from its loop's exit branch, so leaving the loop leads back into it. */ FlowStructuralWarning[];
+            /**
+             * Persisted preference for how the flow's task automations relate to the flow's `enabled` state. When `true`, task automations always mirror the flow: their enabled state is re-synced on every update and new task automations are created with the flow's current enabled state. When `false`, task automations are managed independently: updates never change their enabled state and new task automations are always created enabled, so a flow that is built or edited while disabled does not accumulate automations that stay off after the flow is re-enabled. When unset, legacy behavior applies: new task automations inherit the flow's enabled state and updates leave existing ones untouched. Safety: on updates that do NOT change `enabled`, the in-sync mode never re-enables automations that were disabled by the system (e.g. infinite-loop protection) — only a deliberate `enabled` flip on the flow re-arms those.
+             */
+            keep_task_automations_in_sync?: boolean;
+            /**
+             * If true, the flow is displayed in read-only mode in the UI
+             */
+            protected?: boolean;
+            /**
+             * The revision this content was published from. Returned only with `include_revision=true`. Ignored in requests.
+             */
+            revision_id?: string;
+            /**
+             * ISO timestamp of when the content was published. Returned only with `include_revision=true`. Ignored in requests.
+             */
+            published_at?: string;
+            /**
+             * User id of who published it, or `system`. Returned only with `include_revision=true`. Ignored in requests.
+             */
+            published_by?: string;
+            /**
+             * The latest revision the client knows. May be left out while the latest revision is the base revision. The save is refused with 409 when another revision is the latest.
+             */
+            parent_revision_id?: string;
+        }
+        /**
+         * Base schema for V2 flow templates. A flow template defines the structure of a workflow
+         * including phases, tasks, edges, triggers, and other configuration. Flow templates serve
+         * as blueprints that can be instantiated as flow executions.
+         *
+         */
         export interface CreateFlowTemplate {
             /**
              * Unique identifier for the flow template, generated by the system.
@@ -523,6 +798,16 @@ export declare namespace Components {
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678) and is valid only on a task that has a start date. */ DueDateConfig;
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
             /**
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
              */
@@ -628,6 +913,7 @@ export declare namespace Components {
              */
             start_date?: string;
             start_date_config?: /* Relative start date of a task (AL-3678): `duration` `unit` after the most recent occurrence of the reference event. `THIS_TASK_LAST_COMPLETED` is the task's own previous completion (a loop's earlier pass); there is no wait while the reference event has not happened. Durations are positive whole numbers and are added as exact calendar time (no business days); `years` is not accepted. `TASK_FINISHED` must name another task that comes before this one in the flow: one reached by following the edges back from it, never a loop back edge, where the edge leaving a phase stands for every task in the phase. A task after it, on a parallel branch or later in its own loop is refused. Only a manual task, an automation a person runs and a manual decision may carry one. */ StartDateConfig;
+            on_hold_config?: /* What happens when a person puts the running task on hold (AL-3320). `resume_after` is how long after that the task resumes in progress on its own and its assignees are notified; an absent one never resumes it. `reason` is why it is on hold: `disabled` (not asked), `optional` or `required`, and absent is `disabled`, so a task without the config asks for nothing and resumes only by hand, as before. A reason is typed (`text`), picked from `reason_options` (`options`) or either (`options_and_text`); an absent input is `text`. An input that offers options needs at least one while the reason is asked for. Only a manual task, a manual decision and an automation or AI task a person runs may carry it, and never a scheduled manual task. The config is stored as sent. */ OnHoldConfig;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
@@ -645,6 +931,16 @@ export declare namespace Components {
              */
             subtasks?: /* One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup. */ Subtask[];
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
             partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
@@ -1037,6 +1333,101 @@ export declare namespace Components {
             path: any[];
         }
         /**
+         * A revision of a flow, without its content.
+         */
+        export interface FlowRevision {
+            revision_id: string;
+            created_at: string; // date-time
+            /**
+             * User id, or `system`.
+             */
+            created_by: string;
+            /**
+             * What saved the revision.
+             */
+            source: "builder" | "api" | "blueprint_sync" | "system";
+            /**
+             * The latest revision when this one was saved.
+             */
+            parent_revision_id?: string;
+            /**
+             * The revision that recorded the flow as it was before it had revisions.
+             */
+            is_base: boolean;
+            name?: string;
+            description?: string;
+            /**
+             * Set once the revision was published. The time of its last publish.
+             */
+            published_at?: string; // date-time
+            /**
+             * User id, or `system`.
+             */
+            published_by?: string;
+            flow: /**
+             * Base schema for V2 flow templates. A flow template defines the structure of a workflow
+             * including phases, tasks, edges, triggers, and other configuration. Flow templates serve
+             * as blueprints that can be instantiated as flow executions.
+             *
+             */
+            FlowTemplate;
+        }
+        export interface FlowRevisionList {
+            results: /* A revision of a flow, without its content. */ FlowRevisionMetadata[];
+            /**
+             * Present when there are older revisions.
+             */
+            next_cursor?: string;
+            /**
+             * The revisions the flow points to. Empty for a flow without revisions.
+             */
+            meta: {
+                latest_revision_id?: string;
+                /**
+                 * Left out while the flow was saved without a publish since.
+                 */
+                published_revision_id?: string;
+                /**
+                 * The revision that was published before the current one.
+                 */
+                previous_published_revision_id?: string;
+                base_revision_id?: string;
+            };
+        }
+        /**
+         * A revision of a flow, without its content.
+         */
+        export interface FlowRevisionMetadata {
+            revision_id: string;
+            created_at: string; // date-time
+            /**
+             * User id, or `system`.
+             */
+            created_by: string;
+            /**
+             * What saved the revision.
+             */
+            source: "builder" | "api" | "blueprint_sync" | "system";
+            /**
+             * The latest revision when this one was saved.
+             */
+            parent_revision_id?: string;
+            /**
+             * The revision that recorded the flow as it was before it had revisions.
+             */
+            is_base: boolean;
+            name?: string;
+            description?: string;
+            /**
+             * Set once the revision was published. The time of its last publish.
+             */
+            published_at?: string; // date-time
+            /**
+             * User id, or `system`.
+             */
+            published_by?: string;
+        }
+        /**
          * Where an entry starts looking. Absent means `main_context`.
          * A ROLE, not a schema: an entry anchored on `main_context` follows the primary when a task promotes another entity, where naming a schema would freeze it on the old one.
          *
@@ -1154,6 +1545,16 @@ export declare namespace Components {
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678) and is valid only on a task that has a start date. */ DueDateConfig;
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
             /**
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
              */
@@ -1240,6 +1641,18 @@ export declare namespace Components {
              * If true, the flow is displayed in read-only mode in the UI
              */
             protected?: boolean;
+            /**
+             * The revision this content was published from. Returned only with `include_revision=true`. Ignored in requests.
+             */
+            revision_id?: string;
+            /**
+             * ISO timestamp of when the content was published. Returned only with `include_revision=true`. Ignored in requests.
+             */
+            published_at?: string;
+            /**
+             * User id of who published it, or `system`. Returned only with `include_revision=true`. Ignored in requests.
+             */
+            published_by?: string;
         }
         /**
          * Base schema for V2 flow templates. A flow template defines the structure of a workflow
@@ -1319,6 +1732,16 @@ export declare namespace Components {
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678) and is valid only on a task that has a start date. */ DueDateConfig;
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
             /**
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
              */
@@ -1531,6 +1954,35 @@ export declare namespace Components {
             journey_name?: string;
             automation_id?: string;
         }
+        /**
+         * The task's automation when it is more than one plain action: several actions, or conditions, schedules or loops. Set from the automation `flow_id` points to on every save. Read from a request as described on `action_definition`.
+         */
+        export interface LegacyAutomationDefinition {
+            /**
+             * The automation's actions (automation API `AnyAction`).
+             */
+            actions?: {
+                [name: string]: any;
+            }[];
+            /**
+             * The automation's conditions (automation API `ActionCondition`).
+             */
+            conditions?: {
+                [name: string]: any;
+            }[];
+            /**
+             * The automation's schedules (automation API `ActionSchedule`).
+             */
+            schedules?: {
+                [name: string]: any;
+            }[];
+            /**
+             * The automation's loops (automation API `AutomationLoop`).
+             */
+            loops?: {
+                [name: string]: any;
+            }[];
+        }
         export interface LoopDefinition {
             /**
              * The decision's branches that enter the loop. The first is the `loop_config` loop branch, the others follow in condition order.
@@ -1591,6 +2043,7 @@ export declare namespace Components {
              */
             start_date?: string;
             start_date_config?: /* Relative start date of a task (AL-3678): `duration` `unit` after the most recent occurrence of the reference event. `THIS_TASK_LAST_COMPLETED` is the task's own previous completion (a loop's earlier pass); there is no wait while the reference event has not happened. Durations are positive whole numbers and are added as exact calendar time (no business days); `years` is not accepted. `TASK_FINISHED` must name another task that comes before this one in the flow: one reached by following the edges back from it, never a loop back edge, where the edge leaving a phase stands for every task in the phase. A task after it, on a parallel branch or later in its own loop is refused. Only a manual task, an automation a person runs and a manual decision may carry one. */ StartDateConfig;
+            on_hold_config?: /* What happens when a person puts the running task on hold (AL-3320). `resume_after` is how long after that the task resumes in progress on its own and its assignees are notified; an absent one never resumes it. `reason` is why it is on hold: `disabled` (not asked), `optional` or `required`, and absent is `disabled`, so a task without the config asks for nothing and resumes only by hand, as before. A reason is typed (`text`), picked from `reason_options` (`options`) or either (`options_and_text`); an absent input is `text`. An input that offers options needs at least one while the reason is asked for. Only a manual task, a manual decision and an automation or AI task a person runs may carry it, and never a scheduled manual task. The config is stored as sent. */ OnHoldConfig;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
@@ -1608,6 +2061,16 @@ export declare namespace Components {
              */
             subtasks?: /* One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup. */ Subtask[];
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
             partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
@@ -1636,6 +2099,81 @@ export declare namespace Components {
             currentNoOfWorkflows?: number;
             maxAllowed?: number;
         }
+        /**
+         * What happens when a person puts the running task on hold (AL-3320). `resume_after` is how long after that the task resumes in progress on its own and its assignees are notified; an absent one never resumes it. `reason` is why it is on hold: `disabled` (not asked), `optional` or `required`, and absent is `disabled`, so a task without the config asks for nothing and resumes only by hand, as before. A reason is typed (`text`), picked from `reason_options` (`options`) or either (`options_and_text`); an absent input is `text`. An input that offers options needs at least one while the reason is asked for. Only a manual task, a manual decision and an automation or AI task a person runs may carry it, and never a scheduled manual task. The config is stored as sent.
+         */
+        export interface OnHoldConfig {
+            resume_after?: /* How long after a task is put on hold it resumes in progress on its own (AL-3320), counted from the moment it is put on hold. A day is 24 hours and a week 7 days. */ OnHoldResumeAfter;
+            reason?: OnHoldFieldMode;
+            reason_input?: "text" | "options" | "options_and_text";
+            reason_options?: [
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?,
+                OnHoldReasonOption?
+            ];
+        }
+        export type OnHoldFieldMode = "disabled" | "optional" | "required";
+        export interface OnHoldReasonOption {
+            /**
+             * Stable id the execution records the picked option under
+             */
+            id: string;
+            label: string;
+        }
+        /**
+         * How long after a task is put on hold it resumes in progress on its own (AL-3320), counted from the moment it is put on hold. A day is 24 hours and a week 7 days.
+         */
+        export interface OnHoldResumeAfter {
+            duration: number;
+            unit: "hours" | "days" | "weeks";
+        }
         export type Operator = "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
         /**
          * Details regarding partner for the workflow step
@@ -1655,10 +2193,36 @@ export declare namespace Components {
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678) and is valid only on a task that has a start date. */ DueDateConfig;
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+        }
+        export interface PublishFlowRevisionReq {
+            revision_id: string;
+            /**
+             * When left out, the revision keeps its name. An unnamed one is named after the time of the publish.
+             */
+            name?: string;
+            description?: string;
+            /**
+             * The revision the client believes is published. The publish is refused with 409 when it is another one.
+             */
+            expected_published_revision_id?: string;
+            /**
+             * Publish also when `expected_published_revision_id` is not the published revision.
+             */
+            force?: boolean;
         }
         export interface RelativeSchedule {
             mode: "relative";
@@ -1697,6 +2261,15 @@ export declare namespace Components {
             definition_id?: string;
             trigger_type?: "journey_submission" | "manual" | "automation";
             enabled?: boolean;
+            /**
+             * Only flows that can be started by hand on entities of this schema:
+             * a manual trigger, primary or additional, whose entity_schema is this
+             * slug (the rule the flows sidebar and the bulk start list flows by).
+             *
+             * example:
+             * opportunity
+             */
+            manual_trigger_entity_schema?: string;
             from?: number;
             size?: number;
             sort_by?: "created_at" | "updated_at" | "name" | "enabled" | "id";
@@ -1939,6 +2512,7 @@ export declare namespace Components {
              */
             start_date?: string;
             start_date_config?: /* Relative start date of a task (AL-3678): `duration` `unit` after the most recent occurrence of the reference event. `THIS_TASK_LAST_COMPLETED` is the task's own previous completion (a loop's earlier pass); there is no wait while the reference event has not happened. Durations are positive whole numbers and are added as exact calendar time (no business days); `years` is not accepted. `TASK_FINISHED` must name another task that comes before this one in the flow: one reached by following the edges back from it, never a loop back edge, where the edge leaving a phase stands for every task in the phase. A task after it, on a parallel branch or later in its own loop is refused. Only a manual task, an automation a person runs and a manual decision may carry one. */ StartDateConfig;
+            on_hold_config?: /* What happens when a person puts the running task on hold (AL-3320). `resume_after` is how long after that the task resumes in progress on its own and its assignees are notified; an absent one never resumes it. `reason` is why it is on hold: `disabled` (not asked), `optional` or `required`, and absent is `disabled`, so a task without the config asks for nothing and resumes only by hand, as before. A reason is typed (`text`), picked from `reason_options` (`options`) or either (`options_and_text`); an absent input is `text`. An input that offers options needs at least one while the reason is asked for. Only a manual task, a manual decision and an automation or AI task a person runs may carry it, and never a scheduled manual task. The config is stored as sent. */ OnHoldConfig;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
@@ -1956,6 +2530,16 @@ export declare namespace Components {
              */
             subtasks?: /* One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup. */ Subtask[];
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
+            assignee_sync?: /**
+             * `fill_empty` (also when absent) only resolves a variable that has no
+             * value yet. `follow_attribute` re-resolves a variable whenever its
+             * entity attribute changes, and clears it when the attribute is
+             * emptied or the entity is unshared from every partner. Only the
+             * variable's own entries change; other assignees are kept. The server
+             * never sets a default.
+             *
+             */
+            AssigneeSync;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
             /**
@@ -2173,6 +2757,41 @@ export declare namespace Paths {
             export type $500 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
         }
     }
+    namespace CreateFlowRevision {
+        namespace Parameters {
+            export type ClientSupportsAdvLoops = boolean;
+            export type EnforceLimits = boolean;
+            export type FlowId = /**
+             * Short unique id (length 8) to identify the Flow Template.
+             * example:
+             * 7hj28akg
+             */
+            Components.Schemas.FlowTemplateId;
+        }
+        export interface PathParameters {
+            flowId: Parameters.FlowId;
+        }
+        export interface QueryParameters {
+            enforce_limits?: Parameters.EnforceLimits;
+            client_supports_adv_loops?: Parameters.ClientSupportsAdvLoops;
+        }
+        export type RequestBody = /**
+         * Base schema for V2 flow templates. A flow template defines the structure of a workflow
+         * including phases, tasks, edges, triggers, and other configuration. Flow templates serve
+         * as blueprints that can be instantiated as flow executions.
+         *
+         */
+        Components.Schemas.CreateFlowRevisionReq;
+        namespace Responses {
+            export type $200 = /* A revision of a flow, without its content. */ Components.Schemas.FlowRevision;
+            export type $201 = /* A revision of a flow, without its content. */ Components.Schemas.FlowRevision;
+            export type $400 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $403 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $404 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $409 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $413 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+        }
+    }
     namespace CreateFlowTemplate {
         namespace Parameters {
             export type ClientSupportsAdvLoops = boolean;
@@ -2199,7 +2818,9 @@ export declare namespace Paths {
             Components.Schemas.FlowTemplate;
             export type $400 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
             export type $401 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $413 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
             export type $500 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $503 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
         }
     }
     namespace DeleteClosingReason {
@@ -2290,6 +2911,7 @@ export declare namespace Paths {
             export type $400 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
             export type $401 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
             export type $404 = /* Error response returned when a workflow definition or flow template is not found. */ Components.Schemas.DefinitionNotFoundResp;
+            export type $413 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
             export type $500 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
         }
     }
@@ -2389,6 +3011,27 @@ export declare namespace Paths {
             export type $500 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
         }
     }
+    namespace GetFlowRevision {
+        namespace Parameters {
+            export type FlowId = /**
+             * Short unique id (length 8) to identify the Flow Template.
+             * example:
+             * 7hj28akg
+             */
+            Components.Schemas.FlowTemplateId;
+            export type RevisionId = string;
+        }
+        export interface PathParameters {
+            flowId: Parameters.FlowId;
+            revisionId: Parameters.RevisionId;
+        }
+        namespace Responses {
+            export type $200 = /* A revision of a flow, without its content. */ Components.Schemas.FlowRevision;
+            export type $400 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $403 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $404 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+        }
+    }
     namespace GetFlowTemplate {
         namespace Parameters {
             export type FlowId = /**
@@ -2397,6 +3040,7 @@ export declare namespace Paths {
              * 7hj28akg
              */
             Components.Schemas.FlowTemplateId;
+            export type IncludeRevision = boolean;
             export type SkipHeal = boolean;
         }
         export interface PathParameters {
@@ -2404,6 +3048,7 @@ export declare namespace Paths {
         }
         export interface QueryParameters {
             skip_heal?: Parameters.SkipHeal;
+            include_revision?: Parameters.IncludeRevision;
         }
         namespace Responses {
             export type $200 = /**
@@ -2436,6 +3081,31 @@ export declare namespace Paths {
             export type $200 = Components.Schemas.ClosingReasonsIds;
         }
     }
+    namespace ListFlowRevisions {
+        namespace Parameters {
+            export type Cursor = string;
+            export type FlowId = /**
+             * Short unique id (length 8) to identify the Flow Template.
+             * example:
+             * 7hj28akg
+             */
+            Components.Schemas.FlowTemplateId;
+            export type Limit = number;
+        }
+        export interface PathParameters {
+            flowId: Parameters.FlowId;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+            cursor?: Parameters.Cursor;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.FlowRevisionList;
+            export type $400 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $403 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $404 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+        }
+    }
     namespace ListFlowTemplates {
         namespace Parameters {
             export type TriggerSchema = string;
@@ -2450,6 +3120,29 @@ export declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.FlowTemplatesList;
             export type $500 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+        }
+    }
+    namespace PublishFlowRevision {
+        namespace Parameters {
+            export type FlowId = /**
+             * Short unique id (length 8) to identify the Flow Template.
+             * example:
+             * 7hj28akg
+             */
+            Components.Schemas.FlowTemplateId;
+        }
+        export interface PathParameters {
+            flowId: Parameters.FlowId;
+        }
+        export type RequestBody = Components.Schemas.PublishFlowRevisionReq;
+        namespace Responses {
+            export type $200 = /* A revision of a flow, without its content. */ Components.Schemas.FlowRevision;
+            export type $400 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $403 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $404 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $409 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $413 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $503 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
         }
     }
     namespace SearchFlowTemplates {
@@ -2479,6 +3172,7 @@ export declare namespace Paths {
         namespace Responses {
             export interface $201 {
             }
+            export type $409 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
         }
     }
     namespace UpdateClosingReason {
@@ -2580,7 +3274,9 @@ export declare namespace Paths {
             export type $401 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
             export type $404 = /* Error response returned when a workflow definition or flow template is not found. */ Components.Schemas.DefinitionNotFoundResp;
             export type $409 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $413 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
             export type $500 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $503 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
         }
     }
     namespace V1WorkflowsClosingReasonCategories$CategoryId {
@@ -2642,7 +3338,7 @@ export interface OperationMethods {
   /**
    * listFlowTemplates - listFlowTemplates
    * 
-   * List all Flow Templates for a customer. Optionally, you can filter flow templates by trigger values.
+   * List all Flow Templates for a customer. Optionally, you can filter flow templates by trigger values. A stored template that cannot be read is left out and logged.
    */
   'listFlowTemplates'(
     parameters?: Parameters<Paths.ListFlowTemplates.QueryParameters> | null,
@@ -2667,7 +3363,7 @@ export interface OperationMethods {
   /**
    * searchFlowTemplates - searchFlowTemplates
    * 
-   * Search for flow templates by name, trigger type, enabled status, and more.
+   * Search for flow templates by name, trigger type, enabled status, and more. A stored template that cannot be read is left out and logged.
    */
   'searchFlowTemplates'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -2704,6 +3400,59 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteFlowTemplate.Responses.$204>
+  /**
+   * listFlowRevisions - listFlowRevisions
+   * 
+   * List the revisions of a flow, newest first, without their content.
+   * Answers 404 while flow versioning is off for the organization.
+   * 
+   */
+  'listFlowRevisions'(
+    parameters?: Parameters<Paths.ListFlowRevisions.QueryParameters & Paths.ListFlowRevisions.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListFlowRevisions.Responses.$200>
+  /**
+   * createFlowRevision - createFlowRevision
+   * 
+   * Save a flow as a new revision on top of its latest one. The published flow does not change.
+   * The revision holds `enabled` and `keep_task_automations_in_sync` like every other field of the flow.
+   * The body is checked like an update. A save that changes nothing returns the latest revision with 200.
+   * Answers 404 while flow versioning is off for the organization.
+   * 
+   */
+  'createFlowRevision'(
+    parameters?: Parameters<Paths.CreateFlowRevision.QueryParameters & Paths.CreateFlowRevision.PathParameters> | null,
+    data?: Paths.CreateFlowRevision.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateFlowRevision.Responses.$200 | Paths.CreateFlowRevision.Responses.$201>
+  /**
+   * getFlowRevision - getFlowRevision
+   * 
+   * Get one revision of a flow with its content. `base` in place of the id returns the base revision,
+   * also after the flow was deleted.
+   * Answers 404 while flow versioning is off for the organization.
+   * 
+   */
+  'getFlowRevision'(
+    parameters?: Parameters<Paths.GetFlowRevision.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetFlowRevision.Responses.$200>
+  /**
+   * publishFlowRevision - publishFlowRevision
+   * 
+   * Make a revision the published flow. Publishing an older revision rolls the flow back to it.
+   * The flow takes `enabled` and `keep_task_automations_in_sync` of the revision, and its automations
+   * follow `enabled` as on an update.
+   * Answers 404 while flow versioning is off for the organization.
+   * 
+   */
+  'publishFlowRevision'(
+    parameters?: Parameters<Paths.PublishFlowRevision.PathParameters> | null,
+    data?: Paths.PublishFlowRevision.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PublishFlowRevision.Responses.$200>
   /**
    * duplicateFlowTemplate - duplicateFlowTemplate
    * 
@@ -2934,7 +3683,7 @@ export interface PathsDictionary {
     /**
      * listFlowTemplates - listFlowTemplates
      * 
-     * List all Flow Templates for a customer. Optionally, you can filter flow templates by trigger values.
+     * List all Flow Templates for a customer. Optionally, you can filter flow templates by trigger values. A stored template that cannot be read is left out and logged.
      */
     'get'(
       parameters?: Parameters<Paths.ListFlowTemplates.QueryParameters> | null,
@@ -2961,7 +3710,7 @@ export interface PathsDictionary {
     /**
      * searchFlowTemplates - searchFlowTemplates
      * 
-     * Search for flow templates by name, trigger type, enabled status, and more.
+     * Search for flow templates by name, trigger type, enabled status, and more. A stored template that cannot be read is left out and logged.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -3000,6 +3749,65 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteFlowTemplate.Responses.$204>
+  }
+  ['/v2/flows/templates/{flowId}/revisions']: {
+    /**
+     * createFlowRevision - createFlowRevision
+     * 
+     * Save a flow as a new revision on top of its latest one. The published flow does not change.
+     * The revision holds `enabled` and `keep_task_automations_in_sync` like every other field of the flow.
+     * The body is checked like an update. A save that changes nothing returns the latest revision with 200.
+     * Answers 404 while flow versioning is off for the organization.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateFlowRevision.QueryParameters & Paths.CreateFlowRevision.PathParameters> | null,
+      data?: Paths.CreateFlowRevision.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateFlowRevision.Responses.$200 | Paths.CreateFlowRevision.Responses.$201>
+    /**
+     * listFlowRevisions - listFlowRevisions
+     * 
+     * List the revisions of a flow, newest first, without their content.
+     * Answers 404 while flow versioning is off for the organization.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListFlowRevisions.QueryParameters & Paths.ListFlowRevisions.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListFlowRevisions.Responses.$200>
+  }
+  ['/v2/flows/templates/{flowId}/revisions/{revisionId}']: {
+    /**
+     * getFlowRevision - getFlowRevision
+     * 
+     * Get one revision of a flow with its content. `base` in place of the id returns the base revision,
+     * also after the flow was deleted.
+     * Answers 404 while flow versioning is off for the organization.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetFlowRevision.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetFlowRevision.Responses.$200>
+  }
+  ['/v2/flows/templates/{flowId}/publish']: {
+    /**
+     * publishFlowRevision - publishFlowRevision
+     * 
+     * Make a revision the published flow. Publishing an older revision rolls the flow back to it.
+     * The flow takes `enabled` and `keep_task_automations_in_sync` of the revision, and its automations
+     * follow `enabled` as on an update.
+     * Answers 404 while flow versioning is off for the organization.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.PublishFlowRevision.PathParameters> | null,
+      data?: Paths.PublishFlowRevision.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PublishFlowRevision.Responses.$200>
   }
   ['/v2/flows/templates/{flowId}/duplicate']: {
     /**
@@ -3211,10 +4019,12 @@ export type AiAgentTask = Components.Schemas.AiAgentTask;
 export type AiPrefillConfig = Components.Schemas.AiPrefillConfig;
 export type AiPrefillExtractionField = Components.Schemas.AiPrefillExtractionField;
 export type AiPrefillMapping = Components.Schemas.AiPrefillMapping;
+export type AssigneeSync = Components.Schemas.AssigneeSync;
 export type AutomationConfig = Components.Schemas.AutomationConfig;
 export type AutomationFailurePolicy = Components.Schemas.AutomationFailurePolicy;
 export type AutomationInputContext = Components.Schemas.AutomationInputContext;
 export type AutomationInputExtraContextRef = Components.Schemas.AutomationInputExtraContextRef;
+export type AutomationInputExtraLinkedEntityRef = Components.Schemas.AutomationInputExtraLinkedEntityRef;
 export type AutomationInputExtraTaskRef = Components.Schemas.AutomationInputExtraTaskRef;
 export type AutomationOutputContext = Components.Schemas.AutomationOutputContext;
 export type AutomationTask = Components.Schemas.AutomationTask;
@@ -3232,6 +4042,7 @@ export type ClosingReasons = Components.Schemas.ClosingReasons;
 export type ClosingReasonsIds = Components.Schemas.ClosingReasonsIds;
 export type ClosingReasonsStatus = Components.Schemas.ClosingReasonsStatus;
 export type Condition = Components.Schemas.Condition;
+export type CreateFlowRevisionReq = Components.Schemas.CreateFlowRevisionReq;
 export type CreateFlowTemplate = Components.Schemas.CreateFlowTemplate;
 export type DecisionTask = Components.Schemas.DecisionTask;
 export type DefinitionNotFoundResp = Components.Schemas.DefinitionNotFoundResp;
@@ -3248,6 +4059,9 @@ export type EvaluationSource = Components.Schemas.EvaluationSource;
 export type FlowContextSettings = Components.Schemas.FlowContextSettings;
 export type FlowDisplayRule = Components.Schemas.FlowDisplayRule;
 export type FlowLimitWarning = Components.Schemas.FlowLimitWarning;
+export type FlowRevision = Components.Schemas.FlowRevision;
+export type FlowRevisionList = Components.Schemas.FlowRevisionList;
+export type FlowRevisionMetadata = Components.Schemas.FlowRevisionMetadata;
 export type FlowRuleAnchor = Components.Schemas.FlowRuleAnchor;
 export type FlowStructuralWarning = Components.Schemas.FlowStructuralWarning;
 export type FlowTemplate = Components.Schemas.FlowTemplate;
@@ -3262,15 +4076,21 @@ export type JourneyContextUsage = Components.Schemas.JourneyContextUsage;
 export type JourneyContextUsagesReq = Components.Schemas.JourneyContextUsagesReq;
 export type JourneyContextUsagesResp = Components.Schemas.JourneyContextUsagesResp;
 export type JourneySubmissionTrigger = Components.Schemas.JourneySubmissionTrigger;
+export type LegacyAutomationDefinition = Components.Schemas.LegacyAutomationDefinition;
 export type LoopDefinition = Components.Schemas.LoopDefinition;
 export type MainContextAnchor = Components.Schemas.MainContextAnchor;
 export type MainContextSetting = Components.Schemas.MainContextSetting;
 export type ManualTask = Components.Schemas.ManualTask;
 export type ManualTrigger = Components.Schemas.ManualTrigger;
 export type MaxAllowedLimit = Components.Schemas.MaxAllowedLimit;
+export type OnHoldConfig = Components.Schemas.OnHoldConfig;
+export type OnHoldFieldMode = Components.Schemas.OnHoldFieldMode;
+export type OnHoldReasonOption = Components.Schemas.OnHoldReasonOption;
+export type OnHoldResumeAfter = Components.Schemas.OnHoldResumeAfter;
 export type Operator = Components.Schemas.Operator;
 export type PartnerDetails = Components.Schemas.PartnerDetails;
 export type Phase = Components.Schemas.Phase;
+export type PublishFlowRevisionReq = Components.Schemas.PublishFlowRevisionReq;
 export type RelativeSchedule = Components.Schemas.RelativeSchedule;
 export type RuleAnchor = Components.Schemas.RuleAnchor;
 export type SearchFlowTemplates = Components.Schemas.SearchFlowTemplates;

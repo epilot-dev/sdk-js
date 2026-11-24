@@ -55,6 +55,7 @@ const { data } = await userClient.signUpUser(...)
 - [`listPasskeys`](#listpasskeys)
 - [`deletePasskey`](#deletepasskey)
 - [`switchOrganization`](#switchorganization)
+- [`leaveOrganization`](#leaveorganization)
 
 **Group**
 - [`getGroups`](#getgroups)
@@ -305,6 +306,7 @@ const { data } = await client.getMeV2()
     "assigned_opportunity": true,
     "assigned_task": true
   },
+  "in_app_notification_popups": false,
   "properties": [
     {
       "name": "profileImageName",
@@ -547,6 +549,7 @@ const { data } = await client.listUsersV2({
         "assigned_opportunity": true,
         "assigned_task": true
       },
+      "in_app_notification_popups": false,
       "properties": [
         {
           "name": "profileImageName",
@@ -651,6 +654,7 @@ const { data } = await client.getUserV2({
     "assigned_opportunity": true,
     "assigned_task": true
   },
+  "in_app_notification_popups": false,
   "properties": [
     {
       "name": "profileImageName",
@@ -748,6 +752,7 @@ const { data } = await client.updateUserV2(
       assigned_opportunity: true,
       assigned_task: true
     },
+    in_app_notification_popups: false,
     properties: [
       {
         name: 'profileImageName',
@@ -835,6 +840,7 @@ const { data } = await client.updateUserV2(
     "assigned_opportunity": true,
     "assigned_task": true
   },
+  "in_app_notification_popups": false,
   "properties": [
     {
       "name": "profileImageName",
@@ -909,7 +915,8 @@ const { data } = await client.inviteUser(
     invitation_context: {
       preview_org_name: 'epilot GmbH (Preview)',
       source_org_name: 'epilot GmbH'
-    }
+    },
+    send_email: true
   },
 )
 ```
@@ -990,6 +997,7 @@ const { data } = await client.inviteUser(
     "assigned_opportunity": true,
     "assigned_task": true
   },
+  "in_app_notification_popups": false,
   "properties": [
     {
       "name": "profileImageName",
@@ -1096,6 +1104,7 @@ const { data } = await client.resendUserInvitation(
     "assigned_opportunity": true,
     "assigned_task": true
   },
+  "in_app_notification_popups": false,
   "properties": [
     {
       "name": "profileImageName",
@@ -1198,6 +1207,7 @@ const { data } = await client.getGroupsForUser({
       "favorites": {},
       "email_notification_setting": {},
       "in_app_notification_setting": {},
+      "in_app_notification_popups": false,
       "properties": [],
       "tags": ["non-billable"],
       "crt_index": 3
@@ -1359,6 +1369,7 @@ const { data } = await client.createGroup(
       "assigned_opportunity": true,
       "assigned_task": true
     },
+    "in_app_notification_popups": false,
     "properties": [
       {}
     ],
@@ -1401,6 +1412,7 @@ const { data } = await client.createGroup(
       "favorites": {},
       "email_notification_setting": {},
       "in_app_notification_setting": {},
+      "in_app_notification_popups": false,
       "properties": [],
       "tags": ["non-billable"]
     }
@@ -1509,6 +1521,7 @@ const { data } = await client.getGroup({
       "assigned_opportunity": true,
       "assigned_task": true
     },
+    "in_app_notification_popups": false,
     "properties": [
       {}
     ],
@@ -1551,6 +1564,7 @@ const { data } = await client.getGroup({
       "favorites": {},
       "email_notification_setting": {},
       "in_app_notification_setting": {},
+      "in_app_notification_popups": false,
       "properties": [],
       "tags": ["non-billable"]
     }
@@ -1668,6 +1682,7 @@ const { data } = await client.updateGroup(
       "assigned_opportunity": true,
       "assigned_task": true
     },
+    "in_app_notification_popups": false,
     "properties": [
       {}
     ],
@@ -1710,6 +1725,7 @@ const { data } = await client.updateGroup(
       "favorites": {},
       "email_notification_setting": {},
       "in_app_notification_setting": {},
+      "in_app_notification_popups": false,
       "properties": [],
       "tags": ["non-billable"]
     }
@@ -1831,6 +1847,7 @@ const { data } = await client.advanceUserAssignment({
       "assigned_opportunity": true,
       "assigned_task": true
     },
+    "in_app_notification_popups": false,
     "properties": [
       {}
     ],
@@ -1873,6 +1890,7 @@ const { data } = await client.advanceUserAssignment({
       "favorites": {},
       "email_notification_setting": {},
       "in_app_notification_setting": {},
+      "in_app_notification_popups": false,
       "properties": [],
       "tags": ["non-billable"]
     }
@@ -2240,6 +2258,7 @@ const { data } = await client.getUserLoginParametersV2({
       "organization_type": "Vendor",
       "organization_use": "Production",
       "parent_production_org_id": "123",
+      "is_primary_org": true,
       "cognito_region": "eu-central-1",
       "cognito_user_pool_id": "eu-central-sample",
       "cognito_user_pool_client_id": "asbkh213ehkquwhdi",
@@ -2341,6 +2360,7 @@ const { data } = await client.resolveDiscoverableCredential(
       "organization_type": "Vendor",
       "organization_use": "Production",
       "parent_production_org_id": "123",
+      "is_primary_org": true,
       "cognito_region": "eu-central-1",
       "cognito_user_pool_id": "eu-central-sample",
       "cognito_user_pool_client_id": "asbkh213ehkquwhdi",
@@ -2494,6 +2514,21 @@ const { data } = await client.switchOrganization(
 ```
 
 </details>
+
+---
+
+### `leaveOrganization`
+
+Leave an organization the calling user is a member of. The user's membership in that organization is
+deactivated (status `Deactivated`), so it no longer shows up in the org switcher and can't be logge
+
+`POST /v2/users/me/organizations/{org_id}/leave`
+
+```ts
+const { data } = await client.leaveOrganization({
+  org_id: 'example',
+})
+```
 
 ---
 
@@ -2655,6 +2690,7 @@ const { data } = await client.getUserLoginParameters({
       "organization_type": "Vendor",
       "organization_use": "Production",
       "parent_production_org_id": "123",
+      "is_primary_org": true,
       "cognito_region": "eu-central-1",
       "cognito_user_pool_id": "eu-central-sample",
       "cognito_user_pool_client_id": "asbkh213ehkquwhdi",
@@ -2859,6 +2895,7 @@ type UserInvitationPayload = {
     preview_org_name?: string
     source_org_name?: string
   }
+  send_email?: boolean
 }
 ```
 
@@ -2928,6 +2965,7 @@ type UserV2 = {
   favorites?: Record<string, unknown>
   email_notification_setting?: Record<string, unknown>
   in_app_notification_setting?: Record<string, unknown>
+  in_app_notification_popups?: boolean
   properties?: Array<{
     name: string
     value: string
@@ -2969,6 +3007,7 @@ type LoginParameters = {
   organization_type?: string
   organization_use?: string
   parent_production_org_id?: string
+  is_primary_org?: boolean
   cognito_region?: string
   cognito_user_pool_id?: string
   cognito_user_pool_client_id?: string
@@ -3081,6 +3120,7 @@ type Group = {
     favorites?: Record<string, unknown>
     email_notification_setting?: Record<string, unknown>
     in_app_notification_setting?: Record<string, unknown>
+    in_app_notification_popups?: boolean
     properties?: Array<{
       name: { ... }
       value: { ... }
@@ -3127,7 +3167,6 @@ type Group = {
     custom_navigation?: string
     override_release_channel?: "canary" | "rc" | "stable" | null
     feature_preferences?: Record<string, unknown>
-    image_uri?: {
   // ...
 }
 ```

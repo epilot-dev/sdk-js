@@ -85,11 +85,11 @@ export declare namespace Components {
         }
         export interface DetectDuplicatesRequestBody {
             /**
-             * Entity schema to search (e.g. 'contact'). Must have UniquenessCriteria configured for the calling org.
+             * Entity schema to search (e.g. 'contact'). Must have UniquenessCriteria configured for the calling org, unless the entity carries an explicit '_id' that resolves.
              */
             schema: string;
             /**
-             * The entity to look up potential duplicates for. Attribute values are extracted from this entity per the schema's match rules; system fields such as '_id' are supported. A rule is evaluated when at least one of its attributes resolves to a non-empty value on this entity; attributes without a value require candidates to also lack a value for them.
+             * The entity to look up potential duplicates for. An explicit '_id' is a direct reference: if that entity exists in the schema, it is returned as the single match (confidence 1) before any rule runs — no UniquenessCriteria required. Otherwise attribute values are extracted from this entity per the schema's match rules; a rule is evaluated when at least one of its attributes resolves to a non-empty value, and attributes without a value require candidates to also lack a value for them.
              */
             entity: {
                 [name: string]: any;

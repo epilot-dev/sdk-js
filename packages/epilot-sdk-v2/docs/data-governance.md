@@ -66,7 +66,8 @@ const { data } = await dataGovernanceClient.queryEntities(...)
 
 ### `queryEntities`
 
-Query entities matching a data lifecycle config
+Executes a query against the specified entity schema using a saved view
+definition, optionally combined with additional data governance filters.
 
 `POST /data-governance/v1/{entity_schema}/query`
 
@@ -113,7 +114,8 @@ const { data } = await client.queryEntities(
 
 ### `createJob`
 
-Create a new job run
+Creates a new job run for the given entity schema. The job is associated
+with an existing config and records the scheduled execution date.
 
 `POST /data-governance/v1/{entity_schema}/jobs`
 
@@ -165,7 +167,9 @@ const { data } = await client.createJob(
 
 ### `updateJob`
 
-Update an existing job run
+Partially updates an existing job run. Typically used to record
+progress or finalize a job by setting its status to `success` or
+`failed`, attaching details, error messages, or a report reference.
 
 `PATCH /data-governance/v1/{entity_schema}/jobs/{job_id}`
 
@@ -222,7 +226,9 @@ const { data } = await client.updateJob(
 
 ### `getJob`
 
-Get a job by ID
+Returns full details of a single job run, including its current status,
+execution timestamps, type-specific details, and report reference
+(if available).
 
 `GET /data-governance/v1/jobs/{job_id}`
 
@@ -265,7 +271,9 @@ const { data } = await client.getJob({
 
 ### `getJobReportUrl`
 
-Get report download URL for a job
+Returns a short-lived, pre-signed S3 URL to download the CSV report
+file for the given job. The URL expires after the number of seconds
+indicated in the `expires_in` field.
 
 `GET /data-governance/v1/jobs/{job_id}/report-url`
 
@@ -291,7 +299,8 @@ const { data } = await client.getJobReportUrl({
 
 ### `getConfig`
 
-Get a config by ID
+Returns a single data data lifecycle config by its unique identifier,
+including its query definition, schedule, and current enabled state.
 
 `GET /data-governance/v1/configs/{config_id}`
 
@@ -343,7 +352,8 @@ const { data } = await client.getConfig({
 
 ### `createJobForConfig`
 
-Trigger a manual job run for a config
+Manually triggers a new job run for the specified config. The job is
+created and queued for asynchronous execution.
 
 `POST /data-governance/v1/configs/{config_id}/jobs`
 
@@ -386,7 +396,10 @@ const { data } = await client.createJobForConfig({
 
 ### `upsertConfig`
 
-Create or update a data lifecycle config
+Creates a new data lifecycle config or updates an existing one for the
+given entity schema. The config defines:
+- A **query** (saved view + optional filters) to identify target entities
+- A **schedule
 
 `POST /data-governance/v1/{entity_schema}/configs`
 
@@ -464,7 +477,9 @@ const { data } = await client.upsertConfig(
 
 ### `listConfigs`
 
-List data lifecycle configs
+Returns a cursor-paginated list of data lifecycle configs. Results can be
+filtered by entity schema, config type, scheduled run date, or
+enabled status.
 
 `GET /data-governance/v1/configs`
 
@@ -526,7 +541,8 @@ const { data } = await client.listConfigs({
 
 ### `listJobs`
 
-List job runs
+Returns a cursor-paginated list of job runs. Results can be filtered
+by entity schema, action type, execution status, or parent config.
 
 `GET /data-governance/v1/jobs`
 

@@ -11,6 +11,53 @@ import type {
 
 export declare namespace Components {
     namespace Schemas {
+        /**
+         * AI agent that made the call. Only present when trigger_type is `agent`.
+         */
+        export interface AgentCaller {
+            /**
+             * ID of the agent
+             */
+            agent_id?: string;
+            /**
+             * ID of the host the agent runs on
+             */
+            host_id?: string;
+            /**
+             * Display name of the agent
+             * example:
+             * Claude
+             */
+            agent_name?: string;
+            /**
+             * Display name of the host the agent runs on
+             */
+            host_name?: string;
+            /**
+             * Client the agent connected with
+             */
+            client?: string;
+            /**
+             * Purpose the agent token was approved for
+             * example:
+             * Contract review
+             */
+            purpose?: string;
+            /**
+             * ID of the epilot user who approved the agent; the agent acts on their behalf
+             */
+            user_id?: string;
+            /**
+             * Run of the agent the call belongs to, for correlating all calls of one run
+             */
+            run_id?: string;
+            /**
+             * Where the agent ran, e.g. chat, background, flows
+             * example:
+             * chat
+             */
+            channel?: string;
+        }
         export interface Caller {
             /**
              * Email of the user
@@ -24,8 +71,31 @@ export declare namespace Components {
              * 123456
              */
             user_id?: string;
-            trigger_type?: "user" | "api" | "automation";
+            /**
+             * Who triggered the event. `agent` is an AI agent using an epilot Agent Auth token on behalf of a user.
+             */
+            trigger_type?: "user" | "api" | "automation" | "agent";
+            /**
+             * ID of the token used for the call (API tokens and Agent Auth tokens)
+             * example:
+             * agent_V1StGXR8Z5jdHi6B
+             */
+            token_id?: string;
+            /**
+             * Type of the token used for the call
+             * example:
+             * api
+             */
+            token_type?: string;
+            /**
+             * Name of the token used for the call
+             * example:
+             * Agent: Claude · Contract review
+             */
+            token_name?: string;
+            agent?: /* AI agent that made the call. Only present when trigger_type is `agent`. */ AgentCaller;
         }
+        export type CallerType = "user" | "api" | "automation" | "agent";
         export interface Event {
             /**
              * ID of the log event
@@ -81,6 +151,33 @@ export declare namespace Components {
              * URL of the ressource that was modified
              */
             source_url?: string;
+            /**
+             * ID of the resource this event targets (e.g. blueprint id, workflow id)
+             * example:
+             * 550e8400-e29b-41d4-a716-446655440000
+             */
+            resource_id?: string;
+            /**
+             * Type of resource this event targets
+             * example:
+             * blueprint
+             */
+            resource_type?: string;
+            /**
+             * Semantic action name for this event
+             * example:
+             * blueprint.resource_added
+             */
+            action?: string;
+            /**
+             * `customer` for the organization's own activity, `internal` for actions
+             * performed by epilot staff through the admin portal (hidden from the
+             * customer-facing audit log).
+             *
+             * example:
+             * customer
+             */
+            visibility?: "customer" | "internal";
         }
         export interface HttpContext {
             /**
@@ -152,12 +249,23 @@ export declare namespace Components {
              */
             page?: number;
             /**
-             * Timestamp of the event in ISO 8601 format
-             * example:
-             * 2021-06-01T12:00:00Z
+             * Inclusive time range to filter events by. Each bound accepts either an
+             * ISO 8601 date-time (e.g. `2021-06-01T12:00:00Z`) or a Unix epoch
+             * timestamp in seconds (e.g. `1622548800`). Either bound may be omitted.
+             *
              */
             timestamp?: {
+                /**
+                 * Inclusive lower bound (ISO 8601 or epoch seconds)
+                 * example:
+                 * 2021-06-01T12:00:00Z
+                 */
                 from?: string;
+                /**
+                 * Inclusive upper bound (ISO 8601 or epoch seconds)
+                 * example:
+                 * 2021-06-30T23:59:59Z
+                 */
                 to?: string;
             };
             /**
@@ -182,6 +290,46 @@ export declare namespace Components {
              * POST
              */
             method?: string;
+            /**
+             * Filter by who triggered the event: one type, or a list matching any of them (e.g. `[user, agent]` for
+             * everything people and their AI agents did). `agent` is an AI agent using an epilot Agent Auth token.
+             *
+             */
+            caller_type?: /**
+             * Filter by who triggered the event: one type, or a list matching any of them (e.g. `[user, agent]` for
+             * everything people and their AI agents did). `agent` is an AI agent using an epilot Agent Auth token.
+             *
+             */
+            CallerType | [
+                CallerType,
+                ...CallerType[]
+            ];
+            /**
+             * Which events to return. `customer` (default) returns the organization's own
+             * activity. `internal` returns actions performed by epilot staff through the
+             * admin portal, `all` returns both. `internal` and `all` are only available to
+             * internal callers (internal-auth tokens); other callers receive 403.
+             *
+             */
+            visibility?: "customer" | "internal" | "all";
+            /**
+             * Filter events that target a specific resource (e.g. a blueprint id)
+             * example:
+             * 550e8400-e29b-41d4-a716-446655440000
+             */
+            resource_id?: string;
+            /**
+             * Filter events by the type of resource they target (e.g. "blueprint", "blueprint_resource")
+             * example:
+             * blueprint
+             */
+            resource_type?: string;
+            /**
+             * Filter events by a semantic action name (e.g. "blueprint.created", "blueprint.resource_added")
+             * example:
+             * blueprint.resource_added
+             */
+            action?: string;
             user?: {
                 /**
                  * Email of the user who initiated the event
@@ -203,9 +351,13 @@ export declare namespace Paths {
     namespace GetLogById {
         namespace Parameters {
             export type LogId = string;
+            export type Visibility = "customer" | "internal" | "all";
         }
         export interface PathParameters {
             logId: Parameters.LogId;
+        }
+        export interface QueryParameters {
+            visibility?: Parameters.Visibility;
         }
         namespace Responses {
             export interface $200 {
@@ -247,7 +399,7 @@ export interface OperationMethods {
    * Retrieve Audit Log events
    */
   'getLogById'(
-    parameters?: Parameters<Paths.GetLogById.PathParameters> | null,
+    parameters?: Parameters<Paths.GetLogById.QueryParameters & Paths.GetLogById.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetLogById.Responses.$200>
@@ -273,7 +425,7 @@ export interface PathsDictionary {
      * Retrieve Audit Log events
      */
     'get'(
-      parameters?: Parameters<Paths.GetLogById.PathParameters> | null,
+      parameters?: Parameters<Paths.GetLogById.QueryParameters & Paths.GetLogById.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetLogById.Responses.$200>
@@ -283,7 +435,9 @@ export interface PathsDictionary {
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type AgentCaller = Components.Schemas.AgentCaller;
 export type Caller = Components.Schemas.Caller;
+export type CallerType = Components.Schemas.CallerType;
 export type Event = Components.Schemas.Event;
 export type HttpContext = Components.Schemas.HttpContext;
 export type SearchOptions = Components.Schemas.SearchOptions;

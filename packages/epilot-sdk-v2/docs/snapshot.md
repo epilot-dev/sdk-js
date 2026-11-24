@@ -30,6 +30,7 @@ const { data } = await snapshotClient.createSnapshot(...)
 - [`captureOrgSnapshot`](#captureorgsnapshot)
 - [`getSnapshot`](#getsnapshot)
 - [`deleteSnapshot`](#deletesnapshot)
+- [`getRestore`](#getrestore)
 - [`restoreSnapshot`](#restoresnapshot)
 - [`listSnapshotResources`](#listsnapshotresources)
 - [`getSnapshotResource`](#getsnapshotresource)
@@ -53,10 +54,16 @@ const { data } = await snapshotClient.createSnapshot(...)
 - [`RestoreSnapshotResponse`](#restoresnapshotresponse)
 - [`Snapshot`](#snapshot)
 - [`Operation`](#operation)
+- [`RestoreSummary`](#restoresummary)
+- [`RestoreOutcome`](#restoreoutcome)
+- [`RestoreProgress`](#restoreprogress)
+- [`RestoreResourceProgress`](#restoreresourceprogress)
 - [`CallerIdentity`](#calleridentity)
+- [`CallerActor`](#calleractor)
 - [`RetentionConfig`](#retentionconfig)
 - [`PutOrgSnapshotScheduleRequest`](#putorgsnapshotschedulerequest)
 - [`OrgSnapshotSchedule`](#orgsnapshotschedule)
+- [`ScheduleBlocked`](#scheduleblocked)
 
 ### `createSnapshot`
 
@@ -117,41 +124,16 @@ const { data } = await client.listSnapshots({
       "trigger": "manual",
       "blueprint_instance_id": "string",
       "resource_counts": {},
-      "create": {
-        "type": "create",
-        "started_at": "1970-01-01T00:00:00.000Z",
-        "completed_at": "1970-01-01T00:00:00.000Z",
-        "status": "in_progress",
-        "error": "string",
-        "triggered_by": {
-          "name": "string",
-          "user_id": "string",
-          "token_id": "string"
-        }
-      },
-      "restores": [
-        {
-          "type": "create",
-          "started_at": "1970-01-01T00:00:00.000Z",
-          "completed_at": "1970-01-01T00:00:00.000Z",
-          "status": "in_progress",
-          "error": "string",
-          "triggered_by": {
-            "name": "string",
-            "user_id": "string",
-            "token_id": "string"
-          }
-        }
-      ],
+      "create": {},
+      "restores": [],
       "matched_count": 0,
       "scope": "selection",
       "expires_at": "1970-01-01T00:00:00.000Z",
-      "capture_summary": {
-        "total": 0,
-        "captured": 0,
-        "skipped": 0,
-        "failed": 0
-      }
+      "capture_summary": {},
+      "skipped_resources": [],
+      "skipped_resources_truncated": true,
+      "failed_resources": [],
+      "failed_resources_truncated": true
     }
   ]
 }
@@ -215,11 +197,29 @@ const { data } = await client.getSnapshot({
     "completed_at": "1970-01-01T00:00:00.000Z",
     "status": "in_progress",
     "error": "string",
+    "summary": {
+      "total": 0,
+      "created": 0,
+      "updated": 0,
+      "unchanged": 0,
+      "failed": 0,
+      "skipped": 0
+    },
+    "outcomes_s3_key": "string",
     "triggered_by": {
       "name": "string",
       "user_id": "string",
-      "token_id": "string"
-    }
+      "token_id": "string",
+      "actor": {
+        "type": "agent",
+        "agent_id": "string",
+        "agent_name": "string",
+        "on_behalf_of": {
+          "user_id": "string"
+        }
+      }
+    },
+    "selected_target_count": 1
   },
   "restores": [
     {
@@ -228,11 +228,29 @@ const { data } = await client.getSnapshot({
       "completed_at": "1970-01-01T00:00:00.000Z",
       "status": "in_progress",
       "error": "string",
+      "summary": {
+        "total": 0,
+        "created": 0,
+        "updated": 0,
+        "unchanged": 0,
+        "failed": 0,
+        "skipped": 0
+      },
+      "outcomes_s3_key": "string",
       "triggered_by": {
         "name": "string",
         "user_id": "string",
-        "token_id": "string"
-      }
+        "token_id": "string",
+        "actor": {
+          "type": "agent",
+          "agent_id": "string",
+          "agent_name": "string",
+          "on_behalf_of": {
+            "user_id": "string"
+          }
+        }
+      },
+      "selected_target_count": 1
     }
   ],
   "matched_count": 0,
@@ -243,7 +261,23 @@ const { data } = await client.getSnapshot({
     "captured": 0,
     "skipped": 0,
     "failed": 0
-  }
+  },
+  "skipped_resources": [
+    {
+      "type": "string",
+      "id": "string",
+      "reason": "string"
+    }
+  ],
+  "skipped_resources_truncated": true,
+  "failed_resources": [
+    {
+      "type": "string",
+      "id": "string",
+      "reason": "string"
+    }
+  ],
+  "failed_resources_truncated": true
 }
 ```
 
@@ -253,7 +287,9 @@ const { data } = await client.getSnapshot({
 
 ### `deleteSnapshot`
 
-Delete a snapshot's metadata and S3 manifest.
+Delete a snapshot's metadata and S3 manifest. Refused with 409 while the
+snapshot is still being created, while one of its restores is in progress,
+or while the organization holds a restore lease.
 
 `DELETE /v1/snapshots/{id}`
 
@@ -265,11 +301,121 @@ const { data } = await client.deleteSnapshot({
 
 ---
 
+### `getRestore`
+
+Fetch a restore operation and a page of per-resource outcomes in manifest order.
+Pagination bounds response size for org snapshots; the compressed artifact is
+read in full for each page. Outcomes are 
+
+`GET /v1/snapshots/{id}/restores/{index}`
+
+```ts
+const { data } = await client.getRestore({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+  index: 1,
+  offset: 1,
+  limit: 1,
+  action: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "operation": {
+    "type": "create",
+    "started_at": "1970-01-01T00:00:00.000Z",
+    "completed_at": "1970-01-01T00:00:00.000Z",
+    "status": "in_progress",
+    "error": "string",
+    "summary": {
+      "total": 0,
+      "created": 0,
+      "updated": 0,
+      "unchanged": 0,
+      "failed": 0,
+      "skipped": 0
+    },
+    "outcomes_s3_key": "string",
+    "triggered_by": {
+      "name": "string",
+      "user_id": "string",
+      "token_id": "string",
+      "actor": {
+        "type": "agent",
+        "agent_id": "string",
+        "agent_name": "string",
+        "on_behalf_of": {
+          "user_id": "string"
+        }
+      }
+    },
+    "selected_target_count": 1
+  },
+  "outcomes": [
+    {
+      "type": "string",
+      "id": "string",
+      "captured_id": "string",
+      "lineage_id": "string",
+      "action": "created",
+      "reason": "string",
+      "error": "string"
+    }
+  ],
+  "outcomes_available": true,
+  "total": 0,
+  "progress": {
+    "started": 0,
+    "matched": 0,
+    "applied": 0,
+    "failed": 0,
+    "phase": "preparing",
+    "by_type": [
+      {
+        "type": "string",
+        "started": 0,
+        "applied": 0,
+        "failed": 0
+      }
+    ],
+    "recent": [
+      {
+        "type": "string",
+        "id": "string",
+        "target_id": "string",
+        "state": "working",
+        "error": "string",
+        "at": "1970-01-01T00:00:00.000Z"
+      }
+    ],
+    "resources": [
+      {
+        "type": "string",
+        "id": "string",
+        "target_id": "string",
+        "state": "working",
+        "error": "string",
+        "at": "1970-01-01T00:00:00.000Z"
+      }
+    ],
+    "updated_at": "1970-01-01T00:00:00.000Z"
+  },
+  "next_offset": 0
+}
+```
+
+</details>
+
+---
+
 ### `restoreSnapshot`
 
 Restore a snapshot to the org. Async — returns immediately; client polls
-`getSnapshot` until the latest entry in `restores` moves from
-`in_progress` to one of `completed | partial | failed`.
+`getSnapshot` until `restores[restore_index]` (using the index returned by this POST) moves from
+`in_progress` to one of `compl
 
 `POST /v1/snapshots/{id}:restore`
 
@@ -279,7 +425,9 @@ const { data } = await client.restoreSnapshot(
     id: '123e4567-e89b-12d3-a456-426614174000',
   },
   {
-    exclude_target_ids: ['string']
+    exclude_target_ids: ['string'],
+    include_target_ids: ['string'],
+    blueprint_instance_id: 'string'
   },
 )
 ```
@@ -353,8 +501,10 @@ const { data } = await client.getSnapshotResource({
 
 ### `getOrgSnapshotSchedule`
 
-Return the scheduled-snapshot enrollment config for the caller's org.
-Returns 404 when the org has not yet enrolled.
+Return the scheduled-snapshot enrollment config for the caller's org,
+with `blocked` while no scheduled capture can start and `stale_since`
+while scheduled captures have stopped succeeding.
+Returns 40
 
 `GET /v1/org-snapshot-schedule`
 
@@ -380,9 +530,20 @@ const { data } = await client.getOrgSnapshotSchedule()
   "last_started_at": "1970-01-01T00:00:00.000Z",
   "last_completed_at": "1970-01-01T00:00:00.000Z",
   "last_status": "completed",
+  "last_succeeded_at": "1970-01-01T00:00:00.000Z",
+  "last_status_reason": "restore_in_progress",
+  "enrolled_by": "auto",
+  "opted_out_at": "1970-01-01T00:00:00.000Z",
+  "opted_out_by": "string",
   "created_by": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
-  "updated_at": "1970-01-01T00:00:00.000Z"
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "blocked": {
+    "since": "1970-01-01T00:00:00.000Z",
+    "reason": "execution_unverifiable",
+    "execution_arn": "string"
+  },
+  "stale_since": "1970-01-01T00:00:00.000Z"
 }
 ```
 
@@ -393,8 +554,8 @@ const { data } = await client.getOrgSnapshotSchedule()
 ### `putOrgSnapshotSchedule`
 
 Create or update the scheduled-snapshot enrollment config for the
-caller's org (upsert). The cron expression and retention window are
-validated server-side; invalid values are rejected with 400.
+caller's org (upsert). The cron expression, timezone and retention
+window are validated server-side; invalid values are rejected with 
 
 `PUT /v1/org-snapshot-schedule`
 
@@ -432,9 +593,20 @@ const { data } = await client.putOrgSnapshotSchedule(
   "last_started_at": "1970-01-01T00:00:00.000Z",
   "last_completed_at": "1970-01-01T00:00:00.000Z",
   "last_status": "completed",
+  "last_succeeded_at": "1970-01-01T00:00:00.000Z",
+  "last_status_reason": "restore_in_progress",
+  "enrolled_by": "auto",
+  "opted_out_at": "1970-01-01T00:00:00.000Z",
+  "opted_out_by": "string",
   "created_by": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
-  "updated_at": "1970-01-01T00:00:00.000Z"
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "blocked": {
+    "since": "1970-01-01T00:00:00.000Z",
+    "reason": "execution_unverifiable",
+    "execution_arn": "string"
+  },
+  "stale_since": "1970-01-01T00:00:00.000Z"
 }
 ```
 
@@ -444,10 +616,10 @@ const { data } = await client.putOrgSnapshotSchedule(
 
 ### `deleteOrgSnapshotSchedule`
 
-Remove the scheduled-snapshot enrollment for the caller's org.
-Returns 404 when no schedule exists.
-The corresponding EventBridge schedule is removed by a reconcile
-step (Task 6).
+Opt the caller's org out of scheduled snapshots. The EventBridge
+schedule is removed and the enrollment is kept, disabled, with
+`opted_out_at` and `opted_out_by`, so no scheduled snapshot is taken
+and
 
 `DELETE /v1/org-snapshot-schedule`
 
@@ -616,6 +788,8 @@ restores; Config Hub's manu
 ```ts
 type RestoreSnapshotRequest = {
   exclude_target_ids?: string[]
+  include_target_ids?: string[]
+  blueprint_instance_id?: string
 }
 ```
 
@@ -623,6 +797,7 @@ type RestoreSnapshotRequest = {
 
 ```ts
 type RestoreSnapshotResponse = {
+  restore_index: number
   id: string
   status: "restoring"
 }
@@ -636,7 +811,7 @@ type Snapshot = {
   org_id: string
   name: string
   description?: string
-  trigger: "manual" | "sync" | "blueprint_install" | "scheduled"
+  trigger: "manual" | "sync" | "blueprint_install" | "scheduled" | "analytics"
   blueprint_instance_id?: string
   resource_counts: Record<string, number>
   create: {
@@ -645,11 +820,22 @@ type Snapshot = {
     completed_at?: string // date-time
     status: "in_progress" | "completed" | "partial" | "failed"
     error?: string
+    summary?: {
+      total: { ... }
+      created: { ... }
+      updated: { ... }
+      unchanged: { ... }
+      failed: { ... }
+      skipped: { ... }
+    }
+    outcomes_s3_key?: string
     triggered_by: {
       name: { ... }
       user_id?: { ... }
       token_id?: { ... }
+      actor?: { ... }
     }
+    selected_target_count?: number
   }
   restores: Array<{
     type: "create" | "restore"
@@ -657,11 +843,22 @@ type Snapshot = {
     completed_at?: string // date-time
     status: "in_progress" | "completed" | "partial" | "failed"
     error?: string
+    summary?: {
+      total: { ... }
+      created: { ... }
+      updated: { ... }
+      unchanged: { ... }
+      failed: { ... }
+      skipped: { ... }
+    }
+    outcomes_s3_key?: string
     triggered_by: {
       name: { ... }
       user_id?: { ... }
       token_id?: { ... }
+      actor?: { ... }
     }
+    selected_target_count?: number
   }>
   matched_count?: number
   scope?: "selection" | "org"
@@ -672,6 +869,18 @@ type Snapshot = {
     skipped: number
     failed: number
   }
+  skipped_resources?: Array<{
+    type: string
+    id: string
+    reason: string
+  }>
+  skipped_resources_truncated?: boolean
+  failed_resources?: Array<{
+    type: string
+    id: string
+    reason: string
+  }>
+  failed_resources_truncated?: boolean
 }
 ```
 
@@ -684,11 +893,109 @@ type Operation = {
   completed_at?: string // date-time
   status: "in_progress" | "completed" | "partial" | "failed"
   error?: string
+  summary?: {
+    total: number
+    created: number
+    updated: number
+    unchanged: number
+    failed: number
+    skipped: number
+  }
+  outcomes_s3_key?: string
   triggered_by: {
     name: string
     user_id?: string
     token_id?: string
+    actor?: {
+      type: { ... }
+      agent_id?: { ... }
+      agent_name?: { ... }
+      on_behalf_of?: { ... }
+    }
   }
+  selected_target_count?: number
+}
+```
+
+### `RestoreSummary`
+
+One outcome per captured manifest resource, including exclusions.
+
+```ts
+type RestoreSummary = {
+  total: number
+  created: number
+  updated: number
+  unchanged: number
+  failed: number
+  skipped: number
+}
+```
+
+### `RestoreOutcome`
+
+```ts
+type RestoreOutcome = {
+  type: string
+  id: string
+  captured_id?: string
+  lineage_id?: string
+  action: "created" | "updated" | "unchanged" | "failed" | "skipped"
+  reason?: string
+  error?: string
+}
+```
+
+### `RestoreProgress`
+
+Live progress of a running restore (present only while the operation is
+in_progress), read from config-engine's operation log. A resource is
+"matched" once found or created, "applied" once its full payload is written.
+
+
+```ts
+type RestoreProgress = {
+  started: number
+  matched: number
+  applied: number
+  failed: number
+  phase: "preparing" | "matching" | "applying"
+  by_type: Array<{
+    type: string
+    started: number
+    applied: number
+    failed: number
+  }>
+  recent: Array<{
+    type: string
+    id: string
+    target_id?: string
+    state: "working" | "matched" | "applied" | "failed"
+    error?: string
+    at?: string // date-time
+  }>
+  resources?: Array<{
+    type: string
+    id: string
+    target_id?: string
+    state: "working" | "matched" | "applied" | "failed"
+    error?: string
+    at?: string // date-time
+  }>
+  updated_at?: string // date-time
+}
+```
+
+### `RestoreResourceProgress`
+
+```ts
+type RestoreResourceProgress = {
+  type: string
+  id: string
+  target_id?: string
+  state: "working" | "matched" | "applied" | "failed"
+  error?: string
+  at?: string // date-time
 }
 ```
 
@@ -699,6 +1006,33 @@ type CallerIdentity = {
   name: string
   user_id?: string
   token_id?: string
+  actor?: {
+    type: "agent"
+    agent_id?: string
+    agent_name?: string
+    on_behalf_of?: {
+      user_id: { ... }
+    }
+  }
+}
+```
+
+### `CallerActor`
+
+Present when an agent made the call with a token carrying an `actor`
+claim (e.g. the epilot Admin MCP via a login-as token). `user_id`/`name`
+on the enclosing CallerIdentity are then the agent's token identity;
+`on_behalf_of` is the user the agent acted for.
+
+
+```ts
+type CallerActor = {
+  type: "agent"
+  agent_id?: string
+  agent_name?: string
+  on_behalf_of?: {
+    user_id: string
+  }
 }
 ```
 
@@ -757,9 +1091,34 @@ type OrgSnapshotSchedule = {
   schedule_name: string
   last_started_at?: string // date-time
   last_completed_at?: string // date-time
-  last_status?: "completed" | "partial" | "failed"
+  last_status?: "completed" | "partial" | "failed" | "skipped"
+  last_succeeded_at?: string // date-time
+  last_status_reason?: "restore_in_progress" | "attempts_exhausted" | "window_closed"
+  enrolled_by?: "auto"
+  opted_out_at?: string // date-time
+  opted_out_by?: string
   created_by: string
   created_at: string // date-time
   updated_at: string // date-time
+  blocked?: {
+    since: string // date-time
+    reason: "execution_unverifiable"
+    execution_arn?: string
+  }
+  stale_since?: string // date-time
+}
+```
+
+### `ScheduleBlocked`
+
+No scheduled capture starts for the org until this is resolved. The admitted
+execution cannot be verified; epilot resolves it.
+
+
+```ts
+type ScheduleBlocked = {
+  since: string // date-time
+  reason: "execution_unverifiable"
+  execution_arn?: string
 }
 ```
