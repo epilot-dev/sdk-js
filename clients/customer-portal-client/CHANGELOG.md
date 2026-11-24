@@ -1,5 +1,12 @@
 # @epilot/customer-portal-client
 
+## 0.55.0
+
+### Minor Changes
+
+- Export: `template` on `PortalDataExportColumn` (the column value as a Handlebars template, rendered with the block template engine; a single-variable template keeps typed formatters) and a column-level `address_field`; `source` is no longer required (older single-attribute shape, still accepted)
+- Regenerated from the Customer Portal API: `record_access` / `record_access_defaults` on the portal config and the `RecordAccess` schemas
+
 ## 0.54.0
 
 ### Minor Changes
