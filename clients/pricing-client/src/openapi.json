@@ -3631,6 +3631,16 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "The contract (`contract_id`) or campaign (`campaign_id`) does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -16476,6 +16486,11 @@
             "type": "string",
             "description": "The tariff change campaign the offers are requested for. Used together with `contract_id`:\nthe offers come from the rule table of the campaign's product recommendation, and only when\nthe campaign is active and the contract or its contact is in the campaign's audience.\nOtherwise the result is empty.\n\nOnly applies to organizations with campaign-scoped offers enabled; ignored otherwise.\n",
             "example": "3f1c7d2e-9a4b-4c6d-8e2f-1a2b3c4d5e6f"
+          },
+          "contact_id": {
+            "type": "string",
+            "description": "Only used with `campaign_id` when there's no `contract_id`.",
+            "example": "9b2e4f6a-1c3d-4e5f-8a7b-6c5d4e3f2a1b"
           },
           "filters": {
             "$ref": "#/components/schemas/AvailabilityFilters"
