@@ -33,8 +33,17 @@ const { data } = await entityUiClient.putWidgetDefinition(...)
 - [`WidgetDefinitionRef`](#widgetdefinitionref)
 - [`WidgetDefinitionRefResponse`](#widgetdefinitionrefresponse)
 - [`WidgetDefinition`](#widgetdefinition)
+- [`WidgetDefinitionV1`](#widgetdefinitionv1)
+- [`WidgetDefinitionV2`](#widgetdefinitionv2)
+- [`WidgetPrompt`](#widgetprompt)
+- [`WidgetHtml`](#widgethtml)
 - [`WidgetManifest`](#widgetmanifest)
+- [`WidgetManifestV2`](#widgetmanifestv2)
+- [`WidgetLibs`](#widgetlibs)
+- [`WidgetIcons`](#widgeticons)
 - [`WidgetRelations`](#widgetrelations)
+- [`WidgetRelationsV2`](#widgetrelationsv2)
+- [`WidgetFields`](#widgetfields)
 - [`WidgetStrings`](#widgetstrings)
 - [`WidgetStringTable`](#widgetstringtable)
 - [`WidgetSuggestions`](#widgetsuggestions)
@@ -94,6 +103,7 @@ Returns a stored widget definition in its canonical form.
 ```ts
 const { data } = await client.getWidgetDefinition({
   ref: 'example',
+  schema: 'example',
 })
 ```
 
@@ -134,7 +144,9 @@ listed in `missing`.
 
 ```ts
 const { data } = await client.batchGetWidgetDefinitions(
-  null,
+  {
+    schema: 'example',
+  },
   {
     refs: ['9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08']
   },
@@ -175,8 +187,8 @@ type WidgetDefinitionRefResponse = {
 
 ### `WidgetDefinition`
 
-Version 1 of an AI widget definition. Unknown keys are rejected at every level, because any extra key would
-produce a different `ref` for an otherwise identical definition.
+An AI widget definition, version 1 or version 2. Unknown keys are rejected at every level, because any extra
+key would produce a different `ref` for an otherwise identical definition.
 
 
 ```ts
@@ -202,7 +214,113 @@ type WidgetDefinition = {
     de: string[]
     en: string[]
   }
+} | {
+  version: 2
+  prompt: string
+  manifest: {
+    relations: {
+      mode: { ... }
+      schemas: { ... }
+      size: { ... }
+    }
+    libs: "echarts"[]
+    icons?: string[]
+    fields: Record<string, string[]>
+  }
+  html: string
+  strings: {
+    de: Record<string, string>
+    en: Record<string, string>
+  }
+  suggestions?: {
+    de: string[]
+    en: string[]
+  }
 }
+```
+
+### `WidgetDefinitionV1`
+
+Version 1 of an AI widget definition. The widget receives every attribute of every record.
+
+```ts
+type WidgetDefinitionV1 = {
+  version: 1
+  prompt: string
+  manifest: {
+    relations: {
+      mode?: { ... }
+    } | {
+      mode?: { ... }
+      schemas?: { ... }
+    }
+    libs: "echarts"[]
+    icons?: string[]
+  }
+  html: string
+  strings: {
+    de: Record<string, string>
+    en: Record<string, string>
+  }
+  suggestions?: {
+    de: string[]
+    en: string[]
+  }
+}
+```
+
+### `WidgetDefinitionV2`
+
+Version 2 of an AI widget definition. The widget receives only the attributes its `manifest.fields` declares,
+plus `_id`, `_schema` and `_title`.
+
+Across both string tables, the UTF-8 bytes of every key plus every value may total at most 65536 bytes. The
+server enforces this and answers `400`; JSON 
+
+```ts
+type WidgetDefinitionV2 = {
+  version: 2
+  prompt: string
+  manifest: {
+    relations: {
+      mode: { ... }
+      schemas: { ... }
+      size: { ... }
+    }
+    libs: "echarts"[]
+    icons?: string[]
+    fields: Record<string, string[]>
+  }
+  html: string
+  strings: {
+    de: Record<string, string>
+    en: Record<string, string>
+  }
+  suggestions?: {
+    de: string[]
+    en: string[]
+  }
+}
+```
+
+### `WidgetPrompt`
+
+The admin's own words, at most 4000 UTF-16 code units. The server counts code units and answers `400`, because
+`maxLength` counts code points, so a prompt of astral characters passes it at up to 8000 code units.
+
+
+```ts
+type WidgetPrompt = string
+```
+
+### `WidgetHtml`
+
+Body fragment rendered inside the sandboxed frame, at most 65536 UTF-8 bytes. The server counts bytes and
+answers `400`, because `maxLength` counts characters.
+
+
+```ts
+type WidgetHtml = string
 ```
 
 ### `WidgetManifest`
@@ -220,6 +338,37 @@ type WidgetManifest = {
 }
 ```
 
+### `WidgetManifestV2`
+
+```ts
+type WidgetManifestV2 = {
+  relations: {
+    mode: "none" | "direct" | "reverse" | "both"
+    schemas: string[]
+    size: number
+  }
+  libs: "echarts"[]
+  icons?: string[]
+  fields: Record<string, string[]>
+}
+```
+
+### `WidgetLibs`
+
+Host-injected libraries, `[]` for none
+
+```ts
+type WidgetLibs = "echarts"[]
+```
+
+### `WidgetIcons`
+
+Icon names the widget renders
+
+```ts
+type WidgetIcons = string[]
+```
+
 ### `WidgetRelations`
 
 ```ts
@@ -229,6 +378,32 @@ type WidgetRelations = {
   mode?: "none"
   schemas?: unknown
 }
+```
+
+### `WidgetRelationsV2`
+
+Relations of a version 2 definition: `schemas` names every related schema to load, so it must be non-empty
+unless mode is none, and empty when mode is none.
+
+
+```ts
+type WidgetRelationsV2 = {
+  mode: "none" | "direct" | "reverse" | "both"
+  schemas: string[]
+  size: number
+}
+```
+
+### `WidgetFields`
+
+Maps an entity schema slug to the top-level attributes the widget reads from records of that schema. A record
+whose schema has no key receives `_id`, `_schema` and `_title` only.
+
+Every key must be 1 to 128 UTF-16 code units and may not be `__proto__`, and every attribute name at most 128
+UTF-16 cod
+
+```ts
+type WidgetFields = Record<string, string[]>
 ```
 
 ### `WidgetStrings`
@@ -281,6 +456,24 @@ type BatchGetWidgetDefinitionsResponse = {
       relations: { ... }
       libs: { ... }
       icons?: { ... }
+    }
+    html: string
+    strings: {
+      de: { ... }
+      en: { ... }
+    }
+    suggestions?: {
+      de: { ... }
+      en: { ... }
+    }
+  } | {
+    version: 2
+    prompt: string
+    manifest: {
+      relations: { ... }
+      libs: { ... }
+      icons?: { ... }
+      fields: { ... }
     }
     html: string
     strings: {

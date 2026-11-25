@@ -63,7 +63,7 @@ const { data } = await environmentsClient.listEnvironmentVariables(...)
 
 ### `listEnvironmentVariables`
 
-List all environment variables for the organization. Returns metadata only, no secret values.
+List all environment variables for the organization. Returns metadata only, no secret values. Requires `environments:view`; `environments:edit` is also accepted for roles granted before `environments:
 
 `GET /v1/environments`
 
@@ -139,7 +139,7 @@ const { data } = await client.createEnvironmentVariable(
 
 ### `listEnvironmentGroups`
 
-List all environment groups for the organization.
+List all environment groups for the organization. Requires `environments:view`; `environments:edit` is also accepted for roles granted before `environments:view` existed.
 
 `GET /v1/environments/groups`
 
@@ -216,7 +216,7 @@ const { data } = await client.deleteEnvironmentGroup({
 
 ### `getEnvironmentVariable`
 
-Get an environment variable by key. Returns value for non-secret types, omitted for SecretString.
+Get an environment variable by key. Returns value for non-secret types, omitted for SecretString. Requires `environments:view`; `environments:edit` is also accepted for roles granted before `environme
 
 `GET /v1/environments/{key}`
 

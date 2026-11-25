@@ -1,6 +1,4 @@
 /* Auto-copied from address-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -40,6 +38,27 @@ export declare namespace Components {
          * The address suggestions entity array
          */
         export type AddressSuggestions = /* The address suggestions entity */ AddressSuggestion[];
+        /**
+         * A raw address. Provide EITHER a street address (`street` + `street_number` + (`postal_code` or `city`)) OR coordinates (`latitude` + `longitude`). Only the string fields drive the canonical address hash; for a street address the coordinates are stored as-is on the Location, while a coordinate-only address is anchored and deduplicated by its coordinates (rounded to ~1 m).
+         */
+        export interface AddressValue {
+            [name: string]: any;
+            street?: string;
+            street_number?: string;
+            postal_code?: string;
+            city?: string;
+            suburb?: string;
+            state?: string;
+            country?: string;
+            /**
+             * WGS84 latitude (-90..90). With longitude, sufficient to create a coordinate-anchored Location.
+             */
+            latitude?: number;
+            /**
+             * WGS84 longitude (-180..180). With latitude, sufficient to create a coordinate-anchored Location.
+             */
+            longitude?: number;
+        }
         export interface AvailabilityCheckParams {
             /**
              * Entity ID's to check the availability parameters against
@@ -249,6 +268,24 @@ export declare namespace Components {
              */
             error: string;
         }
+        export interface ResolveLocationParams {
+            address: /* A raw address. Provide EITHER a street address (`street` + `street_number` + (`postal_code` or `city`)) OR coordinates (`latitude` + `longitude`). Only the string fields drive the canonical address hash; for a street address the coordinates are stored as-is on the Location, while a coordinate-only address is anchored and deduplicated by its coordinates (rounded to ~1 m). */ AddressValue;
+            /**
+             * Entity to seed the new Location's back-reference with. Required when the Location has to be created (the location schema requires at least one relation).
+             */
+            entityId?: string; // uuid
+            /**
+             * Schema slug of `entityId` (e.g. "asset").
+             */
+            entitySlug?: string;
+        }
+        export interface ResolveLocationResult {
+            locationId: string; // uuid
+            /**
+             * true when a new Location was created, false when an existing one was reused.
+             */
+            created: boolean;
+        }
         /**
          * The availability rule error
          */
@@ -334,6 +371,16 @@ export declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResponse;
         }
     }
+    namespace ResolveLocation {
+        export type RequestBody = Components.Schemas.ResolveLocationParams;
+        namespace Responses {
+            export type $200 = Components.Schemas.ResolveLocationResult;
+            export type $400 = Components.Schemas.ErrorResponse;
+            export type $401 = Components.Schemas.ErrorResponse;
+            export type $429 = Components.Schemas.ErrorResponse;
+            export type $500 = Components.Schemas.ErrorResponse;
+        }
+    }
     namespace ValidateAvailabilityFile {
         namespace Parameters {
             export type Id = string; // uuid
@@ -374,6 +421,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AvailabilityCheck.Responses.$200>
   /**
+   * resolveLocation - resolveLocation
+   * 
+   * Resolve or create the canonical Location for a raw address (find-or-create by canonical address_hash) and return its id. This is the dedup-safe way to create a Location — direct entity creation of `location` is forbidden. If the address has no valid street address but carries valid `latitude`/`longitude` (e.g. a field asset dropped as a map pin), a coordinate-anchored Location is created instead, deduplicated on a ~1 m coordinate grid.
+   */
+  'resolveLocation'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ResolveLocation.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ResolveLocation.Responses.$200>
+  /**
    * validateAvailabilityFile - validateAvailabilityFile
    * 
    * Validates an already uploaded availability file, it returns an array of errors if any errors are found in the file.
@@ -410,6 +467,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AvailabilityCheck.Responses.$200>
   }
+  ['/v1/public/location-service/resolve']: {
+    /**
+     * resolveLocation - resolveLocation
+     * 
+     * Resolve or create the canonical Location for a raw address (find-or-create by canonical address_hash) and return its id. This is the dedup-safe way to create a Location — direct entity creation of `location` is forbidden. If the address has no valid street address but carries valid `latitude`/`longitude` (e.g. a field asset dropped as a map pin), a coordinate-anchored Location is created instead, deduplicated on a ~1 m coordinate grid.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ResolveLocation.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ResolveLocation.Responses.$200>
+  }
   ['/v1/availability/{id}/validate']: {
     /**
      * validateAvailabilityFile - validateAvailabilityFile
@@ -429,11 +498,14 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type AddressSuggestion = Components.Schemas.AddressSuggestion;
 export type AddressSuggestions = Components.Schemas.AddressSuggestions;
+export type AddressValue = Components.Schemas.AddressValue;
 export type AvailabilityCheckParams = Components.Schemas.AvailabilityCheckParams;
 export type AvailabilityDate = Components.Schemas.AvailabilityDate;
 export type AvailabilityFilters = Components.Schemas.AvailabilityFilters;
 export type AvailabilityLocation = Components.Schemas.AvailabilityLocation;
 export type AvailabilityResult = Components.Schemas.AvailabilityResult;
 export type ErrorResponse = Components.Schemas.ErrorResponse;
+export type ResolveLocationParams = Components.Schemas.ResolveLocationParams;
+export type ResolveLocationResult = Components.Schemas.ResolveLocationResult;
 export type ValidateAvailabilityFileError = Components.Schemas.ValidateAvailabilityFileError;
 export type ValidateAvailabilityFileResult = Components.Schemas.ValidateAvailabilityFileResult;

@@ -41,7 +41,7 @@ const { data } = await purposeClient.createPurpose(...)
 
 ### `createPurpose`
 
-Create Purpose
+Create a new purpose.
 
 `POST /v1/purpose`
 
@@ -61,8 +61,8 @@ const { data } = await client.createPurpose(
 {
   "id": "123e4567-e89b-12d3-a456-426614174000",
   "name": "Electricity Contract",
-  "created_at": "1970-01-01T00:00:00.000Z",
-  "updated_at": "1970-01-01T00:00:00.000Z"
+  "created_at": "2024-01-15T10:30:00.000Z",
+  "updated_at": "2024-06-01T08:00:00.000Z"
 }
 ```
 
@@ -72,7 +72,7 @@ const { data } = await client.createPurpose(
 
 ### `searchPurposes`
 
-Search Purposes
+Search purposes using fuzzy matching against the purpose name.
 
 `GET /v1/purpose:search`
 
@@ -92,8 +92,8 @@ const { data } = await client.searchPurposes({
     {
       "id": "123e4567-e89b-12d3-a456-426614174000",
       "name": "Electricity Contract",
-      "created_at": "1970-01-01T00:00:00.000Z",
-      "updated_at": "1970-01-01T00:00:00.000Z"
+      "created_at": "2024-01-15T10:30:00.000Z",
+      "updated_at": "2024-06-01T08:00:00.000Z"
     }
   ]
 }
@@ -105,7 +105,7 @@ const { data } = await client.searchPurposes({
 
 ### `batchGetPurposes`
 
-Batch Get Purposes
+Fetch multiple purposes by their known IDs in a single request.
 
 `POST /v1/purpose:batchGet`
 
@@ -113,7 +113,7 @@ Batch Get Purposes
 const { data } = await client.batchGetPurposes(
   null,
   {
-    purposeIds: ['123e4567-e89b-12d3-a456-426614174000']
+    purposeIds: ['123e4567-e89b-12d3-a456-426614174000', '987fcdeb-51a2-43f7-9012-345678901234']
   },
 )
 ```
@@ -127,11 +127,11 @@ const { data } = await client.batchGetPurposes(
     {
       "id": "123e4567-e89b-12d3-a456-426614174000",
       "name": "Electricity Contract",
-      "created_at": "1970-01-01T00:00:00.000Z",
-      "updated_at": "1970-01-01T00:00:00.000Z"
+      "created_at": "2024-01-15T10:30:00.000Z",
+      "updated_at": "2024-06-01T08:00:00.000Z"
     }
   ],
-  "hits": 0
+  "hits": 2
 }
 ```
 
@@ -141,7 +141,7 @@ const { data } = await client.batchGetPurposes(
 
 ### `getPurpose`
 
-Get Purpose
+Get a single purpose by its UUID.
 
 `GET /v1/purpose/{purposeId}`
 
@@ -158,8 +158,8 @@ const { data } = await client.getPurpose({
 {
   "id": "123e4567-e89b-12d3-a456-426614174000",
   "name": "Electricity Contract",
-  "created_at": "1970-01-01T00:00:00.000Z",
-  "updated_at": "1970-01-01T00:00:00.000Z"
+  "created_at": "2024-01-15T10:30:00.000Z",
+  "updated_at": "2024-06-01T08:00:00.000Z"
 }
 ```
 
@@ -169,7 +169,7 @@ const { data } = await client.getPurpose({
 
 ### `updatePurpose`
 
-Update Purpose
+Update an existing purpose.
 
 `PUT /v1/purpose/{purposeId}`
 
@@ -179,7 +179,7 @@ const { data } = await client.updatePurpose(
     purposeId: 'example',
   },
   {
-    name: 'string'
+    name: 'Electricity & Gas Contract'
   },
 )
 ```
@@ -191,8 +191,8 @@ const { data } = await client.updatePurpose(
 {
   "id": "123e4567-e89b-12d3-a456-426614174000",
   "name": "Electricity Contract",
-  "created_at": "1970-01-01T00:00:00.000Z",
-  "updated_at": "1970-01-01T00:00:00.000Z"
+  "created_at": "2024-01-15T10:30:00.000Z",
+  "updated_at": "2024-06-01T08:00:00.000Z"
 }
 ```
 
@@ -202,7 +202,7 @@ const { data } = await client.updatePurpose(
 
 ### `deletePurpose`
 
-Delete Purpose
+Permanently delete a purpose by its UUID.
 
 `DELETE /v1/purpose/{purposeId}`
 
@@ -219,8 +219,8 @@ const { data } = await client.deletePurpose({
 {
   "id": "123e4567-e89b-12d3-a456-426614174000",
   "name": "Electricity Contract",
-  "created_at": "1970-01-01T00:00:00.000Z",
-  "updated_at": "1970-01-01T00:00:00.000Z"
+  "created_at": "2024-01-15T10:30:00.000Z",
+  "updated_at": "2024-06-01T08:00:00.000Z"
 }
 ```
 
@@ -232,7 +232,7 @@ const { data } = await client.deletePurpose({
 
 ### `Purpose`
 
-A purpose used to tag and organize entities
+An epilot Purpose – a named taxonomy label used to tag and organize resources across the platform
 
 ```ts
 type Purpose = {
@@ -265,11 +265,11 @@ type UpdatePurposeInput = {
 
 ### `BatchGetPurposesInput`
 
-Input for batch getting purposes
+Input for batch-fetching purposes by their IDs
 
 ```ts
 type BatchGetPurposesInput = {
-  purposeIds: string[]
+  purposeIds: string // uuid[]
 }
 ```
 
@@ -279,5 +279,6 @@ type BatchGetPurposesInput = {
 type Error = {
   status?: number
   error?: string
+  message?: string
 }
 ```

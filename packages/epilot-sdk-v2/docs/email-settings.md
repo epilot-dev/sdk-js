@@ -1092,7 +1092,8 @@ const { data } = await client.getConnectedOutlookEmails()
       "tenant_id": "string",
       "provider": "outlook",
       "connected_at": "1970-01-01T00:00:00.000Z",
-      "connected_by_user_id": "string"
+      "connected_by_user_id": "string",
+      "mailbox_unavailable_since": "1970-01-01T00:00:00.000Z"
     }
   ],
   "count": 0
@@ -2153,6 +2154,7 @@ type ConnectedOutlookEmail = {
   provider?: "outlook"
   connected_at?: string // date-time
   connected_by_user_id?: string
+  mailbox_unavailable_since?: string // date-time
 }
 ```
 

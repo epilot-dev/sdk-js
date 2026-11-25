@@ -1931,6 +1931,7 @@ const { data } = await client.$productRecommendations(
     },
     contract_id: 'string',
     campaign_id: '3f1c7d2e-9a4b-4c6d-8e2f-1a2b3c4d5e6f',
+    contact_id: '9b2e4f6a-1c3d-4e5f-8a7b-6c5d4e3f2a1b',
     filters: {
       location: {
         street: 'string',
@@ -10006,6 +10007,7 @@ type ProductRecommendationSearch = {
   }
   contract_id?: string
   campaign_id?: string
+  contact_id?: string
   filters?: {
     location: {
       street?: { ... }

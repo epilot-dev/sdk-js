@@ -42,6 +42,7 @@ const { data } = await permissionsClient.listCurrentRoles(...)
 - [`listAllAssignments`](#listallassignments)
 
 **Schemas**
+- [`TokenRestrictions`](#tokenrestrictions)
 - [`Grant`](#grant)
 - [`GrantWithDependencies`](#grantwithdependencies)
 - [`GrantCondition`](#grantcondition)
@@ -61,8 +62,6 @@ const { data } = await permissionsClient.listCurrentRoles(...)
 - [`RolePayload`](#rolepayload)
 - [`Assignment`](#assignment)
 - [`InternalAssignment`](#internalassignment)
-- [`OrgAssignments`](#orgassignments)
-- [`OrgRoles`](#orgroles)
 - [`Assignments`](#assignments)
 - [`UserId`](#userid)
 - [`OrganizationId`](#organizationid)
@@ -73,7 +72,7 @@ const { data } = await permissionsClient.listCurrentRoles(...)
 
 ### `listCurrentRoles`
 
-Returns roles and grants assigned to current user
+Returns roles and grants assigned to current user.
 
 `GET /v1/permissions/me`
 
@@ -111,7 +110,18 @@ const { data } = await client.listCurrentRoles()
       "parent_role": "123:owner",
       "vendor_created": true
     }
-  ]
+  ],
+  "token_restrictions": {
+    "read_only": true,
+    "anonymize": true,
+    "allowed_actions": ["journey:*", "entity:view"],
+    "actor": {
+      "type": "agent",
+      "agent_id": "string",
+      "host_id": "string",
+      "purpose": "string"
+    }
+  }
 }
 ```
 
@@ -582,6 +592,25 @@ const { data } = await client.listAllAssignments()
 
 ## Schemas
 
+### `TokenRestrictions`
+
+Restrictions the calling token puts on top of its roles. Only present for restricted tokens.
+
+
+```ts
+type TokenRestrictions = {
+  read_only?: boolean
+  anonymize?: boolean
+  allowed_actions?: string[]
+  actor?: {
+    type?: string
+    agent_id?: string
+    host_id?: string
+    purpose?: string
+  }
+}
+```
+
 ### `Grant`
 
 ```ts
@@ -808,6 +837,7 @@ type PortalRole = {
     effect?: "allow" | "deny"
     conditions?: object[]
   }>
+  portal_id?: string
 }
 ```
 
@@ -885,6 +915,7 @@ type Role = {
     effect?: "allow" | "deny"
     conditions?: object[]
   }>
+  portal_id?: string
 }
 ```
 
@@ -926,102 +957,6 @@ A role attached to an user
 type InternalAssignment = {
   userId?: string
   roles?: string[]
-}
-```
-
-### `OrgAssignments`
-
-All roles attached to an users of an organization
-
-```ts
-type OrgAssignments = {
-  organizationId?: string
-  assignments?: Array<{
-    userId?: string
-    roles?: string[]
-  }>
-}
-```
-
-### `OrgRoles`
-
-All roles attached to an users of an organization
-
-```ts
-type OrgRoles = {
-  organizationId?: string
-  roles?: Array<{
-    id: string
-    name: string
-    slug: string
-    type: "user_role"
-    expires_at?: string // date-time
-    organization_id: string
-    grants: Array<{
-      action: { ... }
-      resource?: { ... }
-      effect?: { ... }
-      conditions?: { ... }
-    }>
-    parent_role?: object
-    vendor_created?: boolean
-  } | {
-    id: string
-    name: string
-    slug: string
-    type: "org_role"
-    expires_at?: string // date-time
-    organization_id: string
-    grants: Array<{
-      action: { ... }
-      resource?: { ... }
-      effect?: { ... }
-      conditions?: { ... }
-    }>
-    pricing_tier?: string
-  } | {
-    id: string
-    name: string
-    slug: string
-    type: "share_role"
-    expires_at?: string // date-time
-    organization_id: string
-    grants: Array<{
-      action: { ... }
-      resource?: { ... }
-      effect?: { ... }
-      conditions?: { ... }
-    }>
-  } | {
-    id: string
-    name: string
-    slug: string
-    type: "partner_role"
-    expires_at?: string // date-time
-    organization_id: string
-    grants: Array<{
-      action: { ... }
-      resource?: { ... }
-      effect?: { ... }
-      conditions?: { ... }
-    }>
-    partner_org_id?: object
-    vendor_enforced_user_limit?: number
-    vendor_created?: boolean
-  } | {
-    id: string
-    name: string
-    slug: string
-    type: "portal_role"
-    expires_at?: string // date-time
-    organization_id: string
-    grants: Array<{
-      action: { ... }
-      resource?: { ... }
-      effect?: { ... }
-      conditions?: { ... }
-    }>
-  }>
 }
 ```
 

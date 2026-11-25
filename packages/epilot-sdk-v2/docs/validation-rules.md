@@ -1765,7 +1765,11 @@ type ComparisonRuleType = {
       operator: { ... }
       value?: { ... }
     }
-    allow_failure?: boolean
+    allow_failure?: boolean | {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
+    }
   }>
 }
 ```

@@ -1,6 +1,4 @@
 /* Auto-copied from address-suggestions-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -57,28 +55,6 @@ export declare namespace Components {
          * The address suggestions entity array
          */
         export type AddressSuggestions = /* The address suggestions entity */ AddressSuggestion[];
-        export interface AvailabilityLocation {
-            /**
-             * The first line of the address. Typically the street address or PO Box number.
-             */
-            street?: string;
-            /**
-             * The second line of the address. Typically the number of the apartment, suite, or unit.
-             */
-            street_number?: string;
-            /**
-             * The postal code for the address.
-             */
-            postal_code?: string;
-            /**
-             * The name of the city, district, village, or town.
-             */
-            city?: string;
-            /**
-             * The name of the country.
-             */
-            country?: string;
-        }
         export interface AvailabilityResult {
             /**
              * The id of the file where the address was found
@@ -235,7 +211,7 @@ export declare namespace Paths {
 
 export interface OperationMethods {
   /**
-   * getAddresses - get addresses from file
+   * getAddresses - getAddresses
    * 
    * Get address suggestions for the given file id
    */
@@ -245,7 +221,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAddresses.Responses.$200>
   /**
-   * validateAddresses - validate addresses file
+   * validateAddresses - validateAddresses
    * 
    * Validates an addresses file, it returns an array of errors if the file is invalid
    */
@@ -255,7 +231,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ValidateAddresses.Responses.$200>
   /**
-   * checkAvailability - Check address availability
+   * checkAvailability - checkAvailability
    * 
    * Check the availability of a given address within multiple files
    */
@@ -265,7 +241,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CheckAvailability.Responses.$200>
   /**
-   * validateAddressesFile - validate addresses file
+   * validateAddressesFile - validateAddressesFile
    * 
    * Validates an addresses file, it returns an array of errors if the file is invalid
    */
@@ -279,7 +255,7 @@ export interface OperationMethods {
 export interface PathsDictionary {
   ['/v1/public/suggestions']: {
     /**
-     * getAddresses - get addresses from file
+     * getAddresses - getAddresses
      * 
      * Get address suggestions for the given file id
      */
@@ -291,7 +267,7 @@ export interface PathsDictionary {
   }
   ['/v1/suggestions:validate']: {
     /**
-     * validateAddresses - validate addresses file
+     * validateAddresses - validateAddresses
      * 
      * Validates an addresses file, it returns an array of errors if the file is invalid
      */
@@ -303,7 +279,7 @@ export interface PathsDictionary {
   }
   ['/v1/public/availability:check']: {
     /**
-     * checkAvailability - Check address availability
+     * checkAvailability - checkAvailability
      * 
      * Check the availability of a given address within multiple files
      */
@@ -315,7 +291,7 @@ export interface PathsDictionary {
   }
   ['/v1/addresses-files:validate']: {
     /**
-     * validateAddressesFile - validate addresses file
+     * validateAddressesFile - validateAddressesFile
      * 
      * Validates an addresses file, it returns an array of errors if the file is invalid
      */
@@ -333,7 +309,6 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type AddressSuggestion = Components.Schemas.AddressSuggestion;
 export type AddressSuggestionError = Components.Schemas.AddressSuggestionError;
 export type AddressSuggestions = Components.Schemas.AddressSuggestions;
-export type AvailabilityLocation = Components.Schemas.AvailabilityLocation;
 export type AvailabilityResult = Components.Schemas.AvailabilityResult;
 export type Error = Components.Schemas.Error;
 export type ValidateAddressFileError = Components.Schemas.ValidateAddressFileError;

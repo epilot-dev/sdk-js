@@ -28,14 +28,20 @@ const { data } = await emailTemplateClient.saveTemplate(...)
 - [`saveTemplate`](#savetemplate)
 - [`getTemplateDetail`](#gettemplatedetail)
 - [`updateTemplateDetail`](#updatetemplatedetail)
+- [`migrateAutomationsForTemplate`](#migrateautomationsfortemplate)
+- [`getTemplateReferences`](#gettemplatereferences)
 - [`bulkSendMessage`](#bulksendmessage)
 - [`revertToOriginalTemplate`](#reverttooriginaltemplate)
+- [`convertToBuilder`](#converttobuilder)
 
 **Variables**
 - [`replaceVariablesAsync`](#replacevariablesasync)
 
 **Schemas**
 - [`BaseEntity`](#baseentity)
+- [`TemplateReferenceItem`](#templatereferenceitem)
+- [`TemplateReferencesResponse`](#templatereferencesresponse)
+- [`MigrateAutomationsResponse`](#migrateautomationsresponse)
 - [`EmailTemplateRequest`](#emailtemplaterequest)
 - [`EmailTemplateEntity`](#emailtemplateentity)
 - [`Attachment`](#attachment)
@@ -64,6 +70,9 @@ const { data } = await emailTemplateClient.saveTemplate(...)
 - [`ApprovedAt`](#approvedat)
 - [`ApproveAction`](#approveaction)
 - [`TaskToken`](#tasktoken)
+- [`JourneyContextUsagesRequest`](#journeycontextusagesrequest)
+- [`JourneyContextUsagesResponse`](#journeycontextusagesresponse)
+- [`JourneyContextUsageItem`](#journeycontextusageitem)
 
 ### `saveTemplate`
 
@@ -83,7 +92,7 @@ const { data } = await client.saveTemplate(
     brand_id: 0,
     from: {
       name: 'epilot',
-      email: 'no-reply@epilot.cloud'
+      email: 'service@stadtwerke-example.de'
     },
     to: [
       {
@@ -126,9 +135,16 @@ const { data } = await client.saveTemplate(
       ]
     },
     system_template: false,
+    protected: false,
     created_by: 1234,
     updated_by: 1234,
-    json_template: 'string'
+    json_template: 'string',
+    original_template_id: 'cd7809ba-a111-4dd9-8d15-18eb4de0faed',
+    backup: {
+      body: 'string',
+      backed_up_at: '2026-05-13T10:00:00.000Z'
+    },
+    converted_to_new_editor: false
   },
 )
 ```
@@ -151,7 +167,7 @@ const { data } = await client.saveTemplate(
   "brand_id": 0,
   "from": {
     "name": "epilot",
-    "email": "no-reply@epilot.cloud"
+    "email": "service@stadtwerke-example.de"
   },
   "to": [
     {
@@ -196,7 +212,14 @@ const { data } = await client.saveTemplate(
   "created_by": 1234,
   "updated_by": 1234,
   "json_template": "string",
-  "system_template": false
+  "backup": {
+    "body": "string",
+    "backed_up_at": "2026-05-13T10:00:00.000Z"
+  },
+  "converted_to_new_editor": false,
+  "system_template": false,
+  "protected": false,
+  "original_template_id": "cd7809ba-a111-4dd9-8d15-18eb4de0faed"
 }
 ```
 
@@ -235,7 +258,7 @@ const { data } = await client.getTemplateDetail({
     "brand_id": 0,
     "from": {
       "name": "epilot",
-      "email": "no-reply@epilot.cloud"
+      "email": "service@stadtwerke-example.de"
     },
     "to": [
       {
@@ -280,7 +303,14 @@ const { data } = await client.getTemplateDetail({
     "created_by": 1234,
     "updated_by": 1234,
     "json_template": "string",
-    "system_template": false
+    "backup": {
+      "body": "string",
+      "backed_up_at": "2026-05-13T10:00:00.000Z"
+    },
+    "converted_to_new_editor": false,
+    "system_template": false,
+    "protected": false,
+    "original_template_id": "cd7809ba-a111-4dd9-8d15-18eb4de0faed"
   },
   "relations": [
     {}
@@ -312,7 +342,7 @@ const { data } = await client.updateTemplateDetail(
     brand_id: 0,
     from: {
       name: 'epilot',
-      email: 'no-reply@epilot.cloud'
+      email: 'service@stadtwerke-example.de'
     },
     to: [
       {
@@ -355,9 +385,16 @@ const { data } = await client.updateTemplateDetail(
       ]
     },
     system_template: false,
+    protected: false,
     created_by: 1234,
     updated_by: 1234,
-    json_template: 'string'
+    json_template: 'string',
+    original_template_id: 'cd7809ba-a111-4dd9-8d15-18eb4de0faed',
+    backup: {
+      body: 'string',
+      backed_up_at: '2026-05-13T10:00:00.000Z'
+    },
+    converted_to_new_editor: false
   },
 )
 ```
@@ -380,7 +417,7 @@ const { data } = await client.updateTemplateDetail(
   "brand_id": 0,
   "from": {
     "name": "epilot",
-    "email": "no-reply@epilot.cloud"
+    "email": "service@stadtwerke-example.de"
   },
   "to": [
     {
@@ -425,7 +462,99 @@ const { data } = await client.updateTemplateDetail(
   "created_by": 1234,
   "updated_by": 1234,
   "json_template": "string",
-  "system_template": false
+  "backup": {
+    "body": "string",
+    "backed_up_at": "2026-05-13T10:00:00.000Z"
+  },
+  "converted_to_new_editor": false,
+  "system_template": false,
+  "protected": false,
+  "original_template_id": "cd7809ba-a111-4dd9-8d15-18eb4de0faed"
+}
+```
+
+</details>
+
+---
+
+### `migrateAutomationsForTemplate`
+
+Find all automation flows in the org that contain a `send-email` or `reply-email`
+action referencing `old_template_id` and rewrite those actions to point at the
+new template id (`{id}` path param). In
+
+`POST /v1/email-template/templates/{id}:migrate-automations`
+
+```ts
+const { data } = await client.migrateAutomationsForTemplate(
+  {
+    id: '123e4567-e89b-12d3-a456-426614174000',
+  },
+  {
+    old_template_id: '511ceb90-f738-47aa-8b1e-915ace0ae13c'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "migrated_flow_count": 3,
+  "migrated_flow_ids": ["string"],
+  "migrated_workflow_count": 2,
+  "migrated_workflow_ids": ["string"],
+  "migrated_portal_count": 1,
+  "migrated_portal_ids": ["string"],
+  "failed_flow_ids": ["string"],
+  "failed_portal_ids": ["string"],
+  "portal_migration_errored": false
+}
+```
+
+</details>
+
+---
+
+### `getTemplateReferences`
+
+List the automation flows, workflows and customer portals that currently
+reference this template, without modifying anything. Powers the template
+settings "used by" view and the pre-migrate preview, a
+
+`GET /v1/email-template/templates/{id}:references`
+
+```ts
+const { data } = await client.getTemplateReferences({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "flows": [
+    {
+      "id": "string",
+      "name": "string"
+    }
+  ],
+  "workflows": [
+    {
+      "id": "string",
+      "name": "string"
+    }
+  ],
+  "portals": [
+    {
+      "id": "string",
+      "name": "string"
+    }
+  ],
+  "portal_lookup_errored": true
 }
 ```
 
@@ -449,7 +578,7 @@ const { data } = await client.replaceVariablesAsync(
     email_template_id: '511ceb90-f738-47aa-8b1e-915ace0ae13c',
     variable_parameters: {
       template_type: 'email',
-      language: 'en',
+      language: 'de',
       main_entity_id: '63753437-c9e2-4e83-82bb-b1c666514561',
       user_id: '123452',
       custom_variables: [
@@ -492,7 +621,7 @@ const { data } = await client.replaceVariablesAsync(
       "brand_id": 0,
       "from": {
         "name": "epilot",
-        "email": "no-reply@epilot.cloud"
+        "email": "service@stadtwerke-example.de"
       },
       "to": [
         {
@@ -537,7 +666,14 @@ const { data } = await client.replaceVariablesAsync(
       "created_by": 1234,
       "updated_by": 1234,
       "json_template": "string",
-      "system_template": false
+      "backup": {
+        "body": "string",
+        "backed_up_at": "2026-05-13T10:00:00.000Z"
+      },
+      "converted_to_new_editor": false,
+      "system_template": false,
+      "protected": false,
+      "original_template_id": "cd7809ba-a111-4dd9-8d15-18eb4de0faed"
     },
     "relations": [
       {}
@@ -650,6 +786,106 @@ const { data } = await client.revertToOriginalTemplate(
 
 ---
 
+### `convertToBuilder`
+
+Converts a legacy HTML email template into the email-builder block format.
+Stores the new `json_template` (stringified block graph), re-renders `body`
+from the resulting blocks, and stashes the origin
+
+`POST /v1/email-template/templates/{id}:convertToBuilder`
+
+```ts
+const { data } = await client.convertToBuilder(
+  {
+    id: '123e4567-e89b-12d3-a456-426614174000',
+  },
+  {
+    dryRun: false,
+    force: false,
+    as_copy: false,
+    name: 'Copy of Welcome email (Visual)'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "_title": "string",
+  "_org": "206801",
+  "_schema": "message",
+  "_tags": ["automatic email template"],
+  "_created_at": "2021-02-09T12:41:43.662Z",
+  "_updated_at": "2021-02-10T09:14:31.990Z",
+  "_purpose": ["a0ec23ac-12f8-4d89-9a63-91cba3787f2a", "310cd388-2f15-4b5b-8f98-ca14c1e03304"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
+  "name": "Order confirmation",
+  "brand_id": 0,
+  "from": {
+    "name": "epilot",
+    "email": "service@stadtwerke-example.de"
+  },
+  "to": [
+    {
+      "name": "Ny Huynh",
+      "email": "ny.huynh@axonactive.com"
+    }
+  ],
+  "cc": [
+    {
+      "name": "Ny Huynh",
+      "email": "ny.huynh@axonactive.com"
+    }
+  ],
+  "bcc": [
+    {
+      "name": "Ny Huynh",
+      "email": "ny.huynh@axonactive.com"
+    }
+  ],
+  "subject": "We have received your order!",
+  "body": "Hi Ms Ny Huynh, </br> Thank you for your order. We will contact you shortly",
+  "attachments": [
+    {
+      "cid": "f820ce3b-07b0-45ae-bcc6-babb2f53f79f",
+      "filename": "Produktinformationen_epilot360_Double_Opt_in.pdf",
+      "size": 451349,
+      "content_type": "application/pdf",
+      "url": "https://go.epilot.cloud/attachments/3e7c616a-3e89-4f92-b4c5-ea5ab140e3dd/Produktinformationen_epilot360_Double_Opt_in.pdf",
+      "bucket": "893487340562-message-attachment",
+      "object_key": "attachments/3e7c616a-3e89-4f92-b4c5-ea5ab140e3dd/Produktinformationen_epilot360_Double_Opt_in.pdf",
+      "inline": false,
+      "send_as_link": false,
+      "type": "Document template",
+      "copy_to_message": true
+    }
+  ],
+  "file": {
+    "$relation": [
+      {}
+    ]
+  },
+  "created_by": 1234,
+  "updated_by": 1234,
+  "json_template": "string",
+  "backup": {
+    "body": "string",
+    "backed_up_at": "2026-05-13T10:00:00.000Z"
+  },
+  "converted_to_new_editor": false,
+  "system_template": false,
+  "protected": false,
+  "original_template_id": "cd7809ba-a111-4dd9-8d15-18eb4de0faed"
+}
+```
+
+</details>
+
+---
+
 ## Schemas
 
 ### `BaseEntity`
@@ -665,6 +901,51 @@ type BaseEntity = {
   _updated_at: string // date-time
   _purpose?: string[]
   _manifest?: string // uuid[]
+}
+```
+
+### `TemplateReferenceItem`
+
+```ts
+type TemplateReferenceItem = {
+  id: string
+  name?: string
+}
+```
+
+### `TemplateReferencesResponse`
+
+```ts
+type TemplateReferencesResponse = {
+  flows: Array<{
+    id: string
+    name?: string
+  }>
+  workflows: Array<{
+    id: string
+    name?: string
+  }>
+  portals: Array<{
+    id: string
+    name?: string
+  }>
+  portal_lookup_errored: boolean
+}
+```
+
+### `MigrateAutomationsResponse`
+
+```ts
+type MigrateAutomationsResponse = {
+  migrated_flow_count: number
+  migrated_flow_ids: string[]
+  migrated_workflow_count: number
+  migrated_workflow_ids: string[]
+  migrated_portal_count: number
+  migrated_portal_ids: string[]
+  failed_flow_ids: string[]
+  failed_portal_ids: string[]
+  portal_migration_errored: boolean
 }
 ```
 
@@ -713,9 +994,16 @@ type EmailTemplateRequest = {
     $relation?: object[]
   }
   system_template?: boolean
+  protected?: boolean
   created_by?: string
   updated_by?: string
   json_template?: string
+  original_template_id?: string
+  backup?: {
+    body?: string
+    backed_up_at?: string
+  }
+  converted_to_new_editor?: boolean
 }
 ```
 
@@ -771,7 +1059,14 @@ type EmailTemplateEntity = {
   created_by?: string
   updated_by?: string
   json_template?: string
+  backup?: {
+    body?: string
+    backed_up_at?: string
+  }
+  converted_to_new_editor?: boolean
   system_template?: boolean
+  protected?: boolean
+  original_template_id?: string
 }
 ```
 
@@ -874,7 +1169,7 @@ type UserResponse = {
 ```ts
 type VariableParameters = {
   template_type: "email" | "document"
-  language?: "en" | "de"
+  language?: string
   main_entity_id?: string
   user_id?: string
   custom_variables?: Array<{
@@ -943,7 +1238,14 @@ type EmailTemplateResponse = {
     created_by?: string
     updated_by?: string
     json_template?: string
+    backup?: {
+      body?: { ... }
+      backed_up_at?: { ... }
+    }
+    converted_to_new_editor?: boolean
     system_template?: boolean
+    protected?: boolean
+    original_template_id?: string
   }
   relations?: object[]
 }
@@ -984,7 +1286,11 @@ type AsyncEmailTemplateResponse = {
       created_by?: { ... }
       updated_by?: { ... }
       json_template?: { ... }
+      backup?: { ... }
+      converted_to_new_editor?: { ... }
       system_template?: { ... }
+      protected?: { ... }
+      original_template_id?: { ... }
     }
     relations?: object[]
   }
@@ -1194,4 +1500,77 @@ Task token to approve or cancel the bulk message action
 
 ```ts
 type TaskToken = string
+```
+
+### `JourneyContextUsagesRequest`
+
+Shared request shape across journey-api's eight context-usage
+adapters. `journey_id` is required for parity with the other seven,
+but this adapter does not use it: email templates reference context
+parameters by name and carry no journey id at all, so it cannot
+narrow the search here.
+
+
+```ts
+type JourneyContextUsagesRequest = {
+  journey_id: string
+  param_keys: string[]
+  param_ids?: string[]
+}
+```
+
+### `JourneyContextUsagesResponse`
+
+```ts
+type JourneyContextUsagesResponse = {
+  usages: Array<{
+    kind: "email-template-body"
+    resource: {
+      type: { ... }
+      id: { ... }
+      name?: { ... }
+    }
+    location: {
+      field: { ... }
+    }
+    matched_as: {
+      dialect: { ... }
+      token: { ... }
+      at: { ... }
+    }
+    link_hint: {
+      route: { ... }
+      params: { ... }
+    }
+  }>
+  status: "ok" | "partial"
+  scanned: number
+}
+```
+
+### `JourneyContextUsageItem`
+
+```ts
+type JourneyContextUsageItem = {
+  kind: "email-template-body"
+  resource: {
+    type: "email_template"
+    id: string
+    name?: string
+  }
+  location: {
+    field: "subject" | "body" | "to" | "cc" | "bcc" | "json_template" | "backup.body"
+  }
+  matched_as: {
+    dialect: "name"
+    token: string
+    at: string
+  }
+  link_hint: {
+    route: "email-template"
+    params: {
+      id: { ... }
+    }
+  }
+}
 ```

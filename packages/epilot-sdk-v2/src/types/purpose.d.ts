@@ -1,6 +1,4 @@
 /* Auto-copied from purpose-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -23,9 +21,33 @@ export declare namespace Components {
         SizeParam?: Parameters.SizeParam;
     }
     namespace RequestBodies {
-        export type BatchGetPurposesRequest = /* Input for batch getting purposes */ Schemas.BatchGetPurposesInput;
-        export type CreatePurposeRequest = /* Input for creating a new purpose */ Schemas.CreatePurposeInput;
-        export type UpdatePurposeRequest = /* Input for updating an existing purpose */ Schemas.UpdatePurposeInput;
+        export type BatchGetPurposesRequest = /**
+         * Input for batch-fetching purposes by their IDs
+         * example:
+         * {
+         *   "purposeIds": [
+         *     "123e4567-e89b-12d3-a456-426614174000",
+         *     "987fcdeb-51a2-43f7-9012-345678901234"
+         *   ]
+         * }
+         */
+        Schemas.BatchGetPurposesInput;
+        export type CreatePurposeRequest = /**
+         * Input for creating a new purpose
+         * example:
+         * {
+         *   "name": "Electricity Contract"
+         * }
+         */
+        Schemas.CreatePurposeInput;
+        export type UpdatePurposeRequest = /**
+         * Input for updating an existing purpose
+         * example:
+         * {
+         *   "name": "Electricity & Gas Contract"
+         * }
+         */
+        Schemas.UpdatePurposeInput;
     }
     namespace Responses {
         export type ClientErrorResponse = Schemas.Error;
@@ -33,39 +55,53 @@ export declare namespace Components {
         export type ForbiddenResponse = Schemas.Error;
         export type NotFoundResponse = Schemas.Error;
         export interface PurposeListResponse {
-            results?: /* A purpose used to tag and organize entities */ Schemas.Purpose[];
+            results?: /* An epilot Purpose – a named taxonomy label used to tag and organize resources across the platform */ Schemas.Purpose[];
             /**
-             * Total number of results
+             * Total number of results returned
+             * example:
+             * 2
              */
             hits?: number;
         }
-        export type PurposeResponse = /* A purpose used to tag and organize entities */ Schemas.Purpose;
+        export type PurposeResponse = /* An epilot Purpose – a named taxonomy label used to tag and organize resources across the platform */ Schemas.Purpose;
         export interface PurposeSearchResponse {
-            results?: /* A purpose used to tag and organize entities */ Schemas.Purpose[];
+            results?: /* An epilot Purpose – a named taxonomy label used to tag and organize resources across the platform */ Schemas.Purpose[];
         }
         export type ServerErrorResponse = Schemas.Error;
         export type UnauthorizedResponse = Schemas.Error;
     }
     namespace Schemas {
         /**
-         * Input for batch getting purposes
+         * Input for batch-fetching purposes by their IDs
+         * example:
+         * {
+         *   "purposeIds": [
+         *     "123e4567-e89b-12d3-a456-426614174000",
+         *     "987fcdeb-51a2-43f7-9012-345678901234"
+         *   ]
+         * }
          */
         export interface BatchGetPurposesInput {
             /**
-             * List of purpose IDs to fetch
+             * List of purpose UUIDs to fetch
              * example:
              * [
-             *   "123e4567-e89b-12d3-a456-426614174000"
+             *   "123e4567-e89b-12d3-a456-426614174000",
+             *   "987fcdeb-51a2-43f7-9012-345678901234"
              * ]
              */
-            purposeIds: string[];
+            purposeIds: string /* uuid */[];
         }
         /**
          * Input for creating a new purpose
+         * example:
+         * {
+         *   "name": "Electricity Contract"
+         * }
          */
         export interface CreatePurposeInput {
             /**
-             * Human-readable name
+             * Human-readable name for the purpose. Must be unique within the organization.
              * example:
              * Electricity Contract
              */
@@ -74,44 +110,64 @@ export declare namespace Components {
         export interface Error {
             /**
              * HTTP status code
+             * example:
+             * 400
              */
             status?: number;
             /**
-             * Error message
+             * Short error label
+             * example:
+             * Bad Request
              */
             error?: string;
+            /**
+             * Human-readable description of the error
+             * example:
+             * name is a required field
+             */
+            message?: string;
         }
         /**
-         * A purpose used to tag and organize entities
+         * An epilot Purpose – a named taxonomy label used to tag and organize resources across the platform
          */
         export interface Purpose {
             /**
-             * Unique identifier
+             * Unique identifier for the purpose
              * example:
              * 123e4567-e89b-12d3-a456-426614174000
              */
             id: string; // uuid
             /**
-             * Human-readable name
+             * Human-readable name of the purpose
              * example:
              * Electricity Contract
              */
             name: string;
             /**
-             * ISO timestamp of creation
+             * ISO 8601 timestamp of when the purpose was created
+             * example:
+             * 2024-01-15T10:30:00.000Z
              */
             created_at?: string; // date-time
             /**
-             * ISO timestamp of last update
+             * ISO 8601 timestamp of the last update
+             * example:
+             * 2024-06-01T08:00:00.000Z
              */
             updated_at?: string; // date-time
         }
         /**
          * Input for updating an existing purpose
+         * example:
+         * {
+         *   "name": "Electricity & Gas Contract"
+         * }
          */
         export interface UpdatePurposeInput {
             /**
-             * Human-readable name
+             * New human-readable name for the purpose
+             * example:
+             * Electricity & Gas Contract
              */
             name?: string;
         }
@@ -204,9 +260,12 @@ export declare namespace Paths {
 
 export interface OperationMethods {
   /**
-   * createPurpose - Create Purpose
+   * createPurpose - createPurpose
    * 
-   * Create a new purpose
+   * Create a new purpose.
+   * 
+   * Purpose names must be unique within an organization. Attempting to create a purpose with a name that already exists returns `409 Conflict`.
+   * 
    */
   'createPurpose'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -214,9 +273,11 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreatePurpose.Responses.$201>
   /**
-   * searchPurposes - Search Purposes
+   * searchPurposes - searchPurposes
    * 
-   * Search purposes using fuzzy matching.
+   * Search purposes using fuzzy matching against the purpose name.
+   * 
+   * Use this endpoint for autocomplete inputs and user-driven purpose pickers. For resolving known purpose IDs to full objects, use `batchGetPurposes` instead.
    * 
    */
   'searchPurposes'(
@@ -225,7 +286,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchPurposes.Responses.$200>
   /**
-   * batchGetPurposes - Batch Get Purposes
+   * batchGetPurposes - batchGetPurposes
    * 
    * Fetch multiple purposes by their known IDs in a single request.
    * 
@@ -248,9 +309,9 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.BatchGetPurposes.Responses.$200>
   /**
-   * getPurpose - Get Purpose
+   * getPurpose - getPurpose
    * 
-   * Get a single purpose by ID
+   * Get a single purpose by its UUID.
    */
   'getPurpose'(
     parameters?: Parameters<Paths.GetPurpose.PathParameters> | null,
@@ -258,9 +319,12 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPurpose.Responses.$200>
   /**
-   * updatePurpose - Update Purpose
+   * updatePurpose - updatePurpose
    * 
-   * Update an existing purpose
+   * Update an existing purpose.
+   * 
+   * Only the `name` field can be updated. The `id`, `created_at`, and `updated_at` fields are managed by the server.
+   * 
    */
   'updatePurpose'(
     parameters?: Parameters<Paths.UpdatePurpose.PathParameters> | null,
@@ -268,9 +332,12 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdatePurpose.Responses.$200>
   /**
-   * deletePurpose - Delete Purpose
+   * deletePurpose - deletePurpose
    * 
-   * Permanently delete a purpose
+   * Permanently delete a purpose by its UUID.
+   * 
+   * Deleting a purpose does not automatically remove it from resources that reference it. Clients should handle stale purpose IDs gracefully.
+   * 
    */
   'deletePurpose'(
     parameters?: Parameters<Paths.DeletePurpose.PathParameters> | null,
@@ -282,9 +349,12 @@ export interface OperationMethods {
 export interface PathsDictionary {
   ['/v1/purpose']: {
     /**
-     * createPurpose - Create Purpose
+     * createPurpose - createPurpose
      * 
-     * Create a new purpose
+     * Create a new purpose.
+     * 
+     * Purpose names must be unique within an organization. Attempting to create a purpose with a name that already exists returns `409 Conflict`.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -294,9 +364,11 @@ export interface PathsDictionary {
   }
   ['/v1/purpose:search']: {
     /**
-     * searchPurposes - Search Purposes
+     * searchPurposes - searchPurposes
      * 
-     * Search purposes using fuzzy matching.
+     * Search purposes using fuzzy matching against the purpose name.
+     * 
+     * Use this endpoint for autocomplete inputs and user-driven purpose pickers. For resolving known purpose IDs to full objects, use `batchGetPurposes` instead.
      * 
      */
     'get'(
@@ -307,7 +379,7 @@ export interface PathsDictionary {
   }
   ['/v1/purpose:batchGet']: {
     /**
-     * batchGetPurposes - Batch Get Purposes
+     * batchGetPurposes - batchGetPurposes
      * 
      * Fetch multiple purposes by their known IDs in a single request.
      * 
@@ -332,9 +404,9 @@ export interface PathsDictionary {
   }
   ['/v1/purpose/{purposeId}']: {
     /**
-     * getPurpose - Get Purpose
+     * getPurpose - getPurpose
      * 
-     * Get a single purpose by ID
+     * Get a single purpose by its UUID.
      */
     'get'(
       parameters?: Parameters<Paths.GetPurpose.PathParameters> | null,
@@ -342,9 +414,12 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPurpose.Responses.$200>
     /**
-     * updatePurpose - Update Purpose
+     * updatePurpose - updatePurpose
      * 
-     * Update an existing purpose
+     * Update an existing purpose.
+     * 
+     * Only the `name` field can be updated. The `id`, `created_at`, and `updated_at` fields are managed by the server.
+     * 
      */
     'put'(
       parameters?: Parameters<Paths.UpdatePurpose.PathParameters> | null,
@@ -352,9 +427,12 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdatePurpose.Responses.$200>
     /**
-     * deletePurpose - Delete Purpose
+     * deletePurpose - deletePurpose
      * 
-     * Permanently delete a purpose
+     * Permanently delete a purpose by its UUID.
+     * 
+     * Deleting a purpose does not automatically remove it from resources that reference it. Clients should handle stale purpose IDs gracefully.
+     * 
      */
     'delete'(
       parameters?: Parameters<Paths.DeletePurpose.PathParameters> | null,

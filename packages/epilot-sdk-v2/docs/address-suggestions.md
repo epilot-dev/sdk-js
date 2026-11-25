@@ -30,7 +30,6 @@ const { data } = await addressSuggestionsClient.getAddresses(...)
 - [`validateAddressesFile`](#validateaddressesfile)
 
 **Schemas**
-- [`AvailabilityLocation`](#availabilitylocation)
 - [`AvailabilityResult`](#availabilityresult)
 - [`Error`](#error)
 - [`AddressSuggestion`](#addresssuggestion)
@@ -42,7 +41,7 @@ const { data } = await addressSuggestionsClient.getAddresses(...)
 
 ### `getAddresses`
 
-get addresses from file
+Get address suggestions for the given file id
 
 `GET /v1/public/suggestions`
 
@@ -78,7 +77,7 @@ const { data } = await client.getAddresses({
 
 ### `checkAvailability`
 
-Check address availability
+Check the availability of a given address within multiple files
 
 `GET /v1/public/availability:check`
 
@@ -108,7 +107,7 @@ const { data } = await client.checkAvailability({
 
 ### `validateAddressesFile`
 
-validate addresses file
+Validates an addresses file, it returns an array of errors if the file is invalid
 
 `GET /v1/addresses-files:validate`
 
@@ -140,18 +139,6 @@ const { data } = await client.validateAddressesFile({
 ---
 
 ## Schemas
-
-### `AvailabilityLocation`
-
-```ts
-type AvailabilityLocation = {
-  street?: string
-  street_number?: string
-  postal_code?: string
-  city?: string
-  country?: string
-}
-```
 
 ### `AvailabilityResult`
 

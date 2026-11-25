@@ -28,6 +28,7 @@ const { data } = await journeyClient.getJourneysByOrgId(...)
 - [`getJourneysByOrgId`](#getjourneysbyorgid)
 - [`getJourney`](#getjourney)
 - [`removeJourney`](#removejourney)
+- [`getPartialUsages`](#getpartialusages)
 - [`createJourneyRevision`](#createjourneyrevision)
 - [`listJourneyRevisions`](#listjourneyrevisions)
 - [`getJourneyRevision`](#getjourneyrevision)
@@ -74,6 +75,14 @@ const { data } = await journeyClient.getJourneysByOrgId(...)
 - [`JourneyResponse`](#journeyresponse)
 - [`JourneyProductsResponse`](#journeyproductsresponse)
 - [`PatchUpdateJourneyRequest`](#patchupdatejourneyrequest)
+- [`PartialContract`](#partialcontract)
+- [`PartialOrigin`](#partialorigin)
+- [`PartialProduced`](#partialproduced)
+- [`PartialInstance`](#partialinstance)
+- [`PartialBlockException`](#partialblockexception)
+- [`PartialUsages`](#partialusages)
+- [`PartialWarnings`](#partialwarnings)
+- [`PartialIssue`](#partialissue)
 - [`JourneyCreationRequest`](#journeycreationrequest)
 - [`JourneyCreationRequestV2`](#journeycreationrequestv2)
 - [`SearchJourneysQueryRequest`](#searchjourneysqueryrequest)
@@ -167,9 +176,16 @@ const { data } = await client.getJourney({
       "stepId": "string",
       "schema": {},
       "uischema": {},
+      "partialOrigin": {},
       "maxWidth": "small"
     }
   ],
+  "partialContract": {
+    "exits": {},
+    "requiresLogin": true,
+    "description": "string"
+  },
+  "partials": {},
   "design": {
     "logoUrl": "string",
     "theme": {},
@@ -220,6 +236,7 @@ const { data } = await client.getJourney({
     "entityId": "string",
     "mappingsAutomationId": "string",
     "newMappings": true,
+    "flowId": "string",
     "targetedCustomer": "string",
     "description": "string",
     "organizationSettings": {},
@@ -237,6 +254,7 @@ const { data } = await client.getJourney({
     "useAustrianLabels": true,
     "enableDarkMode": true,
     "accessMode": "PUBLIC",
+    "available_languages": ["de", "en"],
     "authGate": {
       "stepId": "string"
     },
@@ -250,7 +268,8 @@ const { data } = await client.getJourney({
     "thirdPartyCookies": true,
     "betaFeatures": {
       "modernProducts": true,
-      "modernLauncher": true
+      "modernLauncher": true,
+      "sparkDesign": true
     },
     "offline": {
       "enabled": true,
@@ -303,6 +322,37 @@ const { data } = await client.removeJourney({
 
 ---
 
+### `getPartialUsages`
+
+Lists the journeys of the organization that use the partial journey, with the IDs of their partial instances. Only available for organizations with journey partials enabled; returns `404` otherwise.
+
+`GET /v1/journey/partials/{id}/usages`
+
+```ts
+const { data } = await client.getPartialUsages({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "usages": [
+    {
+      "journeyId": "string",
+      "name": "string",
+      "instanceIds": ["string"]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `createJourneyRevision`
 
 Creates a revision: an immutable copy of the complete journey configuration, identified by `revision_id`. Nothing customers receive changes; the revision only becomes the published version when it is 
@@ -334,9 +384,16 @@ const { data } = await client.createJourneyRevision(
         stepId: 'string',
         schema: {},
         uischema: {},
+        partialOrigin: { /* ... */ },
         maxWidth: 'small'
       }
     ],
+    partialContract: {
+      exits: {},
+      requiresLogin: true,
+      description: 'string'
+    },
+    partials: {},
     design: {
       logoUrl: 'string',
       theme: {},
@@ -387,6 +444,7 @@ const { data } = await client.createJourneyRevision(
       entityId: 'string',
       mappingsAutomationId: 'string',
       newMappings: true,
+      flowId: 'string',
       targetedCustomer: 'string',
       description: 'string',
       organizationSettings: {},
@@ -404,6 +462,7 @@ const { data } = await client.createJourneyRevision(
       useAustrianLabels: true,
       enableDarkMode: true,
       accessMode: 'PUBLIC',
+      available_languages: ['de', 'en'],
       authGate: {
         stepId: 'string'
       },
@@ -417,7 +476,8 @@ const { data } = await client.createJourneyRevision(
       thirdPartyCookies: true,
       betaFeatures: {
         modernProducts: true,
-        modernLauncher: true
+        modernLauncher: true,
+        sparkDesign: true
       },
       offline: {
         enabled: true,
@@ -458,7 +518,21 @@ const { data } = await client.createJourneyRevision(
   "is_published": true,
   "metadata_updated_at": "1970-01-01T00:00:00.000Z",
   "metadata_updated_by": "string",
-  "mapping_config_version": 12
+  "mapping_config_version": 12,
+  "partial_warnings": [
+    {
+      "severity": "error",
+      "code": "string",
+      "message": "string",
+      "instanceId": "string",
+      "partialId": "string",
+      "stepId": "string",
+      "blockId": "string",
+      "logicId": "string",
+      "paramKey": "string",
+      "targetStepId": "string"
+    }
+  ]
 }
 ```
 
@@ -496,7 +570,21 @@ const { data } = await client.listJourneyRevisions({
       "is_published": true,
       "metadata_updated_at": "1970-01-01T00:00:00.000Z",
       "metadata_updated_by": "string",
-      "mapping_config_version": 12
+      "mapping_config_version": 12,
+      "partial_warnings": [
+        {
+          "severity": "error",
+          "code": "string",
+          "message": "string",
+          "instanceId": "string",
+          "partialId": "string",
+          "stepId": "string",
+          "blockId": "string",
+          "logicId": "string",
+          "paramKey": "string",
+          "targetStepId": "string"
+        }
+      ]
     }
   ],
   "next_cursor": "string"
@@ -535,6 +623,20 @@ const { data } = await client.getJourneyRevision({
   "metadata_updated_at": "1970-01-01T00:00:00.000Z",
   "metadata_updated_by": "string",
   "mapping_config_version": 12,
+  "partial_warnings": [
+    {
+      "severity": "error",
+      "code": "string",
+      "message": "string",
+      "instanceId": "string",
+      "partialId": "string",
+      "stepId": "string",
+      "blockId": "string",
+      "logicId": "string",
+      "paramKey": "string",
+      "targetStepId": "string"
+    }
+  ],
   "configuration": {
     "journeyId": "string",
     "organizationId": "string",
@@ -543,6 +645,12 @@ const { data } = await client.getJourneyRevision({
     "steps": [
       {}
     ],
+    "partialContract": {
+      "exits": {},
+      "requiresLogin": true,
+      "description": "string"
+    },
+    "partials": {},
     "design": {
       "logoUrl": "string",
       "theme": {},
@@ -570,6 +678,7 @@ const { data } = await client.getJourneyRevision({
       "entityId": "string",
       "mappingsAutomationId": "string",
       "newMappings": true,
+      "flowId": "string",
       "targetedCustomer": "string",
       "description": "string",
       "organizationSettings": {},
@@ -587,6 +696,7 @@ const { data } = await client.getJourneyRevision({
       "useAustrianLabels": true,
       "enableDarkMode": true,
       "accessMode": "PUBLIC",
+      "available_languages": ["de", "en"],
       "authGate": {},
       "isPublished": true,
       "status": "string",
@@ -656,7 +766,21 @@ const { data } = await client.updateJourneyRevisionMetadata(
   "is_published": true,
   "metadata_updated_at": "1970-01-01T00:00:00.000Z",
   "metadata_updated_by": "string",
-  "mapping_config_version": 12
+  "mapping_config_version": 12,
+  "partial_warnings": [
+    {
+      "severity": "error",
+      "code": "string",
+      "message": "string",
+      "instanceId": "string",
+      "partialId": "string",
+      "stepId": "string",
+      "blockId": "string",
+      "logicId": "string",
+      "paramKey": "string",
+      "targetStepId": "string"
+    }
+  ]
 }
 ```
 
@@ -981,9 +1105,16 @@ const { data } = await client.createJourney(
         stepId: 'string',
         schema: {},
         uischema: {},
+        partialOrigin: { /* ... */ },
         maxWidth: 'small'
       }
     ],
+    partialContract: {
+      exits: {},
+      requiresLogin: true,
+      description: 'string'
+    },
+    partials: {},
     design: {
       logoUrl: 'string',
       theme: {},
@@ -1034,6 +1165,7 @@ const { data } = await client.createJourney(
       entityId: 'string',
       mappingsAutomationId: 'string',
       newMappings: true,
+      flowId: 'string',
       targetedCustomer: 'string',
       description: 'string',
       organizationSettings: {},
@@ -1051,6 +1183,7 @@ const { data } = await client.createJourney(
       useAustrianLabels: true,
       enableDarkMode: true,
       accessMode: 'PUBLIC',
+      available_languages: ['de', 'en'],
       authGate: {
         stepId: 'string'
       },
@@ -1064,7 +1197,8 @@ const { data } = await client.createJourney(
       thirdPartyCookies: true,
       betaFeatures: {
         modernProducts: true,
-        modernLauncher: true
+        modernLauncher: true,
+        sparkDesign: true
       },
       offline: {
         enabled: true,
@@ -1111,9 +1245,16 @@ const { data } = await client.createJourney(
       "stepId": "string",
       "schema": {},
       "uischema": {},
+      "partialOrigin": {},
       "maxWidth": "small"
     }
   ],
+  "partialContract": {
+    "exits": {},
+    "requiresLogin": true,
+    "description": "string"
+  },
+  "partials": {},
   "design": {
     "logoUrl": "string",
     "theme": {},
@@ -1164,6 +1305,7 @@ const { data } = await client.createJourney(
     "entityId": "string",
     "mappingsAutomationId": "string",
     "newMappings": true,
+    "flowId": "string",
     "targetedCustomer": "string",
     "description": "string",
     "organizationSettings": {},
@@ -1181,6 +1323,7 @@ const { data } = await client.createJourney(
     "useAustrianLabels": true,
     "enableDarkMode": true,
     "accessMode": "PUBLIC",
+    "available_languages": ["de", "en"],
     "authGate": {
       "stepId": "string"
     },
@@ -1194,7 +1337,8 @@ const { data } = await client.createJourney(
     "thirdPartyCookies": true,
     "betaFeatures": {
       "modernProducts": true,
-      "modernLauncher": true
+      "modernLauncher": true,
+      "sparkDesign": true
     },
     "offline": {
       "enabled": true,
@@ -1261,9 +1405,16 @@ const { data } = await client.updateJourney(
         stepId: 'string',
         schema: {},
         uischema: {},
+        partialOrigin: { /* ... */ },
         maxWidth: 'small'
       }
     ],
+    partialContract: {
+      exits: {},
+      requiresLogin: true,
+      description: 'string'
+    },
+    partials: {},
     design: {
       logoUrl: 'string',
       theme: {},
@@ -1314,6 +1465,7 @@ const { data } = await client.updateJourney(
       entityId: 'string',
       mappingsAutomationId: 'string',
       newMappings: true,
+      flowId: 'string',
       targetedCustomer: 'string',
       description: 'string',
       organizationSettings: {},
@@ -1331,6 +1483,7 @@ const { data } = await client.updateJourney(
       useAustrianLabels: true,
       enableDarkMode: true,
       accessMode: 'PUBLIC',
+      available_languages: ['de', 'en'],
       authGate: {
         stepId: 'string'
       },
@@ -1344,7 +1497,8 @@ const { data } = await client.updateJourney(
       thirdPartyCookies: true,
       betaFeatures: {
         modernProducts: true,
-        modernLauncher: true
+        modernLauncher: true,
+        sparkDesign: true
       },
       offline: {
         enabled: true,
@@ -1398,6 +1552,12 @@ const { data } = await client.patchUpdateJourney(
     "steps": [
       {}
     ],
+    "partialContract": {
+      "exits": {},
+      "requiresLogin": true,
+      "description": "string"
+    },
+    "partials": {},
     "design": {
       "logoUrl": "string",
       "theme": {},
@@ -1425,6 +1585,7 @@ const { data } = await client.patchUpdateJourney(
       "entityId": "string",
       "mappingsAutomationId": "string",
       "newMappings": true,
+      "flowId": "string",
       "targetedCustomer": "string",
       "description": "string",
       "organizationSettings": {},
@@ -1442,6 +1603,7 @@ const { data } = await client.patchUpdateJourney(
       "useAustrianLabels": true,
       "enableDarkMode": true,
       "accessMode": "PUBLIC",
+      "available_languages": ["de", "en"],
       "authGate": {},
       "isPublished": true,
       "status": "string",
@@ -1633,9 +1795,16 @@ const { data } = await client.createJourneyV2(
         stepId: 'string',
         schema: {},
         uischema: {},
+        partialOrigin: { /* ... */ },
         maxWidth: 'small'
       }
     ],
+    partialContract: {
+      exits: {},
+      requiresLogin: true,
+      description: 'string'
+    },
+    partials: {},
     design: {
       logoUrl: 'string',
       theme: {},
@@ -1684,6 +1853,7 @@ const { data } = await client.createJourneyV2(
       entityId: 'string',
       mappingsAutomationId: 'string',
       newMappings: true,
+      flowId: 'string',
       templateId: 'string',
       targetedCustomer: 'string',
       description: 'string',
@@ -1700,6 +1870,7 @@ const { data } = await client.createJourneyV2(
       useNewDesign: true,
       thirdPartyCookies: true,
       accessMode: 'PUBLIC',
+      available_languages: ['de', 'en'],
       authGate: {
         stepId: 'string'
       },
@@ -1712,7 +1883,8 @@ const { data } = await client.createJourneyV2(
       },
       betaFeatures: {
         modernProducts: true,
-        modernLauncher: true
+        modernLauncher: true,
+        sparkDesign: true
       },
       offline: {
         enabled: true,
@@ -1755,9 +1927,16 @@ const { data } = await client.createJourneyV2(
       "stepId": "string",
       "schema": {},
       "uischema": {},
+      "partialOrigin": {},
       "maxWidth": "small"
     }
   ],
+  "partialContract": {
+    "exits": {},
+    "requiresLogin": true,
+    "description": "string"
+  },
+  "partials": {},
   "design": {
     "logoUrl": "string",
     "theme": {},
@@ -1806,6 +1985,7 @@ const { data } = await client.createJourneyV2(
     "entityId": "string",
     "mappingsAutomationId": "string",
     "newMappings": true,
+    "flowId": "string",
     "templateId": "string",
     "targetedCustomer": "string",
     "description": "string",
@@ -1822,6 +2002,7 @@ const { data } = await client.createJourneyV2(
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
+    "available_languages": ["de", "en"],
     "authGate": {
       "stepId": "string"
     },
@@ -1834,7 +2015,8 @@ const { data } = await client.createJourneyV2(
     },
     "betaFeatures": {
       "modernProducts": true,
-      "modernLauncher": true
+      "modernLauncher": true,
+      "sparkDesign": true
     },
     "offline": {
       "enabled": true,
@@ -1885,9 +2067,16 @@ const { data } = await client.updateJourneyV2(
         stepId: 'string',
         schema: {},
         uischema: {},
+        partialOrigin: { /* ... */ },
         maxWidth: 'small'
       }
     ],
+    partialContract: {
+      exits: {},
+      requiresLogin: true,
+      description: 'string'
+    },
+    partials: {},
     design: {
       logoUrl: 'string',
       theme: {},
@@ -1936,6 +2125,7 @@ const { data } = await client.updateJourneyV2(
       entityId: 'string',
       mappingsAutomationId: 'string',
       newMappings: true,
+      flowId: 'string',
       templateId: 'string',
       targetedCustomer: 'string',
       description: 'string',
@@ -1952,6 +2142,7 @@ const { data } = await client.updateJourneyV2(
       useNewDesign: true,
       thirdPartyCookies: true,
       accessMode: 'PUBLIC',
+      available_languages: ['de', 'en'],
       authGate: {
         stepId: 'string'
       },
@@ -1964,7 +2155,8 @@ const { data } = await client.updateJourneyV2(
       },
       betaFeatures: {
         modernProducts: true,
-        modernLauncher: true
+        modernLauncher: true,
+        sparkDesign: true
       },
       offline: {
         enabled: true,
@@ -2007,9 +2199,16 @@ const { data } = await client.updateJourneyV2(
       "stepId": "string",
       "schema": {},
       "uischema": {},
+      "partialOrigin": {},
       "maxWidth": "small"
     }
   ],
+  "partialContract": {
+    "exits": {},
+    "requiresLogin": true,
+    "description": "string"
+  },
+  "partials": {},
   "design": {
     "logoUrl": "string",
     "theme": {},
@@ -2058,6 +2257,7 @@ const { data } = await client.updateJourneyV2(
     "entityId": "string",
     "mappingsAutomationId": "string",
     "newMappings": true,
+    "flowId": "string",
     "templateId": "string",
     "targetedCustomer": "string",
     "description": "string",
@@ -2074,6 +2274,7 @@ const { data } = await client.updateJourneyV2(
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
+    "available_languages": ["de", "en"],
     "authGate": {
       "stepId": "string"
     },
@@ -2086,7 +2287,8 @@ const { data } = await client.updateJourneyV2(
     },
     "betaFeatures": {
       "modernProducts": true,
-      "modernLauncher": true
+      "modernLauncher": true,
+      "sparkDesign": true
     },
     "offline": {
       "enabled": true,
@@ -2101,7 +2303,21 @@ const { data } = await client.updateJourneyV2(
       "field2": ["rule102", "rule103"]
     }
   },
-  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
+  "partial_warnings": [
+    {
+      "severity": "error",
+      "code": "string",
+      "message": "string",
+      "instanceId": "string",
+      "partialId": "string",
+      "stepId": "string",
+      "blockId": "string",
+      "logicId": "string",
+      "paramKey": "string",
+      "targetStepId": "string"
+    }
+  ]
 }
 ```
 
@@ -2148,9 +2364,16 @@ const { data } = await client.patchUpdateJourneyV2(
       "stepId": "string",
       "schema": {},
       "uischema": {},
+      "partialOrigin": {},
       "maxWidth": "small"
     }
   ],
+  "partialContract": {
+    "exits": {},
+    "requiresLogin": true,
+    "description": "string"
+  },
+  "partials": {},
   "design": {
     "logoUrl": "string",
     "theme": {},
@@ -2199,6 +2422,7 @@ const { data } = await client.patchUpdateJourneyV2(
     "entityId": "string",
     "mappingsAutomationId": "string",
     "newMappings": true,
+    "flowId": "string",
     "templateId": "string",
     "targetedCustomer": "string",
     "description": "string",
@@ -2215,6 +2439,7 @@ const { data } = await client.patchUpdateJourneyV2(
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
+    "available_languages": ["de", "en"],
     "authGate": {
       "stepId": "string"
     },
@@ -2227,7 +2452,8 @@ const { data } = await client.patchUpdateJourneyV2(
     },
     "betaFeatures": {
       "modernProducts": true,
-      "modernLauncher": true
+      "modernLauncher": true,
+      "sparkDesign": true
     },
     "offline": {
       "enabled": true,
@@ -2242,7 +2468,21 @@ const { data } = await client.patchUpdateJourneyV2(
       "field2": ["rule102", "rule103"]
     }
   },
-  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
+  "partial_warnings": [
+    {
+      "severity": "error",
+      "code": "string",
+      "message": "string",
+      "instanceId": "string",
+      "partialId": "string",
+      "stepId": "string",
+      "blockId": "string",
+      "logicId": "string",
+      "paramKey": "string",
+      "targetStepId": "string"
+    }
+  ]
 }
 ```
 
@@ -2286,9 +2526,16 @@ const { data } = await client.getJourneyV2({
       "stepId": "string",
       "schema": {},
       "uischema": {},
+      "partialOrigin": {},
       "maxWidth": "small"
     }
   ],
+  "partialContract": {
+    "exits": {},
+    "requiresLogin": true,
+    "description": "string"
+  },
+  "partials": {},
   "design": {
     "logoUrl": "string",
     "theme": {},
@@ -2337,6 +2584,7 @@ const { data } = await client.getJourneyV2({
     "entityId": "string",
     "mappingsAutomationId": "string",
     "newMappings": true,
+    "flowId": "string",
     "templateId": "string",
     "targetedCustomer": "string",
     "description": "string",
@@ -2353,6 +2601,7 @@ const { data } = await client.getJourneyV2({
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
+    "available_languages": ["de", "en"],
     "authGate": {
       "stepId": "string"
     },
@@ -2365,7 +2614,8 @@ const { data } = await client.getJourneyV2({
     },
     "betaFeatures": {
       "modernProducts": true,
-      "modernLauncher": true
+      "modernLauncher": true,
+      "sparkDesign": true
     },
     "offline": {
       "enabled": true,
@@ -2732,7 +2982,20 @@ type JourneyResponse = {
       stepId?: { ... }
       schema: { ... }
       uischema: { ... }
+      partialOrigin?: { ... }
       maxWidth?: { ... }
+    }>
+    partialContract?: {
+      exits?: { ... }
+      requiresLogin: { ... }
+      description?: { ... }
+    }
+    partials?: Record<string, {
+      partialId: { ... }
+      afterStepId?: { ... }
+      exits?: { ... }
+      produced?: { ... }
+      exceptions?: { ... }
     }>
     design?: {
       logoUrl?: { ... }
@@ -2778,6 +3041,7 @@ type JourneyResponse = {
       entityId?: { ... }
       mappingsAutomationId?: { ... }
       newMappings?: { ... }
+      flowId?: { ... }
       targetedCustomer?: { ... }
       description?: { ... }
       organizationSettings?: { ... }
@@ -2795,23 +3059,9 @@ type JourneyResponse = {
       useAustrianLabels?: { ... }
       enableDarkMode?: { ... }
       accessMode?: { ... }
+      available_languages?: { ... }
       authGate?: { ... }
       isPublished?: { ... }
-      status?: { ... }
-      isActive?: { ... }
-      savingProgress?: { ... }
-      thirdPartyCookies?: { ... }
-      betaFeatures?: { ... }
-      offline?: { ... }
-    }
-    validationRules?: Record<string, string | string[] | Record<string, string | string[]>>
-    _manifest?: string // uuid[]
-    createdBy?: string
-    updatedBy?: string
-    __lastModifiedAt?: string
-    createdAt: string
-    lastModifiedAt: string
-    deletedAt?: string
   // ...
 }
 ```
@@ -2848,6 +3098,118 @@ type PatchUpdateJourneyRequest = {
 }
 ```
 
+### `PartialContract`
+
+```ts
+type PartialContract = {
+  exits?: Record<string, {
+    label: string
+  }>
+  requiresLogin: boolean
+  description?: string
+}
+```
+
+### `PartialOrigin`
+
+```ts
+type PartialOrigin = {
+  instanceId: string
+  partialId: string
+  originalStepId: string
+}
+```
+
+### `PartialProduced`
+
+```ts
+type PartialProduced = {
+  stepIds: string[]
+  logicIds: string[]
+  datasourceIds: string[]
+  contextParameterIds: string[]
+  raisedRequiredParameterIds: string[]
+}
+```
+
+### `PartialInstance`
+
+```ts
+type PartialInstance = {
+  partialId: string
+  afterStepId?: string
+  exits?: Record<string, string>
+  produced?: {
+    stepIds: string[]
+    logicIds: string[]
+    datasourceIds: string[]
+    contextParameterIds: string[]
+    raisedRequiredParameterIds: string[]
+  }
+  exceptions?: Record<string, {
+    controlName: string
+    values: Record<string, unknown>
+  }>
+}
+```
+
+### `PartialBlockException`
+
+```ts
+type PartialBlockException = {
+  controlName: string
+  values: Record<string, unknown>
+}
+```
+
+### `PartialUsages`
+
+```ts
+type PartialUsages = {
+  usages: Array<{
+    journeyId: string
+    name: string
+    instanceIds: string[]
+  }>
+}
+```
+
+### `PartialWarnings`
+
+```ts
+type PartialWarnings = {
+  partial_warnings?: Array<{
+    severity: "error" | "warning"
+    code: string
+    message: string
+    instanceId?: string
+    partialId?: string
+    stepId?: string
+    blockId?: string
+    logicId?: string
+    paramKey?: string
+    targetStepId?: string
+  }>
+}
+```
+
+### `PartialIssue`
+
+```ts
+type PartialIssue = {
+  severity: "error" | "warning"
+  code: string
+  message: string
+  instanceId?: string
+  partialId?: string
+  stepId?: string
+  blockId?: string
+  logicId?: string
+  paramKey?: string
+  targetStepId?: string
+}
+```
+
 ### `JourneyCreationRequest`
 
 ```ts
@@ -2858,8 +3220,8 @@ type JourneyCreationRequest = {
   name: string
   steps: Array<{
     showStepName?: boolean
-    title?: string
-    subTitle?: string
+    title?: string | Record<string, string>
+    subTitle?: string | Record<string, string>
     showStepSubtitle?: boolean
     showStepper?: boolean
     showStepperLabels?: boolean
@@ -2870,7 +3232,35 @@ type JourneyCreationRequest = {
     stepId?: string
     schema: unknown
     uischema: unknown
+    partialOrigin?: {
+      instanceId: { ... }
+      partialId: { ... }
+      originalStepId: { ... }
+    }
     maxWidth?: "small" | "medium" | "large" | "extra large"
+  }>
+  partialContract?: {
+    exits?: Record<string, {
+      label: { ... }
+    }>
+    requiresLogin: boolean
+    description?: string
+  }
+  partials?: Record<string, {
+    partialId: string
+    afterStepId?: string
+    exits?: Record<string, string>
+    produced?: {
+      stepIds: { ... }
+      logicIds: { ... }
+      datasourceIds: { ... }
+      contextParameterIds: { ... }
+      raisedRequiredParameterIds: { ... }
+    }
+    exceptions?: Record<string, {
+      controlName: { ... }
+      values: { ... }
+    }>
   }>
   design?: {
     logoUrl?: string
@@ -2923,34 +3313,6 @@ type JourneyCreationRequest = {
       button?: { ... }
     }
     safeModeAutomation?: boolean
-    canary?: boolean
-    designId: string
-    templateId?: string
-    entityId?: string
-    mappingsAutomationId?: string
-    newMappings?: boolean
-    targetedCustomer?: string
-    description?: string
-    organizationSettings?: Record<string, boolean>
-    publicToken?: string
-    runtimeEntities?: "ORDER" | "OPPORTUNITY"[]
-    filePurposes?: string[]
-    entityTags?: string[]
-    addressSuggestionsFileUrl?: string
-    addressSuggestionsFileId?: string
-    addressSuggestionsCountryCode?: string
-    addressSuggestionsEnableAutoComplete?: boolean
-    addressSuggestionsSource?: string[]
-    addressSuggestionsEnableFreeText?: boolean
-    useNewDesign?: boolean
-    useAustrianLabels?: boolean
-    enableDarkMode?: boolean
-    accessMode?: "PUBLIC" | "PRIVATE"
-    authGate?: {
-      stepId: { ... }
-    }
-    isPublished?: boolean
-    status?: string
   // ...
 }
 ```
@@ -2964,8 +3326,8 @@ type JourneyCreationRequestV2 = {
   name: string
   steps: Array<{
     showStepName?: boolean
-    title?: string
-    subTitle?: string
+    title?: string | Record<string, string>
+    subTitle?: string | Record<string, string>
     showStepSubtitle?: boolean
     showStepper?: boolean
     showStepperLabels?: boolean
@@ -2976,7 +3338,35 @@ type JourneyCreationRequestV2 = {
     stepId?: string
     schema: unknown
     uischema: unknown
+    partialOrigin?: {
+      instanceId: { ... }
+      partialId: { ... }
+      originalStepId: { ... }
+    }
     maxWidth?: "small" | "medium" | "large" | "extra large"
+  }>
+  partialContract?: {
+    exits?: Record<string, {
+      label: { ... }
+    }>
+    requiresLogin: boolean
+    description?: string
+  }
+  partials?: Record<string, {
+    partialId: string
+    afterStepId?: string
+    exits?: Record<string, string>
+    produced?: {
+      stepIds: { ... }
+      logicIds: { ... }
+      datasourceIds: { ... }
+      contextParameterIds: { ... }
+      raisedRequiredParameterIds: { ... }
+    }
+    exceptions?: Record<string, {
+      controlName: { ... }
+      values: { ... }
+    }>
   }>
   design?: {
     logoUrl?: string
@@ -3030,34 +3420,6 @@ type JourneyCreationRequestV2 = {
     }
     safeModeAutomation?: boolean
     designId?: string
-    entityId?: string
-    mappingsAutomationId?: string
-    newMappings?: boolean
-    templateId?: string
-    targetedCustomer?: string
-    description?: string
-    publicToken?: string
-    runtimeEntities?: "ORDER" | "OPPORTUNITY"[]
-    filePurposes?: string[]
-    entityTags?: string[]
-    addressSuggestionsFileUrl?: string
-    addressSuggestionsFileId?: string
-    addressSuggestionsCountryCode?: string
-    addressSuggestionsEnableAutoComplete?: boolean
-    addressSuggestionsSource?: string[]
-    addressSuggestionsEnableFreeText?: boolean
-    useNewDesign?: boolean
-    thirdPartyCookies?: boolean
-    accessMode?: "PUBLIC" | "PRIVATE"
-    authGate?: {
-      stepId: { ... }
-    }
-    enableDarkMode?: boolean
-    useAustrianLabels?: boolean
-    isActive?: boolean
-    savingProgress?: {
-      mode?: { ... }
-      supportedRevision?: { ... }
   // ...
 }
 ```
@@ -3109,8 +3471,8 @@ type Journey = {
   name: string
   steps: Array<{
     showStepName?: boolean
-    title?: string
-    subTitle?: string
+    title?: string | Record<string, string>
+    subTitle?: string | Record<string, string>
     showStepSubtitle?: boolean
     showStepper?: boolean
     showStepperLabels?: boolean
@@ -3121,7 +3483,35 @@ type Journey = {
     stepId?: string
     schema: unknown
     uischema: unknown
+    partialOrigin?: {
+      instanceId: { ... }
+      partialId: { ... }
+      originalStepId: { ... }
+    }
     maxWidth?: "small" | "medium" | "large" | "extra large"
+  }>
+  partialContract?: {
+    exits?: Record<string, {
+      label: { ... }
+    }>
+    requiresLogin: boolean
+    description?: string
+  }
+  partials?: Record<string, {
+    partialId: string
+    afterStepId?: string
+    exits?: Record<string, string>
+    produced?: {
+      stepIds: { ... }
+      logicIds: { ... }
+      datasourceIds: { ... }
+      contextParameterIds: { ... }
+      raisedRequiredParameterIds: { ... }
+    }
+    exceptions?: Record<string, {
+      controlName: { ... }
+      values: { ... }
+    }>
   }>
   design?: {
     logoUrl?: string
@@ -3174,34 +3564,6 @@ type Journey = {
       button?: { ... }
     }
     safeModeAutomation?: boolean
-    canary?: boolean
-    designId: string
-    templateId?: string
-    entityId?: string
-    mappingsAutomationId?: string
-    newMappings?: boolean
-    targetedCustomer?: string
-    description?: string
-    organizationSettings?: Record<string, boolean>
-    publicToken?: string
-    runtimeEntities?: "ORDER" | "OPPORTUNITY"[]
-    filePurposes?: string[]
-    entityTags?: string[]
-    addressSuggestionsFileUrl?: string
-    addressSuggestionsFileId?: string
-    addressSuggestionsCountryCode?: string
-    addressSuggestionsEnableAutoComplete?: boolean
-    addressSuggestionsSource?: string[]
-    addressSuggestionsEnableFreeText?: boolean
-    useNewDesign?: boolean
-    useAustrianLabels?: boolean
-    enableDarkMode?: boolean
-    accessMode?: "PUBLIC" | "PRIVATE"
-    authGate?: {
-      stepId: { ... }
-    }
-    isPublished?: boolean
-    status?: string
   // ...
 }
 ```
@@ -3263,8 +3625,8 @@ type JourneyRevisionRequest = {
   name: string
   steps: Array<{
     showStepName?: boolean
-    title?: string
-    subTitle?: string
+    title?: string | Record<string, string>
+    subTitle?: string | Record<string, string>
     showStepSubtitle?: boolean
     showStepper?: boolean
     showStepperLabels?: boolean
@@ -3275,7 +3637,35 @@ type JourneyRevisionRequest = {
     stepId?: string
     schema: unknown
     uischema: unknown
+    partialOrigin?: {
+      instanceId: { ... }
+      partialId: { ... }
+      originalStepId: { ... }
+    }
     maxWidth?: "small" | "medium" | "large" | "extra large"
+  }>
+  partialContract?: {
+    exits?: Record<string, {
+      label: { ... }
+    }>
+    requiresLogin: boolean
+    description?: string
+  }
+  partials?: Record<string, {
+    partialId: string
+    afterStepId?: string
+    exits?: Record<string, string>
+    produced?: {
+      stepIds: { ... }
+      logicIds: { ... }
+      datasourceIds: { ... }
+      contextParameterIds: { ... }
+      raisedRequiredParameterIds: { ... }
+    }
+    exceptions?: Record<string, {
+      controlName: { ... }
+      values: { ... }
+    }>
   }>
   design?: {
     logoUrl?: string
@@ -3328,34 +3718,6 @@ type JourneyRevisionRequest = {
       button?: { ... }
     }
     safeModeAutomation?: boolean
-    canary?: boolean
-    designId: string
-    templateId?: string
-    entityId?: string
-    mappingsAutomationId?: string
-    newMappings?: boolean
-    targetedCustomer?: string
-    description?: string
-    organizationSettings?: Record<string, boolean>
-    publicToken?: string
-    runtimeEntities?: "ORDER" | "OPPORTUNITY"[]
-    filePurposes?: string[]
-    entityTags?: string[]
-    addressSuggestionsFileUrl?: string
-    addressSuggestionsFileId?: string
-    addressSuggestionsCountryCode?: string
-    addressSuggestionsEnableAutoComplete?: boolean
-    addressSuggestionsSource?: string[]
-    addressSuggestionsEnableFreeText?: boolean
-    useNewDesign?: boolean
-    useAustrianLabels?: boolean
-    enableDarkMode?: boolean
-    accessMode?: "PUBLIC" | "PRIVATE"
-    authGate?: {
-      stepId: { ... }
-    }
-    isPublished?: boolean
-    status?: string
   // ...
 }
 ```
@@ -3393,6 +3755,18 @@ type JourneyRevisionSummary = {
   metadata_updated_at?: string // date-time
   metadata_updated_by?: string
   mapping_config_version?: number
+  partial_warnings?: Array<{
+    severity: "error" | "warning"
+    code: string
+    message: string
+    instanceId?: string
+    partialId?: string
+    stepId?: string
+    blockId?: string
+    logicId?: string
+    paramKey?: string
+    targetStepId?: string
+  }>
 }
 ```
 
@@ -3411,6 +3785,18 @@ type JourneyRevisionList = {
     metadata_updated_at?: string // date-time
     metadata_updated_by?: string
     mapping_config_version?: number
+    partial_warnings?: Array<{
+      severity: { ... }
+      code: { ... }
+      message: { ... }
+      instanceId?: { ... }
+      partialId?: { ... }
+      stepId?: { ... }
+      blockId?: { ... }
+      logicId?: { ... }
+      paramKey?: { ... }
+      targetStepId?: { ... }
+    }>
   }>
   next_cursor?: string
 }
@@ -3430,6 +3816,18 @@ type JourneyRevision = {
   metadata_updated_at?: string // date-time
   metadata_updated_by?: string
   mapping_config_version?: number
+  partial_warnings?: Array<{
+    severity: "error" | "warning"
+    code: string
+    message: string
+    instanceId?: string
+    partialId?: string
+    stepId?: string
+    blockId?: string
+    logicId?: string
+    paramKey?: string
+    targetStepId?: string
+  }>
   configuration: {
     journeyId?: string
     organizationId: string
@@ -3449,7 +3847,20 @@ type JourneyRevision = {
       stepId?: { ... }
       schema: { ... }
       uischema: { ... }
+      partialOrigin?: { ... }
       maxWidth?: { ... }
+    }>
+    partialContract?: {
+      exits?: { ... }
+      requiresLogin: { ... }
+      description?: { ... }
+    }
+    partials?: Record<string, {
+      partialId: { ... }
+      afterStepId?: { ... }
+      exits?: { ... }
+      produced?: { ... }
+      exceptions?: { ... }
     }>
     design?: {
       logoUrl?: { ... }
@@ -3494,31 +3905,6 @@ type JourneyRevision = {
       templateId?: { ... }
       entityId?: { ... }
       mappingsAutomationId?: { ... }
-      newMappings?: { ... }
-      targetedCustomer?: { ... }
-      description?: { ... }
-      organizationSettings?: { ... }
-      publicToken?: { ... }
-      runtimeEntities?: { ... }
-      filePurposes?: { ... }
-      entityTags?: { ... }
-      addressSuggestionsFileUrl?: { ... }
-      addressSuggestionsFileId?: { ... }
-      addressSuggestionsCountryCode?: { ... }
-      addressSuggestionsEnableAutoComplete?: { ... }
-      addressSuggestionsSource?: { ... }
-      addressSuggestionsEnableFreeText?: { ... }
-      useNewDesign?: { ... }
-      useAustrianLabels?: { ... }
-      enableDarkMode?: { ... }
-      accessMode?: { ... }
-      authGate?: { ... }
-      isPublished?: { ... }
-      status?: { ... }
-      isActive?: { ... }
-      savingProgress?: { ... }
-      thirdPartyCookies?: { ... }
-      betaFeatures?: { ... }
   // ...
 }
 ```
@@ -3539,6 +3925,18 @@ type JourneyRevisionConflict = {
     metadata_updated_at?: string // date-time
     metadata_updated_by?: string
     mapping_config_version?: number
+    partial_warnings?: Array<{
+      severity: { ... }
+      code: { ... }
+      message: { ... }
+      instanceId?: { ... }
+      partialId?: { ... }
+      stepId?: { ... }
+      blockId?: { ... }
+      logicId?: { ... }
+      paramKey?: { ... }
+      targetStepId?: { ... }
+    }>
   }
 }
 ```

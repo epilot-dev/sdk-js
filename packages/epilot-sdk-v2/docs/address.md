@@ -31,7 +31,13 @@ const { data } = await addressClient.getAddressSuggestions(...)
 - [`availabilityCheck`](#availabilitycheck)
 - [`validateAvailabilityFile`](#validateavailabilityfile)
 
+**Location**
+- [`resolveLocation`](#resolvelocation)
+
 **Schemas**
+- [`ResolveLocationParams`](#resolvelocationparams)
+- [`ResolveLocationResult`](#resolvelocationresult)
+- [`AddressValue`](#addressvalue)
 - [`AvailabilityCheckParams`](#availabilitycheckparams)
 - [`AvailabilityFilters`](#availabilityfilters)
 - [`AvailabilityDate`](#availabilitydate)
@@ -113,6 +119,47 @@ const { data } = await client.availabilityCheck(
 
 ---
 
+### `resolveLocation`
+
+Resolve or create the canonical Location for a raw address (find-or-create by canonical address_hash) and return its id. This is the dedup-safe way to create a Location — direct entity creation of `lo
+
+`POST /v1/public/location-service/resolve`
+
+```ts
+const { data } = await client.resolveLocation(
+  null,
+  {
+    address: {
+      street: 'string',
+      street_number: 'string',
+      postal_code: 'string',
+      city: 'string',
+      suburb: 'string',
+      state: 'string',
+      country: 'string',
+      latitude: 0,
+      longitude: 0
+    },
+    entityId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    entitySlug: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "locationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "created": true
+}
+```
+
+</details>
+
+---
+
 ### `validateAvailabilityFile`
 
 Validates an already uploaded availability file, it returns an array of errors if any errors are found in the file.
@@ -147,6 +194,53 @@ const { data } = await client.validateAvailabilityFile({
 ---
 
 ## Schemas
+
+### `ResolveLocationParams`
+
+```ts
+type ResolveLocationParams = {
+  address: {
+    street?: string
+    street_number?: string
+    postal_code?: string
+    city?: string
+    suburb?: string
+    state?: string
+    country?: string
+    latitude?: number
+    longitude?: number
+  }
+  entityId?: string // uuid
+  entitySlug?: string
+}
+```
+
+### `ResolveLocationResult`
+
+```ts
+type ResolveLocationResult = {
+  locationId: string // uuid
+  created: boolean
+}
+```
+
+### `AddressValue`
+
+A raw address. Provide EITHER a street address (`street` + `street_number` + (`postal_code` or `city`)) OR coordinates (`latitude` + `longitude`). Only the string fields drive the canonical address hash; for a street address the coordinates are stored as-is on the Location, while a coordinate-only a
+
+```ts
+type AddressValue = {
+  street?: string
+  street_number?: string
+  postal_code?: string
+  city?: string
+  suburb?: string
+  state?: string
+  country?: string
+  latitude?: number
+  longitude?: number
+}
+```
 
 ### `AvailabilityCheckParams`
 

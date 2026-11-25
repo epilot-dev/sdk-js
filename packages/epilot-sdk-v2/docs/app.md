@@ -71,6 +71,10 @@ const { data } = await appClient.getPublicFacingComponent(...)
 **Schemas**
 - [`Role`](#role)
 - [`Options`](#options)
+- [`LocalizedText`](#localizedtext)
+- [`OptionChoice`](#optionchoice)
+- [`OptionGroup`](#optiongroup)
+- [`OptionConditionValue`](#optionconditionvalue)
 - [`ObjectField`](#objectfield)
 - [`Option`](#option)
 - [`OptionsRef`](#optionsref)
@@ -121,6 +125,8 @@ const { data } = await appClient.getPublicFacingComponent(...)
 - [`PortalBlockConfig`](#portalblockconfig)
 - [`AppBridgeSurfaceConfig`](#appbridgesurfaceconfig)
 - [`PortalBlockSurfaceConfig`](#portalblocksurfaceconfig)
+- [`PortalBlockSettings`](#portalblocksettings)
+- [`PortalBlockSettingsField`](#portalblocksettingsfield)
 - [`JourneyBlockComponentArgs`](#journeyblockcomponentargs)
 - [`TextArg`](#textarg)
 - [`BooleanArg`](#booleanarg)
@@ -397,6 +403,7 @@ const { data } = await client.getPublicConfiguration({
     "email": "string"
   },
   "dev_mode": true,
+  "internal": false,
   "category": "string",
   "icon_url": "string",
   "documentation_url": "string",
@@ -433,14 +440,31 @@ const { data } = await client.getPublicConfiguration({
       "label": "string",
       "required": true,
       "description": "string",
+      "placeholder": "string",
+      "default": "string",
+      "choices": [],
+      "format": "hostname",
+      "pattern": "string",
+      "pattern_message": "string",
+      "min": 0,
+      "max": 0,
+      "group": "string",
       "repeatable": true,
       "fields": [],
       "value": {},
       "type": "text",
+      "visible_if": {},
       "sensitive": true,
       "configured": true,
       "lifted": true,
       "value_updated_at": "string"
+    }
+  ],
+  "option_groups": [
+    {
+      "key": "string",
+      "label": "string",
+      "description": "string"
     }
   ],
   "is_beta": true,
@@ -466,6 +490,7 @@ const { data } = await client.getPublicConfiguration({
       "components": [],
       "functions": [],
       "options": [],
+      "option_groups": [],
       "visibility": "private",
       "public": false,
       "pending": false,
@@ -564,14 +589,31 @@ const { data } = await client.getConfiguration({
       "label": "string",
       "required": true,
       "description": "string",
+      "placeholder": "string",
+      "default": "string",
+      "choices": [],
+      "format": "hostname",
+      "pattern": "string",
+      "pattern_message": "string",
+      "min": 0,
+      "max": 0,
+      "group": "string",
       "repeatable": true,
       "fields": [],
       "value": {},
       "type": "text",
+      "visible_if": {},
       "sensitive": true,
       "configured": true,
       "lifted": true,
       "value_updated_at": "string"
+    }
+  ],
+  "option_groups": [
+    {
+      "key": "string",
+      "label": "string",
+      "description": "string"
     }
   ],
   "visibility": "private",
@@ -646,7 +688,7 @@ const { data } = await client.patchMetadata(
 
 ### `deleteConfiguration`
 
-Delete app configuration
+Delete an app configuration and all its versions and components.
 
 `DELETE /v1/app-configurations/{appId}`
 
@@ -918,6 +960,7 @@ const { data } = await client.listVersions({
       "components": [],
       "functions": [],
       "options": [],
+      "option_groups": [],
       "visibility": "private",
       "public": false,
       "pending": false,
@@ -1021,14 +1064,31 @@ const { data } = await client.getVersion({
       "label": "string",
       "required": true,
       "description": "string",
+      "placeholder": "string",
+      "default": "string",
+      "choices": [],
+      "format": "hostname",
+      "pattern": "string",
+      "pattern_message": "string",
+      "min": 0,
+      "max": 0,
+      "group": "string",
       "repeatable": true,
       "fields": [],
       "value": {},
       "type": "text",
+      "visible_if": {},
       "sensitive": true,
       "configured": true,
       "lifted": true,
       "value_updated_at": "string"
+    }
+  ],
+  "option_groups": [
+    {
+      "key": "string",
+      "label": "string",
+      "description": "string"
     }
   ],
   "visibility": "private",
@@ -1126,6 +1186,20 @@ const { data } = await client.patchVersion(
         label: 'string',
         required: true,
         description: 'string',
+        placeholder: 'string',
+        default: 'string',
+        choices: [
+          {
+            value: 'string',
+            label: 'string'
+          }
+        ],
+        format: 'hostname',
+        pattern: 'string',
+        pattern_message: 'string',
+        min: 0,
+        max: 0,
+        group: 'string',
         repeatable: true,
         fields: [
           {
@@ -1138,10 +1212,20 @@ const { data } = await client.patchVersion(
         ],
         value: {},
         type: 'text',
+        visible_if: {
+          auth_mode: ['basic', 'bearer']
+        },
         sensitive: true,
         configured: true,
         lifted: true,
         value_updated_at: 'string'
+      }
+    ],
+    option_groups: [
+      {
+        key: 'string',
+        label: 'string',
+        description: 'string'
       }
     ],
     changelog: 'string'
@@ -1404,6 +1488,7 @@ const { data } = await client.listInstallations({
       "components": [],
       "functions": [],
       "options": [],
+      "option_groups": [],
       "installed_version": "string",
       "role": "string",
       "blueprint_ref": {},
@@ -1449,45 +1534,21 @@ const { data } = await client.getInstallation({
   "option_values": [
     {
       "component_id": "string",
-      "options": [
-        {
-          "key": "string",
-          "value": {}
-        }
-      ]
+      "options": []
     }
   ],
   "components": [
     {
       "component_type": "CUSTOM_JOURNEY_BLOCK",
-      "configuration": {
-        "override_dev_mode": {
-          "override_url": "http://localhost:3000"
-        },
-        "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
-        "component_tag": "string",
-        "component_args": [
-          {
-            "type": "text"
-          }
-        ],
-        "component_size": 0,
-        "component_mapping": {}
-      }
+      "configuration": {}
     }
   ],
   "functions": [
     {
       "name": "string",
       "type": "workflow",
-      "label": {
-        "en": "string",
-        "de": "string"
-      },
-      "description": {
-        "en": "string",
-        "de": "string"
-      },
+      "label": {},
+      "description": {},
       "code": "string",
       "schedule": "rate(30 minutes)",
       "schedule_timezone": "Europe/Berlin",
@@ -1501,22 +1562,31 @@ const { data } = await client.getInstallation({
       "label": "string",
       "required": true,
       "description": "string",
+      "placeholder": "string",
+      "default": "string",
+      "choices": [],
+      "format": "hostname",
+      "pattern": "string",
+      "pattern_message": "string",
+      "min": 0,
+      "max": 0,
+      "group": "string",
       "repeatable": true,
-      "fields": [
-        {
-          "key": "string",
-          "label": "string",
-          "description": "string",
-          "required": true,
-          "type": "text"
-        }
-      ],
+      "fields": [],
       "value": {},
       "type": "text",
+      "visible_if": {},
       "sensitive": true,
       "configured": true,
       "lifted": true,
       "value_updated_at": "string"
+    }
+  ],
+  "option_groups": [
+    {
+      "key": "string",
+      "label": "string",
+      "description": "string"
     }
   ],
   "installed_version": "string",
@@ -1583,45 +1653,21 @@ const { data } = await client.install(
   "option_values": [
     {
       "component_id": "string",
-      "options": [
-        {
-          "key": "string",
-          "value": {}
-        }
-      ]
+      "options": []
     }
   ],
   "components": [
     {
       "component_type": "CUSTOM_JOURNEY_BLOCK",
-      "configuration": {
-        "override_dev_mode": {
-          "override_url": "http://localhost:3000"
-        },
-        "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
-        "component_tag": "string",
-        "component_args": [
-          {
-            "type": "text"
-          }
-        ],
-        "component_size": 0,
-        "component_mapping": {}
-      }
+      "configuration": {}
     }
   ],
   "functions": [
     {
       "name": "string",
       "type": "workflow",
-      "label": {
-        "en": "string",
-        "de": "string"
-      },
-      "description": {
-        "en": "string",
-        "de": "string"
-      },
+      "label": {},
+      "description": {},
       "code": "string",
       "schedule": "rate(30 minutes)",
       "schedule_timezone": "Europe/Berlin",
@@ -1635,22 +1681,31 @@ const { data } = await client.install(
       "label": "string",
       "required": true,
       "description": "string",
+      "placeholder": "string",
+      "default": "string",
+      "choices": [],
+      "format": "hostname",
+      "pattern": "string",
+      "pattern_message": "string",
+      "min": 0,
+      "max": 0,
+      "group": "string",
       "repeatable": true,
-      "fields": [
-        {
-          "key": "string",
-          "label": "string",
-          "description": "string",
-          "required": true,
-          "type": "text"
-        }
-      ],
+      "fields": [],
       "value": {},
       "type": "text",
+      "visible_if": {},
       "sensitive": true,
       "configured": true,
       "lifted": true,
       "value_updated_at": "string"
+    }
+  ],
+  "option_groups": [
+    {
+      "key": "string",
+      "label": "string",
+      "description": "string"
     }
   ],
   "installed_version": "string",
@@ -1746,45 +1801,21 @@ const { data } = await client.promoteVersion({
   "option_values": [
     {
       "component_id": "string",
-      "options": [
-        {
-          "key": "string",
-          "value": {}
-        }
-      ]
+      "options": []
     }
   ],
   "components": [
     {
       "component_type": "CUSTOM_JOURNEY_BLOCK",
-      "configuration": {
-        "override_dev_mode": {
-          "override_url": "http://localhost:3000"
-        },
-        "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
-        "component_tag": "string",
-        "component_args": [
-          {
-            "type": "text"
-          }
-        ],
-        "component_size": 0,
-        "component_mapping": {}
-      }
+      "configuration": {}
     }
   ],
   "functions": [
     {
       "name": "string",
       "type": "workflow",
-      "label": {
-        "en": "string",
-        "de": "string"
-      },
-      "description": {
-        "en": "string",
-        "de": "string"
-      },
+      "label": {},
+      "description": {},
       "code": "string",
       "schedule": "rate(30 minutes)",
       "schedule_timezone": "Europe/Berlin",
@@ -1798,22 +1829,31 @@ const { data } = await client.promoteVersion({
       "label": "string",
       "required": true,
       "description": "string",
+      "placeholder": "string",
+      "default": "string",
+      "choices": [],
+      "format": "hostname",
+      "pattern": "string",
+      "pattern_message": "string",
+      "min": 0,
+      "max": 0,
+      "group": "string",
       "repeatable": true,
-      "fields": [
-        {
-          "key": "string",
-          "label": "string",
-          "description": "string",
-          "required": true,
-          "type": "text"
-        }
-      ],
+      "fields": [],
       "value": {},
       "type": "text",
+      "visible_if": {},
       "sensitive": true,
       "configured": true,
       "lifted": true,
       "value_updated_at": "string"
+    }
+  ],
+  "option_groups": [
+    {
+      "key": "string",
+      "label": "string",
+      "description": "string"
     }
   ],
   "installed_version": "string",
@@ -1865,6 +1905,20 @@ const { data } = await client.resolveOptions(
       "label": "string",
       "required": true,
       "description": "string",
+      "placeholder": "string",
+      "default": "string",
+      "choices": [
+        {
+          "value": "string",
+          "label": "string"
+        }
+      ],
+      "format": "hostname",
+      "pattern": "string",
+      "pattern_message": "string",
+      "min": 0,
+      "max": 0,
+      "group": "string",
       "repeatable": true,
       "fields": [
         {
@@ -1877,6 +1931,9 @@ const { data } = await client.resolveOptions(
       ],
       "value": {},
       "type": "text",
+      "visible_if": {
+        "auth_mode": ["basic", "bearer"]
+      },
       "sensitive": true,
       "configured": true,
       "lifted": true,
@@ -2035,9 +2092,36 @@ An option declaration — a setting the installing org fills in. Declared at app
 ```ts
 type Options = {
   key: string
-  label?: string
+  label?: string | {
+    en?: string
+    de: string
+  }
   required?: boolean
-  description?: string
+  description?: string | {
+    en?: string
+    de: string
+  }
+  placeholder?: string | {
+    en?: string
+    de: string
+  }
+  default?: string | number | boolean
+  choices?: Array<{
+    value: string | number
+    label?: string | {
+      en?: { ... }
+      de: { ... }
+    }
+  }>
+  format?: "hostname" | "url" | "email"
+  pattern?: string
+  pattern_message?: string | {
+    en?: string
+    de: string
+  }
+  min?: number
+  max?: number
+  group?: string
   repeatable?: boolean
   fields?: Array<{
     key: string
@@ -2048,11 +2132,63 @@ type Options = {
   }>
   value?: unknown
   type: "text" | "number" | "boolean" | "secret" | "object"
+  visible_if?: Record<string, string | number | boolean | string | number | boolean[]>
   sensitive?: boolean
   configured?: boolean
   lifted?: boolean
   value_updated_at?: string
 }
+```
+
+### `LocalizedText`
+
+A plain string, or translations with German required.
+
+```ts
+type LocalizedText = string | {
+  en?: string
+  de: string
+}
+```
+
+### `OptionChoice`
+
+One accepted value of an option that declares `choices`.
+
+```ts
+type OptionChoice = {
+  value: string | number
+  label?: string | {
+    en?: string
+    de: string
+  }
+}
+```
+
+### `OptionGroup`
+
+A section the configuration UI groups app-level options under.
+
+```ts
+type OptionGroup = {
+  key: string
+  label: string | {
+    en?: string
+    de: string
+  }
+  description?: string | {
+    en?: string
+    de: string
+  }
+}
+```
+
+### `OptionConditionValue`
+
+A primitive option value to compare against in `visible_if`.
+
+```ts
+type OptionConditionValue = string | number | boolean
 ```
 
 ### `ObjectField`
@@ -2174,9 +2310,33 @@ type BaseComponentCommon = {
   }
   options?: Array<{
     key: string
-    label?: string
+    label?: string | {
+      en?: { ... }
+      de: { ... }
+    }
     required?: boolean
-    description?: string
+    description?: string | {
+      en?: { ... }
+      de: { ... }
+    }
+    placeholder?: string | {
+      en?: { ... }
+      de: { ... }
+    }
+    default?: string | number | boolean
+    choices?: Array<{
+      value: { ... }
+      label?: { ... }
+    }>
+    format?: "hostname" | "url" | "email"
+    pattern?: string
+    pattern_message?: string | {
+      en?: { ... }
+      de: { ... }
+    }
+    min?: number
+    max?: number
+    group?: string
     repeatable?: boolean
     fields?: Array<{
       key: { ... }
@@ -2187,6 +2347,7 @@ type BaseComponentCommon = {
     }>
     value?: unknown
     type: "text" | "number" | "boolean" | "secret" | "object"
+    visible_if?: Record<string, string | number | boolean | string | number | boolean[]>
     sensitive?: boolean
     configured?: boolean
     lifted?: boolean
@@ -2212,9 +2373,33 @@ type BaseComponent = {
   }
   options?: Array<{
     key: string
-    label?: string
+    label?: string | {
+      en?: { ... }
+      de: { ... }
+    }
     required?: boolean
-    description?: string
+    description?: string | {
+      en?: { ... }
+      de: { ... }
+    }
+    placeholder?: string | {
+      en?: { ... }
+      de: { ... }
+    }
+    default?: string | number | boolean
+    choices?: Array<{
+      value: { ... }
+      label?: { ... }
+    }>
+    format?: "hostname" | "url" | "email"
+    pattern?: string
+    pattern_message?: string | {
+      en?: { ... }
+      de: { ... }
+    }
+    min?: number
+    max?: number
+    group?: string
     repeatable?: boolean
     fields?: Array<{
       key: { ... }
@@ -2225,6 +2410,7 @@ type BaseComponent = {
     }>
     value?: unknown
     type: "text" | "number" | "boolean" | "secret" | "object"
+    visible_if?: Record<string, string | number | boolean | string | number | boolean[]>
     sensitive?: boolean
     configured?: boolean
     lifted?: boolean
@@ -2366,6 +2552,7 @@ type PortalBlockComponent = {
       zip_url?: { ... }
       override_url?: { ... }
       supported_surfaces?: { ... }
+      settings?: { ... }
     }
   }
 }
@@ -2740,11 +2927,9 @@ type PortalExtensionConfig = {
       headers: { ... }
       body?: { ... }
       result: { ... }
-      result_correlation_id?: { ... }
     }
     resolved?: {
       result?: { ... }
-      result_correlation_id?: { ... }
       error_message_path?: { ... }
     }
     use_static_ips?: boolean
@@ -2774,11 +2959,9 @@ type PortalExtensionConfig = {
       headers: { ... }
       body?: { ... }
       result?: { ... }
-      result_correlation_id?: { ... }
     }
     resolved?: {
       result?: { ... }
-      result_correlation_id?: { ... }
       error_message_path?: { ... }
     }
     assignment_mode?: "contracts" | "contact_to_contracts" | "contact_to_portal_user"
@@ -2817,6 +3000,10 @@ type PortalExtensionConfig = {
     resolved?: {
       data_path?: { ... }
       dataPath?: { ... }
+      error_message_path?: { ... }
+    }
+    use_static_ips?: boolean
+    secure_proxy?: {
   // ...
 }
 ```
@@ -2853,11 +3040,9 @@ type PortalExtensionHookRegistrationIdentifiersCheck = {
     headers: Record<string, string>
     body?: object
     result: string
-    result_correlation_id?: string
   }
   resolved?: {
     result?: string
-    result_correlation_id?: string
     error_message_path?: string
   }
   use_static_ips?: boolean
@@ -2903,11 +3088,9 @@ type PortalExtensionHookContractIdentification = {
     headers: Record<string, string>
     body?: object
     result?: string
-    result_correlation_id?: string
   }
   resolved?: {
     result?: string
-    result_correlation_id?: string
     error_message_path?: string
   }
   assignment_mode?: "contracts" | "contact_to_contracts" | "contact_to_portal_user"
@@ -3465,6 +3648,89 @@ type PortalBlockSurfaceConfig = {
   zip_url?: string
   override_url?: string
   supported_surfaces?: "main" | "footer_inline" | "footer_left_absolute" | "footer_right_absolute"[]
+  settings?: {
+    version: number
+    fields: Array<{
+      key: { ... }
+      type: { ... }
+      label: { ... }
+      description?: { ... }
+      required?: { ... }
+      default?: { ... }
+      options?: { ... }
+      min?: { ... }
+      max?: { ... }
+      step?: { ... }
+      maxLength?: { ... }
+      allowed?: { ... }
+    }>
+  }
+}
+```
+
+### `PortalBlockSettings`
+
+Settings a Portal Builder user can set on each placed instance of this block. The Portal Builder renders a
+form from these fields and stores the values on the block; the portal passes them to the block as
+`config.settings`. Values reach the end customer's browser, so secrets are not allowed: keep th
+
+```ts
+type PortalBlockSettings = {
+  version: number
+  fields: Array<{
+    key: string
+    type: "text" | "translated_text" | "number" | "boolean" | "select" | "entity_schema" | "page" | "journey" | "color_token"
+    label: {
+      en?: { ... }
+      de: { ... }
+    }
+    description?: {
+      en?: { ... }
+      de: { ... }
+    }
+    required?: boolean
+    default?: unknown
+    options?: Array<{
+      value: { ... }
+      label: { ... }
+    }>
+    min?: number
+    max?: number
+    step?: number
+    maxLength?: number
+    allowed?: string[]
+  }>
+}
+```
+
+### `PortalBlockSettingsField`
+
+```ts
+type PortalBlockSettingsField = {
+  key: string
+  type: "text" | "translated_text" | "number" | "boolean" | "select" | "entity_schema" | "page" | "journey" | "color_token"
+  label: {
+    en?: string
+    de: string
+  }
+  description?: {
+    en?: string
+    de: string
+  }
+  required?: boolean
+  default?: unknown
+  options?: Array<{
+    value: string
+    label: {
+      en?: { ... }
+      de: { ... }
+    }
+  }>
+  min?: number
+  max?: number
+  step?: number
+  maxLength?: number
+  allowed?: string[]
 }
 ```
 
@@ -3662,10 +3928,20 @@ type ConfigurationVersion = {
       label?: { ... }
       required?: { ... }
       description?: { ... }
+      placeholder?: { ... }
+      default?: { ... }
+      choices?: { ... }
+      format?: { ... }
+      pattern?: { ... }
+      pattern_message?: { ... }
+      min?: { ... }
+      max?: { ... }
+      group?: { ... }
       repeatable?: { ... }
       fields?: { ... }
       value?: { ... }
       type: { ... }
+      visible_if?: { ... }
       sensitive?: { ... }
       configured?: { ... }
       lifted?: { ... }
@@ -3693,9 +3969,33 @@ type ConfigurationVersion = {
   }>
   options?: Array<{
     key: string
-    label?: string
+    label?: string | {
+      en?: { ... }
+      de: { ... }
+    }
     required?: boolean
-    description?: string
+    description?: string | {
+      en?: { ... }
+      de: { ... }
+    }
+    placeholder?: string | {
+      en?: { ... }
+      de: { ... }
+    }
+    default?: string | number | boolean
+    choices?: Array<{
+      value: { ... }
+      label?: { ... }
+    }>
+    format?: "hostname" | "url" | "email"
+    pattern?: string
+    pattern_message?: string | {
+      en?: { ... }
+      de: { ... }
+    }
+    min?: number
+    max?: number
+    group?: string
     repeatable?: boolean
     fields?: Array<{
       key: { ... }
@@ -3706,39 +4006,11 @@ type ConfigurationVersion = {
     }>
     value?: unknown
     type: "text" | "number" | "boolean" | "secret" | "object"
+    visible_if?: Record<string, string | number | boolean | string | number | boolean[]>
     sensitive?: boolean
     configured?: boolean
     lifted?: boolean
-    value_updated_at?: string
-  }>
-  visibility?: "public" | "private"
-  public?: boolean
-  pending?: boolean
-  version: string
-  is_beta?: boolean
-  deprecated_at?: string
-  changelog?: string
-  review_status?: "approved" | "rejected" | "pending"
-  role?: {
-    id?: string
-    grants?: Array<{
-      action: { ... }
-      resource?: { ... }
-    }>
-  }
-  blueprint_ref?: {
-    manifest_id?: string
-    job_id?: string
-    source_blueprint_file?: string
-  }
-  version_audit: {
-    created_at?: string
-    created_by?: string
-    updated_at?: string
-    updated_by?: string
-    versioned_at?: string
-    versioned_by?: string
-  }
+  // ...
 }
 ```
 
@@ -4003,10 +4275,20 @@ type Installation = {
       label?: { ... }
       required?: { ... }
       description?: { ... }
+      placeholder?: { ... }
+      default?: { ... }
+      choices?: { ... }
+      format?: { ... }
+      pattern?: { ... }
+      pattern_message?: { ... }
+      min?: { ... }
+      max?: { ... }
+      group?: { ... }
       repeatable?: { ... }
       fields?: { ... }
       value?: { ... }
       type: { ... }
+      visible_if?: { ... }
       sensitive?: { ... }
       configured?: { ... }
       lifted?: { ... }
@@ -4034,38 +4316,37 @@ type Installation = {
   }>
   options?: Array<{
     key: string
-    label?: string
+    label?: string | {
+      en?: { ... }
+      de: { ... }
+    }
     required?: boolean
-    description?: string
+    description?: string | {
+      en?: { ... }
+      de: { ... }
+    }
+    placeholder?: string | {
+      en?: { ... }
+      de: { ... }
+    }
+    default?: string | number | boolean
+    choices?: Array<{
+      value: { ... }
+      label?: { ... }
+    }>
+    format?: "hostname" | "url" | "email"
+    pattern?: string
+    pattern_message?: string | {
+      en?: { ... }
+      de: { ... }
+    }
+    min?: number
+    max?: number
+    group?: string
     repeatable?: boolean
     fields?: Array<{
       key: { ... }
-      label?: { ... }
-      description?: { ... }
-      required?: { ... }
-      type: { ... }
-    }>
-    value?: unknown
-    type: "text" | "number" | "boolean" | "secret" | "object"
-    sensitive?: boolean
-    configured?: boolean
-    lifted?: boolean
-    value_updated_at?: string
-  }>
-  installed_version: string
-  role?: string
-  blueprint_ref?: {
-    manifest_id?: string
-    job_id?: string
-    source_blueprint_file?: string
-  }
-  installation_audit?: {
-    created_at?: string
-    created_by?: string
-    updated_at?: string
-    updated_by?: string
-  }
-  _manifest?: string // uuid[]
+  // ...
 }
 ```
 
@@ -4085,6 +4366,7 @@ type PublicConfiguration = {
     email?: string
   }
   dev_mode?: boolean
+  internal?: boolean
   category?: string
   icon_url?: string
   documentation_url?: string
@@ -4111,10 +4393,20 @@ type PublicConfiguration = {
       label?: { ... }
       required?: { ... }
       description?: { ... }
+      placeholder?: { ... }
+      default?: { ... }
+      choices?: { ... }
+      format?: { ... }
+      pattern?: { ... }
+      pattern_message?: { ... }
+      min?: { ... }
+      max?: { ... }
+      group?: { ... }
       repeatable?: { ... }
       fields?: { ... }
       value?: { ... }
       type: { ... }
+      visible_if?: { ... }
       sensitive?: { ... }
       configured?: { ... }
       lifted?: { ... }
@@ -4142,38 +4434,27 @@ type PublicConfiguration = {
   }>
   options?: Array<{
     key: string
-    label?: string
+    label?: string | {
+      en?: { ... }
+      de: { ... }
+    }
     required?: boolean
-    description?: string
-    repeatable?: boolean
-    fields?: Array<{
-      key: { ... }
+    description?: string | {
+      en?: { ... }
+      de: { ... }
+    }
+    placeholder?: string | {
+      en?: { ... }
+      de: { ... }
+    }
+    default?: string | number | boolean
+    choices?: Array<{
+      value: { ... }
       label?: { ... }
-      description?: { ... }
-      required?: { ... }
-      type: { ... }
     }>
-    value?: unknown
-    type: "text" | "number" | "boolean" | "secret" | "object"
-    sensitive?: boolean
-    configured?: boolean
-    lifted?: boolean
-    value_updated_at?: string
-  }>
-  is_beta?: boolean
-  deprecated_at?: string
-  version: string
-  role?: {
-    id?: string
-    grants?: Array<{
-      action: { ... }
-      resource?: { ... }
-    }>
-  }
-  blueprint_ref?: {
-    manifest_id?: string
-    job_id?: string
-    source_blueprint_file?: string
+    format?: "hostname" | "url" | "email"
+    pattern?: string
+    pattern_message?: string | {
   // ...
 }
 ```
@@ -4234,10 +4515,20 @@ type Configuration = {
       label?: { ... }
       required?: { ... }
       description?: { ... }
+      placeholder?: { ... }
+      default?: { ... }
+      choices?: { ... }
+      format?: { ... }
+      pattern?: { ... }
+      pattern_message?: { ... }
+      min?: { ... }
+      max?: { ... }
+      group?: { ... }
       repeatable?: { ... }
       fields?: { ... }
       value?: { ... }
       type: { ... }
+      visible_if?: { ... }
       sensitive?: { ... }
       configured?: { ... }
       lifted?: { ... }
@@ -4265,24 +4556,14 @@ type Configuration = {
   }>
   options?: Array<{
     key: string
-    label?: string
+    label?: string | {
+      en?: { ... }
+      de: { ... }
+    }
     required?: boolean
-    description?: string
-    repeatable?: boolean
-    fields?: Array<{
-      key: { ... }
-      label?: { ... }
-      description?: { ... }
-      required?: { ... }
-      type: { ... }
-    }>
-    value?: unknown
-    type: "text" | "number" | "boolean" | "secret" | "object"
-    sensitive?: boolean
-    configured?: boolean
-    lifted?: boolean
-    value_updated_at?: string
-  }>
+    description?: string | {
+      en?: { ... }
+      de: { ... }
   // ...
 }
 ```

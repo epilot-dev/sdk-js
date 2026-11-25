@@ -570,6 +570,27 @@ export declare namespace Components {
              */
             json_template?: string;
             /**
+             * Snapshot of the legacy template body, taken when migrating to the email-builder format.
+             */
+            backup?: {
+                /**
+                 * Original HTML body before conversion to email-builder blocks.
+                 */
+                body?: string;
+                /**
+                 * ISO 8601 timestamp when the backup was created.
+                 * example:
+                 * 2026-05-13T10:00:00.000Z
+                 */
+                backed_up_at?: string;
+            };
+            /**
+             * True after the template has been converted from legacy HTML to the new email-builder format. Used by the UI to expose the "Revert to legacy HTML" action.
+             * example:
+             * false
+             */
+            converted_to_new_editor?: boolean;
+            /**
              * If template is created by system (Double Opt-in, CMD invitation,...) then true, and some attributes can not be edited such as Name, To,...
              * Remember to add default content of template to system_template enum for revert to original feature
              *
@@ -577,6 +598,18 @@ export declare namespace Components {
              * false
              */
             system_template?: boolean;
+            /**
+             * If true, the template is displayed in read-only mode in the UI
+             */
+            protected?: boolean;
+            /**
+             * Set on a duplicated template to point at its source template id.
+             * Cleared after automations have been migrated via `migrateAutomationsForTemplate`.
+             *
+             * example:
+             * cd7809ba-a111-4dd9-8d15-18eb4de0faed
+             */
+            original_template_id?: string | null;
         }
         export interface EmailTemplateRequest {
             /**
@@ -666,6 +699,10 @@ export declare namespace Components {
              */
             system_template?: boolean;
             /**
+             * If true, the template is displayed in read-only mode in the UI
+             */
+            protected?: boolean;
+            /**
              * Created by
              * example:
              * 1234
@@ -681,6 +718,36 @@ export declare namespace Components {
              * This field is used to store JSON templates. If this field is populated, then the Body html is derived from the JSON.
              */
             json_template?: string;
+            /**
+             * Set on a duplicated template to point at its source template id.
+             * Cleared (set to null) after automations referencing the source have been
+             * migrated onto the new template via `migrateAutomationsForTemplate`.
+             *
+             * example:
+             * cd7809ba-a111-4dd9-8d15-18eb4de0faed
+             */
+            original_template_id?: string | null;
+            /**
+             * Snapshot of the legacy template body, taken when migrating to the email-builder format.
+             */
+            backup?: {
+                /**
+                 * Original HTML body before conversion to email-builder blocks.
+                 */
+                body?: string;
+                /**
+                 * ISO 8601 timestamp when the backup was created.
+                 * example:
+                 * 2026-05-13T10:00:00.000Z
+                 */
+                backed_up_at?: string;
+            };
+            /**
+             * True after the template has been converted from legacy HTML to the new email-builder format. Used by the UI to expose the "Revert to legacy HTML" action.
+             * example:
+             * false
+             */
+            converted_to_new_editor?: boolean;
         }
         export interface EmailTemplateResponse {
             entity?: EmailTemplateEntity;
@@ -696,9 +763,141 @@ export declare namespace Components {
             name?: string;
             /**
              * example:
-             * no-reply@epilot.cloud
+             * service@stadtwerke-example.de
              */
             email: string;
+        }
+        export interface JourneyContextUsageItem {
+            kind: "email-template-body";
+            resource: {
+                type: "email_template";
+                /**
+                 * example:
+                 * 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                 */
+                id: string;
+                name?: string;
+            };
+            location: {
+                /**
+                 * Email template field the match was found in.
+                 */
+                field: "subject" | "body" | "to" | "cc" | "bcc" | "json_template" | "backup.body";
+            };
+            matched_as: {
+                dialect: "name";
+                /**
+                 * The exact token found, e.g. `submission.journey_context.contact_id`.
+                 */
+                token: string;
+                /**
+                 * Path the match was found at. Debugging and tests only.
+                 */
+                at: string;
+            };
+            link_hint: {
+                route: "email-template";
+                params: {
+                    id: string;
+                };
+            };
+        }
+        /**
+         * Shared request shape across journey-api's eight context-usage
+         * adapters. `journey_id` is required for parity with the other seven,
+         * but this adapter does not use it: email templates reference context
+         * parameters by name and carry no journey id at all, so it cannot
+         * narrow the search here.
+         *
+         */
+        export interface JourneyContextUsagesRequest {
+            /**
+             * Journey the usage check originated from. Validated, not used by this adapter.
+             * example:
+             * 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            journey_id: string;
+            /**
+             * Context parameter keys to search for, e.g. `contact_id`.
+             * example:
+             * [
+             *   "contact_id"
+             * ]
+             */
+            param_keys: [
+                string,
+                ...string[]
+            ];
+            /**
+             * Accepted and ignored. This adapter resolves context parameters by name only.
+             */
+            param_ids?: string[];
+        }
+        export interface JourneyContextUsagesResponse {
+            usages: JourneyContextUsageItem[];
+            /**
+             * `partial` when a page cap, row cap, or soft deadline truncated the scan before every template was read.
+             */
+            status: "ok" | "partial";
+            /**
+             * Number of email templates read during the scan.
+             */
+            scanned: number;
+        }
+        export interface MigrateAutomationsResponse {
+            /**
+             * Number of automation flows successfully rewritten to point at the new template
+             * example:
+             * 3
+             */
+            migrated_flow_count: number;
+            /**
+             * IDs of automation flows that were successfully migrated
+             */
+            migrated_flow_ids: string[];
+            /**
+             * Number of v2 workflows whose `AUTOMATION` tasks point at a migrated automation flow.
+             * Derived from `migrated_flow_ids` — a workflow is counted once even if multiple of
+             * its tasks reference the same migrated flow.
+             *
+             * example:
+             * 2
+             */
+            migrated_workflow_count: number;
+            /**
+             * IDs of workflows (`wf-*`) that owned at least one migrated automation flow
+             */
+            migrated_workflow_ids: string[];
+            /**
+             * Number of customer-portal email-template config rows whose references were rewritten
+             * from the old template id to the new one (via customer-portal-api's
+             * `migrateEmailTemplateReferences`).
+             *
+             * example:
+             * 1
+             */
+            migrated_portal_count: number;
+            /**
+             * Portal IDs whose email-template references were successfully rewritten
+             */
+            migrated_portal_ids: string[];
+            /**
+             * IDs of automation flows whose `putFlow` update failed. Caller can retry or surface to the user.
+             */
+            failed_flow_ids: string[];
+            /**
+             * Portal IDs whose email-template reference rewrite failed in customer-portal-api.
+             */
+            failed_portal_ids: string[];
+            /**
+             * True when the call to customer-portal-api threw before returning, so the portal
+             * counts could not be computed. Flow/workflow results are still valid; the caller
+             * should surface this and offer a retry of the portal migration.
+             *
+             * example:
+             * false
+             */
+            portal_migration_errored: boolean;
         }
         /**
          * Organization ID
@@ -763,6 +962,31 @@ export declare namespace Components {
          * 8c086140-f33e-4bb7-a993-50c0f2402c7b
          */
         export type TaskToken = string;
+        export interface TemplateReferenceItem {
+            id: string;
+            /**
+             * Human-friendly name (flow_name / workflow name / portal name); may be absent.
+             */
+            name?: string | null;
+        }
+        export interface TemplateReferencesResponse {
+            /**
+             * Automation flows whose send-email/reply-email actions reference this template
+             */
+            flows: TemplateReferenceItem[];
+            /**
+             * v2 workflows that own a referencing automation flow
+             */
+            workflows: TemplateReferenceItem[];
+            /**
+             * Customer portals whose email-template config references this template
+             */
+            portals: TemplateReferenceItem[];
+            /**
+             * True when the customer-portal lookup failed, so `portals` may be incomplete.
+             */
+            portal_lookup_errored: boolean;
+        }
         export type TemplateType = "email" | "document";
         export interface To {
             /**
@@ -827,7 +1051,11 @@ export declare namespace Components {
         }
         export interface VariableParameters {
             template_type: TemplateType;
-            language?: "en" | "de";
+            /**
+             * example:
+             * de
+             */
+            language?: string;
             /**
              * The main entity ID. Use main entity in order to use the variable without schema slug prefix - or just pass directly to other object ID.
              * example:
@@ -881,6 +1109,51 @@ export declare namespace Paths {
             }
         }
     }
+    namespace ConvertToBuilder {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export interface RequestBody {
+            /**
+             * When true, return the converted output without saving.
+             * example:
+             * false
+             */
+            dryRun?: boolean;
+            /**
+             * When true, overwrite an existing json_template.
+             * example:
+             * false
+             */
+            force?: boolean;
+            /**
+             * When true, leave the source template untouched and save the converted result as a NEW template (linked via original_template_id). The response is the new entity.
+             * example:
+             * false
+             */
+            as_copy?: boolean;
+            /**
+             * Optional name for the as_copy result. The UI sends a localized copy name (e.g. "Copy of <name> (Visual)") so the new template is named like the list-view "Duplicate" action. Ignored unless as_copy is true.
+             * example:
+             * Copy of Welcome email (Visual)
+             */
+            name?: string;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.EmailTemplateEntity;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+        }
+    }
     namespace GetTemplateDetail {
         namespace Parameters {
             export type Id = string;
@@ -893,6 +1166,40 @@ export declare namespace Paths {
             export interface $403 {
             }
             export interface $404 {
+            }
+        }
+    }
+    namespace GetTemplateReferences {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.TemplateReferencesResponse;
+            export interface $403 {
+            }
+        }
+    }
+    namespace MigrateAutomationsForTemplate {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export interface RequestBody {
+            /**
+             * Source template id that automations are being migrated away from
+             * example:
+             * 511ceb90-f738-47aa-8b1e-915ace0ae13c
+             */
+            old_template_id: string;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MigrateAutomationsResponse;
+            export interface $403 {
             }
         }
     }
@@ -993,6 +1300,7 @@ export declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * saveTemplate - saveTemplate
@@ -1024,6 +1332,35 @@ export interface OperationMethods {
     data?: Paths.UpdateTemplateDetail.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateTemplateDetail.Responses.$200>
+  /**
+   * migrateAutomationsForTemplate - migrateAutomationsForTemplate
+   * 
+   * Find all automation flows in the org that contain a `send-email` or `reply-email`
+   * action referencing `old_template_id` and rewrite those actions to point at the
+   * new template id (`{id}` path param). Intended to be called after a duplicated
+   * template has been refined, so automations follow over to the new template.
+   * 
+   */
+  'migrateAutomationsForTemplate'(
+    parameters?: Parameters<Paths.MigrateAutomationsForTemplate.PathParameters> | null,
+    data?: Paths.MigrateAutomationsForTemplate.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.MigrateAutomationsForTemplate.Responses.$200>
+  /**
+   * getTemplateReferences - getTemplateReferences
+   * 
+   * List the automation flows, workflows and customer portals that currently
+   * reference this template, without modifying anything. Powers the template
+   * settings "used by" view and the pre-migrate preview, and uses the same
+   * discovery as `migrateAutomationsForTemplate` so the preview matches what a
+   * migrate would touch.
+   * 
+   */
+  'getTemplateReferences'(
+    parameters?: Parameters<Paths.GetTemplateReferences.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetTemplateReferences.Responses.$200>
   /**
    * replaceVariables - replaceVariables
    * 
@@ -1067,6 +1404,20 @@ export interface OperationMethods {
     data?: Paths.RevertToOriginalTemplate.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RevertToOriginalTemplate.Responses.$200>
+  /**
+   * convertToBuilder - convertToBuilder
+   * 
+   * Converts a legacy HTML email template into the email-builder block format.
+   * Stores the new `json_template` (stringified block graph), re-renders `body`
+   * from the resulting blocks, and stashes the original HTML at `backup.body`.
+   * Returns 409 if the template is already converted unless `force=true`.
+   * 
+   */
+  'convertToBuilder'(
+    parameters?: Parameters<Paths.ConvertToBuilder.PathParameters> | null,
+    data?: Paths.ConvertToBuilder.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ConvertToBuilder.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1103,6 +1454,39 @@ export interface PathsDictionary {
       data?: Paths.UpdateTemplateDetail.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateTemplateDetail.Responses.$200>
+  }
+  ['/v1/email-template/templates/{id}:migrate-automations']: {
+    /**
+     * migrateAutomationsForTemplate - migrateAutomationsForTemplate
+     * 
+     * Find all automation flows in the org that contain a `send-email` or `reply-email`
+     * action referencing `old_template_id` and rewrite those actions to point at the
+     * new template id (`{id}` path param). Intended to be called after a duplicated
+     * template has been refined, so automations follow over to the new template.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.MigrateAutomationsForTemplate.PathParameters> | null,
+      data?: Paths.MigrateAutomationsForTemplate.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.MigrateAutomationsForTemplate.Responses.$200>
+  }
+  ['/v1/email-template/templates/{id}:references']: {
+    /**
+     * getTemplateReferences - getTemplateReferences
+     * 
+     * List the automation flows, workflows and customer portals that currently
+     * reference this template, without modifying anything. Powers the template
+     * settings "used by" view and the pre-migrate preview, and uses the same
+     * discovery as `migrateAutomationsForTemplate` so the preview matches what a
+     * migrate would touch.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetTemplateReferences.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetTemplateReferences.Responses.$200>
   }
   ['/v1/email-template/templates:replace']: {
     /**
@@ -1155,9 +1539,26 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RevertToOriginalTemplate.Responses.$200>
   }
+  ['/v1/email-template/templates/{id}:convertToBuilder']: {
+    /**
+     * convertToBuilder - convertToBuilder
+     * 
+     * Converts a legacy HTML email template into the email-builder block format.
+     * Stores the new `json_template` (stringified block graph), re-renders `body`
+     * from the resulting blocks, and stashes the original HTML at `backup.body`.
+     * Returns 409 if the template is already converted unless `force=true`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.ConvertToBuilder.PathParameters> | null,
+      data?: Paths.ConvertToBuilder.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ConvertToBuilder.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type ApproveAction = Components.Schemas.ApproveAction;
 export type ApprovedAt = Components.Schemas.ApprovedAt;
@@ -1178,11 +1579,17 @@ export type EmailTemplateEntity = Components.Schemas.EmailTemplateEntity;
 export type EmailTemplateRequest = Components.Schemas.EmailTemplateRequest;
 export type EmailTemplateResponse = Components.Schemas.EmailTemplateResponse;
 export type From = Components.Schemas.From;
+export type JourneyContextUsageItem = Components.Schemas.JourneyContextUsageItem;
+export type JourneyContextUsagesRequest = Components.Schemas.JourneyContextUsagesRequest;
+export type JourneyContextUsagesResponse = Components.Schemas.JourneyContextUsagesResponse;
+export type MigrateAutomationsResponse = Components.Schemas.MigrateAutomationsResponse;
 export type OrgId = Components.Schemas.OrgId;
 export type PresignedRequest = Components.Schemas.PresignedRequest;
 export type PresignedResponse = Components.Schemas.PresignedResponse;
 export type SkipCreatingEntities = Components.Schemas.SkipCreatingEntities;
 export type TaskToken = Components.Schemas.TaskToken;
+export type TemplateReferenceItem = Components.Schemas.TemplateReferenceItem;
+export type TemplateReferencesResponse = Components.Schemas.TemplateReferencesResponse;
 export type TemplateType = Components.Schemas.TemplateType;
 export type To = Components.Schemas.To;
 export type UpdatedAt = Components.Schemas.UpdatedAt;
