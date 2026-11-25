@@ -7689,6 +7689,7 @@ export declare namespace Paths {
         export interface RequestBody {
             name: string;
             slug?: string;
+            installation_slug?: string; // ^[A-Za-z0-9_-]+$
         }
         namespace Responses {
             export type $201 = Components.Schemas.MarketplaceListing;
@@ -9539,6 +9540,12 @@ export declare namespace Paths {
         export interface PathParameters {
             job_id: Parameters.JobId;
         }
+        export interface RequestBody {
+            /**
+             * Token for the job's source org (e.g. the pipeline token). Needed for a cross-org job; never persisted.
+             */
+            source_auth_token?: string;
+        }
         namespace Responses {
             export interface $202 {
                 job_id?: /**
@@ -10525,15 +10532,18 @@ export interface OperationMethods {
    * 
    * Must be called by a user of the destination org (where the job lives); the
    * caller's bearer token is used as the destination token. The plan reuses the
-   * manifest persisted by the original install, so no source-org access is
-   * required. The original job's `options` (ignored resources, sync_notes) are
+   * manifest persisted by the original install, but a cross-org job still reads
+   * the source org (file contents, a merge job's live source), so send a token for
+   * the source org (e.g. the pipeline token) as `source_auth_token`. Without it the
+   * caller's bearer stands in for the source and those reads fail with 403.
+   * The original job's `options` (ignored resources, sync_notes) are
    * reused when present; older jobs without persisted options fall back to the
    * destination blueprint's `ignored_resource_addresses`.
    * 
    */
   'retryInstallationJob'(
     parameters?: Parameters<Paths.RetryInstallationJob.PathParameters> | null,
-    data?: any,
+    data?: Paths.RetryInstallationJob.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RetryInstallationJob.Responses.$202>
   /**
@@ -11959,15 +11969,18 @@ export interface PathsDictionary {
      * 
      * Must be called by a user of the destination org (where the job lives); the
      * caller's bearer token is used as the destination token. The plan reuses the
-     * manifest persisted by the original install, so no source-org access is
-     * required. The original job's `options` (ignored resources, sync_notes) are
+     * manifest persisted by the original install, but a cross-org job still reads
+     * the source org (file contents, a merge job's live source), so send a token for
+     * the source org (e.g. the pipeline token) as `source_auth_token`. Without it the
+     * caller's bearer stands in for the source and those reads fail with 403.
+     * The original job's `options` (ignored resources, sync_notes) are
      * reused when present; older jobs without persisted options fall back to the
      * destination blueprint's `ignored_resource_addresses`.
      * 
      */
     'post'(
       parameters?: Parameters<Paths.RetryInstallationJob.PathParameters> | null,
-      data?: any,
+      data?: Paths.RetryInstallationJob.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RetryInstallationJob.Responses.$202>
   }

@@ -76,6 +76,7 @@ const { data } = await messageClient.sendMessage(...)
 - [`markUnreadThreadV2`](#markunreadthreadv2)
 - [`assignThread`](#assignthread)
 - [`dismissThreadLinkSuggestions`](#dismissthreadlinksuggestions)
+- [`restoreThreadLinkSuggestions`](#restorethreadlinksuggestions)
 - [`unassignThread`](#unassignthread)
 - [`assignUsers`](#assignusers)
 - [`assignUsersV2`](#assignusersv2)
@@ -89,6 +90,7 @@ const { data } = await messageClient.sendMessage(...)
 **Schemas**
 - [`ErrorResponse`](#errorresponse)
 - [`MoveThreadPayload`](#movethreadpayload)
+- [`ThreadMoveReason`](#threadmovereason)
 - [`BaseEntity`](#baseentity)
 - [`Thread`](#thread)
 - [`Message`](#message)
@@ -117,6 +119,10 @@ const { data } = await messageClient.sendMessage(...)
 - [`ThreadSummaryPayload`](#threadsummarypayload)
 - [`ThreadSummaryEntityRef`](#threadsummaryentityref)
 - [`ThreadSummaryContext`](#threadsummarycontext)
+- [`ThreadValidationContext`](#threadvalidationcontext)
+- [`ThreadValidationMessage`](#threadvalidationmessage)
+- [`ThreadValidationAttachment`](#threadvalidationattachment)
+- [`ThreadValidationEntity`](#threadvalidationentity)
 - [`SimilarSentMessagesRequest`](#similarsentmessagesrequest)
 - [`SimilarSentMessagesResponse`](#similarsentmessagesresponse)
 - [`SimilarSentMessage`](#similarsentmessage)
@@ -144,6 +150,7 @@ const { data } = await messageClient.sendMessage(...)
 - [`TimelineEvent`](#timelineevent)
 - [`BulkActionsPayloadWithScopes`](#bulkactionspayloadwithscopes)
 - [`BulkActionsPayload`](#bulkactionspayload)
+- [`BulkActionsResponse`](#bulkactionsresponse)
 - [`FieldsParam`](#fieldsparam)
 
 ### `sendMessage`
@@ -386,14 +393,27 @@ const { data } = await client.deleteMessage({
 
 Download a message as an EML file.
 Returns a 302 redirect to a pre-signed S3 URL where the EML file can be downloaded.
+Browsers cannot read the target of a redirect, so pass `redirect=false` to get th
 
 `GET /v1/message/messages/{id}/eml`
 
 ```ts
 const { data } = await client.getMessageEml({
   id: '123e4567-e89b-12d3-a456-426614174000',
+  redirect: true,
 })
 ```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "download_url": "string"
+}
+```
+
+</details>
 
 ---
 
@@ -413,6 +433,7 @@ const { data } = await client.searchMessages(
       folder: 'inbox',
       mailbox: 'organization',
       labels: ['string'],
+      labels_operator: 'and',
       purposes: ['string'],
       filters: ['unread'],
       from: ['string'],
@@ -424,7 +445,8 @@ const { data } = await client.searchMessages(
       email_filter: ['string'],
       text: 'string',
       thread_ids: ['string'],
-      pinned_by: 'string'
+      pinned_by: 'string',
+      has_link_suggestion: true
     },
     user_groups: ['string'],
     fields: ['_id', '_title', 'first_name', 'account', '!account.*._files', '**._product'],
@@ -734,7 +756,8 @@ const { data } = await client.searchThreads(
       "done": false,
       "latest_message": {},
       "latest_trash_message": {},
-      "latest_message_at": "2024-02-10T09:14:31.990Z"
+      "latest_message_at": "2024-02-10T09:14:31.990Z",
+      "view_latest_message": {}
     }
   ]
 }
@@ -760,6 +783,7 @@ const { data } = await client.searchThreadsV2(
       folder: 'inbox',
       mailbox: 'organization',
       labels: ['string'],
+      labels_operator: 'and',
       purposes: ['string'],
       filters: ['unread'],
       from: ['string'],
@@ -771,7 +795,8 @@ const { data } = await client.searchThreadsV2(
       email_filter: ['string'],
       text: 'string',
       thread_ids: ['string'],
-      pinned_by: 'string'
+      pinned_by: 'string',
+      has_link_suggestion: true
     },
     user_groups: ['string'],
     fields: ['_id', '_title', 'first_name', 'account', '!account.*._files', '**._product'],
@@ -806,7 +831,8 @@ const { data } = await client.searchThreadsV2(
       "done": false,
       "latest_message": {},
       "latest_trash_message": {},
-      "latest_message_at": "2024-02-10T09:14:31.990Z"
+      "latest_message_at": "2024-02-10T09:14:31.990Z",
+      "view_latest_message": {}
     }
   ]
 }
@@ -830,6 +856,7 @@ const { data } = await client.searchIds(
       folder: 'inbox',
       mailbox: 'organization',
       labels: ['string'],
+      labels_operator: 'and',
       purposes: ['string'],
       filters: ['unread'],
       from: ['string'],
@@ -841,7 +868,8 @@ const { data } = await client.searchIds(
       email_filter: ['string'],
       text: 'string',
       thread_ids: ['string'],
-      pinned_by: 'string'
+      pinned_by: 'string',
+      has_link_suggestion: true
     },
     user_groups: ['string'],
     inbox_id: '3f34ce73-089c-4d45-a5ee-c161234e41c3',
@@ -1005,7 +1033,48 @@ const { data } = await client.updateThread()
     "type": "SENT",
     "template_id": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
   },
-  "latest_message_at": "2024-02-10T09:14:31.990Z"
+  "latest_message_at": "2024-02-10T09:14:31.990Z",
+  "view_latest_message": {
+    "message_id": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>",
+    "sender": "206801",
+    "updated_by": "206801",
+    "subject": "Request for solar panel price",
+    "html": "<div>We at ABC GmbH would like to request a price quote for the solar panel.</div>",
+    "text": "We at ABC GmbH would like to request a price quote for the solar panel.",
+    "from": {
+      "name": "epilot",
+      "address": "messaging@epilot.cloud",
+      "email_type": "INTERNAL",
+      "send_status": "SEND",
+      "send_error": {}
+    },
+    "reply_to": {
+      "name": "epilot",
+      "address": "messaging@epilot.cloud",
+      "email_type": "INTERNAL",
+      "send_status": "SEND",
+      "send_error": {}
+    },
+    "to": [
+      {}
+    ],
+    "cc": [
+      {}
+    ],
+    "bcc": [
+      {}
+    ],
+    "file": {
+      "$relation": []
+    },
+    "references": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
+    "in_reply_to": "<CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
+    "user_read_message": ["206801", "200109"],
+    "org_read_message": ["789372", "210291"],
+    "send_status": ["SEND"],
+    "type": "SENT",
+    "template_id": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
+  }
 }
 ```
 
@@ -1039,7 +1108,12 @@ const { data } = await client.moveThread(
     id: '123e4567-e89b-12d3-a456-426614174000',
   },
   {
-    inbox_id: '3f34ce73-089c-4d45-a5ee-c161234e41c3'
+    inbox_id: '3f34ce73-089c-4d45-a5ee-c161234e41c3',
+    reason: {
+      type: 'inbox_deleted',
+      source_inbox_id: 'string',
+      source_inbox_name: 'string'
+    }
   },
 )
 ```
@@ -1099,7 +1173,7 @@ const { data } = await client.getThreadTimeline({
         "user_id": "123",
         "organization_id": "456"
       },
-      "timestamp": "2024-01-01T00:00:00Z",
+      "timestamp": "2024-01-01T00:00:00.000Z",
       "message_id": "string",
       "source": "user",
       "automated": true,
@@ -1268,6 +1342,27 @@ const { data } = await client.bulkMoveThreads(
 )
 ```
 
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "success": 2,
+  "failed": 1,
+  "failedIds": ["6b299eda-4018-4554-8965-c4b5598e6531"],
+  "failures": [
+    {
+      "id": "6b299eda-4018-4554-8965-c4b5598e6531",
+      "message": "Thread 6b299eda-4018-4554-8965-c4b5598e6531 was changed at the same time",
+      "status": 409
+    }
+  ],
+  "error": {}
+}
+```
+
+</details>
+
 ---
 
 ### `bulkAssignThreads`
@@ -1430,6 +1525,27 @@ const { data } = await client.threadBulkActionsDone(
 )
 ```
 
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "success": 2,
+  "failed": 1,
+  "failedIds": ["6b299eda-4018-4554-8965-c4b5598e6531"],
+  "failures": [
+    {
+      "id": "6b299eda-4018-4554-8965-c4b5598e6531",
+      "message": "Thread 6b299eda-4018-4554-8965-c4b5598e6531 was changed at the same time",
+      "status": 409
+    }
+  ],
+  "error": {}
+}
+```
+
+</details>
+
 ---
 
 ### `threadBulkActionsOpen`
@@ -1446,6 +1562,27 @@ const { data } = await client.threadBulkActionsOpen(
   },
 )
 ```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "success": 2,
+  "failed": 1,
+  "failedIds": ["6b299eda-4018-4554-8965-c4b5598e6531"],
+  "failures": [
+    {
+      "id": "6b299eda-4018-4554-8965-c4b5598e6531",
+      "message": "Thread 6b299eda-4018-4554-8965-c4b5598e6531 was changed at the same time",
+      "status": 409
+    }
+  ],
+  "error": {}
+}
+```
+
+</details>
 
 ---
 
@@ -1525,6 +1662,7 @@ Assign thread to entities
 const { data } = await client.assignThread(
   {
     id: '123e4567-e89b-12d3-a456-426614174000',
+    confirmed_warning: true,
   },
   [
     {
@@ -1563,6 +1701,37 @@ const { data } = await client.dismissThreadLinkSuggestions(
 ```json
 {
   "dismissed": ["string"]
+}
+```
+
+</details>
+
+---
+
+### `restoreThreadLinkSuggestions`
+
+Restore dismissed candidates of entity-link suggestions on a thread, e.g. to undo a dismissal. Their suggestions are pending again. Unlinking an entity that was linked from a suggestion (unassignThrea
+
+`POST /v1/message/threads/{id}/link-suggestions/restore`
+
+```ts
+const { data } = await client.restoreThreadLinkSuggestions(
+  {
+    id: '123e4567-e89b-12d3-a456-426614174000',
+  },
+  {
+    suggestion_ids: ['string'],
+    entity_ids: ['string']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "restored": ["string"]
 }
 ```
 
@@ -1885,6 +2054,7 @@ const { data } = await client.getMessageV2({
       "id": "string",
       "identifier": "string",
       "found_in": "string",
+      "reason": "ambiguous",
       "status": "pending",
       "candidates": [],
       "accepted_entity_ids": ["string"],
@@ -1893,6 +2063,7 @@ const { data } = await client.getMessageV2({
       "created_at": "1970-01-01T00:00:00.000Z"
     }
   ],
+  "auto_link_fields": ["contact:customer_number", "contract:lima_contract_ref"],
   "html_omitted": false,
   "html_download_url": "https://s3.eu-central-1.amazonaws.com/epilot-attachments/3f34ce73-089c-4d45-a5ee-c161234e41c3/3f34ce73-089c-4d45-a5ee-c161234e41c3.html",
   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1983,6 +2154,25 @@ type ErrorResponse = {
 ```ts
 type MoveThreadPayload = {
   inbox_id: string
+  reason?: {
+    type: "inbox_deleted"
+    source_inbox_id: string
+    source_inbox_name?: string
+  }
+}
+```
+
+### `ThreadMoveReason`
+
+Why the thread is being moved, recorded on its "moved to inbox" activity. Only accepted from
+internal callers (the inbox deletion job); ignored for user requests.
+
+
+```ts
+type ThreadMoveReason = {
+  type: "inbox_deleted"
+  source_inbox_id: string
+  source_inbox_name?: string
 }
 ```
 
@@ -2302,6 +2492,7 @@ type File = {
 type MessageRequestParams = {
   complete_thread?: boolean
   mark_thread_as_read?: boolean
+  category?: "transactional" | "promotional"
   thread?: {
     topic: string
     assigned_to?: string[]
@@ -2375,6 +2566,7 @@ type ThreadView = {
   folder?: "inbox" | "favorite" | "sent" | "trash" | "spam" | "unassignable" | "draft"
   mailbox?: "organization" | "agent"
   labels?: string[]
+  labels_operator?: "and" | "or"
   purposes?: string[]
   filters?: "unread" | "resolved" | "trash"[]
   from?: string[]
@@ -2387,6 +2579,7 @@ type ThreadView = {
   text?: string
   thread_ids?: string[]
   pinned_by?: string
+  has_link_suggestion?: boolean
 }
 ```
 
@@ -2455,6 +2648,7 @@ type SearchParamsV2 = {
     folder?: "inbox" | "favorite" | "sent" | "trash" | "spam" | "unassignable" | "draft"
     mailbox?: "organization" | "agent"
     labels?: string[]
+    labels_operator?: "and" | "or"
     purposes?: string[]
     filters?: "unread" | "resolved" | "trash"[]
     from?: string[]
@@ -2467,6 +2661,7 @@ type SearchParamsV2 = {
     text?: string
     thread_ids?: string[]
     pinned_by?: string
+    has_link_suggestion?: boolean
   }
   user_groups?: string[]
   fields?: string[]
@@ -2498,6 +2693,7 @@ type SearchIDParams = {
     folder?: "inbox" | "favorite" | "sent" | "trash" | "spam" | "unassignable" | "draft"
     mailbox?: "organization" | "agent"
     labels?: string[]
+    labels_operator?: "and" | "or"
     purposes?: string[]
     filters?: "unread" | "resolved" | "trash"[]
     from?: string[]
@@ -2510,6 +2706,7 @@ type SearchIDParams = {
     text?: string
     thread_ids?: string[]
     pinned_by?: string
+    has_link_suggestion?: boolean
   }
   user_groups?: string[]
   inbox_id?: string | string[]
@@ -2678,6 +2875,101 @@ type ThreadSummaryContext = {
 }
 ```
 
+### `ThreadValidationContext`
+
+```ts
+type ThreadValidationContext = {
+  thread_id: string
+  message_id: string
+  subject: string
+  message: {
+    message_id: string
+    type: "RECEIVED" | "SENT" | "DRAFT"
+    sent_at: string // date-time
+    subject?: string
+    from?: {
+      address: { ... }
+      name?: { ... }
+      email_type?: { ... }
+    }
+    text: string
+  }
+  earlier_messages: Array<{
+    message_id: string
+    type: "RECEIVED" | "SENT" | "DRAFT"
+    sent_at: string // date-time
+    subject?: string
+    from?: {
+      address: { ... }
+      name?: { ... }
+      email_type?: { ... }
+    }
+    text: string
+  }>
+  attachments: Array<{
+    file_id: string
+    filename?: string
+    message_id: string
+    sent_at: string // date-time
+    inline: boolean
+    likely_signature: boolean
+    eligible: boolean
+    reason?: "inline" | "signature" | "limit"
+  }>
+  entities: Array<{
+    entity_id: string
+    schema: string
+    title?: string
+    is_main_entity: boolean
+    source: "thread" | "message"
+  }>
+}
+```
+
+### `ThreadValidationMessage`
+
+```ts
+type ThreadValidationMessage = {
+  message_id: string
+  type: "RECEIVED" | "SENT" | "DRAFT"
+  sent_at: string // date-time
+  subject?: string
+  from?: {
+    address: string
+    name?: string
+    email_type?: "INTERNAL" | "EXTERNAL" | "PARTNER"
+  }
+  text: string
+}
+```
+
+### `ThreadValidationAttachment`
+
+```ts
+type ThreadValidationAttachment = {
+  file_id: string
+  filename?: string
+  message_id: string
+  sent_at: string // date-time
+  inline: boolean
+  likely_signature: boolean
+  eligible: boolean
+  reason?: "inline" | "signature" | "limit"
+}
+```
+
+### `ThreadValidationEntity`
+
+```ts
+type ThreadValidationEntity = {
+  entity_id: string
+  schema: string
+  title?: string
+  is_main_entity: boolean
+  source: "thread" | "message"
+}
+```
+
 ### `SimilarSentMessagesRequest`
 
 ```ts
@@ -2769,6 +3061,9 @@ type ThreadTimeline = {
       type: { ... }
       target_inbox_id?: { ... }
       target_inbox_name?: { ... }
+      reason?: { ... }
+      source_inbox_id?: { ... }
+      source_inbox_name?: { ... }
     } | {
       type: { ... }
     } | {
@@ -2894,6 +3189,9 @@ type ThreadMovedToInboxEvent = {
   type: "THREAD_MOVED_TO_INBOX"
   target_inbox_id?: string
   target_inbox_name?: string
+  reason?: "inbox_deleted"
+  source_inbox_id?: string
+  source_inbox_name?: string
 }
 ```
 
@@ -2938,6 +3236,7 @@ type LinkSuggestion = {
   id: string
   identifier: string
   found_in?: string
+  reason?: "ambiguous" | "other_record" | "quoted_only"
   status: "pending" | "accepted" | "dismissed"
   candidates: Array<{
     entity_id: string
@@ -3095,6 +3394,9 @@ type TimelineEventData = {
   type: "THREAD_MOVED_TO_INBOX"
   target_inbox_id?: string
   target_inbox_name?: string
+  reason?: "inbox_deleted"
+  source_inbox_id?: string
+  source_inbox_name?: string
 } | {
   type: "THREAD_TRASHED"
 } | {
@@ -3168,6 +3470,9 @@ type TimelineEvent = {
     type: "THREAD_MOVED_TO_INBOX"
     target_inbox_id?: string
     target_inbox_name?: string
+    reason?: "inbox_deleted"
+    source_inbox_id?: string
+    source_inbox_name?: string
   } | {
     type: "THREAD_TRASHED"
   } | {
@@ -3204,6 +3509,22 @@ type BulkActionsPayloadWithScopes = {
 ```ts
 type BulkActionsPayload = {
   ids: string[]
+}
+```
+
+### `BulkActionsResponse`
+
+```ts
+type BulkActionsResponse = {
+  success: number
+  failed?: number
+  failedIds?: string[]
+  failures?: Array<{
+    id: string
+    message: string
+    status?: number
+  }>
+  error?: unknown
 }
 ```
 

@@ -30,6 +30,9 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`getAgentById`](#getagentbyid)
 - [`updateAgentById`](#updateagentbyid)
 - [`deleteAgentById`](#deleteagentbyid)
+- [`getAgentAuth`](#getagentauth)
+- [`activateAgentAuth`](#activateagentauth)
+- [`deactivateAgentAuth`](#deactivateagentauth)
 
 **Customer Chat**
 - [`listCustomerChat`](#listcustomerchat)
@@ -39,12 +42,8 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`renameCustomerChatAgent`](#renamecustomerchatagent)
 - [`deleteCustomerChatAgent`](#deletecustomerchatagent)
 - [`saveCustomerChatConfig`](#savecustomerchatconfig)
-
-**Knowledge**
-- [`listKnowledgeSources`](#listknowledgesources)
-- [`createKnowledgeFileUpload`](#createknowledgefileupload)
-- [`getKnowledgeSource`](#getknowledgesource)
-- [`deleteKnowledgeSource`](#deleteknowledgesource)
+- [`listCustomerChatConversations`](#listcustomerchatconversations)
+- [`getCustomerChatConversation`](#getcustomerchatconversation)
 
 **Agent Execution**
 - [`executeAgent`](#executeagent)
@@ -53,6 +52,7 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`getExecution`](#getexecution)
 - [`cancelExecution`](#cancelexecution)
 - [`getExecutionTrace`](#getexecutiontrace)
+- [`getExecutionScreenshots`](#getexecutionscreenshots)
 - [`getExecutionFeedback`](#getexecutionfeedback)
 - [`putExecutionFeedback`](#putexecutionfeedback)
 - [`approveExecution`](#approveexecution)
@@ -68,12 +68,44 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`deleteConversation`](#deleteconversation)
 - [`submitConversationFeedback`](#submitconversationfeedback)
 
+**Portal Sessions**
+- [`createPortalSession`](#createportalsession)
+- [`listPortalSessions`](#listportalsessions)
+- [`getPortalSession`](#getportalsession)
+- [`deletePortalSession`](#deleteportalsession)
+- [`listPortalSessionEvents`](#listportalsessionevents)
+- [`sendPortalSessionEvent`](#sendportalsessionevent)
+- [`getPortalChatConfig`](#getportalchatconfig)
+
+**Sessions**
+- [`createSessionUpload`](#createsessionupload)
+- [`createSession`](#createsession)
+- [`listSessions`](#listsessions)
+- [`getSession`](#getsession)
+- [`renameSession`](#renamesession)
+- [`deleteSession`](#deletesession)
+- [`listSessionEvents`](#listsessionevents)
+- [`sendSessionEvent`](#sendsessionevent)
+- [`getSessionFileUrl`](#getsessionfileurl)
+- [`runScript`](#runscript)
+- [`getScriptRun`](#getscriptrun)
+- [`applyScriptRun`](#applyscriptrun)
+- [`revokeSessionAgents`](#revokesessionagents)
+- [`createInternalSession`](#createinternalsession)
+- [`getInternalSession`](#getinternalsession)
+- [`createInternalExecution`](#createinternalexecution)
+- [`decideInternalExecution`](#decideinternalexecution)
+- [`listInternalPortalChats`](#listinternalportalchats)
+- [`getInternalPortalChat`](#getinternalportalchat)
+
 **Schemas**
 - [`AgentConfig`](#agentconfig)
 - [`AppearanceConfig`](#appearanceconfig)
 - [`LocalizedAppearance`](#localizedappearance)
 - [`LocalizedFieldList`](#localizedfieldlist)
 - [`CapabilityId`](#capabilityid)
+- [`AccessLevel`](#accesslevel)
+- [`SelfServiceIntent`](#selfserviceintent)
 - [`ActionAutonomy`](#actionautonomy)
 - [`CapabilityState`](#capabilitystate)
 - [`CapabilityInstance`](#capabilityinstance)
@@ -83,6 +115,7 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`DeleteCustomerChatAgentRequest`](#deletecustomerchatagentrequest)
 - [`CustomerChatPlace`](#customerchatplace)
 - [`EscalationConfig`](#escalationconfig)
+- [`TicketPurpose`](#ticketpurpose)
 - [`CustomerChatKnowledgeSource`](#customerchatknowledgesource)
 - [`CustomerChatKnowledgeSourceType`](#customerchatknowledgesourcetype)
 - [`ListCustomerChatResponse`](#listcustomerchatresponse)
@@ -93,11 +126,6 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`WebsiteHandover`](#websitehandover)
 - [`AgentId`](#agentid)
 - [`KnowledgeSourceIds`](#knowledgesourceids)
-- [`KnowledgeSource`](#knowledgesource)
-- [`KnowledgeFileSource`](#knowledgefilesource)
-- [`CreateKnowledgeFileUploadRequest`](#createknowledgefileuploadrequest)
-- [`CreateKnowledgeFileUploadResponse`](#createknowledgefileuploadresponse)
-- [`ListKnowledgeSourcesResponse`](#listknowledgesourcesresponse)
 - [`AgentDomain`](#agentdomain)
 - [`CreateAgentRequest`](#createagentrequest)
 - [`UpdateAgentRequest`](#updateagentrequest)
@@ -107,6 +135,7 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`ApproveExecutionRequest`](#approveexecutionrequest)
 - [`RejectExecutionRequest`](#rejectexecutionrequest)
 - [`ExecuteAgentRequest`](#executeagentrequest)
+- [`ExecuteAgentStreamRequest`](#executeagentstreamrequest)
 - [`ExecutionResponse`](#executionresponse)
 - [`ExecutionIterationProjection`](#executioniterationprojection)
 - [`ExecutionFeedback`](#executionfeedback)
@@ -119,10 +148,6 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`ExecutionMetrics`](#executionmetrics)
 - [`AgentExecutionEventStatus`](#agentexecutioneventstatus)
 - [`AgentExecutionEvent`](#agentexecutionevent)
-- [`KnowledgeSourceRegisteredEvent`](#knowledgesourceregisteredevent)
-- [`KnowledgeFileSourceRegisteredEvent`](#knowledgefilesourceregisteredevent)
-- [`KnowledgeSourceDeletedEvent`](#knowledgesourcedeletedevent)
-- [`KnowledgeSourceProcessingCompletedEvent`](#knowledgesourceprocessingcompletedevent)
 - [`ToolPreview`](#toolpreview)
 - [`PreviewActionType`](#previewactiontype)
 - [`PreviewEntity`](#previewentity)
@@ -141,7 +166,13 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`InputParametersSchema`](#inputparametersschema)
 - [`ModelConfig`](#modelconfig)
 - [`Error`](#error)
+- [`AgentAuthAccessProfile`](#agentauthaccessprofile)
+- [`AgentAuthActivationRequest`](#agentauthactivationrequest)
+- [`AgentAuthStatus`](#agentauthstatus)
 - [`ChatRequest`](#chatrequest)
+- [`ToolApprovalAnswer`](#toolapprovalanswer)
+- [`ToolApprovalRequest`](#toolapprovalrequest)
+- [`AgentPreviewOverride`](#agentpreviewoverride)
 - [`ChatMessage`](#chatmessage)
 - [`StreamingOptions`](#streamingoptions)
 - [`StreamEvent`](#streamevent)
@@ -150,8 +181,89 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`MessageItem`](#messageitem)
 - [`MessageFeedback`](#messagefeedback)
 - [`SubmitFeedbackRequest`](#submitfeedbackrequest)
+- [`CustomerChatConversation`](#customerchatconversation)
+- [`CustomerChatConversationMessage`](#customerchatconversationmessage)
+- [`InternalPortalChat`](#internalportalchat)
+- [`InternalPortalChatPlace`](#internalportalchatplace)
+- [`InternalPortalChats`](#internalportalchats)
+- [`InternalPortalChatRows`](#internalportalchatrows)
+- [`InternalPortalChatTranscript`](#internalportalchattranscript)
+- [`ListCustomerChatConversationsResponse`](#listcustomerchatconversationsresponse)
+- [`CustomerChatConversationTranscript`](#customerchatconversationtranscript)
 - [`ListConversationsResponse`](#listconversationsresponse)
 - [`ConversationWithMessages`](#conversationwithmessages)
+- [`SessionsError`](#sessionserror)
+- [`ValidationIssue`](#validationissue)
+- [`RefusalDetails`](#refusaldetails)
+- [`Refusal`](#refusal)
+- [`RequestId`](#requestid)
+- [`SessionStatus`](#sessionstatus)
+- [`SessionLiveInfo`](#sessionliveinfo)
+- [`SessionView`](#sessionview)
+- [`SessionOrigin`](#sessionorigin)
+- [`CreateInternalSessionRequest`](#createinternalsessionrequest)
+- [`CreateInternalExecutionRequest`](#createinternalexecutionrequest)
+- [`ExecutionDecisionRequest`](#executiondecisionrequest)
+- [`ExecutionDecision`](#executiondecision)
+- [`CreatedInternalExecution`](#createdinternalexecution)
+- [`CreatedInternalSession`](#createdinternalsession)
+- [`InternalSessionStatus`](#internalsessionstatus)
+- [`SessionResponse`](#sessionresponse)
+- [`SessionList`](#sessionlist)
+- [`CreatedSession`](#createdsession)
+- [`SessionEventsPage`](#sessioneventspage)
+- [`MessageInput`](#messageinput)
+- [`CreatePortalSessionRequest`](#createportalsessionrequest)
+- [`PortalChatConfig`](#portalchatconfig)
+- [`CreateSessionRequest`](#createsessionrequest)
+- [`RenameSessionRequest`](#renamesessionrequest)
+- [`ClientInput`](#clientinput)
+- [`UserMessageInput`](#usermessageinput)
+- [`UserApprovalInput`](#userapprovalinput)
+- [`UserAnswerInput`](#useranswerinput)
+- [`UserInterruptInput`](#userinterruptinput)
+- [`InputEventId`](#inputeventid)
+- [`SessionInputAccepted`](#sessioninputaccepted)
+- [`UploadRequest`](#uploadrequest)
+- [`SessionUpload`](#sessionupload)
+- [`FileRef`](#fileref)
+- [`SessionFileUrl`](#sessionfileurl)
+- [`RunScriptRequest`](#runscriptrequest)
+- [`ScriptRunView`](#scriptrunview)
+- [`ApplyScriptRunRequest`](#applyscriptrunrequest)
+- [`ScriptApplyResult`](#scriptapplyresult)
+- [`ContentPart`](#contentpart)
+- [`TextContentPart`](#textcontentpart)
+- [`ImageContentPart`](#imagecontentpart)
+- [`ThinkingContentPart`](#thinkingcontentpart)
+- [`ToolCallContentPart`](#toolcallcontentpart)
+- [`SessionErrorCode`](#sessionerrorcode)
+- [`ContextBreakdown`](#contextbreakdown)
+- [`BatchChange`](#batchchange)
+- [`ChangeOutcome`](#changeoutcome)
+- [`Question`](#question)
+- [`Answer`](#answer)
+- [`ClientEvent`](#clientevent)
+- [`ClientEventBase`](#clienteventbase)
+- [`ClientEventInput`](#clienteventinput)
+- [`ClientEventInputTaken`](#clienteventinputtaken)
+- [`ClientEventInputCancelled`](#clienteventinputcancelled)
+- [`ClientEventInputFailed`](#clienteventinputfailed)
+- [`ClientEventTurnStarted`](#clienteventturnstarted)
+- [`ClientEventModelUsage`](#clienteventmodelusage)
+- [`ClientEventContextCompacted`](#clienteventcontextcompacted)
+- [`ClientEventTurnEnded`](#clienteventturnended)
+- [`ClientEventMessage`](#clienteventmessage)
+- [`ClientEventStepStarted`](#clienteventstepstarted)
+- [`ClientEventStepFinished`](#clienteventstepfinished)
+- [`ClientEventSkillLoaded`](#clienteventskillloaded)
+- [`ClientEventApprovalRequired`](#clienteventapprovalrequired)
+- [`ClientEventApprovalResolved`](#clienteventapprovalresolved)
+- [`ClientEventApprovalExecuted`](#clienteventapprovalexecuted)
+- [`ClientEventApprovalResult`](#clienteventapprovalresult)
+- [`ClientEventQuestionAsked`](#clienteventquestionasked)
+- [`ClientEventFilesCreated`](#clienteventfilescreated)
+- [`ClientEventQuestionAnswered`](#clienteventquestionanswered)
 
 ### `createAgent`
 
@@ -550,6 +662,88 @@ const { data } = await client.deleteAgentById({
 
 ---
 
+### `getAgentAuth`
+
+Get the agent's identity for Flows runs
+
+`GET /v1/agents/{agent_id}/agent-auth`
+
+```ts
+const { data } = await client.getAgentAuth({
+  agent_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "status": "inactive",
+  "agent_auth_agent_id": "string",
+  "activation_id": "string",
+  "access_profile": "read",
+  "owner_user_id": "string",
+  "expires_at": "1970-01-01T00:00:00.000Z",
+  "expiring_soon": true
+}
+```
+
+</details>
+
+---
+
+### `activateAgentAuth`
+
+Activate the agent's identity for Flows runs
+
+`PUT /v1/agents/{agent_id}/agent-auth`
+
+```ts
+const { data } = await client.activateAgentAuth(
+  {
+    agent_id: 'example',
+  },
+  {
+    access_profile: 'read',
+    reason: 'Labels inbound emails and updates their tickets'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "status": "inactive",
+  "agent_auth_agent_id": "string",
+  "activation_id": "string",
+  "access_profile": "read",
+  "owner_user_id": "string",
+  "expires_at": "1970-01-01T00:00:00.000Z",
+  "expiring_soon": true
+}
+```
+
+</details>
+
+---
+
+### `deactivateAgentAuth`
+
+Deactivate the agent's identity for Flows runs
+
+`DELETE /v1/agents/{agent_id}/agent-auth`
+
+```ts
+const { data } = await client.deactivateAgentAuth({
+  agent_id: 'example',
+})
+```
+
+---
+
 ### `listCustomerChat`
 
 List customer chat agents
@@ -586,6 +780,11 @@ const { data } = await client.listCustomerChat()
             "guidance": "string",
             "blockIds": ["string"],
             "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "accessLevel": "anonymous",
+            "intent": "submit_meter_reading",
+            "journeyId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "journeyName": "string",
+            "url": "string",
             "searchDeviceDocs": true
           }
         ],
@@ -604,25 +803,36 @@ const { data } = await client.listCustomerChat()
             "value": "string",
             "journeyId": "string",
             "journeyName": "string"
+          },
+          "ticketPurpose": {
+            "id": "string",
+            "name": "string"
           }
         },
         "appearance": {
           "displayName": "string",
           "greeting": "string",
           "starters": ["string"],
+          "starterKeys": ["string"],
+          "launcherLabel": "string",
           "language": "de",
           "formOfAddress": "sie",
+          "followUps": true,
           "languages": ["de"],
           "translations": {
             "de": {
               "displayName": "string",
               "greeting": "string",
-              "starters": ["string"]
+              "starters": ["string"],
+              "starterKeys": ["string"],
+              "launcherLabel": "string"
             },
             "en": {
               "displayName": "string",
               "greeting": "string",
-              "starters": ["string"]
+              "starters": ["string"],
+              "starterKeys": ["string"],
+              "launcherLabel": "string"
             }
           },
           "needsReview": {
@@ -688,6 +898,11 @@ const { data } = await client.createCustomerChatAgent(
         "guidance": "string",
         "blockIds": ["string"],
         "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "accessLevel": "anonymous",
+        "intent": "submit_meter_reading",
+        "journeyId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "journeyName": "string",
+        "url": "string",
         "searchDeviceDocs": true
       }
     ],
@@ -706,25 +921,36 @@ const { data } = await client.createCustomerChatAgent(
         "value": "string",
         "journeyId": "string",
         "journeyName": "string"
+      },
+      "ticketPurpose": {
+        "id": "string",
+        "name": "string"
       }
     },
     "appearance": {
       "displayName": "string",
       "greeting": "string",
       "starters": ["string"],
+      "starterKeys": ["string"],
+      "launcherLabel": "string",
       "language": "de",
       "formOfAddress": "sie",
+      "followUps": true,
       "languages": ["de"],
       "translations": {
         "de": {
           "displayName": "string",
           "greeting": "string",
-          "starters": ["string"]
+          "starters": ["string"],
+          "starterKeys": ["string"],
+          "launcherLabel": "string"
         },
         "en": {
           "displayName": "string",
           "greeting": "string",
-          "starters": ["string"]
+          "starters": ["string"],
+          "starterKeys": ["string"],
+          "launcherLabel": "string"
         }
       },
       "needsReview": {
@@ -814,6 +1040,11 @@ const { data } = await client.getCustomerChatAgent({
         "guidance": "string",
         "blockIds": ["string"],
         "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "accessLevel": "anonymous",
+        "intent": "submit_meter_reading",
+        "journeyId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "journeyName": "string",
+        "url": "string",
         "searchDeviceDocs": true
       }
     ],
@@ -832,25 +1063,36 @@ const { data } = await client.getCustomerChatAgent({
         "value": "string",
         "journeyId": "string",
         "journeyName": "string"
+      },
+      "ticketPurpose": {
+        "id": "string",
+        "name": "string"
       }
     },
     "appearance": {
       "displayName": "string",
       "greeting": "string",
       "starters": ["string"],
+      "starterKeys": ["string"],
+      "launcherLabel": "string",
       "language": "de",
       "formOfAddress": "sie",
+      "followUps": true,
       "languages": ["de"],
       "translations": {
         "de": {
           "displayName": "string",
           "greeting": "string",
-          "starters": ["string"]
+          "starters": ["string"],
+          "starterKeys": ["string"],
+          "launcherLabel": "string"
         },
         "en": {
           "displayName": "string",
           "greeting": "string",
-          "starters": ["string"]
+          "starters": ["string"],
+          "starterKeys": ["string"],
+          "launcherLabel": "string"
         }
       },
       "needsReview": {
@@ -917,6 +1159,11 @@ const { data } = await client.renameCustomerChatAgent(
         "guidance": "string",
         "blockIds": ["string"],
         "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "accessLevel": "anonymous",
+        "intent": "submit_meter_reading",
+        "journeyId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "journeyName": "string",
+        "url": "string",
         "searchDeviceDocs": true
       }
     ],
@@ -935,25 +1182,36 @@ const { data } = await client.renameCustomerChatAgent(
         "value": "string",
         "journeyId": "string",
         "journeyName": "string"
+      },
+      "ticketPurpose": {
+        "id": "string",
+        "name": "string"
       }
     },
     "appearance": {
       "displayName": "string",
       "greeting": "string",
       "starters": ["string"],
+      "starterKeys": ["string"],
+      "launcherLabel": "string",
       "language": "de",
       "formOfAddress": "sie",
+      "followUps": true,
       "languages": ["de"],
       "translations": {
         "de": {
           "displayName": "string",
           "greeting": "string",
-          "starters": ["string"]
+          "starters": ["string"],
+          "starterKeys": ["string"],
+          "launcherLabel": "string"
         },
         "en": {
           "displayName": "string",
           "greeting": "string",
-          "starters": ["string"]
+          "starters": ["string"],
+          "starterKeys": ["string"],
+          "launcherLabel": "string"
         }
       },
       "needsReview": {
@@ -1025,6 +1283,11 @@ const { data } = await client.saveCustomerChatConfig(
           guidance: 'string',
           blockIds: ['string'],
           integrationId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+          accessLevel: 'anonymous',
+          intent: 'submit_meter_reading',
+          journeyId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+          journeyName: 'string',
+          url: 'string',
           searchDeviceDocs: true
         }
       ],
@@ -1043,25 +1306,36 @@ const { data } = await client.saveCustomerChatConfig(
           value: 'string',
           journeyId: 'string',
           journeyName: 'string'
+        },
+        ticketPurpose: {
+          id: 'string',
+          name: 'string'
         }
       },
       appearance: {
         displayName: 'string',
         greeting: 'string',
         starters: ['string'],
+        starterKeys: ['string'],
+        launcherLabel: 'string',
         language: 'de',
         formOfAddress: 'sie',
+        followUps: true,
         languages: ['de'],
         translations: {
           de: {
             displayName: 'string',
             greeting: 'string',
-            starters: ['string']
+            starters: ['string'],
+            starterKeys: ['string'],
+            launcherLabel: 'string'
           },
           en: {
             displayName: 'string',
             greeting: 'string',
-            starters: ['string']
+            starters: ['string'],
+            starterKeys: ['string'],
+            launcherLabel: 'string'
           }
         },
         needsReview: {
@@ -1105,6 +1379,11 @@ const { data } = await client.saveCustomerChatConfig(
         "guidance": "string",
         "blockIds": ["string"],
         "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "accessLevel": "anonymous",
+        "intent": "submit_meter_reading",
+        "journeyId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "journeyName": "string",
+        "url": "string",
         "searchDeviceDocs": true
       }
     ],
@@ -1123,25 +1402,36 @@ const { data } = await client.saveCustomerChatConfig(
         "value": "string",
         "journeyId": "string",
         "journeyName": "string"
+      },
+      "ticketPurpose": {
+        "id": "string",
+        "name": "string"
       }
     },
     "appearance": {
       "displayName": "string",
       "greeting": "string",
       "starters": ["string"],
+      "starterKeys": ["string"],
+      "launcherLabel": "string",
       "language": "de",
       "formOfAddress": "sie",
+      "followUps": true,
       "languages": ["de"],
       "translations": {
         "de": {
           "displayName": "string",
           "greeting": "string",
-          "starters": ["string"]
+          "starters": ["string"],
+          "starterKeys": ["string"],
+          "launcherLabel": "string"
         },
         "en": {
           "displayName": "string",
           "greeting": "string",
-          "starters": ["string"]
+          "starters": ["string"],
+          "starterKeys": ["string"],
+          "launcherLabel": "string"
         }
       },
       "needsReview": {
@@ -1165,14 +1455,21 @@ const { data } = await client.saveCustomerChatConfig(
 
 ---
 
-### `listKnowledgeSources`
+### `listCustomerChatConversations`
 
-List knowledge sources
+List a portal agent's conversations
 
-`GET /v1/knowledge/sources`
+`GET /v1/customer-chat/{agent_id}/conversations`
 
 ```ts
-const { data } = await client.listKnowledgeSources()
+const { data } = await client.listCustomerChatConversations({
+  agent_id: 'example',
+  has_ticket: true,
+  limit: 1,
+  cursor: 'example',
+  from: 'example',
+  to: 'example',
+})
 ```
 
 <details>
@@ -1180,101 +1477,67 @@ const { data } = await client.listKnowledgeSources()
 
 ```json
 {
-  "sources": [
+  "conversations": [
     {
-      "type": "file",
-      "source_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "filename": "string",
-      "mime_type": "string",
-      "size_bytes": 0,
-      "ready": true,
+      "conversation_id": "string",
+      "user_id": "string",
+      "contact_id": "string",
+      "title": "string",
+      "message_count": 0,
+      "last_message": "string",
+      "last_message_at": "1970-01-01T00:00:00.000Z",
       "created_at": "1970-01-01T00:00:00.000Z",
-      "updated_at": "1970-01-01T00:00:00.000Z"
+      "ticket_ids": ["string"]
+    }
+  ],
+  "next_cursor": "string"
+}
+```
+
+</details>
+
+---
+
+### `getCustomerChatConversation`
+
+Get a portal agent conversation transcript
+
+`GET /v1/customer-chat/{agent_id}/conversations/{conversation_id}`
+
+```ts
+const { data } = await client.getCustomerChatConversation({
+  agent_id: 'example',
+  conversation_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "conversation": {
+    "conversation_id": "string",
+    "user_id": "string",
+    "contact_id": "string",
+    "title": "string",
+    "message_count": 0,
+    "last_message": "string",
+    "last_message_at": "1970-01-01T00:00:00.000Z",
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "ticket_ids": ["string"]
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "string",
+      "timestamp": "1970-01-01T00:00:00.000Z"
     }
   ]
 }
 ```
 
 </details>
-
----
-
-### `createKnowledgeFileUpload`
-
-Create a knowledge file upload
-
-`POST /v1/knowledge/file-uploads`
-
-```ts
-const { data } = await client.createKnowledgeFileUpload(
-  null,
-  {
-    filename: 'string',
-    mime_type: 'string',
-    size_bytes: 1
-  },
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "source_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "upload_url": "https://example.com/path",
-  "upload_fields": {},
-  "expires_at": "1970-01-01T00:00:00.000Z"
-}
-```
-
-</details>
-
----
-
-### `getKnowledgeSource`
-
-Get a knowledge source
-
-`GET /v1/knowledge/sources/{source_id}`
-
-```ts
-const { data } = await client.getKnowledgeSource({
-  source_id: 'example',
-})
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "type": "file",
-  "source_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "filename": "string",
-  "mime_type": "string",
-  "size_bytes": 0,
-  "ready": true,
-  "created_at": "1970-01-01T00:00:00.000Z",
-  "updated_at": "1970-01-01T00:00:00.000Z"
-}
-```
-
-</details>
-
----
-
-### `deleteKnowledgeSource`
-
-Delete a knowledge source
-
-`DELETE /v1/knowledge/sources/{source_id}`
-
-```ts
-const { data } = await client.deleteKnowledgeSource({
-  source_id: 'example',
-})
-```
 
 ---
 
@@ -1312,13 +1575,23 @@ const { data } = await client.executeAgent(
         },
         mime_type: 'string',
         filename: 'string'
-      }
+      },
+      attachments: [
+        {
+          s3ref: {
+            bucket: 'string',
+            key: 'string'
+          },
+          mime_type: 'string',
+          filename: 'string'
+        }
+      ]
     },
     parameters: {},
     execution_mode_override: 'automatic',
     execution_context: 'flows',
     callback_url: 'https://example.com/path',
-    timeout_ms: 30000
+    timeout_ms: 0
   },
 )
 ```
@@ -1339,7 +1612,8 @@ const { data } = await client.executeAgent(
   "parameters": {},
   "result": {
     "response": "string",
-    "structured_output": {}
+    "structured_output": {},
+    "stop_reason": "string"
   },
   "error": {
     "code": "TIMEOUT",
@@ -1397,7 +1671,8 @@ const { data } = await client.executeAgent(
       ],
       "metadata": {},
       "summary": "This email discusses solar panel installation and should be handled by the Service team."
-    }
+    },
+    "approval_note": "string"
   },
   "metrics": {
     "total_tokens": 0,
@@ -1458,13 +1733,66 @@ const { data } = await client.executeAgentStream(
         },
         mime_type: 'string',
         filename: 'string'
-      }
+      },
+      attachments: [
+        {
+          s3ref: {
+            bucket: 'string',
+            key: 'string'
+          },
+          mime_type: 'string',
+          filename: 'string'
+        }
+      ]
     },
     parameters: {},
     execution_mode_override: 'automatic',
     execution_context: 'flows',
     callback_url: 'https://example.com/path',
-    timeout_ms: 30000
+    timeout_ms: 0,
+    agent_override: {
+      domain: 'customer_service',
+      availability: ['flows'],
+      name: 'string',
+      description: 'string',
+      category: 'message',
+      icon: 'string',
+      system_prompt: 'string',
+      tools: ['string'],
+      model_config: {
+        model_id: 'anthropic.claude-3-5-sonnet-20241022-v2:0',
+        temperature: 0.7,
+        max_tokens: 4096,
+        thinking: false,
+        thinking_budget: 10000
+      },
+      max_iterations: 1,
+      execution_pattern: 'direct',
+      execution_mode: 'automatic',
+      output_schema: {},
+      input_parameters_schema: {
+        type: 'object',
+        parameters: [
+          {
+            name: 'target_schema',
+            label: 'Target Schema',
+            type: 'entity-schema',
+            description: 'Entity type to create'
+          },
+          {
+            name: 'confidence_threshold',
+            label: 'Confidence Threshold',
+            type: 'number',
+            minimum: 0,
+            maximum: 1,
+            default: 0.8
+          },
+          /* ... 1 more */
+        ],
+        required: ['target_schema']
+      },
+      knowledge_source_ids: ['3fa85f64-5717-4562-b3fc-2c963f66afa6']
+    }
   },
 )
 ```
@@ -1482,6 +1810,7 @@ const { data } = await client.listExecutions({
   agent_id: 'example',
   status: 'example',
   limit: 1,
+  cursor: 'example',
 })
 ```
 
@@ -1503,7 +1832,8 @@ const { data } = await client.listExecutions({
       "parameters": {},
       "result": {
         "response": "string",
-        "structured_output": {}
+        "structured_output": {},
+        "stop_reason": "string"
       },
       "error": {
         "code": "TIMEOUT",
@@ -1561,7 +1891,8 @@ const { data } = await client.listExecutions({
           ],
           "metadata": {},
           "summary": "This email discusses solar panel installation and should be handled by the Service team."
-        }
+        },
+        "approval_note": "string"
       },
       "metrics": {
         "total_tokens": 0,
@@ -1619,7 +1950,8 @@ const { data } = await client.getExecution({
   "parameters": {},
   "result": {
     "response": "string",
-    "structured_output": {}
+    "structured_output": {},
+    "stop_reason": "string"
   },
   "error": {
     "code": "TIMEOUT",
@@ -1677,7 +2009,8 @@ const { data } = await client.getExecution({
       ],
       "metadata": {},
       "summary": "This email discusses solar panel installation and should be handled by the Service team."
-    }
+    },
+    "approval_note": "string"
   },
   "metrics": {
     "total_tokens": 0,
@@ -1732,7 +2065,8 @@ const { data } = await client.cancelExecution({
   "parameters": {},
   "result": {
     "response": "string",
-    "structured_output": {}
+    "structured_output": {},
+    "stop_reason": "string"
   },
   "error": {
     "code": "TIMEOUT",
@@ -1790,7 +2124,8 @@ const { data } = await client.cancelExecution({
       ],
       "metadata": {},
       "summary": "This email discusses solar panel installation and should be handled by the Service team."
-    }
+    },
+    "approval_note": "string"
   },
   "metrics": {
     "total_tokens": 0,
@@ -1850,6 +2185,49 @@ const { data } = await client.getExecutionTrace({
     }
   ],
   "total_iterations": 0
+}
+```
+
+</details>
+
+---
+
+### `getExecutionScreenshots`
+
+Get execution screenshots
+
+`GET /v1/executions/{execution_id}/screenshots`
+
+```ts
+const { data } = await client.getExecutionScreenshots({
+  execution_id: 'example',
+  after: 1,
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "execution_id": "string",
+  "screenshots": [
+    {
+      "index": 0,
+      "label": "string",
+      "kind": "page",
+      "box": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "page_url": "string",
+      "tool": "string",
+      "taken_at": "1970-01-01T00:00:00.000Z",
+      "data_url": "string"
+    }
+  ]
 }
 ```
 
@@ -1958,7 +2336,8 @@ const { data } = await client.approveExecution(
   "parameters": {},
   "result": {
     "response": "string",
-    "structured_output": {}
+    "structured_output": {},
+    "stop_reason": "string"
   },
   "error": {
     "code": "TIMEOUT",
@@ -2016,7 +2395,8 @@ const { data } = await client.approveExecution(
       ],
       "metadata": {},
       "summary": "This email discusses solar panel installation and should be handled by the Service team."
-    }
+    },
+    "approval_note": "string"
   },
   "metrics": {
     "total_tokens": 0,
@@ -2076,7 +2456,8 @@ const { data } = await client.rejectExecution(
   "parameters": {},
   "result": {
     "response": "string",
-    "structured_output": {}
+    "structured_output": {},
+    "stop_reason": "string"
   },
   "error": {
     "code": "TIMEOUT",
@@ -2134,7 +2515,8 @@ const { data } = await client.rejectExecution(
       ],
       "metadata": {},
       "summary": "This email discusses solar panel installation and should be handled by the Service team."
-    }
+    },
+    "approval_note": "string"
   },
   "metrics": {
     "total_tokens": 0,
@@ -2188,6 +2570,11 @@ const { data } = await client.chat(
   {
     agentId: 'string',
     message: 'string',
+    tool_approval: {
+      token: 'string',
+      approved: true,
+      reason: 'string'
+    },
     conversationId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     clientHistory: [
       {
@@ -2212,7 +2599,51 @@ const { data } = await client.chat(
       streamTokens: false,
       includeMetadata: false
     },
-    preview_demo: true
+    preview_demo: true,
+    agent_override: {
+      domain: 'customer_service',
+      availability: ['flows'],
+      name: 'string',
+      description: 'string',
+      category: 'message',
+      icon: 'string',
+      system_prompt: 'string',
+      tools: ['string'],
+      model_config: {
+        model_id: 'anthropic.claude-3-5-sonnet-20241022-v2:0',
+        temperature: 0.7,
+        max_tokens: 4096,
+        thinking: false,
+        thinking_budget: 10000
+      },
+      max_iterations: 1,
+      execution_pattern: 'direct',
+      execution_mode: 'automatic',
+      output_schema: {},
+      input_parameters_schema: {
+        type: 'object',
+        parameters: [
+          {
+            name: 'target_schema',
+            label: 'Target Schema',
+            type: 'entity-schema',
+            description: 'Entity type to create'
+          },
+          {
+            name: 'confidence_threshold',
+            label: 'Confidence Threshold',
+            type: 'number',
+            minimum: 0,
+            maximum: 1,
+            default: 0.8
+          },
+          /* ... 1 more */
+        ],
+        required: ['target_schema']
+      },
+      knowledge_source_ids: ['3fa85f64-5717-4562-b3fc-2c963f66afa6']
+    },
+    portal_config_override: {}
   },
 )
 ```
@@ -2378,6 +2809,1001 @@ const { data } = await client.submitConversationFeedback(
 
 ---
 
+### `createPortalSession`
+
+Start a portal chat
+
+`POST /v2/portal/sessions`
+
+```ts
+const { data } = await client.createPortalSession(
+  {
+    domain: 'example',
+  },
+  {
+    requestId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    input: {
+      text: 'string',
+      context: {}
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "session": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "agentId": "string",
+    "mode": "read",
+    "title": "string",
+    "origin": "string",
+    "createdAt": "1970-01-01T00:00:00.000Z",
+    "updatedAt": "1970-01-01T00:00:00.000Z",
+    "status": "idle",
+    "live": {
+      "transport": "appsync",
+      "httpHost": "string",
+      "realtimeUrl": "string",
+      "channel": "string"
+    }
+  },
+  "events": [
+    {
+      "seq": 0,
+      "eventId": "string",
+      "occurredAt": "1970-01-01T00:00:00.000Z",
+      "blocked": true,
+      "inputEventId": "string",
+      "type": "input",
+      "input": {
+        "kind": "message",
+        "text": "string",
+        "files": [
+          {
+            "fileId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "name": "string",
+            "mediaType": "string",
+            "size": 0
+          }
+        ]
+      }
+    }
+  ],
+  "inputEventId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+```
+
+</details>
+
+---
+
+### `listPortalSessions`
+
+List the portal user's chats
+
+`GET /v2/portal/sessions`
+
+```ts
+const { data } = await client.listPortalSessions({
+  domain: 'example',
+  limit: 1,
+  before: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "sessions": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "agentId": "string",
+      "mode": "read",
+      "title": "string",
+      "origin": "string",
+      "createdAt": "1970-01-01T00:00:00.000Z",
+      "updatedAt": "1970-01-01T00:00:00.000Z",
+      "status": "idle",
+      "live": {
+        "transport": "appsync",
+        "httpHost": "string",
+        "realtimeUrl": "string",
+        "channel": "string"
+      }
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getPortalSession`
+
+Get a portal chat
+
+`GET /v2/portal/sessions/{sessionId}`
+
+```ts
+const { data } = await client.getPortalSession({
+  domain: 'example',
+  sessionId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "session": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "agentId": "string",
+    "mode": "read",
+    "title": "string",
+    "origin": "string",
+    "createdAt": "1970-01-01T00:00:00.000Z",
+    "updatedAt": "1970-01-01T00:00:00.000Z",
+    "status": "idle",
+    "live": {
+      "transport": "appsync",
+      "httpHost": "string",
+      "realtimeUrl": "string",
+      "channel": "string"
+    }
+  }
+}
+```
+
+</details>
+
+---
+
+### `deletePortalSession`
+
+Delete a portal chat
+
+`DELETE /v2/portal/sessions/{sessionId}`
+
+```ts
+const { data } = await client.deletePortalSession({
+  domain: 'example',
+  sessionId: 'example',
+})
+```
+
+---
+
+### `listPortalSessionEvents`
+
+List a portal chat's events
+
+`GET /v2/portal/sessions/{sessionId}/events`
+
+```ts
+const { data } = await client.listPortalSessionEvents({
+  domain: 'example',
+  sessionId: 'example',
+  after: 1,
+  limit: 1,
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "events": [
+    {
+      "seq": 0,
+      "eventId": "string",
+      "occurredAt": "1970-01-01T00:00:00.000Z",
+      "blocked": true,
+      "inputEventId": "string",
+      "type": "input",
+      "input": {
+        "kind": "message",
+        "text": "string",
+        "files": [
+          {
+            "fileId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "name": "string",
+            "mediaType": "string",
+            "size": 0
+          }
+        ]
+      }
+    }
+  ],
+  "lastSeq": 0,
+  "hasMore": true,
+  "status": "idle"
+}
+```
+
+</details>
+
+---
+
+### `sendPortalSessionEvent`
+
+Send to a portal chat
+
+`POST /v2/portal/sessions/{sessionId}/events`
+
+```ts
+const { data } = await client.sendPortalSessionEvent(
+  {
+    domain: 'example',
+    sessionId: 'example',
+  },
+  {
+    text: '',
+    context: {},
+    files: ['3fa85f64-5717-4562-b3fc-2c963f66afa6'],
+    type: 'user.message',
+    requestId: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+  },
+)
+```
+
+---
+
+### `getPortalChatConfig`
+
+The portal's chat
+
+`GET /v2/portal/config`
+
+```ts
+const { data } = await client.getPortalChatConfig({
+  domain: 'example',
+  locale: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "agent": {
+    "name": "string",
+    "greeting": "string",
+    "conversation_starters": ["string"],
+    "language": "string",
+    "formality": "string"
+  }
+}
+```
+
+</details>
+
+---
+
+### `createSessionUpload`
+
+Upload a file for a session
+
+`POST /v2/sessions/uploads`
+
+```ts
+const { data } = await client.createSessionUpload(
+  null,
+  {
+    name: 'string',
+    mediaType: 'image/png',
+    size: 1
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "file": {
+    "fileId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "name": "string",
+    "mediaType": "string",
+    "size": 0
+  },
+  "upload": {
+    "method": "PUT",
+    "url": "string",
+    "headers": {}
+  }
+}
+```
+
+</details>
+
+---
+
+### `createSession`
+
+Start a session
+
+`POST /v2/sessions`
+
+```ts
+const { data } = await client.createSession(
+  null,
+  {
+    agentId: 'string',
+    requestId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    origin: 'configuration-hub',
+    input: {
+      text: '',
+      context: {},
+      files: ['3fa85f64-5717-4562-b3fc-2c963f66afa6']
+    },
+    prepare: true
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "session": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "agentId": "string",
+    "mode": "read",
+    "title": "string",
+    "origin": "string",
+    "createdAt": "1970-01-01T00:00:00.000Z",
+    "updatedAt": "1970-01-01T00:00:00.000Z",
+    "status": "idle",
+    "live": {
+      "transport": "appsync",
+      "httpHost": "string",
+      "realtimeUrl": "string",
+      "channel": "string"
+    }
+  },
+  "events": [
+    {
+      "seq": 0,
+      "eventId": "string",
+      "occurredAt": "1970-01-01T00:00:00.000Z",
+      "blocked": true,
+      "inputEventId": "string",
+      "type": "input",
+      "input": {
+        "kind": "message",
+        "text": "string",
+        "files": [
+          {
+            "fileId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "name": "string",
+            "mediaType": "string",
+            "size": 0
+          }
+        ]
+      }
+    }
+  ],
+  "inputEventId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+```
+
+</details>
+
+---
+
+### `listSessions`
+
+List the caller's sessions
+
+`GET /v2/sessions`
+
+```ts
+const { data } = await client.listSessions({
+  agentId: 'example',
+  origin: 'example',
+  limit: 1,
+  before: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "sessions": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "agentId": "string",
+      "mode": "read",
+      "title": "string",
+      "origin": "string",
+      "createdAt": "1970-01-01T00:00:00.000Z",
+      "updatedAt": "1970-01-01T00:00:00.000Z",
+      "status": "idle",
+      "live": {
+        "transport": "appsync",
+        "httpHost": "string",
+        "realtimeUrl": "string",
+        "channel": "string"
+      }
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getSession`
+
+Get a session
+
+`GET /v2/sessions/{sessionId}`
+
+```ts
+const { data } = await client.getSession({
+  sessionId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "session": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "agentId": "string",
+    "mode": "read",
+    "title": "string",
+    "origin": "string",
+    "createdAt": "1970-01-01T00:00:00.000Z",
+    "updatedAt": "1970-01-01T00:00:00.000Z",
+    "status": "idle",
+    "live": {
+      "transport": "appsync",
+      "httpHost": "string",
+      "realtimeUrl": "string",
+      "channel": "string"
+    }
+  }
+}
+```
+
+</details>
+
+---
+
+### `renameSession`
+
+Rename a session
+
+`PATCH /v2/sessions/{sessionId}`
+
+```ts
+const { data } = await client.renameSession(
+  {
+    sessionId: 'example',
+  },
+  {
+    title: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "session": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "agentId": "string",
+    "mode": "read",
+    "title": "string",
+    "origin": "string",
+    "createdAt": "1970-01-01T00:00:00.000Z",
+    "updatedAt": "1970-01-01T00:00:00.000Z",
+    "status": "idle",
+    "live": {
+      "transport": "appsync",
+      "httpHost": "string",
+      "realtimeUrl": "string",
+      "channel": "string"
+    }
+  }
+}
+```
+
+</details>
+
+---
+
+### `deleteSession`
+
+Delete a session
+
+`DELETE /v2/sessions/{sessionId}`
+
+```ts
+const { data } = await client.deleteSession({
+  sessionId: 'example',
+})
+```
+
+---
+
+### `listSessionEvents`
+
+List a session's events
+
+`GET /v2/sessions/{sessionId}/events`
+
+```ts
+const { data } = await client.listSessionEvents({
+  sessionId: 'example',
+  after: 1,
+  limit: 1,
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "events": [
+    {
+      "seq": 0,
+      "eventId": "string",
+      "occurredAt": "1970-01-01T00:00:00.000Z",
+      "blocked": true,
+      "inputEventId": "string",
+      "type": "input",
+      "input": {
+        "kind": "message",
+        "text": "string",
+        "files": [
+          {
+            "fileId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "name": "string",
+            "mediaType": "string",
+            "size": 0
+          }
+        ]
+      }
+    }
+  ],
+  "lastSeq": 0,
+  "hasMore": true,
+  "status": "idle"
+}
+```
+
+</details>
+
+---
+
+### `sendSessionEvent`
+
+Send to a session
+
+`POST /v2/sessions/{sessionId}/events`
+
+```ts
+const { data } = await client.sendSessionEvent(
+  {
+    sessionId: 'example',
+  },
+  {
+    text: '',
+    context: {},
+    files: ['3fa85f64-5717-4562-b3fc-2c963f66afa6'],
+    type: 'user.message',
+    requestId: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+  },
+)
+```
+
+---
+
+### `getSessionFileUrl`
+
+Get a link to a session file
+
+`GET /v2/sessions/{sessionId}/files/{fileId}`
+
+```ts
+const { data } = await client.getSessionFileUrl({
+  sessionId: 'example',
+  fileId: 'example',
+  download: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "url": "string",
+  "expiresAt": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `runScript`
+
+Run a script
+
+`POST /v2/sessions/scripts`
+
+```ts
+const { data } = await client.runScript(
+  null,
+  {
+    language: 'javascript',
+    script: 'string',
+    description: 'string',
+    waitMs: 0
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "runId": "string",
+  "status": "running",
+  "output": "string",
+  "changes": 0
+}
+```
+
+</details>
+
+---
+
+### `getScriptRun`
+
+Get a script run
+
+`GET /v2/sessions/scripts/{runId}`
+
+```ts
+const { data } = await client.getScriptRun({
+  runId: 'example',
+  waitMs: 1,
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "runId": "string",
+  "status": "running",
+  "output": "string",
+  "changes": 0
+}
+```
+
+</details>
+
+---
+
+### `applyScriptRun`
+
+Apply a script run's changes
+
+`POST /v2/sessions/scripts/{runId}/apply`
+
+```ts
+const { data } = await client.applyScriptRun(
+  {
+    runId: 'example',
+  },
+  {
+    approvalSummary: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "done": true,
+  "applied": 0,
+  "total": 0,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "string"
+      }
+    ],
+    "isError": true
+  }
+}
+```
+
+</details>
+
+---
+
+### `revokeSessionAgents`
+
+Revoke the caller's session agents
+
+`POST /v2/agents/revoke`
+
+```ts
+const { data } = await client.revokeSessionAgents()
+```
+
+---
+
+### `createInternalSession`
+
+Start an unattended session (services only)
+
+`POST /v2/internal/sessions`
+
+```ts
+const { data } = await client.createInternalSession(
+  null,
+  {
+    agentId: 'string',
+    origin: 'configuration-hub',
+    owner: {
+      user_id: 'string'
+    },
+    unattended: true,
+    client_token: 'string',
+    input: {
+      text: 'string',
+      context: {
+        intent: 'blueprint-tests.suggest'
+      }
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "unattended_access": true
+}
+```
+
+</details>
+
+---
+
+### `getInternalSession`
+
+What an unattended session is doing (services only)
+
+`GET /v2/internal/sessions/{sessionId}`
+
+```ts
+const { data } = await client.getInternalSession({
+  sessionId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "state": "working",
+  "needs": "first_message",
+  "attended": true,
+  "last_activity_at": "1970-01-01T00:00:00.000Z",
+  "turns": 0
+}
+```
+
+</details>
+
+---
+
+### `createInternalExecution`
+
+Start a Flows execution as a background run (services only)
+
+`POST /v2/internal/executions`
+
+```ts
+const { data } = await client.createInternalExecution(
+  null,
+  {
+    execution_id: 'string',
+    agent_id: 'string',
+    input: {
+      text: 'string',
+      context: {}
+    },
+    mode: 'automatic',
+    skill: {
+      instructions: 'string',
+      tools: ['string'],
+      output_schema: {}
+    },
+    parameters: {},
+    flows: {
+      workflow_id: 'string',
+      workflow_name: 'string',
+      workflow_execution_id: 'string',
+      task_id: 'string'
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "session_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+```
+
+</details>
+
+---
+
+### `decideInternalExecution`
+
+Decide what a Flows run on v2 waits for (services only)
+
+`POST /v2/internal/executions/{executionId}/decision`
+
+```ts
+const { data } = await client.decideInternalExecution(
+  {
+    executionId: 'example',
+  },
+  {
+    approval_id: 'string',
+    approved: true,
+    reason: 'string',
+    decided_by: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "approval": {
+    "id": "string",
+    "status": "string"
+  }
+}
+```
+
+</details>
+
+---
+
+### `listInternalPortalChats`
+
+An agent's portal chats on v2, for Agent Builder's history (services only)
+
+`GET /v2/internal/portal-chats`
+
+```ts
+const { data } = await client.listInternalPortalChats({
+  agent_id: 'example',
+  limit: 1,
+  after_updated_at: 'example',
+  after_id: 'example',
+  from: 'example',
+  to: 'example',
+  has_ticket: true,
+  ids: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "conversations": [
+    {
+      "conversation_id": "string",
+      "updated_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "has_more": true,
+  "read_to": {
+    "conversation_id": "string",
+    "updated_at": "1970-01-01T00:00:00.000Z"
+  }
+}
+```
+
+</details>
+
+---
+
+### `getInternalPortalChat`
+
+One portal chat on v2 with its transcript, for Agent Builder's history (services only)
+
+`GET /v2/internal/portal-chats/{sessionId}`
+
+```ts
+const { data } = await client.getInternalPortalChat({
+  sessionId: 'example',
+  agent_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "conversation": {
+    "conversation_id": "string",
+    "user_id": "string",
+    "contact_id": "string",
+    "title": "string",
+    "message_count": 0,
+    "last_message": "string",
+    "last_message_at": "1970-01-01T00:00:00.000Z",
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "ticket_ids": ["string"]
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "string",
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "blocked": true
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ## Schemas
 
 ### `AgentConfig`
@@ -2385,7 +3811,7 @@ const { data } = await client.submitConversationFeedback(
 ```ts
 type AgentConfig = {
   capabilities: Array<{
-    type: "navigate_portal_pages" | "search_portal_records" | "view_billing" | "view_meter_readings" | "view_contracts" | "search_web" | "open_quick_actions" | "view_hems_energy"
+    type: "navigate_portal_pages" | "search_portal_records" | "view_billing" | "view_meter_readings" | "view_contracts" | "search_web" | "open_quick_actions" | "view_hems_energy" | "open_journey" | "open_link" | "submit_meter_reading"
     instanceId?: string
     enabled: boolean
     meterTypes?: string[]
@@ -2396,6 +3822,11 @@ type AgentConfig = {
     guidance?: string
     blockIds?: string[]
     integrationId?: string // uuid
+    accessLevel?: "anonymous" | "authenticated"
+    intent?: "submit_meter_reading"
+    journeyId?: string // uuid
+    journeyName?: string
+    url?: string
     searchDeviceDocs?: boolean
   }>
   knowledgeSources: Array<{
@@ -2412,13 +3843,20 @@ type AgentConfig = {
       journeyId?: { ... }
       journeyName?: { ... }
     }
+    ticketPurpose?: {
+      id: { ... }
+      name?: { ... }
+    }
   }
   appearance: {
     displayName: string
     greeting: string
     starters: string[]
+    starterKeys?: string[]
+    launcherLabel?: string
     language: "de" | "en"
     formOfAddress: "sie" | "du"
+    followUps?: boolean
     languages?: "de" | "en"[]
     translations?: {
       de?: { ... }
@@ -2445,24 +3883,31 @@ type AppearanceConfig = {
   displayName: string
   greeting: string
   starters: string[]
+  starterKeys?: string[]
+  launcherLabel?: string
   language: "de" | "en"
   formOfAddress: "sie" | "du"
+  followUps?: boolean
   languages?: "de" | "en"[]
   translations?: {
     de?: {
       displayName: { ... }
       greeting: { ... }
       starters: { ... }
+      starterKeys?: { ... }
+      launcherLabel?: { ... }
     }
     en?: {
       displayName: { ... }
       greeting: { ... }
       starters: { ... }
+      starterKeys?: { ... }
+      launcherLabel?: { ... }
     }
   }
   needsReview?: {
-    de?: "displayName" | "greeting" | "starters"[]
-    en?: "displayName" | "greeting" | "starters"[]
+    de?: "displayName" | "greeting" | "starters" | "launcherLabel"[]
+    en?: "displayName" | "greeting" | "starters" | "launcherLabel"[]
   }
 }
 ```
@@ -2474,19 +3919,41 @@ type LocalizedAppearance = {
   displayName: string
   greeting: string
   starters: string[]
+  starterKeys?: string[]
+  launcherLabel?: string
 }
 ```
 
 ### `LocalizedFieldList`
 
 ```ts
-type LocalizedFieldList = "displayName" | "greeting" | "starters"[]
+type LocalizedFieldList = "displayName" | "greeting" | "starters" | "launcherLabel"[]
 ```
 
 ### `CapabilityId`
 
 ```ts
-type CapabilityId = "navigate_portal_pages" | "search_portal_records" | "view_billing" | "view_meter_readings" | "view_contracts" | "search_web" | "open_quick_actions" | "view_hems_energy"
+type CapabilityId = "navigate_portal_pages" | "search_portal_records" | "view_billing" | "view_meter_readings" | "view_contracts" | "search_web" | "open_quick_actions" | "view_hems_energy" | "open_journey" | "open_link" | "submit_meter_reading"
+```
+
+### `AccessLevel`
+
+Who may use a capability. `anonymous` = every visitor, `authenticated` =
+only a customer authenticated by email code or portal login; others are
+asked to sign in first. Each capability type has a default and a
+minimum; values below the minimum are raised. Used today by
+`open_journey`, `open_link` an
+
+```ts
+type AccessLevel = "anonymous" | "authenticated"
+```
+
+### `SelfServiceIntent`
+
+What a journey, link or in-chat capability is for; names the action in the chat and in analytics.
+
+```ts
+type SelfServiceIntent = "submit_meter_reading"
 ```
 
 ### `ActionAutonomy`
@@ -2514,6 +3981,11 @@ type CapabilityState = {
   guidance?: string
   blockIds?: string[]
   integrationId?: string // uuid
+  accessLevel?: "anonymous" | "authenticated"
+  intent?: "submit_meter_reading"
+  journeyId?: string // uuid
+  journeyName?: string
+  url?: string
   searchDeviceDocs?: boolean
 }
 ```
@@ -2522,7 +3994,7 @@ type CapabilityState = {
 
 ```ts
 type CapabilityInstance = {
-  type: "navigate_portal_pages" | "search_portal_records" | "view_billing" | "view_meter_readings" | "view_contracts" | "search_web" | "open_quick_actions" | "view_hems_energy"
+  type: "navigate_portal_pages" | "search_portal_records" | "view_billing" | "view_meter_readings" | "view_contracts" | "search_web" | "open_quick_actions" | "view_hems_energy" | "open_journey" | "open_link" | "submit_meter_reading"
   instanceId?: string
   enabled: boolean
   meterTypes?: string[]
@@ -2533,6 +4005,11 @@ type CapabilityInstance = {
   guidance?: string
   blockIds?: string[]
   integrationId?: string // uuid
+  accessLevel?: "anonymous" | "authenticated"
+  intent?: "submit_meter_reading"
+  journeyId?: string // uuid
+  journeyName?: string
+  url?: string
   searchDeviceDocs?: boolean
 }
 ```
@@ -2568,6 +4045,11 @@ type CustomerChatAgent = {
       guidance?: { ... }
       blockIds?: { ... }
       integrationId?: { ... }
+      accessLevel?: { ... }
+      intent?: { ... }
+      journeyId?: { ... }
+      journeyName?: { ... }
+      url?: { ... }
       searchDeviceDocs?: { ... }
     }>
     knowledgeSources: Array<{
@@ -2579,13 +4061,17 @@ type CustomerChatAgent = {
     }>
     escalation: {
       websiteHandover: { ... }
+      ticketPurpose?: { ... }
     }
     appearance: {
       displayName: { ... }
       greeting: { ... }
       starters: { ... }
+      starterKeys?: { ... }
+      launcherLabel?: { ... }
       language: { ... }
       formOfAddress: { ... }
+      followUps?: { ... }
       languages?: { ... }
       translations?: { ... }
       needsReview?: { ... }
@@ -2630,11 +4116,28 @@ type CustomerChatPlace = "website" | "portal"
 ```ts
 type EscalationConfig = {
   websiteHandover: {
-    kind: "phone" | "email" | "journey" | "unset"
+    kind: "phone" | "email" | "journey" | "ticket" | "unset"
     value: string
     journeyId?: string
     journeyName?: string
   }
+  ticketPurpose?: {
+    id: string
+    name?: string
+  }
+}
+```
+
+### `TicketPurpose`
+
+Portal places only: purpose set on tickets the portal chat creates when
+it hands over to the service team. Omit (or send `null`) for a plain ticket.
+
+
+```ts
+type TicketPurpose = {
+  id: string
+  name?: string
 }
 ```
 
@@ -2685,7 +4188,7 @@ type ListCustomerChatResponse = {
 
 ```ts
 type CustomerChatCapabilityCatalogEntry = {
-  id: "navigate_portal_pages" | "search_portal_records" | "view_billing" | "view_meter_readings" | "view_contracts" | "search_web" | "open_quick_actions" | "view_hems_energy"
+  id: "navigate_portal_pages" | "search_portal_records" | "view_billing" | "view_meter_readings" | "view_contracts" | "search_web" | "open_quick_actions" | "view_hems_energy" | "open_journey" | "open_link" | "submit_meter_reading"
   places: "website" | "portal"[]
   singleInstance?: boolean
   requiresIntegration?: boolean
@@ -2697,7 +4200,7 @@ type CustomerChatCapabilityCatalogEntry = {
 ```ts
 type ListCustomerChatCapabilitiesResponse = {
   capabilities: Array<{
-    id: "navigate_portal_pages" | "search_portal_records" | "view_billing" | "view_meter_readings" | "view_contracts" | "search_web" | "open_quick_actions" | "view_hems_energy"
+    id: "navigate_portal_pages" | "search_portal_records" | "view_billing" | "view_meter_readings" | "view_contracts" | "search_web" | "open_quick_actions" | "view_hems_energy" | "open_journey" | "open_link" | "submit_meter_reading"
     places: "website" | "portal"[]
     singleInstance?: boolean
     requiresIntegration?: boolean
@@ -2731,6 +4234,11 @@ type SaveCustomerChatConfigRequest = {
       guidance?: { ... }
       blockIds?: { ... }
       integrationId?: { ... }
+      accessLevel?: { ... }
+      intent?: { ... }
+      journeyId?: { ... }
+      journeyName?: { ... }
+      url?: { ... }
       searchDeviceDocs?: { ... }
     }>
     knowledgeSources: Array<{
@@ -2742,13 +4250,17 @@ type SaveCustomerChatConfigRequest = {
     }>
     escalation: {
       websiteHandover: { ... }
+      ticketPurpose?: { ... }
     }
     appearance: {
       displayName: { ... }
       greeting: { ... }
       starters: { ... }
+      starterKeys?: { ... }
+      launcherLabel?: { ... }
       language: { ... }
       formOfAddress: { ... }
+      followUps?: { ... }
       languages?: { ... }
       translations?: { ... }
       needsReview?: { ... }
@@ -2768,7 +4280,7 @@ type SaveCustomerChatConfigRequest = {
 
 ```ts
 type WebsiteHandover = {
-  kind: "phone" | "email" | "journey" | "unset"
+  kind: "phone" | "email" | "journey" | "ticket" | "unset"
   value: string
   journeyId?: string
   journeyName?: string
@@ -2792,74 +4304,6 @@ Knowledge source IDs available to this agent. An empty array clears the selectio
 
 ```ts
 type KnowledgeSourceIds = string // uuid[]
-```
-
-### `KnowledgeSource`
-
-```ts
-type KnowledgeSource = {
-  type: "file"
-  source_id: string // uuid
-  filename: string
-  mime_type: string
-  size_bytes: number
-  ready: boolean
-  created_at: string // date-time
-  updated_at: string // date-time
-}
-```
-
-### `KnowledgeFileSource`
-
-```ts
-type KnowledgeFileSource = {
-  type: "file"
-  source_id: string // uuid
-  filename: string
-  mime_type: string
-  size_bytes: number
-  ready: boolean
-  created_at: string // date-time
-  updated_at: string // date-time
-}
-```
-
-### `CreateKnowledgeFileUploadRequest`
-
-```ts
-type CreateKnowledgeFileUploadRequest = {
-  filename: string
-  mime_type: string
-  size_bytes: number
-}
-```
-
-### `CreateKnowledgeFileUploadResponse`
-
-```ts
-type CreateKnowledgeFileUploadResponse = {
-  source_id: string // uuid
-  upload_url: string // uri
-  upload_fields: Record<string, string>
-  expires_at: string // date-time
-}
-```
-
-### `ListKnowledgeSourcesResponse`
-
-```ts
-type ListKnowledgeSourcesResponse = {
-  sources: Array<{
-    type: "file"
-    source_id: string // uuid
-    filename: string
-    mime_type: string
-    size_bytes: number
-    ready: boolean
-    created_at: string // date-time
-    updated_at: string // date-time
-  }>
-}
 ```
 
 ### `AgentDomain`
@@ -3088,6 +4532,7 @@ type ListExecutionsResponse = {
     result?: {
       response?: { ... }
       structured_output?: { ... }
+      stop_reason?: { ... }
     }
     error?: {
       code?: { ... }
@@ -3099,6 +4544,7 @@ type ListExecutionsResponse = {
       input?: { ... }
       description?: { ... }
       preview?: { ... }
+      approval_note?: { ... }
     }
     metrics?: {
       total_tokens?: { ... }
@@ -3161,12 +4607,80 @@ type ExecuteAgentRequest = {
       mime_type: { ... }
       filename?: { ... }
     }
+    attachments?: Array<{
+      s3ref: { ... }
+      mime_type: { ... }
+      filename?: { ... }
+    }>
   }
   parameters?: Record<string, unknown>
   execution_mode_override?: "automatic" | "approval" | "draft"
   execution_context?: "flows" | "copilot" | "api" | "sharing"
   callback_url?: string // uri
   timeout_ms?: number
+}
+```
+
+### `ExecuteAgentStreamRequest`
+
+```ts
+type ExecuteAgentStreamRequest = {
+  mode?: "auto" | "stream" | "async" | "sync"
+  input?: {
+    message?: string
+    entity_id?: string
+    entity_schema?: string
+    workflow_id?: string
+    workflow_execution_id?: string
+    task_id?: string
+    custom_data?: Record<string, unknown>
+    flow_context?: Array<{
+      entity_id: { ... }
+      entity_schema: { ... }
+    }>
+    attachment?: {
+      s3ref: { ... }
+      mime_type: { ... }
+      filename?: { ... }
+    }
+    attachments?: Array<{
+      s3ref: { ... }
+      mime_type: { ... }
+      filename?: { ... }
+    }>
+  }
+  parameters?: Record<string, unknown>
+  execution_mode_override?: "automatic" | "approval" | "draft"
+  execution_context?: "flows" | "copilot" | "api" | "sharing"
+  callback_url?: string // uri
+  timeout_ms?: number
+  agent_override?: {
+    domain?: "customer_service" | "sales" | "billing" | "metering_grid" | "other"
+    availability?: "flows" | "copilot" | "portals" | "website" | "all"[]
+    name?: string
+    description?: string
+    category?: "message" | "entity" | "document" | "classification" | "custom"
+    icon?: string
+    system_prompt?: string
+    tools?: string[]
+    model_config?: {
+      model_id?: { ... }
+      temperature?: { ... }
+      max_tokens?: { ... }
+      thinking?: { ... }
+      thinking_budget?: { ... }
+    }
+    max_iterations?: number
+    execution_pattern?: "direct" | "react"
+    execution_mode?: "automatic" | "approval" | "draft"
+    output_schema?: object
+    input_parameters_schema?: {
+      type: { ... }
+      parameters: { ... }
+      required?: { ... }
+    }
+    knowledge_source_ids?: string // uuid[]
+  }
 }
 ```
 
@@ -3186,6 +4700,7 @@ type ExecutionResponse = {
   result?: {
     response?: string
     structured_output?: object
+    stop_reason?: string
   }
   error?: {
     code?: "TIMEOUT" | "MAX_ITERATIONS_EXCEEDED" | "TOOL_EXECUTION_FAILED" | "LLM_ERROR" | "INVALID_OUTPUT" | "REJECTED" | "INTERNAL_ERROR"
@@ -3204,6 +4719,7 @@ type ExecutionResponse = {
       metadata?: { ... }
       summary?: { ... }
     }
+    approval_note?: string
   }
   metrics?: {
     total_tokens?: number
@@ -3353,6 +4869,7 @@ type PendingAction = {
     }>
     summary?: string
   }
+  approval_note?: string
 }
 ```
 
@@ -3425,62 +4942,6 @@ type AgentExecutionEvent = {
     args?: Record<string, unknown>
   }>
   timestamp?: string // date-time
-}
-```
-
-### `KnowledgeSourceRegisteredEvent`
-
-Detail payload of the `knowledge-source-registered` event, published on
-the AI Agents event bus with source `ai-agents` after the source record
-exists in DynamoDB. Consumers must process `sourceId` idempotently.
-
-
-```ts
-type KnowledgeSourceRegisteredEvent = {
-  orgId: string
-  sourceId: string // uuid
-  type: "file"
-  bucket: string
-  key: string
-}
-```
-
-### `KnowledgeFileSourceRegisteredEvent`
-
-```ts
-type KnowledgeFileSourceRegisteredEvent = {
-  orgId: string
-  sourceId: string // uuid
-  type: "file"
-  bucket: string
-  key: string
-}
-```
-
-### `KnowledgeSourceDeletedEvent`
-
-Published when a knowledge source is deleted.
-
-```ts
-type KnowledgeSourceDeletedEvent = {
-  orgId: string
-  sourceId: string // uuid
-  type: "file"
-}
-```
-
-### `KnowledgeSourceProcessingCompletedEvent`
-
-Published by a knowledge processing pipeline after all derived data for
-the source has been stored and is available for agent retrieval. The
-event uses source `knowledge-processing` and detail type
-`knowledge-source-processing-completed` on the AI Agents event bus.
-
-
-```ts
-type KnowledgeSourceProcessingCompletedEvent = {
-  orgId: string
-  sourceId: string // uuid
 }
 ```
 
@@ -3711,7 +5172,7 @@ Custom types (domain-specific):
 - entity-attribute
 
 ```ts
-type ParameterType = "text" | "textarea" | "number" | "boolean" | "select" | "entity-schema" | "entity-attribute" | "entity-id" | "taxonomy" | "taxonomy-classification" | "shared-inbox" | "label" | "matching-criteria"
+type ParameterType = "text" | "textarea" | "number" | "boolean" | "select" | "entity-schema" | "entity-attribute" | "entity-id" | "taxonomy" | "taxonomy-classification" | "shared-inbox" | "label" | "matching-criteria" | "journey-task" | "journey" | "journey-context"
 ```
 
 ### `InputParameterDefinition`
@@ -3720,7 +5181,7 @@ type ParameterType = "text" | "textarea" | "number" | "boolean" | "select" | "en
 type InputParameterDefinition = {
   name: string
   label: string
-  type: "text" | "textarea" | "number" | "boolean" | "select" | "entity-schema" | "entity-attribute" | "entity-id" | "taxonomy" | "taxonomy-classification" | "shared-inbox" | "label" | "matching-criteria"
+  type: "text" | "textarea" | "number" | "boolean" | "select" | "entity-schema" | "entity-attribute" | "entity-id" | "taxonomy" | "taxonomy-classification" | "shared-inbox" | "label" | "matching-criteria" | "journey-task" | "journey" | "journey-context"
   description?: string
   default?: unknown
   multi?: boolean
@@ -3746,7 +5207,7 @@ type InputParametersSchema = {
   parameters: Array<{
     name: string
     label: string
-    type: "text" | "textarea" | "number" | "boolean" | "select" | "entity-schema" | "entity-attribute" | "entity-id" | "taxonomy" | "taxonomy-classification" | "shared-inbox" | "label" | "matching-criteria"
+    type: "text" | "textarea" | "number" | "boolean" | "select" | "entity-schema" | "entity-attribute" | "entity-id" | "taxonomy" | "taxonomy-classification" | "shared-inbox" | "label" | "matching-criteria" | "journey-task" | "journey" | "journey-context"
     description?: string
     default?: unknown
     multi?: boolean
@@ -3783,8 +5244,40 @@ type ModelConfig = {
 ```ts
 type Error = {
   error?: string
+  code?: string
   message?: string
   details?: object
+}
+```
+
+### `AgentAuthAccessProfile`
+
+Access profile of the agent's grant at the Access Token API (its ceiling)
+
+```ts
+type AgentAuthAccessProfile = "read" | "config:read" | "config:write" | "data:read" | "data:write" | "full"
+```
+
+### `AgentAuthActivationRequest`
+
+```ts
+type AgentAuthActivationRequest = {
+  access_profile: "read" | "config:read" | "config:write" | "data:read" | "data:write" | "full"
+  reason?: string
+}
+```
+
+### `AgentAuthStatus`
+
+```ts
+type AgentAuthStatus = {
+  status: "inactive" | "active" | "expired"
+  agent_auth_agent_id?: string
+  activation_id?: string
+  access_profile?: "read" | "config:read" | "config:write" | "data:read" | "data:write" | "full"
+  owner_user_id?: string
+  expires_at?: string // date-time
+  expiring_soon?: boolean
 }
 ```
 
@@ -3793,7 +5286,12 @@ type Error = {
 ```ts
 type ChatRequest = {
   agentId: string
-  message: string
+  message?: string
+  tool_approval?: {
+    token: string
+    approved: boolean
+    reason?: string
+  }
   conversationId?: string // uuid
   clientHistory?: Array<{
     role: "user" | "assistant" | "tool" | "system"
@@ -3815,6 +5313,124 @@ type ChatRequest = {
     includeMetadata?: boolean
   }
   preview_demo?: boolean
+  agent_override?: {
+    domain?: "customer_service" | "sales" | "billing" | "metering_grid" | "other"
+    availability?: "flows" | "copilot" | "portals" | "website" | "all"[]
+    name?: string
+    description?: string
+    category?: "message" | "entity" | "document" | "classification" | "custom"
+    icon?: string
+    system_prompt?: string
+    tools?: string[]
+    model_config?: {
+      model_id?: { ... }
+      temperature?: { ... }
+      max_tokens?: { ... }
+      thinking?: { ... }
+      thinking_budget?: { ... }
+    }
+    max_iterations?: number
+    execution_pattern?: "direct" | "react"
+    execution_mode?: "automatic" | "approval" | "draft"
+    output_schema?: object
+    input_parameters_schema?: {
+      type: { ... }
+      parameters: { ... }
+      required?: { ... }
+    }
+    knowledge_source_ids?: string // uuid[]
+  }
+  portal_config_override?: Record<string, unknown>
+}
+```
+
+### `ToolApprovalAnswer`
+
+The user's answer to an `approval_required` event (Luna behind the
+`luna-tool-approvals` flag). Requires the asking turn's `conversationId` and `agentId`; `message` may
+be omitted. On approve the server runs exactly the pending tool call
+stored in the conversation, streams its `tool_call` / `tool_re
+
+```ts
+type ToolApprovalAnswer = {
+  token: string
+  approved: boolean
+  reason?: string
+}
+```
+
+### `ToolApprovalRequest`
+
+A tool call waiting for the user's approval; the turn has ended.
+
+```ts
+type ToolApprovalRequest = {
+  id: string
+  tool_id: string
+  tool_call_id: string
+  title?: string
+  input: Record<string, unknown>
+  impact?: string
+  preview?: Record<string, unknown>
+  expires_at: string // date-time
+  token: string
+}
+```
+
+### `AgentPreviewOverride`
+
+Agent Builder preview: unsaved editor settings applied to the saved
+custom agent for this request only. Nothing is persisted. Requires
+preview_demo on /v1/chat and forces draft execution mode on
+/v1/agents/{agent_id}/execute/stream. Not supported for system skills
+or Website Chat agents.
+
+
+```ts
+type AgentPreviewOverride = {
+  domain?: "customer_service" | "sales" | "billing" | "metering_grid" | "other"
+  availability?: "flows" | "copilot" | "portals" | "website" | "all"[]
+  name?: string
+  description?: string
+  category?: "message" | "entity" | "document" | "classification" | "custom"
+  icon?: string
+  system_prompt?: string
+  tools?: string[]
+  model_config?: {
+    model_id?: string
+    temperature?: number
+    max_tokens?: number
+    thinking?: boolean
+    thinking_budget?: number
+  }
+  max_iterations?: number
+  execution_pattern?: "direct" | "react"
+  execution_mode?: "automatic" | "approval" | "draft"
+  output_schema?: object
+  input_parameters_schema?: {
+    type: "object"
+    parameters: Array<{
+      name: { ... }
+      label: { ... }
+      type: { ... }
+      description?: { ... }
+      default?: { ... }
+      multi?: { ... }
+      dependsOn?: { ... }
+      visibleWhen?: { ... }
+      enum?: { ... }
+      minimum?: { ... }
+      maximum?: { ... }
+      step?: { ... }
+      minLength?: { ... }
+      maxLength?: { ... }
+      schemaFilter?: { ... }
+      attributeTypeFilter?: { ... }
+      hidden?: { ... }
+    }>
+    required?: string[]
+  }
+  knowledge_source_ids?: string // uuid[]
 }
 ```
 
@@ -3849,8 +5465,19 @@ Server-Sent Event for streaming responses
 
 ```ts
 type StreamEvent = {
-  type?: "token" | "agent_step" | "tool_call" | "tool_result" | "complete" | "error" | "metadata" | "needs_approval"
+  type?: "token" | "agent_step" | "tool_call" | "tool_result" | "complete" | "error" | "metadata" | "needs_approval" | "approval_required"
   content?: string
+  approval?: {
+    id: string
+    tool_id: string
+    tool_call_id: string
+    title?: string
+    input: Record<string, unknown>
+    impact?: string
+    preview?: Record<string, unknown>
+    expires_at: string // date-time
+    token: string
+  }
   index?: number
   tool?: string
   input?: object
@@ -3961,6 +5588,161 @@ type SubmitFeedbackRequest = {
 }
 ```
 
+### `CustomerChatConversation`
+
+```ts
+type CustomerChatConversation = {
+  conversation_id: string
+  user_id: string
+  contact_id?: string
+  title?: string
+  message_count: number
+  last_message?: string
+  last_message_at: string // date-time
+  created_at: string // date-time
+  ticket_ids: string[]
+}
+```
+
+### `CustomerChatConversationMessage`
+
+```ts
+type CustomerChatConversationMessage = {
+  role: "user" | "assistant"
+  content: string
+  timestamp: string // date-time
+}
+```
+
+### `InternalPortalChat`
+
+A v2 portal chat in v1's conversation shape
+
+```ts
+type InternalPortalChat = {
+  conversation_id: string
+  user_id: string
+  contact_id?: string
+  title?: string
+  message_count: number
+  last_message?: string
+  last_message_at: string // date-time
+  created_at: string // date-time
+  ticket_ids: string[]
+}
+```
+
+### `InternalPortalChatPlace`
+
+Where a v2 portal chat is in the history's order
+
+```ts
+type InternalPortalChatPlace = {
+  conversation_id: string
+  updated_at: string // date-time
+}
+```
+
+### `InternalPortalChats`
+
+```ts
+type InternalPortalChats = {
+  conversations: Array<{
+    conversation_id: string
+    updated_at: string // date-time
+  }>
+  has_more: boolean
+  read_to?: {
+    conversation_id: string
+    updated_at: string // date-time
+  }
+}
+```
+
+### `InternalPortalChatRows`
+
+```ts
+type InternalPortalChatRows = {
+  conversations: Array<{
+    conversation_id: string
+    user_id: string
+    contact_id?: string
+    title?: string
+    message_count: number
+    last_message?: string
+    last_message_at: string // date-time
+    created_at: string // date-time
+    ticket_ids: string[]
+  }>
+}
+```
+
+### `InternalPortalChatTranscript`
+
+```ts
+type InternalPortalChatTranscript = {
+  conversation: {
+    conversation_id: string
+    user_id: string
+    contact_id?: string
+    title?: string
+    message_count: number
+    last_message?: string
+    last_message_at: string // date-time
+    created_at: string // date-time
+    ticket_ids: string[]
+  }
+  messages: Array<{
+    role: "user" | "assistant"
+    content: string
+    timestamp: string // date-time
+    blocked?: boolean
+  }>
+}
+```
+
+### `ListCustomerChatConversationsResponse`
+
+```ts
+type ListCustomerChatConversationsResponse = {
+  conversations: Array<{
+    conversation_id: string
+    user_id: string
+    contact_id?: string
+    title?: string
+    message_count: number
+    last_message?: string
+    last_message_at: string // date-time
+    created_at: string // date-time
+    ticket_ids: string[]
+  }>
+  next_cursor?: string
+}
+```
+
+### `CustomerChatConversationTranscript`
+
+```ts
+type CustomerChatConversationTranscript = {
+  conversation: {
+    conversation_id: string
+    user_id: string
+    contact_id?: string
+    title?: string
+    message_count: number
+    last_message?: string
+    last_message_at: string // date-time
+    created_at: string // date-time
+    ticket_ids: string[]
+  }
+  messages: Array<{
+    role: "user" | "assistant"
+    content: string
+    timestamp: string // date-time
+  }>
+}
+```
+
 ### `ListConversationsResponse`
 
 ```ts
@@ -4023,5 +5805,1450 @@ type ConversationWithMessages = {
       submitted_at: { ... }
     }
   }>
+}
+```
+
+### `SessionsError`
+
+An error of the Sessions API
+
+```ts
+type SessionsError = {
+  error: {
+    message: string
+    issues?: Array<{
+      code: { ... }
+      path: { ... }
+      message: { ... }
+    }>
+    requestId?: string
+  }
+}
+```
+
+### `ValidationIssue`
+
+```ts
+type ValidationIssue = {
+  code: string
+  path: string | number[]
+  message: string
+}
+```
+
+### `RefusalDetails`
+
+```ts
+type RefusalDetails = {
+  code: "not_enabled" | "quota_exceeded" | "refused" | "portal_chat_off" | "portal_chat_unavailable" | "message_too_long" | "screening_unavailable" | "rate_limited" | "usage_limit"
+  message: string
+  limit?: "concurrent_sessions" | "active_vms" | "daily_budget"
+  retryAfterSeconds?: number
+}
+```
+
+### `Refusal`
+
+A refusal the client tells the user about; `error` repeats it, like every other error
+
+```ts
+type Refusal = {
+  code: "not_enabled" | "quota_exceeded" | "refused" | "portal_chat_off" | "portal_chat_unavailable" | "message_too_long" | "screening_unavailable" | "rate_limited" | "usage_limit"
+  message: string
+  limit?: "concurrent_sessions" | "active_vms" | "daily_budget"
+  retryAfterSeconds?: number
+  error: {
+    code: "not_enabled" | "quota_exceeded" | "refused" | "portal_chat_off" | "portal_chat_unavailable" | "message_too_long" | "screening_unavailable" | "rate_limited" | "usage_limit"
+    message: string
+    limit?: "concurrent_sessions" | "active_vms" | "daily_budget"
+    retryAfterSeconds?: number
+  }
+}
+```
+
+### `RequestId`
+
+The client's id for the request: sent again on a retry, it is taken once
+
+```ts
+type RequestId = string // uuid
+```
+
+### `SessionStatus`
+
+`starting`: its VM starts or the agent catches up; `failed`: its last turn couldn't run
+
+```ts
+type SessionStatus = "idle" | "starting" | "running" | "failed"
+```
+
+### `SessionLiveInfo`
+
+How to subscribe to the session's live messages on AppSync Events
+
+```ts
+type SessionLiveInfo = {
+  transport: "appsync"
+  httpHost: string
+  realtimeUrl: string
+  channel: string
+}
+```
+
+### `SessionView`
+
+```ts
+type SessionView = {
+  id: string // uuid
+  agentId: string
+  mode: "read" | "write"
+  title: string
+  origin?: string
+  createdAt: string // date-time
+  updatedAt: string // date-time
+  status: "idle" | "starting" | "running" | "failed"
+  live?: {
+    transport: "appsync"
+    httpHost: string
+    realtimeUrl: string
+    channel: string
+  }
+}
+```
+
+### `SessionOrigin`
+
+Where in the product a session is started, e.g. `configuration-hub`
+
+```ts
+type SessionOrigin = string
+```
+
+### `CreateInternalSessionRequest`
+
+```ts
+type CreateInternalSessionRequest = {
+  agentId?: string
+  origin: string
+  owner: {
+    user_id: string
+  }
+  unattended: true
+  client_token?: string
+  input: {
+    text: string
+    context: {
+      intent: { ... }
+    }
+  }
+}
+```
+
+### `CreateInternalExecutionRequest`
+
+```ts
+type CreateInternalExecutionRequest = {
+  execution_id: string
+  agent_id: string
+  input: {
+    text: string
+    context?: Record<string, unknown>
+  }
+  mode?: "automatic" | "approval" | "draft"
+  skill?: {
+    instructions: string
+    tools: string[]
+    output_schema?: Record<string, unknown>
+  }
+  parameters?: Record<string, unknown>
+  flows?: {
+    workflow_id?: string
+    workflow_name?: string
+    workflow_execution_id?: string
+    task_id?: string
+  }
+}
+```
+
+### `ExecutionDecisionRequest`
+
+```ts
+type ExecutionDecisionRequest = {
+  approval_id: string
+  approved: boolean
+  reason?: string
+  decided_by: string
+}
+```
+
+### `ExecutionDecision`
+
+```ts
+type ExecutionDecision = {
+  approval: {
+    id: string
+    status: string
+  }
+}
+```
+
+### `CreatedInternalExecution`
+
+```ts
+type CreatedInternalExecution = {
+  session_id: string // uuid
+}
+```
+
+### `CreatedInternalSession`
+
+```ts
+type CreatedInternalSession = {
+  id: string // uuid
+  unattended_access: boolean
+}
+```
+
+### `InternalSessionStatus`
+
+```ts
+type InternalSessionStatus = {
+  id: string // uuid
+  state: "working" | "needs_owner" | "idle" | "failed"
+  needs: "first_message" | "approval" | "answer" | null
+  attended: boolean
+  last_activity_at: string // date-time
+  turns: number
+}
+```
+
+### `SessionResponse`
+
+```ts
+type SessionResponse = {
+  session: {
+    id: string // uuid
+    agentId: string
+    mode: "read" | "write"
+    title: string
+    origin?: string
+    createdAt: string // date-time
+    updatedAt: string // date-time
+    status: "idle" | "starting" | "running" | "failed"
+    live?: {
+      transport: { ... }
+      httpHost: { ... }
+      realtimeUrl: { ... }
+      channel: { ... }
+    }
+  }
+}
+```
+
+### `SessionList`
+
+```ts
+type SessionList = {
+  sessions: Array<{
+    id: string // uuid
+    agentId: string
+    mode: "read" | "write"
+    title: string
+    origin?: string
+    createdAt: string // date-time
+    updatedAt: string // date-time
+    status: "idle" | "starting" | "running" | "failed"
+    live?: {
+      transport: { ... }
+      httpHost: { ... }
+      realtimeUrl: { ... }
+      channel: { ... }
+    }
+  }>
+}
+```
+
+### `CreatedSession`
+
+```ts
+type CreatedSession = {
+  session: {
+    id: string // uuid
+    agentId: string
+    mode: "read" | "write"
+    title: string
+    origin?: string
+    createdAt: string // date-time
+    updatedAt: string // date-time
+    status: "idle" | "starting" | "running" | "failed"
+    live?: {
+      transport: { ... }
+      httpHost: { ... }
+      realtimeUrl: { ... }
+      channel: { ... }
+    }
+  }
+  events: Array<{
+    seq: number
+    eventId: string
+    occurredAt: string // date-time
+    blocked?: boolean
+    inputEventId?: string
+    type: "input"
+    input: {
+      kind: { ... }
+      text: { ... }
+      files?: { ... }
+    } | {
+      kind: { ... }
+    }
+  } | {
+    seq: number
+    eventId: string
+    occurredAt: string // date-time
+    blocked?: boolean
+    inputEventId: string
+    type: "input.taken"
+  } | {
+    seq: number
+    eventId: string
+    occurredAt: string // date-time
+    blocked?: boolean
+    inputEventId: string
+    type: "input.cancelled"
+    reason: "stopped" | "deleted"
+  } | {
+    seq: number
+    eventId: string
+    occurredAt: string // date-time
+    blocked?: boolean
+    inputEventId: string
+    type: "input.failed"
+    errorCode: "model_unavailable" | "tool_timeout" | "turn_timeout" | "wake_failed" | "boot_failed" | "workspace_lost" | "budget_exceeded" | "internal"
+    error: string
+  } | {
+    seq: number
+    eventId: string
+    occurredAt: string // date-time
+    blocked?: boolean
+    inputEventId?: string
+    type: "turn.started"
+  } | {
+    seq: number
+    eventId: string
+    occurredAt: string // date-time
+    blocked?: boolean
+    inputEventId?: string
+    type: "model.usage"
+    usage: {
+      input: { ... }
+      output: { ... }
+      cacheRead: { ... }
+      cacheWrite: { ... }
+    }
+    context?: {
+      window: { ... }
+      parts: { ... }
+    }
+  } | {
+    seq: number
+    eventId: string
+    occurredAt: string // date-time
+    blocked?: boolean
+    inputEventId?: string
+    type: "context.compacted"
+    tokensBefore: number
+  } | {
+    seq: number
+    eventId: string
+    occurredAt: string // date-time
+    blocked?: boolean
+    inputEventId?: string
+    type: "turn.ended"
+    reason: "done" | "stopped" | "failed"
+    error?: string
+    errorCode?: "model_unavailable" | "tool_timeout" | "turn_timeout" | "wake_failed" | "boot_failed" | "workspace_lost" | "budget_exceeded" | "internal"
+    cutOff?: boolean
+  } | {
+    seq: number
+  // ...
+}
+```
+
+### `SessionEventsPage`
+
+```ts
+type SessionEventsPage = {
+  events: Array<{
+    seq: number
+    eventId: string
+    occurredAt: string // date-time
+    blocked?: boolean
+    inputEventId?: string
+    type: "input"
+    input: {
+      kind: { ... }
+      text: { ... }
+      files?: { ... }
+    } | {
+      kind: { ... }
+    }
+  } | {
+    seq: number
+    eventId: string
+    occurredAt: string // date-time
+    blocked?: boolean
+    inputEventId: string
+    type: "input.taken"
+  } | {
+    seq: number
+    eventId: string
+    occurredAt: string // date-time
+    blocked?: boolean
+    inputEventId: string
+    type: "input.cancelled"
+    reason: "stopped" | "deleted"
+  } | {
+    seq: number
+    eventId: string
+    occurredAt: string // date-time
+    blocked?: boolean
+    inputEventId: string
+    type: "input.failed"
+    errorCode: "model_unavailable" | "tool_timeout" | "turn_timeout" | "wake_failed" | "boot_failed" | "workspace_lost" | "budget_exceeded" | "internal"
+    error: string
+  } | {
+    seq: number
+    eventId: string
+    occurredAt: string // date-time
+    blocked?: boolean
+    inputEventId?: string
+    type: "turn.started"
+  } | {
+    seq: number
+    eventId: string
+    occurredAt: string // date-time
+    blocked?: boolean
+    inputEventId?: string
+    type: "model.usage"
+    usage: {
+      input: { ... }
+      output: { ... }
+      cacheRead: { ... }
+      cacheWrite: { ... }
+    }
+    context?: {
+      window: { ... }
+      parts: { ... }
+    }
+  } | {
+    seq: number
+    eventId: string
+    occurredAt: string // date-time
+    blocked?: boolean
+    inputEventId?: string
+    type: "context.compacted"
+    tokensBefore: number
+  } | {
+    seq: number
+    eventId: string
+    occurredAt: string // date-time
+    blocked?: boolean
+    inputEventId?: string
+    type: "turn.ended"
+    reason: "done" | "stopped" | "failed"
+    error?: string
+    errorCode?: "model_unavailable" | "tool_timeout" | "turn_timeout" | "wake_failed" | "boot_failed" | "workspace_lost" | "budget_exceeded" | "internal"
+    cutOff?: boolean
+  } | {
+    seq: number
+    eventId: string
+    occurredAt: string // date-time
+    blocked?: boolean
+    inputEventId?: string
+    type: "message"
+    text: string
+    reasoning?: string
+    reasoningMs?: number
+  } | {
+    seq: number
+    eventId: string
+    occurredAt: string // date-time
+    blocked?: boolean
+    inputEventId?: string
+    type: "step.started"
+    stepId: string
+  // ...
+}
+```
+
+### `MessageInput`
+
+The user's message, its text (trimmed), its files, or both
+
+```ts
+type MessageInput = {
+  text?: string
+  context?: Record<string, unknown>
+  files?: string // uuid[]
+}
+```
+
+### `CreatePortalSessionRequest`
+
+A portal chat; the portal's settings choose its agent.
+
+```ts
+type CreatePortalSessionRequest = {
+  requestId?: string // uuid
+  input?: {
+    text: string
+    context?: Record<string, unknown>
+  }
+}
+```
+
+### `PortalChatConfig`
+
+```ts
+type PortalChatConfig = {
+  agent: {
+    name?: string
+    greeting?: string
+    conversation_starters?: string[]
+    language?: string
+    formality?: string
+  }
+}
+```
+
+### `CreateSessionRequest`
+
+```ts
+type CreateSessionRequest = {
+  agentId: string
+  requestId?: string // uuid
+  origin?: string
+  input?: {
+    text?: string
+    context?: Record<string, unknown>
+    files?: string // uuid[]
+  }
+  prepare?: boolean
+}
+```
+
+### `RenameSessionRequest`
+
+```ts
+type RenameSessionRequest = {
+  title: string
+}
+```
+
+### `ClientInput`
+
+The user's input to a session
+
+```ts
+type ClientInput = {
+  text?: string
+  context?: Record<string, unknown>
+  files?: string // uuid[]
+  type: "user.message"
+  requestId?: string // uuid
+} | {
+  type: "user.approval"
+  approvalId: string // uuid
+  approved: boolean
+  reason?: string
+} | {
+  type: "user.answer"
+  questionId: string // uuid
+  answers: Array<{
+    selected: string[]
+    other?: string
+  }>
+} | {
+  type: "user.interrupt"
+  requestId?: string // uuid
+}
+```
+
+### `UserMessageInput`
+
+A message. It closes open questions and expires pending approvals.
+
+```ts
+type UserMessageInput = {
+  text?: string
+  context?: Record<string, unknown>
+  files?: string // uuid[]
+  type: "user.message"
+  requestId?: string // uuid
+}
+```
+
+### `UserApprovalInput`
+
+Approves or rejects what the agent asked to do (`approval.required`)
+
+```ts
+type UserApprovalInput = {
+  type: "user.approval"
+  approvalId: string // uuid
+  approved: boolean
+  reason?: string
+}
+```
+
+### `UserAnswerInput`
+
+The user's answers to the agent's questions (`question.asked`), one per question
+
+```ts
+type UserAnswerInput = {
+  type: "user.answer"
+  questionId: string // uuid
+  answers: Array<{
+    selected: string[]
+    other?: string
+  }>
+}
+```
+
+### `UserInterruptInput`
+
+Stops the agent's turn
+
+```ts
+type UserInterruptInput = {
+  type: "user.interrupt"
+  requestId?: string // uuid
+}
+```
+
+### `InputEventId`
+
+The input as stored (a message, also a blocked one or a retry's first attempt; an approval decision; answers): the turn that answers it names it on `turn.started` and `turn.ended` (`inputEventId`), so a client follows this input's turn and no other's.
+
+```ts
+type InputEventId = string // uuid
+```
+
+### `SessionInputAccepted`
+
+What was accepted: a message or an interrupt, an approval decision, or answers
+
+```ts
+type SessionInputAccepted = {
+  accepted: true
+  blocked?: boolean
+  inputEventId?: string // uuid
+} | {
+  approval: {
+    id: string // uuid
+    status: "pending" | "approved" | "rejected" | "executed" | "expired"
+  }
+  inputEventId?: string // uuid
+} | {
+  inputEventId?: string // uuid
+  question: {
+    id: string // uuid
+    status: "pending" | "answered" | "dismissed"
+  }
+}
+```
+
+### `UploadRequest`
+
+```ts
+type UploadRequest = {
+  name: string
+  mediaType: "image/png" | "image/jpeg" | "image/webp" | "image/gif" | "application/pdf" | "text/csv" | "text/plain" | "text/markdown" | "application/json" | "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" | "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  size: number
+}
+```
+
+### `SessionUpload`
+
+```ts
+type SessionUpload = {
+  file: {
+    fileId: string // uuid
+    name: string
+    mediaType: string
+    size: number
+  }
+  upload: {
+    method: "PUT"
+    url: string
+    headers: Record<string, string>
+  }
+}
+```
+
+### `FileRef`
+
+A file in a session
+
+```ts
+type FileRef = {
+  fileId: string // uuid
+  name: string
+  mediaType: string
+  size: number
+}
+```
+
+### `SessionFileUrl`
+
+```ts
+type SessionFileUrl = {
+  url: string
+  expiresAt: string // date-time
+}
+```
+
+### `RunScriptRequest`
+
+```ts
+type RunScriptRequest = {
+  language: "javascript" | "python"
+  script: string
+  description: string
+  waitMs?: number
+}
+```
+
+### `ScriptRunView`
+
+```ts
+type ScriptRunView = {
+  runId: string
+  status: "running" | "done" | "failed"
+  output?: string
+  changes?: number
+}
+```
+
+### `ApplyScriptRunRequest`
+
+```ts
+type ApplyScriptRunRequest = {
+  approvalSummary: string
+}
+```
+
+### `ScriptApplyResult`
+
+```ts
+type ScriptApplyResult = {
+  done: boolean
+  applied: number
+  total: number
+  result?: {
+    content: Array<{
+      type: { ... }
+      text: { ... }
+    } | {
+      type: { ... }
+      mimeType: { ... }
+      data?: { ... }
+      key?: { ... }
+    } | {
+      type: { ... }
+      thinking: { ... }
+      redacted?: { ... }
+    } | {
+      type: { ... }
+      id: { ... }
+      name: { ... }
+      arguments: { ... }
+    }>
+    isError: boolean
+  }
+}
+```
+
+### `ContentPart`
+
+```ts
+type ContentPart = {
+  type: "text"
+  text: string
+} | {
+  type: "image"
+  mimeType: string
+  data?: string
+  key?: string
+} | {
+  type: "thinking"
+  thinking: string
+  redacted?: boolean
+} | {
+  type: "tool_call"
+  id: string
+  name: string
+  arguments: Record<string, unknown>
+}
+```
+
+### `TextContentPart`
+
+```ts
+type TextContentPart = {
+  type: "text"
+  text: string
+}
+```
+
+### `ImageContentPart`
+
+```ts
+type ImageContentPart = {
+  type: "image"
+  mimeType: string
+  data?: string
+  key?: string
+}
+```
+
+### `ThinkingContentPart`
+
+```ts
+type ThinkingContentPart = {
+  type: "thinking"
+  thinking: string
+  redacted?: boolean
+}
+```
+
+### `ToolCallContentPart`
+
+```ts
+type ToolCallContentPart = {
+  type: "tool_call"
+  id: string
+  name: string
+  arguments: Record<string, unknown>
+}
+```
+
+### `SessionErrorCode`
+
+Why a turn or an input failed, for the user's copy
+
+```ts
+type SessionErrorCode = "model_unavailable" | "tool_timeout" | "turn_timeout" | "wake_failed" | "boot_failed" | "workspace_lost" | "budget_exceeded" | "internal"
+```
+
+### `ContextBreakdown`
+
+What filled the model's context on one call, in tokens
+
+```ts
+type ContextBreakdown = {
+  window: number
+  parts: {
+    instructions?: number
+    user?: number
+    replies?: number
+    thinking?: number
+    toolCalls?: number
+    toolResults?: number
+    files?: number
+    summary?: number
+  }
+}
+```
+
+### `BatchChange`
+
+A change the agent asks to make, exactly as it will run
+
+```ts
+type BatchChange = {
+  operationId: string
+  service?: string
+  method: string
+  path: string
+  effect: "read" | "write" | "config" | "destructive"
+  pathParameters?: Record<string, unknown>
+  queryParameters?: Record<string, unknown>
+  body?: unknown
+  title?: string
+}
+```
+
+### `ChangeOutcome`
+
+What happened to one change of an approved batch
+
+```ts
+type ChangeOutcome = {
+  change: number
+  status: "ok" | "failed" | "skipped"
+  operationId: string
+  error?: string
+  mayHaveRun?: boolean
+  record?: {
+    _id?: string
+    _title?: string
+    _schema?: string
+  }
+}
+```
+
+### `Question`
+
+```ts
+type Question = {
+  header: string
+  question: string
+  multiSelect?: boolean
+  options: Array<{
+    label: string
+    description?: string
+  }>
+}
+```
+
+### `Answer`
+
+One answer per question, in order: the labels picked, and/or the user's own words
+
+```ts
+type Answer = {
+  selected: string[]
+  other?: string
+}
+```
+
+### `ClientEvent`
+
+What a client sees of a session's history. Every event carries the `seq` of the stored event it comes
+from, so history, live messages and reconnects can overlap and a client applies each event once.
+
+
+```ts
+type ClientEvent = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "input"
+  input: {
+    kind: "message"
+    text: string
+    files?: Array<{
+      fileId: { ... }
+      name: { ... }
+      mediaType: { ... }
+      size: { ... }
+    }>
+  } | {
+    kind: "interrupt"
+  }
+} | {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId: string
+  type: "input.taken"
+} | {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId: string
+  type: "input.cancelled"
+  reason: "stopped" | "deleted"
+} | {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId: string
+  type: "input.failed"
+  errorCode: "model_unavailable" | "tool_timeout" | "turn_timeout" | "wake_failed" | "boot_failed" | "workspace_lost" | "budget_exceeded" | "internal"
+  error: string
+} | {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "turn.started"
+} | {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "model.usage"
+  usage: {
+    input: number
+    output: number
+    cacheRead: number
+    cacheWrite: number
+  }
+  context?: {
+    window: number
+    parts: {
+      instructions?: { ... }
+      user?: { ... }
+      replies?: { ... }
+      thinking?: { ... }
+      toolCalls?: { ... }
+      toolResults?: { ... }
+      files?: { ... }
+      summary?: { ... }
+    }
+  }
+} | {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "context.compacted"
+  tokensBefore: number
+} | {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "turn.ended"
+  reason: "done" | "stopped" | "failed"
+  error?: string
+  errorCode?: "model_unavailable" | "tool_timeout" | "turn_timeout" | "wake_failed" | "boot_failed" | "workspace_lost" | "budget_exceeded" | "internal"
+  cutOff?: boolean
+} | {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  // ...
+}
+```
+
+### `ClientEventBase`
+
+```ts
+type ClientEventBase = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+}
+```
+
+### `ClientEventInput`
+
+The user's message, or their interrupt
+
+```ts
+type ClientEventInput = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "input"
+  input: {
+    kind: "message"
+    text: string
+    files?: Array<{
+      fileId: { ... }
+      name: { ... }
+      mediaType: { ... }
+      size: { ... }
+    }>
+  } | {
+    kind: "interrupt"
+  }
+}
+```
+
+### `ClientEventInputTaken`
+
+The agent took the user's message `inputEventId`, where it reads it
+
+```ts
+type ClientEventInputTaken = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId: string
+  type: "input.taken"
+}
+```
+
+### `ClientEventInputCancelled`
+
+The message will not be answered: the user stopped the turn, or the session was deleted
+
+```ts
+type ClientEventInputCancelled = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId: string
+  type: "input.cancelled"
+  reason: "stopped" | "deleted"
+}
+```
+
+### `ClientEventInputFailed`
+
+The message failed again and again and was skipped, so the session goes on
+
+```ts
+type ClientEventInputFailed = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId: string
+  type: "input.failed"
+  errorCode: "model_unavailable" | "tool_timeout" | "turn_timeout" | "wake_failed" | "boot_failed" | "workspace_lost" | "budget_exceeded" | "internal"
+  error: string
+}
+```
+
+### `ClientEventTurnStarted`
+
+```ts
+type ClientEventTurnStarted = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "turn.started"
+}
+```
+
+### `ClientEventModelUsage`
+
+One model call: what it read and wrote, and what filled its context
+
+```ts
+type ClientEventModelUsage = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "model.usage"
+  usage: {
+    input: number
+    output: number
+    cacheRead: number
+    cacheWrite: number
+  }
+  context?: {
+    window: number
+    parts: {
+      instructions?: { ... }
+      user?: { ... }
+      replies?: { ... }
+      thinking?: { ... }
+      toolCalls?: { ... }
+      toolResults?: { ... }
+      files?: { ... }
+      summary?: { ... }
+    }
+  }
+}
+```
+
+### `ClientEventContextCompacted`
+
+Older messages were summarized to make room; the context held `tokensBefore` until then
+
+```ts
+type ClientEventContextCompacted = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "context.compacted"
+  tokensBefore: number
+}
+```
+
+### `ClientEventTurnEnded`
+
+```ts
+type ClientEventTurnEnded = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "turn.ended"
+  reason: "done" | "stopped" | "failed"
+  error?: string
+  errorCode?: "model_unavailable" | "tool_timeout" | "turn_timeout" | "wake_failed" | "boot_failed" | "workspace_lost" | "budget_exceeded" | "internal"
+  cutOff?: boolean
+}
+```
+
+### `ClientEventMessage`
+
+The agent's answer
+
+```ts
+type ClientEventMessage = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "message"
+  text: string
+  reasoning?: string
+  reasoningMs?: number
+}
+```
+
+### `ClientEventStepStarted`
+
+The agent calls a tool
+
+```ts
+type ClientEventStepStarted = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "step.started"
+  stepId: string
+  tool: string
+  input: Record<string, unknown>
+}
+```
+
+### `ClientEventStepFinished`
+
+```ts
+type ClientEventStepFinished = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "step.finished"
+  stepId: string
+  tool: string
+  ok: boolean
+  output: string
+  marker?: "interrupted" | "may_have_run"
+}
+```
+
+### `ClientEventSkillLoaded`
+
+```ts
+type ClientEventSkillLoaded = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "skill.loaded"
+  skill: string
+  version?: string
+  stepId?: string
+}
+```
+
+### `ClientEventApprovalRequired`
+
+The agent asks to make changes: approve or reject with `user.approval`
+
+```ts
+type ClientEventApprovalRequired = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "approval.required"
+  approvalId: string
+  stepId: string
+  tool: string
+  summary: string
+  changes?: Array<{
+    operationId: string
+    service?: string
+    method: string
+    path: string
+    effect: "read" | "write" | "config" | "destructive"
+    pathParameters?: Record<string, unknown>
+    queryParameters?: Record<string, unknown>
+    body?: unknown
+    title?: string
+  }>
+  executionId?: string
+  call?: {
+    operationId: string
+    service?: string
+    method: string
+    path: string
+    effect: "read" | "write" | "config" | "destructive"
+    pathParameters?: Record<string, unknown>
+    queryParameters?: Record<string, unknown>
+    body?: unknown
+    title?: string
+  }
+  card?: Record<string, unknown>
+}
+```
+
+### `ClientEventApprovalResolved`
+
+```ts
+type ClientEventApprovalResolved = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "approval.resolved"
+  approvalId: string
+  approved: boolean
+  reason?: string
+}
+```
+
+### `ClientEventApprovalExecuted`
+
+An approved batch ran: every change ran, or it stopped at the first failure
+
+```ts
+type ClientEventApprovalExecuted = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "approval.executed"
+  approvalId: string
+  stepId: string
+  applied: number
+  total: number
+  complete: boolean
+  stopped?: boolean
+  changes: Array<{
+    change: number
+    status: "ok" | "failed" | "skipped"
+    operationId: string
+    error?: string
+    mayHaveRun?: boolean
+    record?: {
+      _id?: { ... }
+      _title?: { ... }
+      _schema?: { ... }
+    }
+  }>
+}
+```
+
+### `ClientEventApprovalResult`
+
+An approved single call ran: its result, as `step.finished` shows a step's (a client reads its markers there, e.g. a portal's ticket or open directive)
+
+```ts
+type ClientEventApprovalResult = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "approval.result"
+  approvalId: string
+  stepId: string
+  tool: string
+  ok: boolean
+  output: string
+}
+```
+
+### `ClientEventQuestionAsked`
+
+The agent asks the user: answer with `user.answer`
+
+```ts
+type ClientEventQuestionAsked = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "question.asked"
+  questionId: string
+  stepId: string
+  questions: Array<{
+    header: string
+    question: string
+    multiSelect?: boolean
+    options: Array<{
+      label: { ... }
+      description?: { ... }
+    }>
+  }>
+}
+```
+
+### `ClientEventFilesCreated`
+
+Files the agent wrote for the user in this turn
+
+```ts
+type ClientEventFilesCreated = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "files.created"
+  files: Array<{
+    fileId: string // uuid
+    name: string
+    mediaType: string
+    size: number
+  }>
+}
+```
+
+### `ClientEventQuestionAnswered`
+
+Answered, or `dismissed`: the user wrote a message instead
+
+```ts
+type ClientEventQuestionAnswered = {
+  seq: number
+  eventId: string
+  occurredAt: string // date-time
+  blocked?: boolean
+  inputEventId?: string
+  type: "question.answered"
+  questionId: string
+  answers?: Array<{
+    selected: string[]
+    other?: string
+  }>
+  dismissed?: boolean
 }
 ```

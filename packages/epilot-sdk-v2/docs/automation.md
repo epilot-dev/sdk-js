@@ -50,9 +50,14 @@ const { data } = await automationClient.searchFlows(...)
 **Schemas**
 - [`AutomationFlowId`](#automationflowid)
 - [`AutomationActionId`](#automationactionid)
+- [`AutomationFlowFields`](#automationflowfields)
 - [`AutomationFlow`](#automationflow)
 - [`WorkflowContextRole`](#workflowcontextrole)
 - [`SearchAutomationsResp`](#searchautomationsresp)
+- [`BatchSyncFlowsRequest`](#batchsyncflowsrequest)
+- [`BatchSyncFlowsUpsert`](#batchsyncflowsupsert)
+- [`BatchSyncFlowsResponse`](#batchsyncflowsresponse)
+- [`BatchSyncFlowsFailure`](#batchsyncflowsfailure)
 - [`JourneyContextUsagesReq`](#journeycontextusagesreq)
 - [`JourneyContextUsage`](#journeycontextusage)
 - [`JourneyContextUsagesResp`](#journeycontextusagesresp)
@@ -74,6 +79,8 @@ const { data } = await automationClient.searchFlows(...)
 - [`MapEntityActionConfig`](#mapentityactionconfig)
 - [`MapEntityAction`](#mapentityaction)
 - [`MapEntityConfig`](#mapentityconfig)
+- [`MapCondition`](#mapcondition)
+- [`ConditionNode`](#conditionnode)
 - [`GraphContextEntry`](#graphcontextentry)
 - [`GraphSeed`](#graphseed)
 - [`GraphDefinition`](#graphdefinition)
@@ -94,8 +101,12 @@ const { data } = await automationClient.searchFlows(...)
 - [`MoveThreadAction`](#movethreadaction)
 - [`AssignThreadAction`](#assignthreadaction)
 - [`LabelEmailAction`](#labelemailaction)
+- [`ReopenEmailTicketsAction`](#reopenemailticketsaction)
+- [`MarkTicketEmailsDoneAction`](#markticketemailsdoneaction)
 - [`MoveThreadConfig`](#movethreadconfig)
 - [`LabelEmailConfig`](#labelemailconfig)
+- [`ReopenEmailTicketsConfig`](#reopenemailticketsconfig)
+- [`MarkTicketEmailsDoneConfig`](#markticketemailsdoneconfig)
 - [`AssignThreadConfig`](#assignthreadconfig)
 - [`EntityAssignee`](#entityassignee)
 - [`EntityAssigneeVariable`](#entityassigneevariable)
@@ -160,6 +171,9 @@ const { data } = await automationClient.searchFlows(...)
 - [`SearchExecutionsReq`](#searchexecutionsreq)
 - [`SearchExecutionsResp`](#searchexecutionsresp)
 - [`StartExecutionRequest`](#startexecutionrequest)
+- [`StartEphemeralExecutionRequest`](#startephemeralexecutionrequest)
+- [`EphemeralExecution`](#ephemeralexecution)
+- [`EphemeralIdentity`](#ephemeralidentity)
 - [`ActionInputs`](#actioninputs)
 - [`SendEmailInputs`](#sendemailinputs)
 - [`FlowExecutionCancelInputs`](#flowexecutioncancelinputs)
@@ -191,6 +205,10 @@ const { data } = await automationClient.searchFlows(...)
 - [`EventCatalogTrigger`](#eventcatalogtrigger)
 - [`TriggerCondition`](#triggercondition)
 - [`Comparison`](#comparison)
+- [`EntityTriggerConditions`](#entitytriggerconditions)
+- [`EntityTriggerStatement`](#entitytriggerstatement)
+- [`EntityTriggerStatementSource`](#entitytriggerstatementsource)
+- [`EntityTriggerOperator`](#entitytriggeroperator)
 - [`FilterConditionOnEvent`](#filterconditiononevent)
 - [`EqualsIgnoreCaseCondition`](#equalsignorecasecondition)
 - [`AnythingButCondition`](#anythingbutcondition)
@@ -233,7 +251,7 @@ const { data } = await client.searchFlows({
 
 ### `createFlow`
 
-Create new automation flow
+Create new automation flow. Map-entity actions hold their mappings inline: check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving (`{ source, actions }`, with `sourc
 
 `POST /v1/automation/flows`
 
@@ -276,7 +294,7 @@ const { data } = await client.getFlow({
 
 ### `putFlow`
 
-Update automation flow by id
+Update automation flow by id. Map-entity actions hold their mappings inline: check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving (`{ source, actions }`, with `sou
 
 `PUT /v1/automation/flows/{flow_id}`
 
@@ -348,7 +366,8 @@ const { data } = await client.getExecutions({
       "workflow_wait_context": {},
       "loops": [],
       "loop_state": {},
-      "chain": ["string"]
+      "chain": ["string"],
+      "ephemeral": {}
     }
   ]
 }
@@ -575,7 +594,13 @@ const { data } = await client.startExecution(
     }
   ],
   "loop_state": {},
-  "chain": ["string"]
+  "chain": ["string"],
+  "ephemeral": {
+    "identity": {
+      "namespace": "flows",
+      "key": ["7791b04a-16d2-44a2-9af9-2d59c25c512f", "task-1"]
+    }
+  }
 }
 ```
 
@@ -635,7 +660,8 @@ const { data } = await client.searchExecutions(
       "workflow_wait_context": {},
       "loops": [],
       "loop_state": {},
-      "chain": ["string"]
+      "chain": ["string"],
+      "ephemeral": {}
     }
   ],
   "next_cursor": "string"
@@ -1004,7 +1030,13 @@ const { data } = await client.getExecution({
     }
   ],
   "loop_state": {},
-  "chain": ["string"]
+  "chain": ["string"],
+  "ephemeral": {
+    "identity": {
+      "namespace": "flows",
+      "key": ["7791b04a-16d2-44a2-9af9-2d59c25c512f", "task-1"]
+    }
+  }
 }
 ```
 
@@ -1175,7 +1207,13 @@ const { data } = await client.cancelExecution({
     }
   ],
   "loop_state": {},
-  "chain": ["string"]
+  "chain": ["string"],
+  "ephemeral": {
+    "identity": {
+      "namespace": "flows",
+      "key": ["7791b04a-16d2-44a2-9af9-2d59c25c512f", "task-1"]
+    }
+  }
 }
 ```
 
@@ -1289,7 +1327,10 @@ const { data } = await client.resumeExecutionWithToken(
       {}
     ],
     "loop_state": {},
-    "chain": ["string"]
+    "chain": ["string"],
+    "ephemeral": {
+      "identity": {}
+    }
   },
   "resumedAction": {
     "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
@@ -1305,7 +1346,10 @@ const { data } = await client.resumeExecutionWithToken(
       "relation_attributes": [],
       "linkback_relation_attribute": "mapped_entities",
       "linkback_relation_tags": ["string"],
-      "graph_context": []
+      "graph_context": [],
+      "loop_config": {},
+      "conditionMode": "oneOf",
+      "conditions": []
     },
     "allow_failure": true,
     "created_automatically": true,
@@ -1390,19 +1434,21 @@ type AutomationFlowId = string
 type AutomationActionId = string
 ```
 
-### `AutomationFlow`
+### `AutomationFlowFields`
+
+The top-level fields of an automation flow. None is required.
 
 ```ts
-type AutomationFlow = {
+type AutomationFlowFields = {
   id?: string
-  flow_name: string
+  flow_name?: string
   enabled?: boolean
   disable_details?: {
     disabled_at: string // date-time
     disabled_by: "system" | "user"
     blame?: string
   }
-  triggers: Array<{
+  triggers?: Array<{
     id?: string // uuid
     type: "frontend_submission"
     configuration: {
@@ -1428,6 +1474,7 @@ type AutomationFlow = {
       operations?: { ... }
       include_activities?: { ... }
       exclude_activities?: { ... }
+      conditions?: { ... }
       filter_config?: { ... }
       ecp_config?: { ... }
     }
@@ -1492,7 +1539,113 @@ type AutomationFlow = {
     error_output?: {
       error_code: { ... }
       error_reason: { ... }
-      error_info?: { ... }
+  // ...
+}
+```
+
+### `AutomationFlow`
+
+```ts
+type AutomationFlow = {
+  id?: string
+  flow_name?: string
+  enabled?: boolean
+  disable_details?: {
+    disabled_at: string // date-time
+    disabled_by: "system" | "user"
+    blame?: string
+  }
+  triggers?: Array<{
+    id?: string // uuid
+    type: "frontend_submission"
+    configuration: {
+      source_id?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "journey_submission"
+    configuration: {
+      source_id: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "api_submission"
+    configuration: {
+      source_id?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "entity_operation"
+    configuration: {
+      schema?: { ... }
+      operations?: { ... }
+      include_activities?: { ... }
+      exclude_activities?: { ... }
+      conditions?: { ... }
+      filter_config?: { ... }
+      ecp_config?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "activity"
+    configuration: {
+      schema?: { ... }
+      types?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "entity_manual"
+    configuration: {
+      schema?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "received_email"
+    configuration: {
+      message_type?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "sent_email"
+    configuration: object
+  } | {
+    id?: string // uuid
+    type: "new_email_thread"
+    configuration: {
+      shared_inbox_ids?: { ... }
+      direction: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "flows_trigger"
+    configuration?: {
+      journey_id?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "event_catalog"
+    configuration: {
+      event_name: { ... }
+      event_version: { ... }
+      entity_node_id: { ... }
+      entity_schema: { ... }
+      ignore_automation_triggered?: { ... }
+    }
+  }>
+  trigger_conditions?: Array<{
+    source: string
+    comparison: "equals" | "any_of" | "not_empty" | "is_empty"
+    value?: string | number | string[] | number[]
+  }>
+  entity_schema?: string
+  conditions?: Array<{
+    id?: string
+    schedule_id?: string
+    evaluation_order?: "AFTER_SCHEDULE" | "BEFORE_SCHEDULE"
+    evaluationResult?: boolean
+    error_output?: {
+      error_code: { ... }
+      error_reason: { ... }
   // ...
 }
 ```
@@ -1512,14 +1665,14 @@ type SearchAutomationsResp = {
   total: number
   results: Array<{
     id?: string
-    flow_name: string
+    flow_name?: string
     enabled?: boolean
     disable_details?: {
       disabled_at: { ... }
       disabled_by: { ... }
       blame?: { ... }
     }
-    triggers: Array<{
+    triggers?: Array<{
       id?: { ... }
       type: { ... }
       configuration: { ... }
@@ -1594,7 +1747,7 @@ type SearchAutomationsResp = {
       filter_tags?: { ... }
       length?: { ... }
     }>
-    actions: Array<{
+    actions?: Array<{
       type?: { ... }
       config?: { ... }
     } | {
@@ -1609,6 +1762,304 @@ type SearchAutomationsResp = {
     } | {
       type?: { ... }
   // ...
+}
+```
+
+### `BatchSyncFlowsRequest`
+
+At least one of `upsert` and `delete` needs an item. An id may appear once in the request.
+Each list has at most 100 items.
+
+
+```ts
+type BatchSyncFlowsRequest = {
+  upsert?: Array<{
+    id: string
+    flow_name?: string
+    enabled?: boolean
+    disable_details?: {
+      disabled_at: { ... }
+      disabled_by: { ... }
+      blame?: { ... }
+    }
+    triggers?: Array<{
+      id?: { ... }
+      type: { ... }
+      configuration: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      configuration: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      configuration: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      configuration: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      configuration: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      configuration: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      configuration: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      configuration: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      configuration: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      configuration?: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      configuration: { ... }
+    }>
+    trigger_conditions?: Array<{
+      source: { ... }
+      comparison: { ... }
+      value?: { ... }
+    }>
+    entity_schema?: string
+    conditions?: Array<{
+      id?: { ... }
+      schedule_id?: { ... }
+      evaluation_order?: { ... }
+      evaluationResult?: { ... }
+      error_output?: { ... }
+      allow_failure?: { ... }
+      statements?: { ... }
+    }>
+    schedules?: Array<{
+      id: { ... }
+      scheduleApiId?: { ... }
+      numberOfUnits?: { ... }
+      timePeriod?: { ... }
+      timeRelation?: { ... }
+      source: { ... }
+    }>
+    loops?: Array<{
+      id: { ... }
+      source_path: { ... }
+      source_type?: { ... }
+      filter_tags?: { ... }
+      length?: { ... }
+    }>
+    actions?: Array<{
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+  // ...
+}
+```
+
+### `BatchSyncFlowsUpsert`
+
+The id and any other top-level fields of an automation flow
+
+```ts
+type BatchSyncFlowsUpsert = {
+  id: string
+  flow_name?: string
+  enabled?: boolean
+  disable_details?: {
+    disabled_at: string // date-time
+    disabled_by: "system" | "user"
+    blame?: string
+  }
+  triggers?: Array<{
+    id?: string // uuid
+    type: "frontend_submission"
+    configuration: {
+      source_id?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "journey_submission"
+    configuration: {
+      source_id: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "api_submission"
+    configuration: {
+      source_id?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "entity_operation"
+    configuration: {
+      schema?: { ... }
+      operations?: { ... }
+      include_activities?: { ... }
+      exclude_activities?: { ... }
+      conditions?: { ... }
+      filter_config?: { ... }
+      ecp_config?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "activity"
+    configuration: {
+      schema?: { ... }
+      types?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "entity_manual"
+    configuration: {
+      schema?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "received_email"
+    configuration: {
+      message_type?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "sent_email"
+    configuration: object
+  } | {
+    id?: string // uuid
+    type: "new_email_thread"
+    configuration: {
+      shared_inbox_ids?: { ... }
+      direction: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "flows_trigger"
+    configuration?: {
+      journey_id?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "event_catalog"
+    configuration: {
+      event_name: { ... }
+      event_version: { ... }
+      entity_node_id: { ... }
+      entity_schema: { ... }
+      ignore_automation_triggered?: { ... }
+    }
+  }>
+  trigger_conditions?: Array<{
+    source: string
+    comparison: "equals" | "any_of" | "not_empty" | "is_empty"
+    value?: string | number | string[] | number[]
+  }>
+  entity_schema?: string
+  conditions?: Array<{
+    id?: string
+    schedule_id?: string
+    evaluation_order?: "AFTER_SCHEDULE" | "BEFORE_SCHEDULE"
+    evaluationResult?: boolean
+    error_output?: {
+      error_code: { ... }
+      error_reason: { ... }
+  // ...
+}
+```
+
+### `BatchSyncFlowsResponse`
+
+```ts
+type BatchSyncFlowsResponse = {
+  results: Array<{
+    id: string
+    result: "created" | "updated" | "unchanged" | "deleted" | "not_found" | "failed"
+    flow?: {
+      id?: { ... }
+      flow_name?: { ... }
+      enabled?: { ... }
+      disable_details?: { ... }
+      triggers?: { ... }
+      trigger_conditions?: { ... }
+      entity_schema?: { ... }
+      conditions?: { ... }
+      schedules?: { ... }
+      loops?: { ... }
+      actions?: { ... }
+      runs?: { ... }
+      max_executions?: { ... }
+      created_at?: { ... }
+      updated_at?: { ... }
+      created_by?: { ... }
+      last_updated_by?: { ... }
+      org_id?: { ... }
+      system_flow?: { ... }
+      version?: { ... }
+      _manifest?: { ... }
+      protected?: { ... }
+    }
+    reason?: "changed" | "no_capacity" | "out_of_time" | "deleted" | "invalid"
+    error?: string
+  }>
+}
+```
+
+### `BatchSyncFlowsFailure`
+
+The answer of a batch sync with at least one `failed` result
+
+```ts
+type BatchSyncFlowsFailure = {
+  status?: number
+  error?: string
+  results: Array<{
+    id: string
+    result: "created" | "updated" | "unchanged" | "deleted" | "not_found" | "failed"
+    flow?: {
+      id?: { ... }
+      flow_name?: { ... }
+      enabled?: { ... }
+      disable_details?: { ... }
+      triggers?: { ... }
+      trigger_conditions?: { ... }
+      entity_schema?: { ... }
+      conditions?: { ... }
+      schedules?: { ... }
+      loops?: { ... }
+      actions?: { ... }
+      runs?: { ... }
+      max_executions?: { ... }
+      created_at?: { ... }
+      updated_at?: { ... }
+      created_by?: { ... }
+      last_updated_by?: { ... }
+      org_id?: { ... }
+      system_flow?: { ... }
+      version?: { ... }
+      _manifest?: { ... }
+      protected?: { ... }
+    }
+    reason?: "changed" | "no_capacity" | "out_of_time" | "deleted" | "invalid"
+    error?: string
+  }>
 }
 ```
 
@@ -1635,6 +2086,7 @@ type JourneyContextUsage = {
   location?: {
     action_id?: string
     action_type?: string
+    action_index?: number
   }
   matched_as: {
     dialect: "name"
@@ -1662,6 +2114,7 @@ type JourneyContextUsagesResp = {
     location?: {
       action_id?: { ... }
       action_type?: { ... }
+      action_index?: { ... }
     }
     matched_as: {
       dialect: { ... }
@@ -1707,6 +2160,10 @@ type AnyTrigger = {
     operations?: "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity" | "relationsAdded" | "relationsRemoved" | "relationsSoftDeleted" | "relationsRestored" | "relationsDeleted"[]
     include_activities?: string[]
     exclude_activities?: string[]
+    conditions?: {
+      logical_operator?: { ... }
+      statements: { ... }
+    }
     filter_config?: {
       operation?: { ... }
       activity?: { ... }
@@ -1812,6 +2269,19 @@ type AnyAction = {
       seed: { ... }
       graph: { ... }
     }>
+    loop_config?: {
+      source_path?: { ... }
+      source_type?: { ... }
+      filter_tags?: { ... }
+      length?: { ... }
+    }
+    conditionMode?: "oneOf" | "anyOf" | "allOf"
+    conditions?: Array<{
+      _exists?: { ... }
+      _equals?: { ... }
+      _not_exists?: { ... }
+      _any_of?: { ... }
+    }>
   }
 } | {
   type?: "trigger-workflow"
@@ -1856,19 +2326,6 @@ type AnyAction = {
 } | {
   type?: "trigger-event"
   config?: {
-    event_name: string
-    event_inputs?: Record<string, unknown>
-  }
-} | {
-  type?: "create-document"
-  config?: {
-    template_id?: string
-    filename?: string
-  }
-} | {
-  type?: "send-email"
-  config?: {
-    email_template_id?: string
   // ...
 }
 ```
@@ -1922,6 +2379,19 @@ type AnyActionConfig = {
       seed: { ... }
       graph: { ... }
     }>
+    loop_config?: {
+      source_path?: { ... }
+      source_type?: { ... }
+      filter_tags?: { ... }
+      length?: { ... }
+    }
+    conditionMode?: "oneOf" | "anyOf" | "allOf"
+    conditions?: Array<{
+      _exists?: { ... }
+      _equals?: { ... }
+      _not_exists?: { ... }
+      _any_of?: { ... }
+    }>
   }
   allow_failure?: boolean
   created_automatically?: boolean
@@ -1963,19 +2433,6 @@ type AnyActionConfig = {
   }
   condition_id?: string
   schedule_id?: string
-  loop_id?: string
-} | {
-  id?: string
-  flow_action_id?: string
-  name?: string
-  type?: "trigger-workflow"
-  config?: {
-    operation?: "share" | "unshare"
-    unshare_all_partners?: boolean
-    partner_org_ids?: string[]
-  }
-  allow_failure?: boolean
-  created_automatically?: boolean
   // ...
 }
 ```
@@ -2360,6 +2817,19 @@ type MapEntityActionConfig = {
       seed: { ... }
       graph: { ... }
     }>
+    loop_config?: {
+      source_path?: { ... }
+      source_type?: { ... }
+      filter_tags?: { ... }
+      length?: { ... }
+    }
+    conditionMode?: "oneOf" | "anyOf" | "allOf"
+    conditions?: Array<{
+      _exists?: { ... }
+      _equals?: { ... }
+      _not_exists?: { ... }
+      _any_of?: { ... }
+    }>
   }
   allow_failure?: boolean
   created_automatically?: boolean
@@ -2419,6 +2889,19 @@ type MapEntityAction = {
     graph_context?: Array<{
       seed: { ... }
       graph: { ... }
+    }>
+    loop_config?: {
+      source_path?: { ... }
+      source_type?: { ... }
+      filter_tags?: { ... }
+      length?: { ... }
+    }
+    conditionMode?: "oneOf" | "anyOf" | "allOf"
+    conditions?: Array<{
+      _exists?: { ... }
+      _equals?: { ... }
+      _not_exists?: { ... }
+      _any_of?: { ... }
     }>
   }
 }
@@ -2486,6 +2969,63 @@ type MapEntityConfig = {
       edges: { ... }
     }
   }>
+  loop_config?: {
+    source_path?: string
+    source_type?: "journey-multi-select" | "journey-file-upload"
+    filter_tags?: string[]
+    length?: number
+  }
+  conditionMode?: "oneOf" | "anyOf" | "allOf"
+  conditions?: Array<{
+    _exists?: {
+      source?: { ... }
+      value?: { ... }
+    }
+    _equals?: {
+      source?: { ... }
+      value?: { ... }
+    }
+    _not_exists?: {
+      source?: { ... }
+      value?: { ... }
+    }
+    _any_of?: {
+      source?: { ... }
+      value?: { ... }
+    }
+  }>
+}
+```
+
+### `MapCondition`
+
+```ts
+type MapCondition = {
+  _exists?: {
+    source?: string
+    value?: string | number | object | object[]
+  }
+  _equals?: {
+    source?: string
+    value?: string | number | object | object[]
+  }
+  _not_exists?: {
+    source?: string
+    value?: string | number | object | object[]
+  }
+  _any_of?: {
+    source?: string
+    value?: string | number | object | object[]
+  }
+}
+```
+
+### `ConditionNode`
+
+```ts
+type ConditionNode = {
+  source?: string
+  value?: string | number | object | object[]
 }
 ```
 
@@ -2763,6 +3303,29 @@ type LabelEmailAction = {
 }
 ```
 
+### `ReopenEmailTicketsAction`
+
+```ts
+type ReopenEmailTicketsAction = {
+  type?: "reopen-email-tickets"
+  config?: {
+    closed_statuses: string[]
+    reopen_status: string
+  }
+}
+```
+
+### `MarkTicketEmailsDoneAction`
+
+```ts
+type MarkTicketEmailsDoneAction = {
+  type?: "mark-ticket-emails-done"
+  config?: {
+    ending_statuses: string[]
+  }
+}
+```
+
 ### `MoveThreadConfig`
 
 ```ts
@@ -2776,6 +3339,28 @@ type MoveThreadConfig = {
 ```ts
 type LabelEmailConfig = {
   add: string[]
+}
+```
+
+### `ReopenEmailTicketsConfig`
+
+Runs on an email: the trigger's message, or a thread's latest received email. Finds the tickets of every email in the email's thread, through links in both directions, and sets each one whose status counts as closed to `reopen_status`. Nothing else on the ticket changes. Does nothing for our own out
+
+```ts
+type ReopenEmailTicketsConfig = {
+  closed_statuses: string[]
+  reopen_status: string
+}
+```
+
+### `MarkTicketEmailsDoneConfig`
+
+Runs on a ticket and marks the threads of the ticket's emails as done, whatever that ticket's own status is: when the action runs is up to the flow's trigger and conditions. A thread that also belongs to another ticket whose status is not in `ending_statuses` stays open.
+
+
+```ts
+type MarkTicketEmailsDoneConfig = {
+  ending_statuses: string[]
 }
 ```
 
@@ -2871,6 +3456,8 @@ type AssignEntityConfig = {
     attribute?: string
     values?: string[]
   }
+  only_available_users?: boolean
+  hold_until_available?: boolean
   match_user_skills?: boolean
   required_skill_categories?: string[]
   required_skills?: string[]
@@ -2940,6 +3527,8 @@ type AssignEntityActionConfig = {
       attribute?: { ... }
       values?: { ... }
     }
+    only_available_users?: boolean
+    hold_until_available?: boolean
     match_user_skills?: boolean
     required_skill_categories?: string[]
     required_skills?: string[]
@@ -3017,6 +3606,8 @@ type AssignEntityAction = {
       attribute?: { ... }
       values?: { ... }
     }
+    only_available_users?: boolean
+    hold_until_available?: boolean
     match_user_skills?: boolean
     required_skill_categories?: string[]
     required_skills?: string[]
@@ -3164,7 +3755,7 @@ type ForwardEmailAction = {
 ```ts
 type ForwardEmailConfig = {
   forward_to: Array<{
-    email: string // email
+    email: string
     name?: string
   }>
   include_attachments?: boolean
@@ -3867,6 +4458,9 @@ type AutomationExecution = {
       linkback_relation_attribute?: { ... }
       linkback_relation_tags?: { ... }
       graph_context?: { ... }
+      loop_config?: { ... }
+      conditionMode?: { ... }
+      conditions?: { ... }
     }
   } | {
     type?: "trigger-workflow"
@@ -3901,9 +4495,6 @@ type AutomationExecution = {
     }
   } | {
     type?: "trigger-event"
-    config?: {
-      event_name: { ... }
-      event_inputs?: { ... }
   // ...
 }
 ```
@@ -4382,6 +4973,139 @@ type StartExecutionRequest = {
 }
 ```
 
+### `StartEphemeralExecutionRequest`
+
+```ts
+type StartEphemeralExecutionRequest = {
+  entity_id: string
+  flow_name: string
+  actions: Array<{
+    type?: "map-entity"
+    config?: {
+      mapping_config?: { ... }
+      target_schema: { ... }
+      use_uniqueness_criteria?: { ... }
+      target_unique?: { ... }
+      mapping_attributes?: { ... }
+      relation_attributes?: { ... }
+      linkback_relation_attribute?: { ... }
+      linkback_relation_tags?: { ... }
+      graph_context?: { ... }
+      loop_config?: { ... }
+      conditionMode?: { ... }
+      conditions?: { ... }
+    }
+  } | {
+    type?: "trigger-workflow"
+    config?: {
+      target_workflow?: { ... }
+      conditions?: { ... }
+      assignees?: { ... }
+      assign_steps?: { ... }
+      filter_with_purposes?: { ... }
+    }
+  } | {
+    type?: "trigger-share-entity"
+    config?: {
+      operation?: { ... }
+      unshare_all_partners?: { ... }
+      partner_org_ids?: { ... }
+    }
+  } | {
+    type?: "trigger-webhook"
+    config?: {
+      event_id?: { ... }
+      entity_sources?: { ... }
+      target_webhook_id?: { ... }
+      sync?: { ... }
+    }
+  } | {
+    type?: "inform-erp"
+    config?: {
+      entity_sources?: { ... }
+      target_webhook_id?: { ... }
+      sync?: { ... }
+    }
+  } | {
+    type?: "trigger-event"
+    config?: {
+      event_name: { ... }
+      event_inputs?: { ... }
+    }
+  } | {
+    type?: "create-document"
+    config?: {
+      template_id?: { ... }
+      filename?: { ... }
+    }
+  } | {
+    type?: "send-email"
+    config?: {
+      email_template_id?: { ... }
+      language_code?: { ... }
+      notify_portal_user_only?: { ... }
+      skip_creating_entities?: { ... }
+      wait_for_confirmation?: { ... }
+      wait_for_journey_submission?: { ... }
+      journey_id?: { ... }
+      reply_to_sender?: { ... }
+      reply_mode?: { ... }
+      mark_as_done?: { ... }
+      mark_as_read?: { ... }
+      attachments?: { ... }
+      conditions?: { ... }
+    }
+  } | {
+    type?: "cart-checkout"
+    config?: {
+      version?: { ... }
+      mapping_config?: { ... }
+      relation_attributes?: { ... }
+      mapping_attributes?: { ... }
+      linkback_relation_attribute?: { ... }
+      linkback_relation_tags?: { ... }
+      target_unique?: { ... }
+    }
+  } | {
+    type?: "custom-action"
+    config?: {
+      name?: { ... }
+      description?: { ... }
+      app_id?: { ... }
+      component_id?: { ... }
+      wait_for_callback?: { ... }
+    }
+  } | {
+  // ...
+}
+```
+
+### `EphemeralExecution`
+
+Present on an execution started from an automation definition sent in the request.
+
+```ts
+type EphemeralExecution = {
+  identity: {
+    namespace: string
+    key: string[]
+  }
+}
+```
+
+### `EphemeralIdentity`
+
+Identifies the automation of an ephemeral execution. The execution's `flow_id` is derived from the organization and this identity.
+Executions with the same identity share the state kept per `flow_id` across runs, e.g. round-robin assignment queues.
+Configurations that must not share this state need 
+
+```ts
+type EphemeralIdentity = {
+  namespace: string
+  key: string[]
+}
+```
+
 ### `ActionInputs`
 
 Internal. Run-time inputs for the actions of this execution, keyed by
@@ -4751,6 +5475,10 @@ type EntityOperationTrigger = {
     operations?: "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity" | "relationsAdded" | "relationsRemoved" | "relationsSoftDeleted" | "relationsRestored" | "relationsDeleted"[]
     include_activities?: string[]
     exclude_activities?: string[]
+    conditions?: {
+      logical_operator?: { ... }
+      statements: { ... }
+    }
     filter_config?: {
       operation?: { ... }
       activity?: { ... }
@@ -4865,6 +5593,86 @@ type TriggerCondition = {
 
 ```ts
 type Comparison = "equals" | "any_of" | "not_empty" | "is_empty"
+```
+
+### `EntityTriggerConditions`
+
+Conditions the entity must satisfy for the trigger to start the automation, checked after
+`schema`, `operations`, the activity filters and `filter_config` have matched. An event that
+does not satisfy them starts nothing: no execution is created.
+
+Statements use the flows condition dialect (the `Stat
+
+```ts
+type EntityTriggerConditions = {
+  logical_operator?: "AND" | "OR"
+  statements: Array<{
+    id?: string
+    source: {
+      schema?: { ... }
+      attribute: { ... }
+      attribute_type?: { ... }
+      attribute_repeatable?: { ... }
+      attribute_sub_field?: { ... }
+      attribute_operation?: { ... }
+      date_offset?: { ... }
+    }
+    operator: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty" | "has_changed" | "changes_to" | "changes_to_all" | "no_longer_is" | "no_longer_is_all"
+    values?: string[]
+    value_type?: "static" | "relative_date"
+  }>
+}
+```
+
+### `EntityTriggerStatement`
+
+```ts
+type EntityTriggerStatement = {
+  id?: string
+  source: {
+    schema?: string
+    attribute: string
+    attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "status" | "multiselect" | "select" | "radio" | "purpose" | "label"
+    attribute_repeatable?: boolean
+    attribute_sub_field?: string
+    attribute_operation?: "all" | "added" | "updated" | "deleted"
+    date_offset?: {
+      amount?: { ... }
+      unit?: { ... }
+    }
+  }
+  operator: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty" | "has_changed" | "changes_to" | "changes_to_all" | "no_longer_is" | "no_longer_is_all"
+  values?: string[]
+  value_type?: "static" | "relative_date"
+}
+```
+
+### `EntityTriggerStatementSource`
+
+```ts
+type EntityTriggerStatementSource = {
+  schema?: string
+  attribute: string
+  attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "status" | "multiselect" | "select" | "radio" | "purpose" | "label"
+  attribute_repeatable?: boolean
+  attribute_sub_field?: string
+  attribute_operation?: "all" | "added" | "updated" | "deleted"
+  date_offset?: {
+    amount?: number
+    unit?: "days" | "months" | "years"
+  }
+}
+```
+
+### `EntityTriggerOperator`
+
+The value operators of a flow decision, plus three change operators for update triggers:
+- `has_changed`: the update touched the attribute
+- `changes_to`: the attribute was not the value and now is; on a list, at least one of the values was not there and now is
+- `changes_to_all`: every listed value
+
+```ts
+type EntityTriggerOperator = "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty" | "has_changed" | "changes_to" | "changes_to_all" | "no_longer_is" | "no_longer_is_all"
 ```
 
 ### `FilterConditionOnEvent`

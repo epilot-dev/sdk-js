@@ -20333,6 +20333,12 @@ declare namespace Components {
              * 3f1c7d2e-9a4b-4c6d-8e2f-1a2b3c4d5e6f
              */
             campaign_id?: string;
+            /**
+             * Only used with `campaign_id` when there's no `contract_id`.
+             * example:
+             * 9b2e4f6a-1c3d-4e5f-8a7b-6c5d4e3f2a1b
+             */
+            contact_id?: string;
             filters?: /* Availability filters dimensions */ AvailabilityFilters;
         }
         /**
@@ -24444,6 +24450,7 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = /* Product recommendations request payload */ Components.Schemas.ProductRecommendationResponse;
             export type $400 = Components.Schemas.Error;
+            export type $404 = Components.Schemas.Error;
         }
     }
     namespace $ReplaceActiveConditionalVariantVersion {

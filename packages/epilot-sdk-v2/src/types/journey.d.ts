@@ -221,8 +221,12 @@ export declare namespace Components {
             name: string;
             steps: {
                 showStepName?: boolean | null;
-                title?: string | null;
-                subTitle?: string | null;
+                title?: (string | null) | {
+                    [name: string]: string;
+                };
+                subTitle?: (string | null) | {
+                    [name: string]: string;
+                };
                 showStepSubtitle?: boolean | null;
                 showStepper?: boolean | null;
                 showStepperLabels?: boolean | null;
@@ -233,8 +237,13 @@ export declare namespace Components {
                 stepId?: string;
                 schema: any;
                 uischema: any;
+                partialOrigin?: PartialOrigin;
                 maxWidth?: "small" | "medium" | "large" | "extra large";
             }[];
+            partialContract?: PartialContract;
+            partials?: {
+                [name: string]: PartialInstance;
+            };
             design?: {
                 logoUrl?: string | null;
                 theme?: {
@@ -383,11 +392,18 @@ export declare namespace Components {
                 designId: string;
                 templateId?: string | null;
                 entityId?: string | null;
+                /**
+                 * Where this journey's submission mappings are stored. Without `newMappings`: the id of its entity mapping config (entity-mapping-api `/v2/mappings/{id}`). With `newMappings`: the id of the automation flow whose map-entity actions hold the mappings (automation-api `/v1/automation/flows/{flow_id}`). Before saving changed mappings, check them with entity-mapping-api `POST /v1/mappings:validate-flow` (`{ source: { journey_id }, actions }`) and fix every `blocking` issue.
+                 */
                 mappingsAutomationId?: string;
                 /**
-                 * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.
+                 * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation. Write each mapping line as a map-entity action of that automation, reading `submission._block_values['<block id>']['<field>']` (the block id is the `id` of the block in `steps[].uischema`), and check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving the automation.
                  */
                 newMappings?: boolean;
+                /**
+                 * Flow template that processes this journey's submissions. Managed by the Journey Builder, which sets it when the journey is saved (in rollout behind the feature flag journey-mappings-flows). API clients and agents must not set or change it: the builder would then show a flow that does not process this journey's submissions. null unlinks the flow.
+                 */
+                flowId?: string | null;
                 targetedCustomer?: string;
                 description?: string | null;
                 organizationSettings?: {
@@ -432,6 +448,15 @@ export declare namespace Components {
                 enableDarkMode?: boolean;
                 accessMode?: "PUBLIC" | "PRIVATE";
                 /**
+                 * Languages the journey is offered in. Absent means the journey's single language embedOptions.lang, defaulting to de.
+                 * example:
+                 * [
+                 *   "de",
+                 *   "en"
+                 * ]
+                 */
+                available_languages?: ("de" | "en" | "fr")[];
+                /**
                  * Steps after this step require an authenticated session (auth gate)
                  */
                 authGate?: {
@@ -466,6 +491,11 @@ export declare namespace Components {
                      *
                      */
                     modernLauncher?: boolean;
+                    /**
+                     * Opt this journey into the Spark design (Spark UI renderers, branded by the journey's design). Effective when true OR the organization flag `journey-spark-design` is on.
+                     *
+                     */
+                    sparkDesign?: boolean;
                 };
                 /**
                  * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
@@ -569,8 +599,12 @@ export declare namespace Components {
             name: string;
             steps: {
                 showStepName?: boolean | null;
-                title?: string | null;
-                subTitle?: string | null;
+                title?: (string | null) | {
+                    [name: string]: string;
+                };
+                subTitle?: (string | null) | {
+                    [name: string]: string;
+                };
                 showStepSubtitle?: boolean | null;
                 showStepper?: boolean | null;
                 showStepperLabels?: boolean | null;
@@ -581,8 +615,13 @@ export declare namespace Components {
                 stepId?: string;
                 schema: any;
                 uischema: any;
+                partialOrigin?: PartialOrigin;
                 maxWidth?: "small" | "medium" | "large" | "extra large";
             }[];
+            partialContract?: PartialContract;
+            partials?: {
+                [name: string]: PartialInstance;
+            };
             design?: {
                 logoUrl?: string | null;
                 theme?: {
@@ -731,11 +770,18 @@ export declare namespace Components {
                 designId: string;
                 templateId?: string | null;
                 entityId?: string | null;
+                /**
+                 * Where this journey's submission mappings are stored. Without `newMappings`: the id of its entity mapping config (entity-mapping-api `/v2/mappings/{id}`). With `newMappings`: the id of the automation flow whose map-entity actions hold the mappings (automation-api `/v1/automation/flows/{flow_id}`). Before saving changed mappings, check them with entity-mapping-api `POST /v1/mappings:validate-flow` (`{ source: { journey_id }, actions }`) and fix every `blocking` issue.
+                 */
                 mappingsAutomationId?: string;
                 /**
-                 * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.
+                 * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation. Write each mapping line as a map-entity action of that automation, reading `submission._block_values['<block id>']['<field>']` (the block id is the `id` of the block in `steps[].uischema`), and check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving the automation.
                  */
                 newMappings?: boolean;
+                /**
+                 * Flow template that processes this journey's submissions. Managed by the Journey Builder, which sets it when the journey is saved (in rollout behind the feature flag journey-mappings-flows). API clients and agents must not set or change it: the builder would then show a flow that does not process this journey's submissions. null unlinks the flow.
+                 */
+                flowId?: string | null;
                 targetedCustomer?: string;
                 description?: string | null;
                 organizationSettings?: {
@@ -780,6 +826,15 @@ export declare namespace Components {
                 enableDarkMode?: boolean;
                 accessMode?: "PUBLIC" | "PRIVATE";
                 /**
+                 * Languages the journey is offered in. Absent means the journey's single language embedOptions.lang, defaulting to de.
+                 * example:
+                 * [
+                 *   "de",
+                 *   "en"
+                 * ]
+                 */
+                available_languages?: ("de" | "en" | "fr")[];
+                /**
                  * Steps after this step require an authenticated session (auth gate)
                  */
                 authGate?: {
@@ -814,6 +869,11 @@ export declare namespace Components {
                      *
                      */
                     modernLauncher?: boolean;
+                    /**
+                     * Opt this journey into the Spark design (Spark UI renderers, branded by the journey's design). Effective when true OR the organization flag `journey-spark-design` is on.
+                     *
+                     */
+                    sparkDesign?: boolean;
                 };
                 /**
                  * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
@@ -871,8 +931,12 @@ export declare namespace Components {
             name: string;
             steps: {
                 showStepName?: boolean | null;
-                title?: string | null;
-                subTitle?: string | null;
+                title?: (string | null) | {
+                    [name: string]: string;
+                };
+                subTitle?: (string | null) | {
+                    [name: string]: string;
+                };
                 showStepSubtitle?: boolean | null;
                 showStepper?: boolean | null;
                 showStepperLabels?: boolean | null;
@@ -883,8 +947,13 @@ export declare namespace Components {
                 stepId?: string;
                 schema: any;
                 uischema: any;
+                partialOrigin?: PartialOrigin;
                 maxWidth?: "small" | "medium" | "large" | "extra large";
             }[];
+            partialContract?: PartialContract;
+            partials?: {
+                [name: string]: PartialInstance;
+            };
             design?: {
                 logoUrl?: string | null;
                 theme?: {
@@ -1028,11 +1097,18 @@ export declare namespace Components {
                 safeModeAutomation?: boolean;
                 designId?: string;
                 entityId?: string | null;
+                /**
+                 * Where this journey's submission mappings are stored. Without `newMappings`: the id of its entity mapping config (entity-mapping-api `/v2/mappings/{id}`). With `newMappings`: the id of the automation flow whose map-entity actions hold the mappings (automation-api `/v1/automation/flows/{flow_id}`). Before saving changed mappings, check them with entity-mapping-api `POST /v1/mappings:validate-flow` (`{ source: { journey_id }, actions }`) and fix every `blocking` issue.
+                 */
                 mappingsAutomationId?: string;
                 /**
-                 * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.
+                 * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation. Write each mapping line as a map-entity action of that automation, reading `submission._block_values['<block id>']['<field>']` (the block id is the `id` of the block in `steps[].uischema`), and check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving the automation.
                  */
                 newMappings?: boolean;
+                /**
+                 * Flow template that processes this journey's submissions. Managed by the Journey Builder, which sets it when the journey is saved (in rollout behind the feature flag journey-mappings-flows). API clients and agents must not set or change it: the builder would then show a flow that does not process this journey's submissions. null unlinks the flow.
+                 */
+                flowId?: string | null;
                 templateId?: string | null;
                 targetedCustomer?: string;
                 description?: string | null;
@@ -1071,6 +1147,15 @@ export declare namespace Components {
                 thirdPartyCookies?: boolean;
                 accessMode?: "PUBLIC" | "PRIVATE";
                 /**
+                 * Languages the journey is offered in. Absent means the journey's single language embedOptions.lang, defaulting to de.
+                 * example:
+                 * [
+                 *   "de",
+                 *   "en"
+                 * ]
+                 */
+                available_languages?: ("de" | "en" | "fr")[];
+                /**
                  * Steps after this step require an authenticated session (auth gate)
                  */
                 authGate?: {
@@ -1107,6 +1192,11 @@ export declare namespace Components {
                      *
                      */
                     modernLauncher?: boolean;
+                    /**
+                     * Opt this journey into the Spark design (Spark UI renderers, branded by the journey's design). Effective when true OR the organization flag `journey-spark-design` is on.
+                     *
+                     */
+                    sparkDesign?: boolean;
                 };
                 /**
                  * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
@@ -1417,6 +1507,7 @@ export declare namespace Components {
              * 12
              */
             mapping_config_version?: number;
+            partial_warnings?: PartialIssue[];
             /**
              * The journey configuration as it was saved in this revision, in the shape the builder holds a journey in.
              *
@@ -1429,8 +1520,12 @@ export declare namespace Components {
                 name: string;
                 steps: {
                     showStepName?: boolean | null;
-                    title?: string | null;
-                    subTitle?: string | null;
+                    title?: (string | null) | {
+                        [name: string]: string;
+                    };
+                    subTitle?: (string | null) | {
+                        [name: string]: string;
+                    };
                     showStepSubtitle?: boolean | null;
                     showStepper?: boolean | null;
                     showStepperLabels?: boolean | null;
@@ -1441,8 +1536,13 @@ export declare namespace Components {
                     stepId?: string;
                     schema: any;
                     uischema: any;
+                    partialOrigin?: PartialOrigin;
                     maxWidth?: "small" | "medium" | "large" | "extra large";
                 }[];
+                partialContract?: PartialContract;
+                partials?: {
+                    [name: string]: PartialInstance;
+                };
                 design?: {
                     logoUrl?: string | null;
                     theme?: {
@@ -1591,11 +1691,18 @@ export declare namespace Components {
                     designId: string;
                     templateId?: string | null;
                     entityId?: string | null;
+                    /**
+                     * Where this journey's submission mappings are stored. Without `newMappings`: the id of its entity mapping config (entity-mapping-api `/v2/mappings/{id}`). With `newMappings`: the id of the automation flow whose map-entity actions hold the mappings (automation-api `/v1/automation/flows/{flow_id}`). Before saving changed mappings, check them with entity-mapping-api `POST /v1/mappings:validate-flow` (`{ source: { journey_id }, actions }`) and fix every `blocking` issue.
+                     */
                     mappingsAutomationId?: string;
                     /**
-                     * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.
+                     * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation. Write each mapping line as a map-entity action of that automation, reading `submission._block_values['<block id>']['<field>']` (the block id is the `id` of the block in `steps[].uischema`), and check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving the automation.
                      */
                     newMappings?: boolean;
+                    /**
+                     * Flow template that processes this journey's submissions. Managed by the Journey Builder, which sets it when the journey is saved (in rollout behind the feature flag journey-mappings-flows). API clients and agents must not set or change it: the builder would then show a flow that does not process this journey's submissions. null unlinks the flow.
+                     */
+                    flowId?: string | null;
                     targetedCustomer?: string;
                     description?: string | null;
                     organizationSettings?: {
@@ -1640,6 +1747,15 @@ export declare namespace Components {
                     enableDarkMode?: boolean;
                     accessMode?: "PUBLIC" | "PRIVATE";
                     /**
+                     * Languages the journey is offered in. Absent means the journey's single language embedOptions.lang, defaulting to de.
+                     * example:
+                     * [
+                     *   "de",
+                     *   "en"
+                     * ]
+                     */
+                    available_languages?: ("de" | "en" | "fr")[];
+                    /**
                      * Steps after this step require an authenticated session (auth gate)
                      */
                     authGate?: {
@@ -1674,6 +1790,11 @@ export declare namespace Components {
                          *
                          */
                         modernLauncher?: boolean;
+                        /**
+                         * Opt this journey into the Spark design (Spark UI renderers, branded by the journey's design). Effective when true OR the organization flag `journey-spark-design` is on.
+                         *
+                         */
+                        sparkDesign?: boolean;
                     };
                     /**
                      * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
@@ -1771,8 +1892,12 @@ export declare namespace Components {
             name: string;
             steps: {
                 showStepName?: boolean | null;
-                title?: string | null;
-                subTitle?: string | null;
+                title?: (string | null) | {
+                    [name: string]: string;
+                };
+                subTitle?: (string | null) | {
+                    [name: string]: string;
+                };
                 showStepSubtitle?: boolean | null;
                 showStepper?: boolean | null;
                 showStepperLabels?: boolean | null;
@@ -1783,8 +1908,13 @@ export declare namespace Components {
                 stepId?: string;
                 schema: any;
                 uischema: any;
+                partialOrigin?: PartialOrigin;
                 maxWidth?: "small" | "medium" | "large" | "extra large";
             }[];
+            partialContract?: PartialContract;
+            partials?: {
+                [name: string]: PartialInstance;
+            };
             design?: {
                 logoUrl?: string | null;
                 theme?: {
@@ -1933,11 +2063,18 @@ export declare namespace Components {
                 designId: string;
                 templateId?: string | null;
                 entityId?: string | null;
+                /**
+                 * Where this journey's submission mappings are stored. Without `newMappings`: the id of its entity mapping config (entity-mapping-api `/v2/mappings/{id}`). With `newMappings`: the id of the automation flow whose map-entity actions hold the mappings (automation-api `/v1/automation/flows/{flow_id}`). Before saving changed mappings, check them with entity-mapping-api `POST /v1/mappings:validate-flow` (`{ source: { journey_id }, actions }`) and fix every `blocking` issue.
+                 */
                 mappingsAutomationId?: string;
                 /**
-                 * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.
+                 * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation. Write each mapping line as a map-entity action of that automation, reading `submission._block_values['<block id>']['<field>']` (the block id is the `id` of the block in `steps[].uischema`), and check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving the automation.
                  */
                 newMappings?: boolean;
+                /**
+                 * Flow template that processes this journey's submissions. Managed by the Journey Builder, which sets it when the journey is saved (in rollout behind the feature flag journey-mappings-flows). API clients and agents must not set or change it: the builder would then show a flow that does not process this journey's submissions. null unlinks the flow.
+                 */
+                flowId?: string | null;
                 targetedCustomer?: string;
                 description?: string | null;
                 organizationSettings?: {
@@ -1982,6 +2119,15 @@ export declare namespace Components {
                 enableDarkMode?: boolean;
                 accessMode?: "PUBLIC" | "PRIVATE";
                 /**
+                 * Languages the journey is offered in. Absent means the journey's single language embedOptions.lang, defaulting to de.
+                 * example:
+                 * [
+                 *   "de",
+                 *   "en"
+                 * ]
+                 */
+                available_languages?: ("de" | "en" | "fr")[];
+                /**
                  * Steps after this step require an authenticated session (auth gate)
                  */
                 authGate?: {
@@ -2016,6 +2162,11 @@ export declare namespace Components {
                      *
                      */
                     modernLauncher?: boolean;
+                    /**
+                     * Opt this journey into the Spark design (Spark UI renderers, branded by the journey's design). Effective when true OR the organization flag `journey-spark-design` is on.
+                     *
+                     */
+                    sparkDesign?: boolean;
                 };
                 /**
                  * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
@@ -2140,6 +2291,7 @@ export declare namespace Components {
              * 12
              */
             mapping_config_version?: number;
+            partial_warnings?: PartialIssue[];
         }
         /**
          * Which revision the runtime read served: the requested one, or the published version when no revision was requested. Absent while the journey has not adopted versioning and on legacy `version` reads.
@@ -2269,6 +2421,75 @@ export declare namespace Components {
                 type?: string;
                 message?: string;
             }[];
+        }
+        export interface PartialBlockException {
+            controlName: string;
+            values: {
+                [name: string]: any;
+            };
+        }
+        export interface PartialContract {
+            /**
+             * Ignored; accepted from older clients.
+             */
+            exits?: {
+                [name: string]: {
+                    label: string;
+                };
+            };
+            requiresLogin: boolean;
+            description?: string;
+        }
+        export interface PartialInstance {
+            partialId: string;
+            afterStepId?: string;
+            /**
+             * Ignored; accepted from older clients.
+             */
+            exits?: {
+                [name: string]: string;
+            };
+            produced?: PartialProduced;
+            /**
+             * Journey-owned overrides of partial block prefill, keyed by the partial's block id.
+             */
+            exceptions?: {
+                [name: string]: PartialBlockException;
+            };
+        }
+        export interface PartialIssue {
+            severity: "error" | "warning";
+            code: string;
+            message: string;
+            instanceId?: string;
+            partialId?: string;
+            stepId?: string;
+            blockId?: string;
+            logicId?: string;
+            paramKey?: string;
+            targetStepId?: string;
+        }
+        export interface PartialOrigin {
+            instanceId: string;
+            partialId: string;
+            originalStepId: string;
+        }
+        export interface PartialProduced {
+            stepIds: string[];
+            logicIds: string[];
+            datasourceIds: string[];
+            contextParameterIds: string[];
+            raisedRequiredParameterIds: string[];
+        }
+        export interface PartialUsages {
+            usages: {
+                journeyId: string;
+                name: string;
+                instanceIds: string[];
+            }[];
+        }
+        export interface PartialWarnings {
+            partial_warnings?: PartialIssue[];
         }
         /**
          * Patch request to update a journey (journey id is required) Support for nested properties (e.g. steps[0].uischema.elements[0].products) is supported.
@@ -2783,8 +3004,12 @@ export declare namespace Paths {
                 name: string;
                 steps: {
                     showStepName?: boolean | null;
-                    title?: string | null;
-                    subTitle?: string | null;
+                    title?: (string | null) | {
+                        [name: string]: string;
+                    };
+                    subTitle?: (string | null) | {
+                        [name: string]: string;
+                    };
                     showStepSubtitle?: boolean | null;
                     showStepper?: boolean | null;
                     showStepperLabels?: boolean | null;
@@ -2795,8 +3020,13 @@ export declare namespace Paths {
                     stepId?: string;
                     schema: any;
                     uischema: any;
+                    partialOrigin?: Components.Schemas.PartialOrigin;
                     maxWidth?: "small" | "medium" | "large" | "extra large";
                 }[];
+                partialContract?: Components.Schemas.PartialContract;
+                partials?: {
+                    [name: string]: Components.Schemas.PartialInstance;
+                };
                 design?: {
                     logoUrl?: string | null;
                     theme?: {
@@ -2945,11 +3175,18 @@ export declare namespace Paths {
                     designId: string;
                     templateId?: string | null;
                     entityId?: string | null;
+                    /**
+                     * Where this journey's submission mappings are stored. Without `newMappings`: the id of its entity mapping config (entity-mapping-api `/v2/mappings/{id}`). With `newMappings`: the id of the automation flow whose map-entity actions hold the mappings (automation-api `/v1/automation/flows/{flow_id}`). Before saving changed mappings, check them with entity-mapping-api `POST /v1/mappings:validate-flow` (`{ source: { journey_id }, actions }`) and fix every `blocking` issue.
+                     */
                     mappingsAutomationId?: string;
                     /**
-                     * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.
+                     * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation. Write each mapping line as a map-entity action of that automation, reading `submission._block_values['<block id>']['<field>']` (the block id is the `id` of the block in `steps[].uischema`), and check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving the automation.
                      */
                     newMappings?: boolean;
+                    /**
+                     * Flow template that processes this journey's submissions. Managed by the Journey Builder, which sets it when the journey is saved (in rollout behind the feature flag journey-mappings-flows). API clients and agents must not set or change it: the builder would then show a flow that does not process this journey's submissions. null unlinks the flow.
+                     */
+                    flowId?: string | null;
                     targetedCustomer?: string;
                     description?: string | null;
                     organizationSettings?: {
@@ -2994,6 +3231,15 @@ export declare namespace Paths {
                     enableDarkMode?: boolean;
                     accessMode?: "PUBLIC" | "PRIVATE";
                     /**
+                     * Languages the journey is offered in. Absent means the journey's single language embedOptions.lang, defaulting to de.
+                     * example:
+                     * [
+                     *   "de",
+                     *   "en"
+                     * ]
+                     */
+                    available_languages?: ("de" | "en" | "fr")[];
+                    /**
                      * Steps after this step require an authenticated session (auth gate)
                      */
                     authGate?: {
@@ -3031,6 +3277,11 @@ export declare namespace Paths {
                          *
                          */
                         modernLauncher?: boolean;
+                        /**
+                         * Opt this journey into the Spark design (Spark UI renderers, branded by the journey's design). Effective when true OR the organization flag `journey-spark-design` is on.
+                         *
+                         */
+                        sparkDesign?: boolean;
                     };
                     /**
                      * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
@@ -3260,8 +3511,12 @@ export declare namespace Paths {
                 name: string;
                 steps: {
                     showStepName?: boolean | null;
-                    title?: string | null;
-                    subTitle?: string | null;
+                    title?: (string | null) | {
+                        [name: string]: string;
+                    };
+                    subTitle?: (string | null) | {
+                        [name: string]: string;
+                    };
                     showStepSubtitle?: boolean | null;
                     showStepper?: boolean | null;
                     showStepperLabels?: boolean | null;
@@ -3272,8 +3527,13 @@ export declare namespace Paths {
                     stepId?: string;
                     schema: any;
                     uischema: any;
+                    partialOrigin?: Components.Schemas.PartialOrigin;
                     maxWidth?: "small" | "medium" | "large" | "extra large";
                 }[];
+                partialContract?: Components.Schemas.PartialContract;
+                partials?: {
+                    [name: string]: Components.Schemas.PartialInstance;
+                };
                 design?: {
                     logoUrl?: string | null;
                     theme?: {
@@ -3417,11 +3677,18 @@ export declare namespace Paths {
                     safeModeAutomation?: boolean;
                     designId?: string;
                     entityId?: string | null;
+                    /**
+                     * Where this journey's submission mappings are stored. Without `newMappings`: the id of its entity mapping config (entity-mapping-api `/v2/mappings/{id}`). With `newMappings`: the id of the automation flow whose map-entity actions hold the mappings (automation-api `/v1/automation/flows/{flow_id}`). Before saving changed mappings, check them with entity-mapping-api `POST /v1/mappings:validate-flow` (`{ source: { journey_id }, actions }`) and fix every `blocking` issue.
+                     */
                     mappingsAutomationId?: string;
                     /**
-                     * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.
+                     * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation. Write each mapping line as a map-entity action of that automation, reading `submission._block_values['<block id>']['<field>']` (the block id is the `id` of the block in `steps[].uischema`), and check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving the automation.
                      */
                     newMappings?: boolean;
+                    /**
+                     * Flow template that processes this journey's submissions. Managed by the Journey Builder, which sets it when the journey is saved (in rollout behind the feature flag journey-mappings-flows). API clients and agents must not set or change it: the builder would then show a flow that does not process this journey's submissions. null unlinks the flow.
+                     */
+                    flowId?: string | null;
                     templateId?: string | null;
                     targetedCustomer?: string;
                     description?: string | null;
@@ -3459,6 +3726,15 @@ export declare namespace Paths {
                      */
                     thirdPartyCookies?: boolean;
                     accessMode?: "PUBLIC" | "PRIVATE";
+                    /**
+                     * Languages the journey is offered in. Absent means the journey's single language embedOptions.lang, defaulting to de.
+                     * example:
+                     * [
+                     *   "de",
+                     *   "en"
+                     * ]
+                     */
+                    available_languages?: ("de" | "en" | "fr")[];
                     /**
                      * Steps after this step require an authenticated session (auth gate)
                      */
@@ -3499,6 +3775,11 @@ export declare namespace Paths {
                          *
                          */
                         modernLauncher?: boolean;
+                        /**
+                         * Opt this journey into the Spark design (Spark UI renderers, branded by the journey's design). Effective when true OR the organization flag `journey-spark-design` is on.
+                         *
+                         */
+                        sparkDesign?: boolean;
                     };
                     /**
                      * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
@@ -3575,6 +3856,29 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetJourneysResponse;
+        }
+    }
+    namespace GetPartialUsages {
+        namespace Parameters {
+            /**
+             * example:
+             * 509cdffe-424f-457a-95c2-9708c304ce77
+             */
+            export type Id = string; // uuid
+        }
+        export interface PathParameters {
+            id: /**
+             * example:
+             * 509cdffe-424f-457a-95c2-9708c304ce77
+             */
+            Parameters.Id /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.PartialUsages;
+            export interface $403 {
+            }
+            export interface $404 {
+            }
         }
     }
     namespace GetSettingsForJourney {
@@ -3666,7 +3970,324 @@ export declare namespace Paths {
          */
         Components.Schemas.PatchUpdateJourneyRequest;
         namespace Responses {
-            export type $200 = Components.Schemas.JourneyCreationRequestV2;
+            export interface $200 {
+                journeyId?: string;
+                brandId?: string;
+                name: string;
+                steps: {
+                    showStepName?: boolean | null;
+                    title?: (string | null) | {
+                        [name: string]: string;
+                    };
+                    subTitle?: (string | null) | {
+                        [name: string]: string;
+                    };
+                    showStepSubtitle?: boolean | null;
+                    showStepper?: boolean | null;
+                    showStepperLabels?: boolean | null;
+                    stepperType?: "numbers" | "progress bar";
+                    hideNextButton?: boolean | null;
+                    guestVisible?: boolean | null;
+                    name: string;
+                    stepId?: string;
+                    schema: any;
+                    uischema: any;
+                    partialOrigin?: Components.Schemas.PartialOrigin;
+                    maxWidth?: "small" | "medium" | "large" | "extra large";
+                }[];
+                partialContract?: Components.Schemas.PartialContract;
+                partials?: {
+                    [name: string]: Components.Schemas.PartialInstance;
+                };
+                design?: {
+                    logoUrl?: string | null;
+                    theme?: {
+                        [name: string]: any;
+                    };
+                    designTokens?: {
+                        [key: string]: any;
+                    };
+                };
+                rules?: {
+                    type: "inject" | "injectWithKey";
+                    sourceType: "journey" | "step" | "block";
+                    source: string;
+                    target: string;
+                }[];
+                logics?: {
+                    autoGeneratedId?: string;
+                    conditions: string[];
+                    actions: string[];
+                }[];
+                logicsV4?: {
+                    [name: string]: {
+                        /**
+                         * Unique identifier for logic. Use uuidv7
+                         */
+                        id?: string; // uuid
+                        /**
+                         * If true, logic can't be manipulated by the configuring user
+                         */
+                        protected?: boolean;
+                        /**
+                         * Indicates which action to take in case logic evaluates to true
+                         */
+                        action?: string;
+                        /**
+                         * Indicates when the logic should be evaluated
+                         */
+                        triggeredOn?: string;
+                        conditions?: {
+                            /**
+                             * Operator to be applied between the fact value and the value
+                             */
+                            operator?: string;
+                            /**
+                             * If operator is a custom function, this needs to be provided
+                             */
+                            functionName?: string;
+                            fact?: {
+                                /**
+                                 * Unique identifier for a fact
+                                 */
+                                id?: string; // uuid
+                                /**
+                                 * Indicates reference type: block, context-parameter, datasource, global or environment (an organization environment variable, by key; ER-5455)
+                                 */
+                                referenceType?: string;
+                                /**
+                                 * Id of the reference
+                                 */
+                                referenceId?: string;
+                                /**
+                                 * Path to a property. Used if only part of the value is needed
+                                 */
+                                path?: string;
+                                /**
+                                 * If path is a reference, indicates the intention of it
+                                 */
+                                meaning?: string;
+                            };
+                            value?: string | number | boolean | {
+                                [key: string]: any;
+                            } | any[];
+                            args?: {
+                                [key: string]: any;
+                            };
+                        }[][];
+                        /**
+                         * Logic specific settings. Will vary by type of logic
+                         */
+                        settings?: {
+                            [key: string]: any;
+                        };
+                    };
+                };
+                contextSchema?: {
+                    /**
+                     * Unique identifier for the context schema item
+                     */
+                    id?: string; // uuid
+                    /**
+                     * Type of the parameter. It could be either an entity slug, or a text
+                     */
+                    type: string;
+                    /**
+                     * Expected key to be received in the context
+                     */
+                    paramKey: string;
+                    /**
+                     * Indicates if a value is expected to be provided
+                     */
+                    isRequired?: boolean;
+                    /**
+                     * If type is not text, we can instruct the journey to fetch the entity id we receive as value
+                     */
+                    shouldLoadEntity?: boolean;
+                    /**
+                     * Human-readable note describing the parameter's purpose. Free text; may contain newlines.
+                     */
+                    description?: string | null;
+                }[];
+                /**
+                 * Journey Template
+                 * example:
+                 * Sales template (Premium)
+                 */
+                journey_type?: string;
+                /**
+                 * If true, journey is displayed in read-only mode
+                 */
+                protected?: boolean;
+                /**
+                 * Whitelist of paths that remain editable when the journey is protected. Supports wildcard patterns (e.g. steps/*​/blocks/**).
+                 */
+                protectedEditable?: string[];
+                settings?: {
+                    embedOptions?: {
+                        mode?: "full-screen" | "inline";
+                        /**
+                         * example:
+                         * de
+                         */
+                        lang?: string;
+                        width?: string;
+                        topBar?: boolean;
+                        scrollToTop?: boolean;
+                        button?: {
+                            text?: string | null;
+                            align?: "left" | "center" | "right";
+                        };
+                    };
+                    safeModeAutomation?: boolean;
+                    designId?: string;
+                    entityId?: string | null;
+                    /**
+                     * Where this journey's submission mappings are stored. Without `newMappings`: the id of its entity mapping config (entity-mapping-api `/v2/mappings/{id}`). With `newMappings`: the id of the automation flow whose map-entity actions hold the mappings (automation-api `/v1/automation/flows/{flow_id}`). Before saving changed mappings, check them with entity-mapping-api `POST /v1/mappings:validate-flow` (`{ source: { journey_id }, actions }`) and fix every `blocking` issue.
+                     */
+                    mappingsAutomationId?: string;
+                    /**
+                     * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation. Write each mapping line as a map-entity action of that automation, reading `submission._block_values['<block id>']['<field>']` (the block id is the `id` of the block in `steps[].uischema`), and check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving the automation.
+                     */
+                    newMappings?: boolean;
+                    /**
+                     * Flow template that processes this journey's submissions. Managed by the Journey Builder, which sets it when the journey is saved (in rollout behind the feature flag journey-mappings-flows). API clients and agents must not set or change it: the builder would then show a flow that does not process this journey's submissions. null unlinks the flow.
+                     */
+                    flowId?: string | null;
+                    templateId?: string | null;
+                    targetedCustomer?: string;
+                    description?: string | null;
+                    publicToken?: string | null;
+                    runtimeEntities?: ("ORDER" | "OPPORTUNITY")[];
+                    filePurposes?: string[];
+                    entityTags?: string[];
+                    /**
+                     * @deprecated Use addressSuggestionsFileId instead
+                     */
+                    addressSuggestionsFileUrl?: string | null;
+                    addressSuggestionsFileId?: string | null;
+                    /**
+                     * Country code for address format (e.g. DE, AT, CH, LU)
+                     */
+                    addressSuggestionsCountryCode?: string | null;
+                    /**
+                     * Whether address auto-complete is enabled
+                     */
+                    addressSuggestionsEnableAutoComplete?: boolean;
+                    /**
+                     * Sources for address auto-complete (e.g. deutschePostService, customAddressesFile)
+                     */
+                    addressSuggestionsSource?: string[];
+                    /**
+                     * Whether free text input is allowed when auto-complete is on
+                     */
+                    addressSuggestionsEnableFreeText?: boolean;
+                    /**
+                     * This property is deprecated and will be removed in a future version
+                     */
+                    useNewDesign?: boolean;
+                    /**
+                     * If false, third-party cookies are disabled to comply with GDPR regulations without asking for consent.
+                     */
+                    thirdPartyCookies?: boolean;
+                    accessMode?: "PUBLIC" | "PRIVATE";
+                    /**
+                     * Languages the journey is offered in. Absent means the journey's single language embedOptions.lang, defaulting to de.
+                     * example:
+                     * [
+                     *   "de",
+                     *   "en"
+                     * ]
+                     */
+                    available_languages?: ("de" | "en" | "fr")[];
+                    /**
+                     * Steps after this step require an authenticated session (auth gate)
+                     */
+                    authGate?: {
+                        /**
+                         * The step containing the Login & Registration block
+                         */
+                        stepId: string;
+                    };
+                    /**
+                     * If true, the journey shows an icon to toggle dark mode
+                     */
+                    enableDarkMode?: boolean;
+                    /**
+                     * If true, some journey input labels are in Austrian format
+                     */
+                    useAustrianLabels?: boolean;
+                    isActive?: boolean;
+                    savingProgress?: {
+                        mode?: "auto" | "local" | "remote" | "none";
+                        supportedRevision?: number;
+                    };
+                    /**
+                     * Per-journey opt-ins to beta features. One named boolean per feature (no free-form map), so a mistyped key is rejected with 400 and generated client types stay explicit. Additive: a feature is on when its key is true OR the organization-wide PostHog flag for that feature is on.
+                     *
+                     */
+                    betaFeatures?: {
+                        /**
+                         * Opt this journey into the modern product presentation (product tiles and details modal). Effective when true OR the organization flag `journey-modern-products` is on.
+                         *
+                         */
+                        modernProducts?: boolean;
+                        /**
+                         * Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.
+                         *
+                         */
+                        modernLauncher?: boolean;
+                        /**
+                         * Opt this journey into the Spark design (Spark UI renderers, branded by the journey's design). Effective when true OR the organization flag `journey-spark-design` is on.
+                         *
+                         */
+                        sparkDesign?: boolean;
+                    };
+                    /**
+                     * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
+                     *
+                     */
+                    offline?: {
+                        /**
+                         * Prepare this journey for offline use on devices that open it online first.
+                         */
+                        enabled: boolean;
+                        /**
+                         * How long a prepared pack stays fresh before the next online open refreshes it. Default 24.
+                         * example:
+                         * 24
+                         */
+                        packTtlHours?: number;
+                    } | null;
+                };
+                validationRules?: /**
+                 * References to validation rules organized by blocks and fields.
+                 * Maps block IDs to either one or more ordered rule IDs (for block-level rules)
+                 * or rule references (for field-level rules).
+                 *
+                 * example:
+                 * {
+                 *   "block1": "rule123",
+                 *   "block2": [
+                 *     "rule456",
+                 *     "rule789"
+                 *   ],
+                 *   "block3": {
+                 *     "field1": "rule101",
+                 *     "field2": [
+                 *       "rule102",
+                 *       "rule103"
+                 *     ]
+                 *   }
+                 * }
+                 */
+                Components.Schemas.ValidationRuleRef;
+                /**
+                 * Manifest/Blueprint ID used to create/update the entity
+                 */
+                _manifest?: string /* uuid */[];
+                partial_warnings?: Components.Schemas.PartialIssue[];
+            }
             export type $400 = Components.Schemas.JourneyValidationError;
             export interface $404 {
                 /**
@@ -3728,6 +4349,14 @@ export declare namespace Paths {
                  */
                 message?: string;
             }
+            export interface $409 {
+                /**
+                 * example:
+                 * This partial is used in 2 journeys
+                 */
+                message?: string;
+                details?: Components.Schemas.PartialUsages;
+            }
         }
     }
     namespace RemoveJourneyV2 {
@@ -3744,6 +4373,16 @@ export declare namespace Paths {
              * 509cdffe-424f-457a-95c2-9708c304ce77
              */
             Parameters.Id /* uuid */;
+        }
+        namespace Responses {
+            export interface $409 {
+                /**
+                 * example:
+                 * This partial is used in 2 journeys
+                 */
+                message?: string;
+                details?: Components.Schemas.PartialUsages;
+            }
         }
     }
     namespace ResolveJourneyExternalValues {
@@ -3819,7 +4458,324 @@ export declare namespace Paths {
     namespace UpdateJourneyV2 {
         export type RequestBody = Components.Schemas.JourneyCreationRequestV2;
         namespace Responses {
-            export type $200 = Components.Schemas.JourneyCreationRequestV2;
+            export interface $200 {
+                journeyId?: string;
+                brandId?: string;
+                name: string;
+                steps: {
+                    showStepName?: boolean | null;
+                    title?: (string | null) | {
+                        [name: string]: string;
+                    };
+                    subTitle?: (string | null) | {
+                        [name: string]: string;
+                    };
+                    showStepSubtitle?: boolean | null;
+                    showStepper?: boolean | null;
+                    showStepperLabels?: boolean | null;
+                    stepperType?: "numbers" | "progress bar";
+                    hideNextButton?: boolean | null;
+                    guestVisible?: boolean | null;
+                    name: string;
+                    stepId?: string;
+                    schema: any;
+                    uischema: any;
+                    partialOrigin?: Components.Schemas.PartialOrigin;
+                    maxWidth?: "small" | "medium" | "large" | "extra large";
+                }[];
+                partialContract?: Components.Schemas.PartialContract;
+                partials?: {
+                    [name: string]: Components.Schemas.PartialInstance;
+                };
+                design?: {
+                    logoUrl?: string | null;
+                    theme?: {
+                        [name: string]: any;
+                    };
+                    designTokens?: {
+                        [key: string]: any;
+                    };
+                };
+                rules?: {
+                    type: "inject" | "injectWithKey";
+                    sourceType: "journey" | "step" | "block";
+                    source: string;
+                    target: string;
+                }[];
+                logics?: {
+                    autoGeneratedId?: string;
+                    conditions: string[];
+                    actions: string[];
+                }[];
+                logicsV4?: {
+                    [name: string]: {
+                        /**
+                         * Unique identifier for logic. Use uuidv7
+                         */
+                        id?: string; // uuid
+                        /**
+                         * If true, logic can't be manipulated by the configuring user
+                         */
+                        protected?: boolean;
+                        /**
+                         * Indicates which action to take in case logic evaluates to true
+                         */
+                        action?: string;
+                        /**
+                         * Indicates when the logic should be evaluated
+                         */
+                        triggeredOn?: string;
+                        conditions?: {
+                            /**
+                             * Operator to be applied between the fact value and the value
+                             */
+                            operator?: string;
+                            /**
+                             * If operator is a custom function, this needs to be provided
+                             */
+                            functionName?: string;
+                            fact?: {
+                                /**
+                                 * Unique identifier for a fact
+                                 */
+                                id?: string; // uuid
+                                /**
+                                 * Indicates reference type: block, context-parameter, datasource, global or environment (an organization environment variable, by key; ER-5455)
+                                 */
+                                referenceType?: string;
+                                /**
+                                 * Id of the reference
+                                 */
+                                referenceId?: string;
+                                /**
+                                 * Path to a property. Used if only part of the value is needed
+                                 */
+                                path?: string;
+                                /**
+                                 * If path is a reference, indicates the intention of it
+                                 */
+                                meaning?: string;
+                            };
+                            value?: string | number | boolean | {
+                                [key: string]: any;
+                            } | any[];
+                            args?: {
+                                [key: string]: any;
+                            };
+                        }[][];
+                        /**
+                         * Logic specific settings. Will vary by type of logic
+                         */
+                        settings?: {
+                            [key: string]: any;
+                        };
+                    };
+                };
+                contextSchema?: {
+                    /**
+                     * Unique identifier for the context schema item
+                     */
+                    id?: string; // uuid
+                    /**
+                     * Type of the parameter. It could be either an entity slug, or a text
+                     */
+                    type: string;
+                    /**
+                     * Expected key to be received in the context
+                     */
+                    paramKey: string;
+                    /**
+                     * Indicates if a value is expected to be provided
+                     */
+                    isRequired?: boolean;
+                    /**
+                     * If type is not text, we can instruct the journey to fetch the entity id we receive as value
+                     */
+                    shouldLoadEntity?: boolean;
+                    /**
+                     * Human-readable note describing the parameter's purpose. Free text; may contain newlines.
+                     */
+                    description?: string | null;
+                }[];
+                /**
+                 * Journey Template
+                 * example:
+                 * Sales template (Premium)
+                 */
+                journey_type?: string;
+                /**
+                 * If true, journey is displayed in read-only mode
+                 */
+                protected?: boolean;
+                /**
+                 * Whitelist of paths that remain editable when the journey is protected. Supports wildcard patterns (e.g. steps/*​/blocks/**).
+                 */
+                protectedEditable?: string[];
+                settings?: {
+                    embedOptions?: {
+                        mode?: "full-screen" | "inline";
+                        /**
+                         * example:
+                         * de
+                         */
+                        lang?: string;
+                        width?: string;
+                        topBar?: boolean;
+                        scrollToTop?: boolean;
+                        button?: {
+                            text?: string | null;
+                            align?: "left" | "center" | "right";
+                        };
+                    };
+                    safeModeAutomation?: boolean;
+                    designId?: string;
+                    entityId?: string | null;
+                    /**
+                     * Where this journey's submission mappings are stored. Without `newMappings`: the id of its entity mapping config (entity-mapping-api `/v2/mappings/{id}`). With `newMappings`: the id of the automation flow whose map-entity actions hold the mappings (automation-api `/v1/automation/flows/{flow_id}`). Before saving changed mappings, check them with entity-mapping-api `POST /v1/mappings:validate-flow` (`{ source: { journey_id }, actions }`) and fix every `blocking` issue.
+                     */
+                    mappingsAutomationId?: string;
+                    /**
+                     * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation. Write each mapping line as a map-entity action of that automation, reading `submission._block_values['<block id>']['<field>']` (the block id is the `id` of the block in `steps[].uischema`), and check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving the automation.
+                     */
+                    newMappings?: boolean;
+                    /**
+                     * Flow template that processes this journey's submissions. Managed by the Journey Builder, which sets it when the journey is saved (in rollout behind the feature flag journey-mappings-flows). API clients and agents must not set or change it: the builder would then show a flow that does not process this journey's submissions. null unlinks the flow.
+                     */
+                    flowId?: string | null;
+                    templateId?: string | null;
+                    targetedCustomer?: string;
+                    description?: string | null;
+                    publicToken?: string | null;
+                    runtimeEntities?: ("ORDER" | "OPPORTUNITY")[];
+                    filePurposes?: string[];
+                    entityTags?: string[];
+                    /**
+                     * @deprecated Use addressSuggestionsFileId instead
+                     */
+                    addressSuggestionsFileUrl?: string | null;
+                    addressSuggestionsFileId?: string | null;
+                    /**
+                     * Country code for address format (e.g. DE, AT, CH, LU)
+                     */
+                    addressSuggestionsCountryCode?: string | null;
+                    /**
+                     * Whether address auto-complete is enabled
+                     */
+                    addressSuggestionsEnableAutoComplete?: boolean;
+                    /**
+                     * Sources for address auto-complete (e.g. deutschePostService, customAddressesFile)
+                     */
+                    addressSuggestionsSource?: string[];
+                    /**
+                     * Whether free text input is allowed when auto-complete is on
+                     */
+                    addressSuggestionsEnableFreeText?: boolean;
+                    /**
+                     * This property is deprecated and will be removed in a future version
+                     */
+                    useNewDesign?: boolean;
+                    /**
+                     * If false, third-party cookies are disabled to comply with GDPR regulations without asking for consent.
+                     */
+                    thirdPartyCookies?: boolean;
+                    accessMode?: "PUBLIC" | "PRIVATE";
+                    /**
+                     * Languages the journey is offered in. Absent means the journey's single language embedOptions.lang, defaulting to de.
+                     * example:
+                     * [
+                     *   "de",
+                     *   "en"
+                     * ]
+                     */
+                    available_languages?: ("de" | "en" | "fr")[];
+                    /**
+                     * Steps after this step require an authenticated session (auth gate)
+                     */
+                    authGate?: {
+                        /**
+                         * The step containing the Login & Registration block
+                         */
+                        stepId: string;
+                    };
+                    /**
+                     * If true, the journey shows an icon to toggle dark mode
+                     */
+                    enableDarkMode?: boolean;
+                    /**
+                     * If true, some journey input labels are in Austrian format
+                     */
+                    useAustrianLabels?: boolean;
+                    isActive?: boolean;
+                    savingProgress?: {
+                        mode?: "auto" | "local" | "remote" | "none";
+                        supportedRevision?: number;
+                    };
+                    /**
+                     * Per-journey opt-ins to beta features. One named boolean per feature (no free-form map), so a mistyped key is rejected with 400 and generated client types stay explicit. Additive: a feature is on when its key is true OR the organization-wide PostHog flag for that feature is on.
+                     *
+                     */
+                    betaFeatures?: {
+                        /**
+                         * Opt this journey into the modern product presentation (product tiles and details modal). Effective when true OR the organization flag `journey-modern-products` is on.
+                         *
+                         */
+                        modernProducts?: boolean;
+                        /**
+                         * Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.
+                         *
+                         */
+                        modernLauncher?: boolean;
+                        /**
+                         * Opt this journey into the Spark design (Spark UI renderers, branded by the journey's design). Effective when true OR the organization flag `journey-spark-design` is on.
+                         *
+                         */
+                        sparkDesign?: boolean;
+                    };
+                    /**
+                     * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
+                     *
+                     */
+                    offline?: {
+                        /**
+                         * Prepare this journey for offline use on devices that open it online first.
+                         */
+                        enabled: boolean;
+                        /**
+                         * How long a prepared pack stays fresh before the next online open refreshes it. Default 24.
+                         * example:
+                         * 24
+                         */
+                        packTtlHours?: number;
+                    } | null;
+                };
+                validationRules?: /**
+                 * References to validation rules organized by blocks and fields.
+                 * Maps block IDs to either one or more ordered rule IDs (for block-level rules)
+                 * or rule references (for field-level rules).
+                 *
+                 * example:
+                 * {
+                 *   "block1": "rule123",
+                 *   "block2": [
+                 *     "rule456",
+                 *     "rule789"
+                 *   ],
+                 *   "block3": {
+                 *     "field1": "rule101",
+                 *     "field2": [
+                 *       "rule102",
+                 *       "rule103"
+                 *     ]
+                 *   }
+                 * }
+                 */
+                Components.Schemas.ValidationRuleRef;
+                /**
+                 * Manifest/Blueprint ID used to create/update the entity
+                 */
+                _manifest?: string /* uuid */[];
+                partial_warnings?: Components.Schemas.PartialIssue[];
+            }
             export type $400 = Components.Schemas.JourneyValidationError;
             export interface $404 {
                 /**
@@ -3864,6 +4820,17 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<any>
+  /**
+   * getPartialUsages - getPartialUsages
+   * 
+   * Lists the journeys of the organization that use the partial journey, with the IDs of their partial instances. Only available for organizations with journey partials enabled; returns `404` otherwise.
+   * 
+   */
+  'getPartialUsages'(
+    parameters?: Parameters<Paths.GetPartialUsages.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPartialUsages.Responses.$200>
   /**
    * listJourneyRevisions - listJourneyRevisions
    * 
@@ -4174,6 +5141,19 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<any>
+  }
+  ['/v1/journey/partials/{id}/usages']: {
+    /**
+     * getPartialUsages - getPartialUsages
+     * 
+     * Lists the journeys of the organization that use the partial journey, with the IDs of their partial instances. Only available for organizations with journey partials enabled; returns `404` otherwise.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPartialUsages.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPartialUsages.Responses.$200>
   }
   ['/v1/journey/configuration/{id}/revisions']: {
     /**
@@ -4523,6 +5503,14 @@ export type JourneyTemplatingLink = Components.Schemas.JourneyTemplatingLink;
 export type JourneyTemplatingTranslatable = Components.Schemas.JourneyTemplatingTranslatable;
 export type JourneyValidationError = Components.Schemas.JourneyValidationError;
 export type JourneyValidationResponse = Components.Schemas.JourneyValidationResponse;
+export type PartialBlockException = Components.Schemas.PartialBlockException;
+export type PartialContract = Components.Schemas.PartialContract;
+export type PartialInstance = Components.Schemas.PartialInstance;
+export type PartialIssue = Components.Schemas.PartialIssue;
+export type PartialOrigin = Components.Schemas.PartialOrigin;
+export type PartialProduced = Components.Schemas.PartialProduced;
+export type PartialUsages = Components.Schemas.PartialUsages;
+export type PartialWarnings = Components.Schemas.PartialWarnings;
 export type PatchUpdateJourneyRequest = Components.Schemas.PatchUpdateJourneyRequest;
 export type PublishResult = Components.Schemas.PublishResult;
 export type PublishRevisionRequest = Components.Schemas.PublishRevisionRequest;

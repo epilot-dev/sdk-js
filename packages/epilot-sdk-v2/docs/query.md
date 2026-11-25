@@ -54,6 +54,10 @@ const { data } = await queryClient.createOrUpdateView(...)
 **V2**
 - [`executeQueryV2`](#executequeryv2)
 - [`getSemanticModel`](#getsemanticmodel)
+- [`getChartModel`](#getchartmodel)
+- [`getChartTemplates`](#getcharttemplates)
+- [`resolveChartTemplate`](#resolvecharttemplate)
+- [`searchAutocomplete`](#searchautocomplete)
 - [`autocomplete`](#autocomplete)
 - [`workflowsAutocomplete`](#workflowsautocomplete)
 
@@ -114,7 +118,16 @@ const { data } = await queryClient.createOrUpdateView(...)
 - [`WorkflowsQueryResult`](#workflowsqueryresult)
 - [`AutomationExecutionResponse`](#automationexecutionresponse)
 - [`ListAutomationDefinitionsResponse`](#listautomationdefinitionsresponse)
+- [`QueryTimeWindow`](#querytimewindow)
+- [`SemanticModelColumn`](#semanticmodelcolumn)
+- [`SemanticModelTable`](#semanticmodeltable)
+- [`SemanticModelRelationship`](#semanticmodelrelationship)
 - [`SemanticModel`](#semanticmodel)
+- [`ChartTemplateOptionSource`](#charttemplateoptionsource)
+- [`ChartTemplateParameter`](#charttemplateparameter)
+- [`ChartTemplateSummary`](#charttemplatesummary)
+- [`ChartTemplateParameterValue`](#charttemplateparametervalue)
+- [`ResolvedChartTemplate`](#resolvedcharttemplate)
 - [`QueryResults`](#queryresults)
 - [`TimeSeriesSettings`](#timeseriessettings)
 - [`NameDurationSettings`](#namedurationsettings)
@@ -383,6 +396,43 @@ const { data } = await client.executeEntitiesQuery(
   "timestamp": "1715621496068",
   "results": [
     {}
+  ],
+  "sql": "WITH main AS (...) SELECT ... FROM main LEFT JOIN rel_current_sharing_configs ON ...",
+  "nextCursor": "string",
+  "total": 0,
+  "timeRange": {
+    "from": "2026-09-28T00:00:00+02:00",
+    "to": "2026-10-05T00:00:00+02:00",
+    "timezone": "Europe/Berlin"
+  },
+  "comparison": {
+    "to": "previous_period",
+    "timeRange": {
+      "from": "2026-09-28T00:00:00+02:00",
+      "to": "2026-10-05T00:00:00+02:00",
+      "timezone": "Europe/Berlin"
+    },
+    "results": [
+      {}
+    ],
+    "sql": "string",
+    "deltas": [
+      {
+        "column": "string",
+        "current": 0,
+        "previous": 0,
+        "absolute": 0,
+        "relative": 0
+      }
+    ]
+  },
+  "columns": [
+    {
+      "role": "dimension",
+      "id": "purposes.name",
+      "alias": "purposes_name",
+      "name": "Purpose Name"
+    }
   ]
 }
 ```
@@ -638,6 +688,43 @@ const { data } = await client.executeQuery(
   "timestamp": "1715621496068",
   "results": [
     {}
+  ],
+  "sql": "WITH main AS (...) SELECT ... FROM main LEFT JOIN rel_current_sharing_configs ON ...",
+  "nextCursor": "string",
+  "total": 0,
+  "timeRange": {
+    "from": "2026-09-28T00:00:00+02:00",
+    "to": "2026-10-05T00:00:00+02:00",
+    "timezone": "Europe/Berlin"
+  },
+  "comparison": {
+    "to": "previous_period",
+    "timeRange": {
+      "from": "2026-09-28T00:00:00+02:00",
+      "to": "2026-10-05T00:00:00+02:00",
+      "timezone": "Europe/Berlin"
+    },
+    "results": [
+      {}
+    ],
+    "sql": "string",
+    "deltas": [
+      {
+        "column": "string",
+        "current": 0,
+        "previous": 0,
+        "absolute": 0,
+        "relative": 0
+      }
+    ]
+  },
+  "columns": [
+    {
+      "role": "dimension",
+      "id": "purposes.name",
+      "alias": "purposes_name",
+      "name": "Purpose Name"
+    }
   ]
 }
 ```
@@ -749,6 +836,43 @@ const { data } = await client.executeQueryV2(
   "timestamp": "1715621496068",
   "results": [
     {}
+  ],
+  "sql": "WITH main AS (...) SELECT ... FROM main LEFT JOIN rel_current_sharing_configs ON ...",
+  "nextCursor": "string",
+  "total": 0,
+  "timeRange": {
+    "from": "2026-09-28T00:00:00+02:00",
+    "to": "2026-10-05T00:00:00+02:00",
+    "timezone": "Europe/Berlin"
+  },
+  "comparison": {
+    "to": "previous_period",
+    "timeRange": {
+      "from": "2026-09-28T00:00:00+02:00",
+      "to": "2026-10-05T00:00:00+02:00",
+      "timezone": "Europe/Berlin"
+    },
+    "results": [
+      {}
+    ],
+    "sql": "string",
+    "deltas": [
+      {
+        "column": "string",
+        "current": 0,
+        "previous": 0,
+        "absolute": 0,
+        "relative": 0
+      }
+    ]
+  },
+  "columns": [
+    {
+      "role": "dimension",
+      "id": "purposes.name",
+      "alias": "purposes_name",
+      "name": "Purpose Name"
+    }
   ]
 }
 ```
@@ -759,7 +883,7 @@ const { data } = await client.executeQueryV2(
 
 ### `getSemanticModel`
 
-Get the semantic model for agent/tool consumption.
+Get the semantic model for agent/tool (LLM) consumption.
 
 `GET /v2/query/semantic-model`
 
@@ -772,38 +896,222 @@ const { data } = await client.getSemanticModel()
 
 ```json
 {
-  "entities": [
-    {
-      "name": "current_contacts",
-      "displayName": "Contacts",
-      "schema": "entity"
+  "version": "3",
+  "sql_flavor": "ClickHouse",
+  "tables": {
+    "entities": {
+      "name": "string",
+      "description": "string",
+      "columns": [],
+      "known_schemas": ["string"],
+      "shortcuts": {}
+    },
+    "entity_edges": {
+      "name": "string",
+      "description": "string",
+      "columns": [],
+      "known_schemas": ["string"],
+      "shortcuts": {}
+    },
+    "purposes": {
+      "name": "string",
+      "description": "string",
+      "columns": [],
+      "known_schemas": ["string"],
+      "shortcuts": {}
+    },
+    "taxonomies": {
+      "name": "string",
+      "description": "string",
+      "columns": [],
+      "known_schemas": ["string"],
+      "shortcuts": {}
+    },
+    "workflows": {
+      "description": "string",
+      "tables": {}
+    },
+    "sharing": {
+      "description": "string",
+      "tables": {}
+    },
+    "analytics_datasets": {
+      "description": "string",
+      "tables": {}
     }
-  ],
+  },
   "relationships": [
     {
-      "from": "current_contacts",
-      "to": "opportunity_account_contact_relation",
-      "relationship": "hasMany",
-      "displayName": "Contact has many Opportunities"
+      "name": "string",
+      "mechanism": "entity_relation",
+      "from": "string",
+      "to": "string",
+      "via": "string",
+      "cardinality": "one-to-one",
+      "description": "string"
     }
   ],
+  "conventions": {
+    "deduplication": "string",
+    "soft_delete": "string",
+    "org_filter": "string",
+    "json_extract": "string",
+    "workflow_org_id_padding": "string",
+    "entity_fields": "string"
+  },
   "capabilities": {
-    "aggregations": ["count", "count_distinct", "sum", "average", "min", "max", "median"],
-    "calculationTypes": [
-      {
-        "type": "string",
-        "description": "string",
-        "parameters": {}
-      }
-    ],
-    "granularities": ["day", "week", "month", "quarter", "year"],
-    "filterOperators": [
-      {
-        "operator": "string",
-        "description": "string"
-      }
-    ]
+    "chart_calculations": {
+      "formula": {},
+      "milestone_duration": {}
+    }
   }
+}
+```
+
+</details>
+
+---
+
+### `getChartModel`
+
+Chart-builder UI model. Returns the dataset catalog (per-schema entity
+views, cross-schema `current_entities_final`, workflow tables, purposes,
+sharing, partners, and pseudo-datasets for purposes/tags
+
+`GET /v2/query/chart-model`
+
+```ts
+const { data } = await client.getChartModel()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{}
+```
+
+</details>
+
+---
+
+### `getChartTemplates`
+
+List chart templates
+
+`GET /v2/query/chart-templates`
+
+```ts
+const { data } = await client.getChartTemplates()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "templates": [
+    {
+      "id": "string",
+      "version": 1,
+      "category": "workflows",
+      "title": "string",
+      "description": "string",
+      "chart_type": "metric",
+      "tags": ["string"],
+      "requires_setup": true,
+      "parameters": [
+        {
+          "id": "string",
+          "label": "string",
+          "description": "string",
+          "required": true,
+          "depends_on": ["string"],
+          "option_source": {
+            "dataset": "workflows",
+            "attribute": "workflow_executions.definition_id",
+            "filters": {}
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `resolveChartTemplate`
+
+Resolve a chart template
+
+`POST /v2/query/chart-templates/{template_id}:resolve`
+
+```ts
+const { data } = await client.resolveChartTemplate(
+  {
+    template_id: 'example',
+  },
+  {
+    version: 1,
+    parameters: {}
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "title": "string",
+  "description": "string",
+  "chart_config": {}
+}
+```
+
+</details>
+
+---
+
+### `searchAutocomplete`
+
+Search contextual autocomplete options
+
+`POST /v2/query/autocomplete:search`
+
+```ts
+const { data } = await client.searchAutocomplete(
+  null,
+  {
+    dataset: 'workflows',
+    attribute: 'workflow_executions.definition_id',
+    input: 'string',
+    size: 25,
+    filters: {
+      'workflow_executions.definition_id': 'definition-1'
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "options": [
+    {
+      "value": "string",
+      "label": "string",
+      "context": {
+        "workflow_name": "string",
+        "phase_name": "string"
+      }
+    }
+  ]
 }
 ```
 
@@ -878,6 +1186,7 @@ type ErrorResponse = {
   status?: number
   error?: string
   message?: string
+  code?: string
 }
 ```
 
@@ -1542,36 +1851,216 @@ type ListAutomationDefinitionsResponse = {
 }
 ```
 
+### `QueryTimeWindow`
+
+A resolved time window, ISO-8601 instants with the offset of `timezone`.
+
+```ts
+type QueryTimeWindow = {
+  from: string
+  to: string
+  timezone: string
+}
+```
+
+### `SemanticModelColumn`
+
+```ts
+type SemanticModelColumn = {
+  name: string
+  type: string
+  description?: string
+}
+```
+
+### `SemanticModelTable`
+
+```ts
+type SemanticModelTable = {
+  name: string
+  description: string
+  columns?: Array<{
+    name: string
+    type: string
+    description?: string
+  }>
+  known_schemas?: string[]
+  shortcuts?: Record<string, string>
+}
+```
+
+### `SemanticModelRelationship`
+
+```ts
+type SemanticModelRelationship = {
+  name: string
+  mechanism: "entity_relation" | "purpose_array" | "tags_array" | "workflow_context" | "direct_fk"
+  from: string
+  to?: string
+  via?: string
+  cardinality: "one-to-one" | "one-to-many" | "many-to-one" | "many-to-many"
+  description: string
+}
+```
+
 ### `SemanticModel`
 
-The semantic model exposing entities, relationships, and query capabilities
+Describes the ClickHouse datasets an agent can query: which tables exist, how they
+connect, and what conventions (FINAL, soft-delete, JSON extraction, org filter) must
+be observed. Intentionally terse — per-entity payload fields live in the Entity API
+and are not repeated here.
+
 
 ```ts
 type SemanticModel = {
-  entities?: Array<{
-    name?: string
-    displayName?: string
-    schema?: string
-  }>
-  relationships?: Array<{
-    from?: string
+  version: "3"
+  sql_flavor: "ClickHouse"
+  tables: {
+    entities: {
+      name: { ... }
+      description: { ... }
+      columns?: { ... }
+      known_schemas?: { ... }
+      shortcuts?: { ... }
+    }
+    entity_edges: {
+      name: { ... }
+      description: { ... }
+      columns?: { ... }
+      known_schemas?: { ... }
+      shortcuts?: { ... }
+    }
+    purposes: {
+      name: { ... }
+      description: { ... }
+      columns?: { ... }
+      known_schemas?: { ... }
+      shortcuts?: { ... }
+    }
+    taxonomies: {
+      name: { ... }
+      description: { ... }
+      columns?: { ... }
+      known_schemas?: { ... }
+      shortcuts?: { ... }
+    }
+    workflows: {
+      description: { ... }
+      tables: { ... }
+    }
+    sharing: {
+      description: { ... }
+      tables: { ... }
+    }
+    analytics_datasets: {
+      description: { ... }
+      tables: { ... }
+    }
+  }
+  relationships: Array<{
+    name: string
+    mechanism: "entity_relation" | "purpose_array" | "tags_array" | "workflow_context" | "direct_fk"
+    from: string
     to?: string
-    relationship?: "hasMany" | "belongsTo" | "hasOne"
-    displayName?: string
+    via?: string
+    cardinality: "one-to-one" | "one-to-many" | "many-to-one" | "many-to-many"
+    description: string
   }>
-  capabilities?: {
-    aggregations?: string[]
-    calculationTypes?: Array<{
-      type?: { ... }
-      description?: { ... }
-      parameters?: { ... }
-    }>
-    granularities?: string[]
-    filterOperators?: Array<{
-      operator?: { ... }
-      description?: { ... }
+  conventions: {
+    deduplication: string
+    soft_delete: string
+    org_filter: string
+    json_extract: string
+    workflow_org_id_padding: string
+    entity_fields: string
+  }
+  capabilities: {
+    chart_calculations: {
+      formula: { ... }
+      milestone_duration: { ... }
+    }
+  }
+}
+```
+
+### `ChartTemplateOptionSource`
+
+```ts
+type ChartTemplateOptionSource = {
+  dataset: "workflows"
+  attribute: "workflow_executions.definition_id" | "workflow_phases.name" | "workflow_tasks.name"
+  filters?: Record<string, {
+    parameter: string
+  }>
+}
+```
+
+### `ChartTemplateParameter`
+
+```ts
+type ChartTemplateParameter = {
+  id: string
+  label: string
+  description?: string
+  required: boolean
+  depends_on: string[]
+  option_source: {
+    dataset: "workflows"
+    attribute: "workflow_executions.definition_id" | "workflow_phases.name" | "workflow_tasks.name"
+    filters?: Record<string, {
+      parameter: { ... }
     }>
   }
+}
+```
+
+### `ChartTemplateSummary`
+
+```ts
+type ChartTemplateSummary = {
+  id: string
+  version: number
+  category: "workflows" | "journeys" | "opportunities" | "sharing" | "contacts" | "orders" | "tickets" | "contracts" | "service"
+  title: string
+  description: string
+  chart_type: "metric" | "line" | "bar" | "horizontal-bar" | "pie" | "donut" | "funnel" | "area"
+  tags: string[]
+  requires_setup: boolean
+  parameters: Array<{
+    id: string
+    label: string
+    description?: string
+    required: boolean
+    depends_on: string[]
+    option_source: {
+      dataset: { ... }
+      attribute: { ... }
+      filters?: { ... }
+    }
+  }>
+}
+```
+
+### `ChartTemplateParameterValue`
+
+```ts
+type ChartTemplateParameterValue = string | {
+  value: string
+  label?: string
+  context?: {
+    workflow_name?: string
+    phase_name?: string
+  }
+}
+```
+
+### `ResolvedChartTemplate`
+
+```ts
+type ResolvedChartTemplate = {
+  title: string
+  description: string
+  chart_config: Record<string, unknown>
 }
 ```
 
@@ -1582,6 +2071,37 @@ type QueryResults = {
   status?: string
   timestamp?: string
   results?: Record<string, unknown>[]
+  sql?: string
+  nextCursor?: string
+  total?: number
+  timeRange?: {
+    from: string
+    to: string
+    timezone: string
+  }
+  comparison?: {
+    to: "previous_period" | "previous_year"
+    timeRange: {
+      from: { ... }
+      to: { ... }
+      timezone: { ... }
+    }
+    results: Record<string, unknown>[]
+    sql: string
+    deltas: Array<{
+      column: { ... }
+      current: { ... }
+      previous: { ... }
+      absolute: { ... }
+      relative: { ... }
+    }>
+  }
+  columns?: Array<{
+    role?: "dimension" | "breakdown" | "measure"
+    id?: string
+    alias?: string
+    name?: string
+  }>
 }
 ```
 

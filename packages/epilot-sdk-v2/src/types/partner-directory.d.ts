@@ -265,6 +265,12 @@ export declare namespace Components {
              * group-456
              */
             group_id?: string;
+            /**
+             * Short abbreviation for the group, up to 2 characters
+             * example:
+             * FN
+             */
+            abbreviation?: string | null;
         }
         /**
          * A partner organization that can be assigned to tasks or entities at the organization level.
@@ -623,7 +629,7 @@ export declare namespace Components {
              * example:
              * de
              */
-            language?: "en" | "de";
+            language?: string;
             /**
              * Role IDs to automatically assign to the user upon creation.
              * If not provided, the user will have no roles until manually assigned.
@@ -899,7 +905,7 @@ export declare namespace Components {
              * example:
              * de
              */
-            language?: "en" | "de";
+            language?: string;
         }
         /**
          * A role definition for users in a partner organization
@@ -941,6 +947,15 @@ export declare namespace Components {
              *
              */
             Grant[];
+            /**
+             * Whether this role can be mutated (edited / deleted / assigned) by the calling Vendor.
+             * Reflects the partner organization's pricing tier — role mutations are only allowed
+             * when the partner org is on the Partner pricing tier.
+             *
+             * example:
+             * true
+             */
+            mutable: boolean;
         }
         /**
          * A user within a partner organization, including their assigned roles
@@ -1009,6 +1024,14 @@ export declare namespace Components {
                  * Partner Administrator
                  */
                 name: string;
+                /**
+                 * Whether this role can be re-assigned / unassigned by the calling Vendor.
+                 * Reflects the partner organization's pricing tier.
+                 *
+                 * example:
+                 * true
+                 */
+                mutable: boolean;
             }[];
         }
         /**
@@ -1423,7 +1446,14 @@ export declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                results?: /* A role definition for users in a partner organization */ Components.Schemas.PartnerRole[];
+                results: /* A role definition for users in a partner organization */ Components.Schemas.PartnerRole[];
+                /**
+                 * Whether the caller (Vendor) is allowed to mutate roles for this partner
+                 * organization. `false` when the partner org is not on the Partner pricing tier —
+                 * i.e. when the "partnership" is between two Vendors.
+                 *
+                 */
+                can_manage_roles: boolean;
             }
             export interface $400 {
             }
@@ -1449,7 +1479,16 @@ export declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                results?: /* A user within a partner organization, including their assigned roles */ Components.Schemas.PartnerUser[];
+                results: /* A user within a partner organization, including their assigned roles */ Components.Schemas.PartnerUser[];
+                /**
+                 * Whether the caller (Vendor) is allowed to mutate roles for this partner
+                 * organization. `false` when the partner org is not on the Partner pricing tier —
+                 * i.e. when the "partnership" is between two Vendors. Frontends should disable
+                 * role-mutation UI (create / edit / delete role, assign / unassign user roles)
+                 * when this flag is `false`.
+                 *
+                 */
+                can_manage_roles: boolean;
             }
             export interface $400 {
             }

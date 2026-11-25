@@ -9,6 +9,7 @@ import type {
 
 export declare namespace Components {
     namespace Parameters {
+        export type AgentTaskSessionId = string; // ^[A-Za-z0-9_-]{1,100}$
         export type ConfigId = string;
         export type ConfigType = /**
          * Configuration resource type identifier.
@@ -22,6 +23,7 @@ export declare namespace Components {
         export type SyncJobId = string;
     }
     export interface PathParameters {
+        AgentTaskSessionId?: Parameters.AgentTaskSessionId /* ^[A-Za-z0-9_-]{1,100}$ */;
         ConfigType?: Parameters.ConfigType;
         ConfigId?: Parameters.ConfigId;
         SyncJobId?: Parameters.SyncJobId;
@@ -32,6 +34,1224 @@ export declare namespace Components {
         SizeParam?: Parameters.SizeParam;
     }
     namespace Schemas {
+        export interface AgentTask {
+            session_id: string;
+            org_id: string;
+            title: string;
+            summary: string;
+            status: /**
+             * `working`: the agent has more to do. `needs_input`: an open item
+             * waits for the user. `awaiting_signoff`: the agent is done and
+             * nothing is open. `signed_off`: the user accepted it.
+             *
+             */
+            AgentTaskStatus;
+            state: "working" | "done";
+            plan_job_id?: string;
+            version: number;
+            created_by?: string;
+            created_at: string; // date-time
+            updated_at: string; // date-time
+            signed_off_by?: string;
+            signed_off_at?: string; // date-time
+            items: AgentTaskItem[];
+            changes: /* A resource of the org the session changed. */ AgentTaskChange[];
+        }
+        /**
+         * A resource of the org the session changed.
+         */
+        export interface AgentTaskChange {
+            /**
+             * Configuration resource type (e.g. journey, automation_flow).
+             */
+            type: string;
+            id: string;
+            title?: string;
+            change: "created" | "updated" | "deleted";
+            /**
+             * What changed, in a sentence.
+             */
+            note?: string;
+        }
+        export interface AgentTaskInput {
+            /**
+             * What the session is doing, as a short imperative ("Install the Blueprint X").
+             */
+            title: string;
+            summary?: string;
+            /**
+             * `working` while the agent has more to do, `done` once everything is.
+             */
+            state: "working" | "done";
+            /**
+             * The plan (a dry-run sync job) the task works for, e.g. resolving its conflicts.
+             */
+            plan_job_id?: string;
+            items: [
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?,
+                AgentTaskItemInput?
+            ];
+            changes?: [
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?,
+                /* A resource of the org the session changed. */ AgentTaskChange?
+            ];
+        }
+        export interface AgentTaskItem {
+            /**
+             * Stable id; keep it (and the title) to keep the user's status.
+             */
+            id: string;
+            /**
+             * `done`: something the agent did. `decision`: a choice the
+             * agent made. `check`: something it verified. `open_item`:
+             * something only the user can decide.
+             *
+             */
+            kind: "open_item" | "decision" | "check" | "done" | "decision" | "check" | "open_item";
+            title: string;
+            detail?: string;
+            resource?: {
+                type: string;
+                id: string;
+                title?: string;
+            };
+            resolution?: "merged" | "kept_target" | "took_source";
+            status: SyncJobReportItemStatus;
+            /**
+             * Choices for an open item the user decides (e.g. "Sync the missing
+             * template" / "Use template X"). The user picks one with
+             * `updateAgentTaskItem` (`choice`). Keep option ids stable: a
+             * task written again keeps the user's choice while the option is
+             * still offered.
+             *
+             */
+            options?: [
+                {
+                    id: string;
+                    label: string;
+                    detail?: string;
+                }?,
+                {
+                    id: string;
+                    label: string;
+                    detail?: string;
+                }?,
+                {
+                    id: string;
+                    label: string;
+                    detail?: string;
+                }?,
+                {
+                    id: string;
+                    label: string;
+                    detail?: string;
+                }?,
+                {
+                    id: string;
+                    label: string;
+                    detail?: string;
+                }?,
+                {
+                    id: string;
+                    label: string;
+                    detail?: string;
+                }?
+            ];
+            resolved_by?: string;
+            resolved_at?: string; // date-time
+            /**
+             * The id of the option the user picked.
+             */
+            choice?: string;
+        }
+        export interface AgentTaskItemInput {
+            /**
+             * Stable id; keep it (and the title) to keep the user's status.
+             */
+            id: string;
+            /**
+             * `done`: something the agent did. `decision`: a choice the
+             * agent made. `check`: something it verified. `open_item`:
+             * something only the user can decide.
+             *
+             */
+            kind: "open_item" | "decision" | "check" | "done" | "decision" | "check" | "open_item";
+            title: string;
+            detail?: string;
+            resource?: {
+                type: string;
+                id: string;
+                title?: string;
+            };
+            resolution?: "merged" | "kept_target" | "took_source";
+            status?: SyncJobReportItemStatus;
+            /**
+             * Choices for an open item the user decides (e.g. "Sync the missing
+             * template" / "Use template X"). The user picks one with
+             * `updateAgentTaskItem` (`choice`). Keep option ids stable: a
+             * task written again keeps the user's choice while the option is
+             * still offered.
+             *
+             */
+            options?: [
+                {
+                    id: string;
+                    label: string;
+                    detail?: string;
+                }?,
+                {
+                    id: string;
+                    label: string;
+                    detail?: string;
+                }?,
+                {
+                    id: string;
+                    label: string;
+                    detail?: string;
+                }?,
+                {
+                    id: string;
+                    label: string;
+                    detail?: string;
+                }?,
+                {
+                    id: string;
+                    label: string;
+                    detail?: string;
+                }?,
+                {
+                    id: string;
+                    label: string;
+                    detail?: string;
+                }?
+            ];
+        }
+        /**
+         * `working`: the agent has more to do. `needs_input`: an open item
+         * waits for the user. `awaiting_signoff`: the agent is done and
+         * nothing is open. `signed_off`: the user accepted it.
+         *
+         */
+        export type AgentTaskStatus = "working" | "needs_input" | "awaiting_signoff" | "signed_off";
+        export interface AgentTaskSummary {
+            session_id: string;
+            title: string;
+            status: /**
+             * `working`: the agent has more to do. `needs_input`: an open item
+             * waits for the user. `awaiting_signoff`: the agent is done and
+             * nothing is open. `signed_off`: the user accepted it.
+             *
+             */
+            AgentTaskStatus;
+            plan_job_id?: string;
+            created_by?: string;
+            created_at: string; // date-time
+            updated_at: string; // date-time
+            /**
+             * Open items still waiting for the user.
+             */
+            open_items: number;
+            /**
+             * How many resources the session changed.
+             */
+            changes: number;
+        }
         export interface BreakLineageResponse {
             deleted: boolean;
         }
@@ -48,9 +1268,9 @@ export declare namespace Components {
          */
         export interface CompareLineage {
             /**
-             * `pull` — the caller org imported this config from the source org
+             * `pull` — the caller org pulled this config from the source org
              * (entry lives in the caller's lineage partition). `push` — the
-             * source org imported it from the caller (entry lives in the source
+             * source org pulled it from the caller (entry lives in the source
              * org's partition).
              *
              */
@@ -118,6 +1338,23 @@ export declare namespace Components {
             current?: /* Summary metadata for a single configuration item in the tree */ ConfigNode;
             source?: /* Summary metadata for a single configuration item in the tree */ ConfigNode;
             lineage?: /* Provenance of a lineage-backed match */ CompareLineage;
+        }
+        /**
+         * A config's connections in the org's config index
+         */
+        export interface ConfigConnectionsResponse {
+            /**
+             * Configs this config needs (references)
+             */
+            needs: /* Summary metadata for a single configuration item in the tree */ ConfigNode[];
+            /**
+             * Other configs that use (reference) this config
+             */
+            used_by: /* Summary metadata for a single configuration item in the tree */ ConfigNode[];
+            /**
+             * When the index these connections come from was built
+             */
+            indexed_at?: string; // date-time
         }
         /**
          * Cursor-paginated list of configs referenced by a given config
@@ -286,6 +1523,22 @@ export declare namespace Components {
              * true
              */
             deletable: boolean;
+            /**
+             * The type is normally reached only as a dependency of other configs.
+             * Returned only when `include_dependency_only=true` is requested.
+             *
+             * example:
+             * false
+             */
+            dependency_only?: boolean;
+            /**
+             * The type is not indexed: `listConfigs` returns its resources only
+             * with a `blueprint_ids` filter, read from the blueprints' manifests.
+             *
+             * example:
+             * false
+             */
+            requires_blueprint_filter?: boolean;
         }
         /**
          * Persist a source→target lineage pairing (caller org as target)
@@ -349,6 +1602,10 @@ export declare namespace Components {
              * True once the worker has kicked the index rebuild on completion.
              */
             rebuild_triggered?: boolean;
+            /**
+             * Id of the user who started the job. Absent on jobs started with a token that has no user.
+             */
+            created_by?: string;
         }
         /**
          * Aggregate counters by resource delete status.
@@ -457,7 +1714,7 @@ export declare namespace Components {
              * Stable finding identity — unchanged across rescans.
              */
             id: string;
-            code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration" | "source_org_reference" | "secret_value_missing" | "env_value_missing";
+            code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_attribute_in_group" | "duplicate_attribute_id" | "duplicate_group_id" | "summary_attribute_missing" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration" | "source_org_reference" | "secret_value_missing" | "env_value_missing";
             severity: "error" | "warning" | "info";
             /**
              * Config type carrying the problem.
@@ -631,8 +1888,12 @@ export declare namespace Components {
              * - creating_org: the preview org is being created
              * - copying_configuration: the sync job copying this org's configuration is running
              * - inviting: the requester is being invited to the preview org
-             * - ready: the requester got the "your preview org is ready" email
+             * - ready: the requester is a member of the preview org (or, invited by email alone, got the
+             *   invitation email)
              * - failed: see `error`
+             * - superseded: a newer preview of this org replaced it (`superseded_by`); its org is queued for deletion
+             * - cancelled: cancelled or discarded with `cancelPreview` (`cancelled_at`, `cancelled_by`); its org is
+             *   queued for deletion
              *
              */
             PreviewStatus;
@@ -671,22 +1932,117 @@ export declare namespace Components {
              * Why the preview failed.
              */
             error?: string;
+            /**
+             * The newer preview that superseded this one.
+             */
+            superseded_by?: string;
+            /**
+             * When the preview was cancelled (`cancelPreview`). Only on `cancelled` previews.
+             */
+            cancelled_at?: string; // date-time
+            /**
+             * The user who cancelled the preview. Only on `cancelled` previews.
+             */
+            cancelled_by?: string;
+            /**
+             * When the preview org was queued for deletion at organization-api, after the preview was replaced or
+             * cancelled. The org exists until organization-api's grace period has passed.
+             *
+             */
+            org_deletion_requested_at?: string; // date-time
+            /**
+             * Why queueing the preview org for deletion last failed. It is tried again with the next preview of the
+             * org; absent once it worked.
+             *
+             */
+            org_deletion_error?: string;
+            /**
+             * When the preview entered each status (ISO 8601), keyed by status. `creating_org` is the creation
+             * time. A status the preview has not reached is absent. Lets clients time the steps.
+             *
+             * example:
+             * {
+             *   "creating_org": "2026-11-17T07:38:58.000Z",
+             *   "copying_configuration": "2026-11-17T07:40:12.000Z"
+             * }
+             */
+            status_since?: {
+                [name: string]: string; // date-time
+            };
+            /**
+             * When the requester was invited to the preview org.
+             */
+            invited_at?: string; // date-time
+            /**
+             * When the invite was accepted on the requester's behalf. A requester who already has an epilot account
+             * becomes a member of the preview org right away; they can open it without accepting anything.
+             *
+             */
+            invite_accepted_at?: string; // date-time
+            /**
+             * Why accepting the invite on the requester's behalf last failed. It is tried again before the agent
+             * starts; absent once it worked. While it is set the requester accepts the invite themselves.
+             *
+             */
+            invite_accept_error?: string;
+            /**
+             * The requester's invite link into the preview org, as it was when the invite was sent. Only on
+             * `getPreview`, and only for the requester themselves. It stops working once the invite is accepted.
+             *
+             */
+            invite_link?: string;
+            /**
+             * Progress of copying the configuration into the preview org. Only on `getPreview` while the status is
+             * `copying_configuration`. The copy runs through the sync phases one after another, so
+             * `processed_count` starts again with each phase; `last_activity_at` shows that the copy is alive.
+             *
+             */
+            mirror_progress?: {
+                /**
+                 * Current phase of the copy job.
+                 */
+                phase: "phase_0" | "dependencies" | "phase_a" | "phase_a5" | "phase_b" | "finalize";
+                /**
+                 * Resources the current phase is done with.
+                 */
+                processed_count: number;
+                /**
+                 * The batch the current phase is working on, when it runs in batches.
+                 */
+                batch?: {
+                    index?: number;
+                    of?: number;
+                };
+                /**
+                 * Resources in the copy so far (grows while dependencies are added).
+                 */
+                total_count: number;
+                failed_count: number;
+                /**
+                 * When a resource of the copy last changed.
+                 */
+                last_activity_at?: string; // date-time
+            };
         }
         /**
          * - creating_org: the preview org is being created
          * - copying_configuration: the sync job copying this org's configuration is running
          * - inviting: the requester is being invited to the preview org
-         * - ready: the requester got the "your preview org is ready" email
+         * - ready: the requester is a member of the preview org (or, invited by email alone, got the
+         *   invitation email)
          * - failed: see `error`
+         * - superseded: a newer preview of this org replaced it (`superseded_by`); its org is queued for deletion
+         * - cancelled: cancelled or discarded with `cancelPreview` (`cancelled_at`, `cancelled_by`); its org is
+         *   queued for deletion
          *
          */
-        export type PreviewStatus = "creating_org" | "copying_configuration" | "inviting" | "ready" | "failed";
+        export type PreviewStatus = "creating_org" | "copying_configuration" | "inviting" | "ready" | "failed" | "superseded" | "cancelled";
         /**
          * Configuration resource type identifier.
          * Matches blueprint-manifest-api V3 naming conventions.
          *
          */
-        export type ResourceType = "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "org_setting";
+        export type ResourceType = "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting";
         /**
          * Minimal identity of a single configuration resource.
          */
@@ -781,6 +2137,96 @@ export declare namespace Components {
          */
         export type SyncDirection = "push" | "pull";
         /**
+         * A finding of the post-sync health check: a `HealthFinding` plus
+         * whether the source config the job copied has it too.
+         *
+         */
+        export interface SyncHealthFinding {
+            /**
+             * Stable finding identity — unchanged across rescans.
+             */
+            id: string;
+            code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_attribute_in_group" | "duplicate_attribute_id" | "duplicate_group_id" | "summary_attribute_missing" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration" | "source_org_reference" | "secret_value_missing" | "env_value_missing";
+            severity: "error" | "warning" | "info";
+            /**
+             * Config type carrying the problem.
+             */
+            source_type: string;
+            source_id: string;
+            source_title: string;
+            /**
+             * English prose. Use message_key when rendering to a user.
+             */
+            message: string;
+            /**
+             * Translation key for the same sentence, with message_params as interpolation values. Absent for findings whose text comes from @epilot/config-engine.
+             *
+             */
+            message_key?: string;
+            message_params?: {
+                [name: string]: any;
+            };
+            /**
+             * Type of the referenced config (reference findings only).
+             */
+            ref_type?: string;
+            ref_id?: string;
+            ref_title?: string;
+            /**
+             * Portal deep link to the source config.
+             */
+            source_link?: string;
+            /**
+             * Portal deep link to the referenced config (when it exists).
+             */
+            ref_link?: string;
+            /**
+             * Config that owns the affected one, when the affected config has no
+             * editor of its own (an entity mapping is edited inside its journey).
+             *
+             */
+            owner_type?: string;
+            owner_id?: string;
+            owner_title?: string;
+            /**
+             * Portal deep link to the owning config — where the fix happens.
+             */
+            owner_link?: string;
+            /**
+             * Field path of the referencing field in the source payload.
+             */
+            path?: string;
+            /**
+             * True when the cleanup endpoint can remove this orphan reference.
+             */
+            cleanable?: boolean;
+            /**
+             * Acknowledged as intentional by a person — excluded from the headline score and default breakdown until un-ignored.
+             *
+             */
+            ignored?: boolean;
+            ignored_at?: string; // date-time
+            ignored_by?: string;
+            ignored_reason?: string;
+            /**
+             * Scan timestamp when this finding first appeared.
+             */
+            first_seen: string; // date-time
+            last_seen: string; // date-time
+            /**
+             * `in_source`: the same check reports the same thing on the
+             * source version of the config (same code, config, reference
+             * mapped back to the source, and path) — the sync copied it.
+             * `new`: everything else, always for `source_org_reference`,
+             * `secret_value_missing`, `env_value_missing` and
+             * `unreadable_config`, and for every finding when the baseline
+             * is `unavailable`. Absent on results computed before the
+             * baseline existed.
+             *
+             */
+            baseline?: "new" | "in_source";
+        }
+        /**
          * Sync job header as surfaced by `getSyncJob` and the create response. The
          * canonical persistence shape is described in `docs/sync/INTERFACES.md`.
          *
@@ -818,7 +2264,7 @@ export declare namespace Components {
             started_at: string; // date-time
             finished_at?: string; // date-time
             health_check?: /**
-             * Compact state of the job's post-import health check. Full results:
+             * Compact state of the job's post-sync health check. Full results:
              * `getSyncJobHealth`. Absent on plans and on jobs that finished before
              * the check existed.
              *
@@ -896,6 +2342,16 @@ export declare namespace Components {
                 approved_by?: string;
                 approved_at: string; // date-time
             }[];
+            /**
+             * On a plan, when it was rejected (`rejectSyncPlan`). Absent on plans that were not rejected and on
+             * other jobs.
+             *
+             */
+            rejected_at?: string; // date-time
+            /**
+             * The user who rejected the plan. Present with `rejected_at` when a user rejected it.
+             */
+            rejected_by?: string;
             /**
              * Up to 20 sample error messages from failed resources.
              */
@@ -1162,9 +2618,9 @@ export declare namespace Components {
          */
         export interface SyncJobHealth {
             status: /**
-             * State of a sync job's post-import health check. `pending`: queued,
+             * State of a sync job's post-sync health check. `pending`: queued,
              * `running`: scanning, `done`: findings available, `failed`: the check
-             * itself failed or did not finish (the import is unaffected), `skipped`:
+             * itself failed or did not finish (the sync is unaffected), `skipped`:
              * nothing to check (a plan, a job that wrote nothing, or a cancelled
              * job), `not_run`: a finished job that never had a check (start one with
              * `runSyncJobHealth`).
@@ -1182,22 +2638,74 @@ export declare namespace Components {
              * Why the check failed or was skipped.
              */
             error?: string;
+            baseline?: /**
+             * Comparison of the findings with the same checks run on the source
+             * versions of the written configs, with the source org as context.
+             * Present on `done` results computed since the baseline exists. The
+             * top-level `counts` keep counting every finding.
+             *
+             */
+            SyncJobHealthBaseline;
             /**
              * Errors first, then warnings, then info. Empty unless `done`.
              */
-            findings: HealthFinding[];
+            findings: /**
+             * A finding of the post-sync health check: a `HealthFinding` plus
+             * whether the source config the job copied has it too.
+             *
+             */
+            SyncHealthFinding[];
         }
         /**
-         * Compact state of the job's post-import health check. Full results:
+         * Comparison of the findings with the same checks run on the source
+         * versions of the written configs, with the source org as context.
+         * Present on `done` results computed since the baseline exists. The
+         * top-level `counts` keep counting every finding.
+         *
+         */
+        export interface SyncJobHealthBaseline {
+            /**
+             * `unavailable`: the source could not be checked (see `reason`);
+             * every finding is `new`.
+             *
+             */
+            status: "compared" | "unavailable";
+            /**
+             * Why the baseline is unavailable, e.g. `source_token_unavailable`,
+             * `source_index_unavailable`, `source_unreadable`,
+             * `source_reads_failed`, `source_check_failed`,
+             * `source_check_timed_out`.
+             *
+             */
+            reason?: string;
+            /**
+             * New findings per severity.
+             */
+            counts: {
+                error: number;
+                warning: number;
+                info: number;
+            };
+            /**
+             * Findings the source configs already have, per severity.
+             */
+            in_source_counts: {
+                error: number;
+                warning: number;
+                info: number;
+            };
+        }
+        /**
+         * Compact state of the job's post-sync health check. Full results:
          * `getSyncJobHealth`. Absent on plans and on jobs that finished before
          * the check existed.
          *
          */
         export interface SyncJobHealthCheck {
             status: /**
-             * State of a sync job's post-import health check. `pending`: queued,
+             * State of a sync job's post-sync health check. `pending`: queued,
              * `running`: scanning, `done`: findings available, `failed`: the check
-             * itself failed or did not finish (the import is unaffected), `skipped`:
+             * itself failed or did not finish (the sync is unaffected), `skipped`:
              * nothing to check (a plan, a job that wrote nothing, or a cancelled
              * job), `not_run`: a finished job that never had a check (start one with
              * `runSyncJobHealth`).
@@ -1207,9 +2715,9 @@ export declare namespace Components {
             counts: HealthSeverityCounts;
         }
         /**
-         * State of a sync job's post-import health check. `pending`: queued,
+         * State of a sync job's post-sync health check. `pending`: queued,
          * `running`: scanning, `done`: findings available, `failed`: the check
-         * itself failed or did not finish (the import is unaffected), `skipped`:
+         * itself failed or did not finish (the sync is unaffected), `skipped`:
          * nothing to check (a plan, a job that wrote nothing, or a cancelled
          * job), `not_run`: a finished job that never had a check (start one with
          * `runSyncJobHealth`).
@@ -1228,6 +2736,63 @@ export declare namespace Components {
              */
             SyncJob[];
         }
+        export interface SyncJobReportItemInput {
+            /**
+             * Stable id; keep it (and the title) to keep the user's status.
+             */
+            id: string;
+            kind: "open_item" | "decision" | "check";
+            title: string;
+            detail?: string;
+            resource?: {
+                type: string;
+                id: string;
+                title?: string;
+            };
+            resolution?: "merged" | "kept_target" | "took_source";
+            status?: SyncJobReportItemStatus;
+            /**
+             * Choices for an open item the user decides (e.g. "Sync the missing
+             * template" / "Use template X"). The user picks one with
+             * `updateAgentTaskItem` (`choice`). Keep option ids stable: a
+             * task written again keeps the user's choice while the option is
+             * still offered.
+             *
+             */
+            options?: [
+                {
+                    id: string;
+                    label: string;
+                    detail?: string;
+                }?,
+                {
+                    id: string;
+                    label: string;
+                    detail?: string;
+                }?,
+                {
+                    id: string;
+                    label: string;
+                    detail?: string;
+                }?,
+                {
+                    id: string;
+                    label: string;
+                    detail?: string;
+                }?,
+                {
+                    id: string;
+                    label: string;
+                    detail?: string;
+                }?,
+                {
+                    id: string;
+                    label: string;
+                    detail?: string;
+                }?
+            ];
+        }
+        export type SyncJobReportItemStatus = "open" | "done";
         /**
          * Request body for `createSyncJob`. `target_auth_token` is the destination
          * org's auth token and MUST NOT be persisted or logged — it is `writeOnly`.
@@ -1465,6 +3030,57 @@ export declare namespace Components {
          */
         export type SyncJobStatus = "pending" | "in_progress" | "succeeded" | "partial" | "failed" | "cancelled";
         /**
+         * Why a conflicted resource cannot be named in `merge_conflicts`:
+         * `type_not_supported` (only flat records are merged: email templates,
+         * signatures, notification templates, products, prices, taxes, coupons,
+         * webhooks, custom and environment variables, closing reasons,
+         * taxonomies and their classifications, designs, org settings. Entity
+         * schemas, journeys, automations, workflows and the like are not: their
+         * parts refer to each other), `not_exact` (a conflict of certainty
+         * `possible`), `mostly_replaced`, `paths_truncated` (the plan does not
+         * hold all of the resource's conflicting paths), `list_changes` (a
+         * conflict is inside a list). An entity schema has a merge of its own
+         * that tells attributes and groups apart, so the type and list reasons
+         * do not apply to it; it gets `not_mergeable` when that merge refuses
+         * the schema (why: `merge_refusal`).
+         *
+         */
+        export type SyncMergeBlocker = "type_not_supported" | "not_exact" | "mostly_replaced" | "paths_truncated" | "list_changes" | "not_mergeable";
+        /**
+         * A choice the merge of an entity schema needs before it can write.
+         * Answer it with a decision on `path` in `merge_conflicts`.
+         *
+         */
+        export interface SyncMergeChoice {
+            /**
+             * example:
+             * attributes[name=tax].label
+             */
+            path: string;
+            /**
+             * `both_edited` (both sides changed one property to different
+             * values), `both_added` (both added an item under one name, not the
+             * same), `removed_and_edited` (one side removed an item the other
+             * changed), `probable_duplicate` (each side added an attribute with
+             * a different name but the same label and type: `source` keeps
+             * both, `target` only the target's).
+             *
+             */
+            reason: "both_edited" | "both_added" | "removed_and_edited" | "probable_duplicate";
+            /**
+             * What `take: source` writes. Absent when the item is left out, or
+             * too large to show.
+             *
+             */
+            source?: any;
+            /**
+             * What `take: target` writes. Absent when the item is left out, or
+             * too large to show.
+             *
+             */
+            target?: any;
+        }
+        /**
          * Three-phase orchestrator phase. `phase_0` fetches source payloads,
          * `dependencies` expands the selection with its dependencies (only when
          * `include_dependencies` is on), `phase_a` creates/matches with
@@ -1491,8 +3107,8 @@ export declare namespace Components {
              */
             ready: boolean;
             /**
-             * True while `applySyncPlan` accepts the plan: it is `ready` and
-             * `expires_at` has not passed. A plan can be applied more than once
+             * True while `applySyncPlan` accepts the plan: it is `ready`, not
+             * rejected (`rejected_at`) and `expires_at` has not passed. A plan can be applied more than once
              * (e.g. one part now, another later); each apply is listed in
              * `applied_by`.
              *
@@ -1540,12 +3156,24 @@ export declare namespace Components {
                  * Rows with at least one conflict (`plan.conflicts`).
                  */
                 conflicts?: number;
+                /**
+                 * Rows with at least one warning (`plan.warnings`).
+                 */
+                warnings?: number;
                 type: string;
             }[];
             /**
              * Ids of the jobs that applied this plan, oldest first.
              */
             applied_by?: string[];
+            /**
+             * When the plan was rejected (`rejectSyncPlan`). Absent unless rejected.
+             */
+            rejected_at?: string; // date-time
+            /**
+             * The user who rejected the plan. Absent unless a user rejected it.
+             */
+            rejected_by?: string;
         }
         /**
          * What a real run would do with a planned resource:
@@ -1566,25 +3194,29 @@ export declare namespace Components {
             /**
              * Machine-readable reason, for clients that show their own message.
              */
-            code?: "target_auth_token_missing" | "empty_selection" | "invalid_resources" | "plan_not_ready" | "plan_expired" | "nothing_to_apply" | "missing_dependencies" | "unresolved_conflicts";
+            code?: "target_auth_token_missing" | "empty_selection" | "invalid_resources" | "plan_not_ready" | "plan_expired" | "nothing_to_apply" | "missing_dependencies" | "unresolved_conflicts" | "merge_not_possible" | "plan_rejected" | "plan_already_applied" | "add_resources_not_allowed" | "apply_in_progress";
             /**
-             * Same as `error` (set with `unresolved_conflicts`).
+             * Same as `error` (set with `unresolved_conflicts` and `merge_not_possible`).
              */
             message?: string;
             invalid_resources?: SyncJobResourceRef[];
             missing_dependencies?: SyncPlanMissingDependency[];
             /**
-             * With `unresolved_conflicts`, the applied rows with undecided conflicts.
+             * With `unresolved_conflicts`, the applied rows with undecided
+             * conflicts. With `merge_not_possible`, the rows of
+             * `merge_conflicts` that cannot be merged.
+             *
              */
             resources?: SyncPlanUnresolvedConflict[];
         }
         export interface SyncPlanApplyRequest {
             /**
              * Destination-org auth token, as on `createSyncJob`. Never returned
-             * in responses and never logged.
+             * in responses and never logged. Required (400
+             * `target_auth_token_missing` without it).
              *
              */
-            target_auth_token: string;
+            target_auth_token?: string;
             /**
              * Name of the apply job. Defaults to the plan's name.
              */
@@ -1601,11 +3233,37 @@ export declare namespace Components {
             exclude?: SyncJobResourceRef[];
             /**
              * Rows with conflicts to apply anyway, overwriting the target's
-             * changes. Applied rows with conflicts that are not listed here
-             * make the request fail with `unresolved_conflicts`.
+             * changes. Applied rows with conflicts that are listed neither
+             * here nor in `merge_conflicts` make the request fail with
+             * `unresolved_conflicts`.
              *
              */
             overwrite_conflicts?: SyncJobResourceRef[];
+            /**
+             * Rows with conflicts to apply merged: the source's version, with
+             * the target's own changes kept on the conflicting paths. Each must
+             * be applied and must not be in `overwrite_conflicts` (400
+             * `invalid_resources`). A row without conflicts is applied as
+             * usual.
+             *
+             */
+            merge_conflicts?: {
+                type: string;
+                source_id: string;
+                /**
+                 * One per `both_edited` path of the row: whose value the
+                 * merged row gets there. Other conflict paths need none (the
+                 * target's value is kept) and decisions for them are ignored.
+                 *
+                 */
+                decisions?: {
+                    /**
+                     * A `path` of the row's `both_edited` conflict.
+                     */
+                    path: string;
+                    take: "source" | "target";
+                }[];
+            }[];
             /**
              * Apply even when left-out resources that would be created are
              * referenced by applied ones. Those references then keep pointing
@@ -1692,7 +3350,10 @@ export declare namespace Components {
              */
             certainty: "exact" | "possible";
             /**
-             * Always true for now. `applySyncPlan` refuses the row until it is overwritten or left out.
+             * Always true for now. `applySyncPlan` refuses the row until it is
+             * overwritten (`overwrite_conflicts`), merged (`merge_conflicts`)
+             * or left out.
+             *
              */
             requires_decision: boolean;
             /**
@@ -1840,6 +3501,10 @@ export declare namespace Components {
              * Rows with at least one conflict (`plan.conflicts`).
              */
             conflicts?: number;
+            /**
+             * Rows with at least one warning (`plan.warnings`).
+             */
+            warnings?: number;
         }
         export interface SyncPlanDiff {
             type: string;
@@ -1943,19 +3608,190 @@ export declare namespace Components {
         }
         export interface SyncPlanReplanRequest {
             /**
-             * Destination-org auth token (planning reads the target). Never returned or logged.
+             * Destination-org auth token (planning reads the target). Never returned or logged. Required (400
+             * `target_auth_token_missing` without it).
+             *
              */
-            target_auth_token: string;
+            target_auth_token?: string;
             /**
              * Rows of the plan to plan again. Omit to plan every row again.
              */
             resources?: SyncJobResourceRef[];
+            /**
+             * Source-org resources to add to the plan, then plan (with their
+             * dependencies, when the plan includes dependencies) together with any
+             * listed `resources`; the other rows keep their plan. Resources the
+             * plan already holds are just planned again.
+             *
+             * Only for a plan into a preview org, replanned from that preview
+             * org: the Configuration Agent adds what the selection misses (e.g. a
+             * document template an email template references) and applies the
+             * plan again. Otherwise 403 `add_resources_not_allowed`.
+             *
+             */
+            add_resources?: [
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?,
+                SyncJobResourceRef?
+            ];
         }
         export interface SyncPlanUnresolvedConflict {
             type: string;
             source_id: string;
             title?: string;
-            codes: ("target_edited" | "both_edited" | "target_only_removed")[];
+            codes: ("mostly_replaced" | "target_edited" | "both_edited" | "target_only_removed")[];
+            /**
+             * With `unresolved_conflicts`, on a row of `merge_conflicts`: its
+             * `both_edited` paths without a decision.
+             *
+             */
+            undecided_paths?: string[];
+            /**
+             * With `merge_not_possible`, why the row cannot be merged (see
+             * `SyncMergeBlocker`).
+             *
+             */
+            reasons?: /**
+             * Why a conflicted resource cannot be named in `merge_conflicts`:
+             * `type_not_supported` (only flat records are merged: email templates,
+             * signatures, notification templates, products, prices, taxes, coupons,
+             * webhooks, custom and environment variables, closing reasons,
+             * taxonomies and their classifications, designs, org settings. Entity
+             * schemas, journeys, automations, workflows and the like are not: their
+             * parts refer to each other), `not_exact` (a conflict of certainty
+             * `possible`), `mostly_replaced`, `paths_truncated` (the plan does not
+             * hold all of the resource's conflicting paths), `list_changes` (a
+             * conflict is inside a list). An entity schema has a merge of its own
+             * that tells attributes and groups apart, so the type and list reasons
+             * do not apply to it; it gets `not_mergeable` when that merge refuses
+             * the schema (why: `merge_refusal`).
+             *
+             */
+            SyncMergeBlocker[];
+            /**
+             * With `merge_not_possible`, the reasons in words.
+             */
+            message?: string;
+        }
+        export interface SyncPlanWarning {
+            /**
+             * - `unresolved_reference`: the resource names a source-org
+             *   resource (`ref`) that is not part of the sync and has no
+             *   counterpart in the target org.
+             * - `invalid_request`: the request Config Hub would send violates
+             *   the target API's OpenAPI definition at `path`.
+             * - `target_capability`: the target org lacks something the
+             *   resource needs that a sync cannot bring.
+             *
+             */
+            code: "unresolved_reference" | "invalid_request" | "target_capability";
+            message: string;
+            /**
+             * JSON Pointer into the source payload or the request body.
+             */
+            path?: string;
+            ref?: {
+                type: string;
+                source_id: string;
+                title?: string;
+            };
         }
         /**
          * The resource that referenced the dependency.
@@ -2069,12 +3905,59 @@ export declare namespace Components {
              */
             SyncPlanConflict[];
             /**
-             * On rows of a job applying a plan, for rows with conflicts:
-             * `overwrite` when the row was applied anyway (listed in
-             * `overwrite_conflicts`), `keep_target` when it was left out.
+             * With `conflicts`: why the resource cannot be merged on apply
+             * (`merge_conflicts`). Empty when it can be.
              *
              */
-            conflict_resolution?: "overwrite" | "keep_target";
+            merge_blockers?: /**
+             * Why a conflicted resource cannot be named in `merge_conflicts`:
+             * `type_not_supported` (only flat records are merged: email templates,
+             * signatures, notification templates, products, prices, taxes, coupons,
+             * webhooks, custom and environment variables, closing reasons,
+             * taxonomies and their classifications, designs, org settings. Entity
+             * schemas, journeys, automations, workflows and the like are not: their
+             * parts refer to each other), `not_exact` (a conflict of certainty
+             * `possible`), `mostly_replaced`, `paths_truncated` (the plan does not
+             * hold all of the resource's conflicting paths), `list_changes` (a
+             * conflict is inside a list). An entity schema has a merge of its own
+             * that tells attributes and groups apart, so the type and list reasons
+             * do not apply to it; it gets `not_mergeable` when that merge refuses
+             * the schema (why: `merge_refusal`).
+             *
+             */
+            SyncMergeBlocker[];
+            /**
+             * Entity schemas only: the choices its merge needs, each to be
+             * answered with a decision in `merge_conflicts`. Empty: it merges
+             * without any.
+             *
+             */
+            merge_choices?: /**
+             * A choice the merge of an entity schema needs before it can write.
+             * Answer it with a decision on `path` in `merge_conflicts`.
+             *
+             */
+            SyncMergeChoice[];
+            /**
+             * With `not_mergeable` in `merge_blockers`, why the merge refused the resource.
+             */
+            merge_refusal?: string;
+            /**
+             * On rows of a job applying a plan, for rows with conflicts:
+             * `overwrite` when the row was applied anyway (listed in
+             * `overwrite_conflicts`), `merge` when it was applied with the
+             * target's own changes kept (listed in `merge_conflicts`),
+             * `keep_target` when it was left out.
+             *
+             */
+            conflict_resolution?: "overwrite" | "keep_target" | "merge";
+            /**
+             * Reasons the write is likely to be rejected, or to leave a broken
+             * reference, found while planning. Advice only: the row can still
+             * be applied. Absent when there are none; at most 10 per row.
+             *
+             */
+            warnings?: SyncPlanWarning[];
         }
     }
 }
@@ -2117,6 +4000,20 @@ export declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.BreakLineageResponse;
             export type $404 = Components.Schemas.ErrorResponse;
+        }
+    }
+    namespace CancelPreview {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Preview;
+            export type $403 = Components.Schemas.ErrorResponse;
+            export type $404 = Components.Schemas.ErrorResponse;
+            export type $409 = Components.Schemas.ErrorResponse;
         }
     }
     namespace CancelSyncJob {
@@ -2183,6 +4080,37 @@ export declare namespace Paths {
              */
             Components.Schemas.SyncJob;
             export type $400 = Components.Schemas.ErrorResponse;
+        }
+    }
+    namespace GetAgentTask {
+        namespace Parameters {
+            export type SessionId = string; // ^[A-Za-z0-9_-]{1,100}$
+        }
+        export interface PathParameters {
+            session_id: Parameters.SessionId /* ^[A-Za-z0-9_-]{1,100}$ */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.AgentTask;
+            export interface $404 {
+            }
+        }
+    }
+    namespace GetConfigConnections {
+        namespace Parameters {
+            export type Id = string;
+            export type Type = /**
+             * Configuration resource type identifier.
+             * Matches blueprint-manifest-api V3 naming conventions.
+             *
+             */
+            Components.Schemas.ResourceType;
+        }
+        export interface PathParameters {
+            type: Parameters.Type;
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = /* A config's connections in the org's config index */ Components.Schemas.ConfigConnectionsResponse;
         }
     }
     namespace GetConfigDependencies {
@@ -2338,7 +4266,20 @@ export declare namespace Paths {
             export type $409 = Components.Schemas.ErrorResponse;
         }
     }
+    namespace ListAgentTasks {
+        namespace Responses {
+            export interface $200 {
+                results: Components.Schemas.AgentTaskSummary[];
+            }
+        }
+    }
     namespace ListConfigTypes {
+        namespace Parameters {
+            export type IncludeDependencyOnly = boolean;
+        }
+        export interface QueryParameters {
+            include_dependency_only?: Parameters.IncludeDependencyOnly;
+        }
         namespace Responses {
             export interface $200 {
                 results: /**
@@ -2566,9 +4507,51 @@ export declare namespace Paths {
             export type $404 = Components.Schemas.ErrorResponse;
         }
     }
+    namespace PutAgentTask {
+        namespace Parameters {
+            export type SessionId = string; // ^[A-Za-z0-9_-]{1,100}$
+        }
+        export interface PathParameters {
+            session_id: Parameters.SessionId /* ^[A-Za-z0-9_-]{1,100}$ */;
+        }
+        export type RequestBody = Components.Schemas.AgentTaskInput;
+        namespace Responses {
+            export type $200 = Components.Schemas.AgentTask;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $409 {
+            }
+        }
+    }
     namespace RebuildIndex {
+        namespace Parameters {
+            export type Force = boolean;
+        }
+        export interface QueryParameters {
+            force?: Parameters.Force;
+        }
         namespace Responses {
             export type $200 = /* Result of an index rebuild operation */ Components.Schemas.IndexRebuildResponse;
+        }
+    }
+    namespace RejectSyncPlan {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * Sync job header as surfaced by `getSyncJob` and the create response. The
+             * canonical persistence shape is described in `docs/sync/INTERFACES.md`.
+             *
+             */
+            Components.Schemas.SyncJob;
+            export type $404 = Components.Schemas.ErrorResponse;
+            export type $409 = Components.Schemas.SyncPlanApplyErrorResponse;
         }
     }
     namespace ReplanSyncPlan {
@@ -2670,6 +4653,21 @@ export declare namespace Paths {
             }
         }
     }
+    namespace SignOffAgentTask {
+        namespace Parameters {
+            export type SessionId = string; // ^[A-Za-z0-9_-]{1,100}$
+        }
+        export interface PathParameters {
+            session_id: Parameters.SessionId /* ^[A-Za-z0-9_-]{1,100}$ */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.AgentTask;
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+        }
+    }
     namespace StartHealthCleanup {
         export interface RequestBody {
             finding_ids?: string[];
@@ -2696,6 +4694,32 @@ export declare namespace Paths {
             export type $400 = Components.Schemas.ErrorResponse;
         }
     }
+    namespace UpdateAgentTaskItem {
+        namespace Parameters {
+            export type ItemId = string;
+            export type SessionId = string; // ^[A-Za-z0-9_-]{1,100}$
+        }
+        export interface PathParameters {
+            session_id: Parameters.SessionId /* ^[A-Za-z0-9_-]{1,100}$ */;
+            item_id: Parameters.ItemId;
+        }
+        export interface RequestBody {
+            status?: Components.Schemas.SyncJobReportItemStatus;
+            /**
+             * An option id of the item; null takes the choice back.
+             */
+            choice?: string | null;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.AgentTask;
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+        }
+    }
 }
 
 
@@ -2708,9 +4732,14 @@ export interface OperationMethods {
    * with labels and icons. The frontend should then call `listConfigs` separately
    * for each type it wants to load.
    * 
+   * Dependency-only types (entity mappings, validation rules, product
+   * recommendations, files) are normally pulled in only as dependencies of
+   * other configs. Pass `include_dependency_only=true` to list them too,
+   * marked `dependency_only: true`.
+   * 
    */
   'listConfigTypes'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.ListConfigTypes.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListConfigTypes.Responses.$200>
@@ -2756,6 +4785,20 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetConfigUsedBy.Responses.$200>
   /**
+   * getConfigConnections - getConfigConnections
+   * 
+   * What a config needs and what uses it, from the org's config index.
+   * Same connection graph as the `connections`, `connections_needs` and
+   * `connections_used_by` counts on index rows, so the two always agree
+   * for the same index build. `used_by` never repeats a config in `needs`.
+   * 
+   */
+  'getConfigConnections'(
+    parameters?: Parameters<Paths.GetConfigConnections.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetConfigConnections.Responses.$200>
+  /**
    * getIndex - getIndex
    * 
    * Return the current index build state for the caller's organization.
@@ -2794,7 +4837,7 @@ export interface OperationMethods {
    * counts by severity, new/resolved deltas vs the previous scan, and the
    * full finding list (errors first, then most recently appeared).
    * Findings carry `first_seen`/`last_seen` so the UI can correlate new
-   * findings with recent imports and installs.
+   * findings with recent syncs and installs.
    * 
    */
   'getHealthReport'(
@@ -2829,6 +4872,8 @@ export interface OperationMethods {
    * a body every cleanable finding is cleaned; `finding_ids` narrows the
    * set (e.g. one row's Clean up button). Fire-and-forget: poll
    * `getHealthReport` — status `cleaning` until done.
+   * A scoped token (an `allowed_actions` claim, e.g. a `config:write` agent
+   * token) may only clean up its own organization (403 otherwise).
    * 
    */
   'startHealthCleanup'(
@@ -2857,7 +4902,7 @@ export interface OperationMethods {
    * 
    * Compare the caller org's configs of a single type against another
    * (source) org, side by side. Rows are paired via the lineage registry in
-   * both sync directions (caller imported from source, or source imported
+   * both sync directions (caller pulled from source, or source pulled
    * from caller); configs without a counterpart come back as `only_current`
    * or `only_source`.
    * 
@@ -2942,6 +4987,9 @@ export interface OperationMethods {
    * Create a new cross-org sync job. The job is enqueued for asynchronous execution
    * by the worker Lambda; the response returns the persisted job header with status
    * `pending`.
+   * A scoped token (an `allowed_actions` claim, e.g. a `config:write` agent token)
+   * may only start a live job whose `target_org_id` is its own organization (403
+   * otherwise); plans (`dry_run`) into any org stay allowed.
    * 
    * See `docs/sync/INTERFACES.md` for the locked request/response contract.
    * 
@@ -2997,7 +5045,7 @@ export interface OperationMethods {
    * Start the targeted health check of a finished, applied sync job again:
    * for jobs that finished before checks existed (`not_run`), checks that
    * failed or got stuck, or to re-check after fixing something. Same scope
-   * and rules as the automatic check after every import. Callable from the
+   * and rules as the automatic check after every sync. Callable from the
    * source or the target org; the scan runs in the target org. Answers with
    * the check's new state (`pending`) and runs asynchronously; poll
    * `getSyncJobHealth`.
@@ -3015,6 +5063,9 @@ export interface OperationMethods {
    * rows the original run left at `pending`/`in_progress` because it stopped
    * early. Creates a new job whose scope is that `(type, source_id)` set and
    * enqueues it for execution. Optionally accepts inline payload overrides.
+   * A scoped token (an `allowed_actions` claim, e.g. a `config:write` agent
+   * token) may only retry a live job whose stored target is its own
+   * organization (403 otherwise).
    * 
    * With `resources`, only those rows are retried, plus the unresolved rows
    * of the original job they depend on (transitively). The new job carries
@@ -3142,6 +5193,10 @@ export interface OperationMethods {
   /**
    * applySyncPlan - applySyncPlan
    * 
+   * A scoped token (an `allowed_actions` claim, e.g. a `config:write`
+   * agent token) may only apply a plan whose target is its own
+   * organization (403 otherwise).
+   * 
    * Run a finished plan for real. Creates a new sync job (it carries
    * `applied_from_plan`; the plan's `applied_by` gets the new job's id)
    * and enqueues it.
@@ -3165,10 +5220,29 @@ export interface OperationMethods {
    * 
    * Rows whose plan has conflicts (`plan.conflicts`: the target was
    * changed since the last sync, and applying would overwrite that, or
-   * applying would replace most of the target) need a decision: list them in `overwrite_conflicts` to apply them anyway,
-   * or leave them out (`exclude`, or a `resources` list without them) to
-   * keep the target's version. Applying one without a decision is
-   * rejected with 409 and `unresolved_conflicts`; nothing is applied.
+   * applying would replace most of the target) need a decision, one of
+   * three: list them in `overwrite_conflicts` to apply them anyway (the
+   * target's changes are lost), list them in `merge_conflicts` to apply
+   * them and keep the target's own changes, or leave them out (`exclude`,
+   * or a `resources` list without them) to keep the target's version.
+   * Applying one without a decision is rejected with 409 and
+   * `unresolved_conflicts`; nothing is applied.
+   * 
+   * A merged row is written as the source's version with the target's
+   * own changes put back on the conflicting paths: `target_edited` and
+   * `target_only_removed` paths keep the target's value, and each
+   * `both_edited` path gets the side its decision names (a missing
+   * decision: 409 `unresolved_conflicts`, with the row's
+   * `undecided_paths`). Only rows with an empty `plan.merge_blockers` can
+   * be merged (409 `merge_not_possible` otherwise). An entity schema is
+   * merged by its own merge, which matches attributes by name and groups
+   * by id: it needs a decision for each of its `plan.merge_choices`
+   * instead of for the `both_edited` paths. The merge is computed
+   * again when the row is written, from the target as it is then; a row
+   * that cannot be merged safely at that point fails with an error that
+   * says so and is not written.
+   * One apply of a plan runs at a time: while one runs, another is
+   * rejected with 409 and `apply_in_progress` (its `job_id`).
    * The decision is recorded on the apply job's rows
    * (`plan.conflict_resolution`).
    * 
@@ -3177,6 +5251,9 @@ export interface OperationMethods {
    * applied up to 24 hours after it finished (`expires_at`); plan again
    * after that. A plan can be applied more than once; each apply job is
    * added to the plan's `applied_by`.
+   * 
+   * A rejected plan (`rejectSyncPlan`) cannot be applied: 409
+   * `plan_rejected`.
    * 
    * Errors carry a machine-readable `code`.
    * 
@@ -3202,7 +5279,8 @@ export interface OperationMethods {
    * 
    * The plan job goes back to `pending` / `in_progress` and is `ready`
    * again when it finishes (`replanned_at` / `planned_at` updated). Poll
-   * `getSyncPlan`.
+   * `getSyncPlan`. A rejected plan (`rejectSyncPlan`) cannot be replanned:
+   * 409 `plan_rejected`.
    * 
    */
   'replanSyncPlan'(
@@ -3210,6 +5288,109 @@ export interface OperationMethods {
     data?: Paths.ReplanSyncPlan.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ReplanSyncPlan.Responses.$202>
+  /**
+   * rejectSyncPlan - rejectSyncPlan
+   * 
+   * Reject a plan that was not applied: it can no longer be applied or
+   * replanned (`applySyncPlan` / `replanSyncPlan` answer 409
+   * `plan_rejected`), `getSyncPlan` reports it as not `applicable`, and
+   * the job carries `rejected_at` / `rejected_by`. Called from the plan's
+   * source or target org. No request body.
+   * 
+   * Idempotent: rejecting a rejected plan returns it unchanged (the first
+   * rejection's time and user are kept).
+   * 
+   * Errors carry a machine-readable `code`:
+   * - `plan_already_applied`: the plan has apply jobs (`applied_by`).
+   * - `plan_not_ready`: the plan is still running; cancel it with
+   *   `cancelSyncJob` instead.
+   * 
+   */
+  'rejectSyncPlan'(
+    parameters?: Parameters<Paths.RejectSyncPlan.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RejectSyncPlan.Responses.$200>
+  /**
+   * listAgentTasks - listAgentTasks
+   * 
+   * The agent tasks of the caller's org, most recently changed first (at
+   * most 500), without their items and changes. An agent task is what a
+   * Configuration Agent session did in the org: see `putAgentTask`.
+   * 
+   */
+  'listAgentTasks'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListAgentTasks.Responses.$200>
+  /**
+   * getAgentTask - getAgentTask
+   * 
+   * The agent task of a Configuration Agent session in the caller's org.
+   */
+  'getAgentTask'(
+    parameters?: Parameters<Paths.GetAgentTask.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetAgentTask.Responses.$200>
+  /**
+   * putAgentTask - putAgentTask
+   * 
+   * Written by the Configuration Agent, in the org its session works in:
+   * what the session did there, for the user to review and sign off. One
+   * task per session; the whole task each time (`version` goes up by one).
+   * 
+   * Write it as soon as the session changes configuration, and again
+   * whenever something is added: `state: working` while there is more to
+   * do, `state: done` once everything is. `items` is the task list:
+   * `done` (something the agent did), `decision` (a choice the agent
+   * made that the user should know about), `check` (something it
+   * verified) and `open_item` (something only the user can decide; give
+   * it `options` when there are clear choices). `changes` lists every
+   * resource the session created, updated or deleted.
+   * 
+   * Items that keep their `id` and `title` keep what the user did with
+   * them (status, choice). A task that was signed off and is written
+   * again needs a new sign-off. Only the user whose session first wrote
+   * the task writes it again (`403` for anyone else).
+   * 
+   */
+  'putAgentTask'(
+    parameters?: Parameters<Paths.PutAgentTask.PathParameters> | null,
+    data?: Paths.PutAgentTask.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PutAgentTask.Responses.$200>
+  /**
+   * updateAgentTaskItem - updateAgentTaskItem
+   * 
+   * Answers an open item of the task: picks one of its `options`
+   * (`choice`, which marks it done; `choice: null` opens it again), or
+   * marks it done or open without a choice (`status`). Records who and
+   * when. Other kinds of items are a record and can't be changed. `409`
+   * once the task is signed off.
+   * 
+   */
+  'updateAgentTaskItem'(
+    parameters?: Parameters<Paths.UpdateAgentTaskItem.PathParameters> | null,
+    data?: Paths.UpdateAgentTaskItem.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateAgentTaskItem.Responses.$200>
+  /**
+   * signOffAgentTask - signOffAgentTask
+   * 
+   * The user has reviewed what the session did and accepts it. Only a
+   * task that is `awaiting_signoff` (the agent is done and no open item
+   * is open); signing off a signed-off task changes nothing. The changes
+   * themselves are already in the org: signing off records the review,
+   * it applies nothing. No request body.
+   * 
+   */
+  'signOffAgentTask'(
+    parameters?: Parameters<Paths.SignOffAgentTask.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SignOffAgentTask.Responses.$200>
   /**
    * listDeleteJobs - listDeleteJobs
    * 
@@ -3228,6 +5409,8 @@ export interface OperationMethods {
    * Create a bulk-delete job for the caller's organization. The selected
    * resources are deleted asynchronously by a worker Lambda; the response
    * returns the persisted job header with status `pending`.
+   * A scoped token (an `allowed_actions` claim, e.g. a `config:write` agent
+   * token) may only delete in its own organization (403 otherwise).
    * 
    * Raw delete — no dependency checks are performed. On completion the
    * worker auto-triggers an index rebuild so the config list reflects the
@@ -3270,9 +5453,14 @@ export interface OperationMethods {
    * Fire-and-forget: invokes the async worker and returns immediately.
    * A new rebuild will cancel any in-flight build (see `build_token`).
    * 
+   * By default, types that support it list only the configs changed since
+   * the last build (with a full listing at least daily). `force=true` lists
+   * every type in full: the UI sets it when someone clicks Refresh again
+   * while a rebuild is running or right after one was requested.
+   * 
    */
   'rebuildIndex'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.RebuildIndex.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RebuildIndex.Responses.$200>
@@ -3306,8 +5494,10 @@ export interface OperationMethods {
    * plus `requester`): a new, temporary org with
    * `organization_use: Preview` (parent = this org) that receives a copy of all of
    * this org's configuration through a sync job. When the copy is done, the
-   * requesting user is invited to the preview org as owner with a
-   * "your preview org is ready" email. Runs asynchronously; poll `getPreview`.
+   * requesting user is made an owner of the preview org: someone with an
+   * epilot account becomes a member right away (no email; the org shows up
+   * in their org list), someone invited by email alone gets a "your preview
+   * org is ready" invitation email. Runs asynchronously; poll `getPreview`.
    * 
    */
   'createPreview'(
@@ -3318,13 +5508,37 @@ export interface OperationMethods {
   /**
    * getPreview - getPreview
    * 
-   * Returns a preview requested from the caller's current org, with its progress.
+   * Returns a preview requested from the caller's current org, with its progress. Called from a
+   * preview org, it also returns that org's own preview (stored under the previewed org).
+   * 
    */
   'getPreview'(
     parameters?: Parameters<Paths.GetPreview.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPreview.Responses.$200>
+  /**
+   * cancelPreview - cancelPreview
+   * 
+   * Cancels a preview that is still being made, or discards a `ready` one.
+   * Called from the previewed org (the org `listPreviews` lists it in);
+   * needs `organization:edit` there, like `createPreview`. No request body.
+   * 
+   * The preview becomes `cancelled` (`cancelled_at`, `cancelled_by`) at
+   * once and never changes status again. Then, in the background: its
+   * state machine is stopped; the copy job is cancelled if it still runs;
+   * and the preview org is queued for deletion.
+   * 
+   * Cancelling a `cancelled` preview returns it unchanged (and retries the
+   * clean-up). `failed` and `superseded` previews answer 409 with code
+   * `preview_not_cancellable`.
+   * 
+   */
+  'cancelPreview'(
+    parameters?: Parameters<Paths.CancelPreview.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CancelPreview.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -3337,9 +5551,14 @@ export interface PathsDictionary {
      * with labels and icons. The frontend should then call `listConfigs` separately
      * for each type it wants to load.
      * 
+     * Dependency-only types (entity mappings, validation rules, product
+     * recommendations, files) are normally pulled in only as dependencies of
+     * other configs. Pass `include_dependency_only=true` to list them too,
+     * marked `dependency_only: true`.
+     * 
      */
     'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.ListConfigTypes.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListConfigTypes.Responses.$200>
@@ -3391,6 +5610,22 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetConfigUsedBy.Responses.$200>
   }
+  ['/v1/configs/{type}/{id}/connections']: {
+    /**
+     * getConfigConnections - getConfigConnections
+     * 
+     * What a config needs and what uses it, from the org's config index.
+     * Same connection graph as the `connections`, `connections_needs` and
+     * `connections_used_by` counts on index rows, so the two always agree
+     * for the same index build. `used_by` never repeats a config in `needs`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetConfigConnections.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetConfigConnections.Responses.$200>
+  }
   ['/v1/configs/index']: {
     /**
      * getIndex - getIndex
@@ -3435,7 +5670,7 @@ export interface PathsDictionary {
      * counts by severity, new/resolved deltas vs the previous scan, and the
      * full finding list (errors first, then most recently appeared).
      * Findings carry `first_seen`/`last_seen` so the UI can correlate new
-     * findings with recent imports and installs.
+     * findings with recent syncs and installs.
      * 
      */
     'get'(
@@ -3474,6 +5709,8 @@ export interface PathsDictionary {
      * a body every cleanable finding is cleaned; `finding_ids` narrows the
      * set (e.g. one row's Clean up button). Fire-and-forget: poll
      * `getHealthReport` — status `cleaning` until done.
+     * A scoped token (an `allowed_actions` claim, e.g. a `config:write` agent
+     * token) may only clean up its own organization (403 otherwise).
      * 
      */
     'post'(
@@ -3506,7 +5743,7 @@ export interface PathsDictionary {
      * 
      * Compare the caller org's configs of a single type against another
      * (source) org, side by side. Rows are paired via the lineage registry in
-     * both sync directions (caller imported from source, or source imported
+     * both sync directions (caller pulled from source, or source pulled
      * from caller); configs without a counterpart come back as `only_current`
      * or `only_source`.
      * 
@@ -3585,6 +5822,9 @@ export interface PathsDictionary {
      * Create a new cross-org sync job. The job is enqueued for asynchronous execution
      * by the worker Lambda; the response returns the persisted job header with status
      * `pending`.
+     * A scoped token (an `allowed_actions` claim, e.g. a `config:write` agent token)
+     * may only start a live job whose `target_org_id` is its own organization (403
+     * otherwise); plans (`dry_run`) into any org stay allowed.
      * 
      * See `docs/sync/INTERFACES.md` for the locked request/response contract.
      * 
@@ -3658,7 +5898,7 @@ export interface PathsDictionary {
      * Start the targeted health check of a finished, applied sync job again:
      * for jobs that finished before checks existed (`not_run`), checks that
      * failed or got stuck, or to re-check after fixing something. Same scope
-     * and rules as the automatic check after every import. Callable from the
+     * and rules as the automatic check after every sync. Callable from the
      * source or the target org; the scan runs in the target org. Answers with
      * the check's new state (`pending`) and runs asynchronously; poll
      * `getSyncJobHealth`.
@@ -3678,6 +5918,9 @@ export interface PathsDictionary {
      * rows the original run left at `pending`/`in_progress` because it stopped
      * early. Creates a new job whose scope is that `(type, source_id)` set and
      * enqueues it for execution. Optionally accepts inline payload overrides.
+     * A scoped token (an `allowed_actions` claim, e.g. a `config:write` agent
+     * token) may only retry a live job whose stored target is its own
+     * organization (403 otherwise).
      * 
      * With `resources`, only those rows are retried, plus the unresolved rows
      * of the original job they depend on (transitively). The new job carries
@@ -3821,6 +6064,10 @@ export interface PathsDictionary {
     /**
      * applySyncPlan - applySyncPlan
      * 
+     * A scoped token (an `allowed_actions` claim, e.g. a `config:write`
+     * agent token) may only apply a plan whose target is its own
+     * organization (403 otherwise).
+     * 
      * Run a finished plan for real. Creates a new sync job (it carries
      * `applied_from_plan`; the plan's `applied_by` gets the new job's id)
      * and enqueues it.
@@ -3844,10 +6091,29 @@ export interface PathsDictionary {
      * 
      * Rows whose plan has conflicts (`plan.conflicts`: the target was
      * changed since the last sync, and applying would overwrite that, or
-     * applying would replace most of the target) need a decision: list them in `overwrite_conflicts` to apply them anyway,
-     * or leave them out (`exclude`, or a `resources` list without them) to
-     * keep the target's version. Applying one without a decision is
-     * rejected with 409 and `unresolved_conflicts`; nothing is applied.
+     * applying would replace most of the target) need a decision, one of
+     * three: list them in `overwrite_conflicts` to apply them anyway (the
+     * target's changes are lost), list them in `merge_conflicts` to apply
+     * them and keep the target's own changes, or leave them out (`exclude`,
+     * or a `resources` list without them) to keep the target's version.
+     * Applying one without a decision is rejected with 409 and
+     * `unresolved_conflicts`; nothing is applied.
+     * 
+     * A merged row is written as the source's version with the target's
+     * own changes put back on the conflicting paths: `target_edited` and
+     * `target_only_removed` paths keep the target's value, and each
+     * `both_edited` path gets the side its decision names (a missing
+     * decision: 409 `unresolved_conflicts`, with the row's
+     * `undecided_paths`). Only rows with an empty `plan.merge_blockers` can
+     * be merged (409 `merge_not_possible` otherwise). An entity schema is
+     * merged by its own merge, which matches attributes by name and groups
+     * by id: it needs a decision for each of its `plan.merge_choices`
+     * instead of for the `both_edited` paths. The merge is computed
+     * again when the row is written, from the target as it is then; a row
+     * that cannot be merged safely at that point fails with an error that
+     * says so and is not written.
+     * One apply of a plan runs at a time: while one runs, another is
+     * rejected with 409 and `apply_in_progress` (its `job_id`).
      * The decision is recorded on the apply job's rows
      * (`plan.conflict_resolution`).
      * 
@@ -3856,6 +6122,9 @@ export interface PathsDictionary {
      * applied up to 24 hours after it finished (`expires_at`); plan again
      * after that. A plan can be applied more than once; each apply job is
      * added to the plan's `applied_by`.
+     * 
+     * A rejected plan (`rejectSyncPlan`) cannot be applied: 409
+     * `plan_rejected`.
      * 
      * Errors carry a machine-readable `code`.
      * 
@@ -3883,7 +6152,8 @@ export interface PathsDictionary {
      * 
      * The plan job goes back to `pending` / `in_progress` and is `ready`
      * again when it finishes (`replanned_at` / `planned_at` updated). Poll
-     * `getSyncPlan`.
+     * `getSyncPlan`. A rejected plan (`rejectSyncPlan`) cannot be replanned:
+     * 409 `plan_rejected`.
      * 
      */
     'post'(
@@ -3892,6 +6162,119 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ReplanSyncPlan.Responses.$202>
   }
+  ['/v1/configs/sync-jobs/{id}/plan/reject']: {
+    /**
+     * rejectSyncPlan - rejectSyncPlan
+     * 
+     * Reject a plan that was not applied: it can no longer be applied or
+     * replanned (`applySyncPlan` / `replanSyncPlan` answer 409
+     * `plan_rejected`), `getSyncPlan` reports it as not `applicable`, and
+     * the job carries `rejected_at` / `rejected_by`. Called from the plan's
+     * source or target org. No request body.
+     * 
+     * Idempotent: rejecting a rejected plan returns it unchanged (the first
+     * rejection's time and user are kept).
+     * 
+     * Errors carry a machine-readable `code`:
+     * - `plan_already_applied`: the plan has apply jobs (`applied_by`).
+     * - `plan_not_ready`: the plan is still running; cancel it with
+     *   `cancelSyncJob` instead.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.RejectSyncPlan.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RejectSyncPlan.Responses.$200>
+  }
+  ['/v1/configs/agent-tasks']: {
+    /**
+     * listAgentTasks - listAgentTasks
+     * 
+     * The agent tasks of the caller's org, most recently changed first (at
+     * most 500), without their items and changes. An agent task is what a
+     * Configuration Agent session did in the org: see `putAgentTask`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListAgentTasks.Responses.$200>
+  }
+  ['/v1/configs/agent-tasks/{session_id}']: {
+    /**
+     * getAgentTask - getAgentTask
+     * 
+     * The agent task of a Configuration Agent session in the caller's org.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetAgentTask.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetAgentTask.Responses.$200>
+    /**
+     * putAgentTask - putAgentTask
+     * 
+     * Written by the Configuration Agent, in the org its session works in:
+     * what the session did there, for the user to review and sign off. One
+     * task per session; the whole task each time (`version` goes up by one).
+     * 
+     * Write it as soon as the session changes configuration, and again
+     * whenever something is added: `state: working` while there is more to
+     * do, `state: done` once everything is. `items` is the task list:
+     * `done` (something the agent did), `decision` (a choice the agent
+     * made that the user should know about), `check` (something it
+     * verified) and `open_item` (something only the user can decide; give
+     * it `options` when there are clear choices). `changes` lists every
+     * resource the session created, updated or deleted.
+     * 
+     * Items that keep their `id` and `title` keep what the user did with
+     * them (status, choice). A task that was signed off and is written
+     * again needs a new sign-off. Only the user whose session first wrote
+     * the task writes it again (`403` for anyone else).
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.PutAgentTask.PathParameters> | null,
+      data?: Paths.PutAgentTask.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PutAgentTask.Responses.$200>
+  }
+  ['/v1/configs/agent-tasks/{session_id}/items/{item_id}']: {
+    /**
+     * updateAgentTaskItem - updateAgentTaskItem
+     * 
+     * Answers an open item of the task: picks one of its `options`
+     * (`choice`, which marks it done; `choice: null` opens it again), or
+     * marks it done or open without a choice (`status`). Records who and
+     * when. Other kinds of items are a record and can't be changed. `409`
+     * once the task is signed off.
+     * 
+     */
+    'patch'(
+      parameters?: Parameters<Paths.UpdateAgentTaskItem.PathParameters> | null,
+      data?: Paths.UpdateAgentTaskItem.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateAgentTaskItem.Responses.$200>
+  }
+  ['/v1/configs/agent-tasks/{session_id}/sign-off']: {
+    /**
+     * signOffAgentTask - signOffAgentTask
+     * 
+     * The user has reviewed what the session did and accepts it. Only a
+     * task that is `awaiting_signoff` (the agent is done and no open item
+     * is open); signing off a signed-off task changes nothing. The changes
+     * themselves are already in the org: signing off records the review,
+     * it applies nothing. No request body.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.SignOffAgentTask.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SignOffAgentTask.Responses.$200>
+  }
   ['/v1/configs/delete-jobs']: {
     /**
      * createDeleteJob - createDeleteJob
@@ -3899,6 +6282,8 @@ export interface PathsDictionary {
      * Create a bulk-delete job for the caller's organization. The selected
      * resources are deleted asynchronously by a worker Lambda; the response
      * returns the persisted job header with status `pending`.
+     * A scoped token (an `allowed_actions` claim, e.g. a `config:write` agent
+     * token) may only delete in its own organization (403 otherwise).
      * 
      * Raw delete — no dependency checks are performed. On completion the
      * worker auto-triggers an index rebuild so the config list reflects the
@@ -3959,9 +6344,14 @@ export interface PathsDictionary {
      * Fire-and-forget: invokes the async worker and returns immediately.
      * A new rebuild will cancel any in-flight build (see `build_token`).
      * 
+     * By default, types that support it list only the configs changed since
+     * the last build (with a full listing at least daily). `force=true` lists
+     * every type in full: the UI sets it when someone clicks Refresh again
+     * while a rebuild is running or right after one was requested.
+     * 
      */
     'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.RebuildIndex.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RebuildIndex.Responses.$200>
@@ -3989,8 +6379,10 @@ export interface PathsDictionary {
      * plus `requester`): a new, temporary org with
      * `organization_use: Preview` (parent = this org) that receives a copy of all of
      * this org's configuration through a sync job. When the copy is done, the
-     * requesting user is invited to the preview org as owner with a
-     * "your preview org is ready" email. Runs asynchronously; poll `getPreview`.
+     * requesting user is made an owner of the preview org: someone with an
+     * epilot account becomes a member right away (no email; the org shows up
+     * in their org list), someone invited by email alone gets a "your preview
+     * org is ready" invitation email. Runs asynchronously; poll `getPreview`.
      * 
      */
     'post'(
@@ -4013,7 +6405,9 @@ export interface PathsDictionary {
     /**
      * getPreview - getPreview
      * 
-     * Returns a preview requested from the caller's current org, with its progress.
+     * Returns a preview requested from the caller's current org, with its progress. Called from a
+     * preview org, it also returns that org's own preview (stored under the previewed org).
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetPreview.PathParameters> | null,
@@ -4021,17 +6415,49 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPreview.Responses.$200>
   }
+  ['/v1/previews/{id}/cancel']: {
+    /**
+     * cancelPreview - cancelPreview
+     * 
+     * Cancels a preview that is still being made, or discards a `ready` one.
+     * Called from the previewed org (the org `listPreviews` lists it in);
+     * needs `organization:edit` there, like `createPreview`. No request body.
+     * 
+     * The preview becomes `cancelled` (`cancelled_at`, `cancelled_by`) at
+     * once and never changes status again. Then, in the background: its
+     * state machine is stopped; the copy job is cancelled if it still runs;
+     * and the preview org is queued for deletion.
+     * 
+     * Cancelling a `cancelled` preview returns it unchanged (and retries the
+     * clean-up). `failed` and `superseded` previews answer 409 with code
+     * `preview_not_cancellable`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.CancelPreview.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CancelPreview.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type AgentTask = Components.Schemas.AgentTask;
+export type AgentTaskChange = Components.Schemas.AgentTaskChange;
+export type AgentTaskInput = Components.Schemas.AgentTaskInput;
+export type AgentTaskItem = Components.Schemas.AgentTaskItem;
+export type AgentTaskItemInput = Components.Schemas.AgentTaskItemInput;
+export type AgentTaskStatus = Components.Schemas.AgentTaskStatus;
+export type AgentTaskSummary = Components.Schemas.AgentTaskSummary;
 export type BreakLineageResponse = Components.Schemas.BreakLineageResponse;
 export type CompareCounts = Components.Schemas.CompareCounts;
 export type CompareLineage = Components.Schemas.CompareLineage;
 export type CompareRequest = Components.Schemas.CompareRequest;
 export type CompareResponse = Components.Schemas.CompareResponse;
 export type CompareRow = Components.Schemas.CompareRow;
+export type ConfigConnectionsResponse = Components.Schemas.ConfigConnectionsResponse;
 export type ConfigDependenciesResponse = Components.Schemas.ConfigDependenciesResponse;
 export type ConfigInventoryResponse = Components.Schemas.ConfigInventoryResponse;
 export type ConfigListResponse = Components.Schemas.ConfigListResponse;
@@ -4065,6 +6491,7 @@ export type SuggestMatchesRequest = Components.Schemas.SuggestMatchesRequest;
 export type SuggestMatchesResponse = Components.Schemas.SuggestMatchesResponse;
 export type SyncDependencyReason = Components.Schemas.SyncDependencyReason;
 export type SyncDirection = Components.Schemas.SyncDirection;
+export type SyncHealthFinding = Components.Schemas.SyncHealthFinding;
 export type SyncJob = Components.Schemas.SyncJob;
 export type SyncJobBatch = Components.Schemas.SyncJobBatch;
 export type SyncJobCounts = Components.Schemas.SyncJobCounts;
@@ -4072,9 +6499,12 @@ export type SyncJobEvent = Components.Schemas.SyncJobEvent;
 export type SyncJobEventDependency = Components.Schemas.SyncJobEventDependency;
 export type SyncJobEventListResponse = Components.Schemas.SyncJobEventListResponse;
 export type SyncJobHealth = Components.Schemas.SyncJobHealth;
+export type SyncJobHealthBaseline = Components.Schemas.SyncJobHealthBaseline;
 export type SyncJobHealthCheck = Components.Schemas.SyncJobHealthCheck;
 export type SyncJobHealthStatus = Components.Schemas.SyncJobHealthStatus;
 export type SyncJobListResponse = Components.Schemas.SyncJobListResponse;
+export type SyncJobReportItemInput = Components.Schemas.SyncJobReportItemInput;
+export type SyncJobReportItemStatus = Components.Schemas.SyncJobReportItemStatus;
 export type SyncJobRequest = Components.Schemas.SyncJobRequest;
 export type SyncJobResource = Components.Schemas.SyncJobResource;
 export type SyncJobResourceListResponse = Components.Schemas.SyncJobResourceListResponse;
@@ -4085,6 +6515,8 @@ export type SyncJobRetryPlan = Components.Schemas.SyncJobRetryPlan;
 export type SyncJobRetryPlanRequest = Components.Schemas.SyncJobRetryPlanRequest;
 export type SyncJobRetryRequest = Components.Schemas.SyncJobRetryRequest;
 export type SyncJobStatus = Components.Schemas.SyncJobStatus;
+export type SyncMergeBlocker = Components.Schemas.SyncMergeBlocker;
+export type SyncMergeChoice = Components.Schemas.SyncMergeChoice;
 export type SyncPhase = Components.Schemas.SyncPhase;
 export type SyncPlan = Components.Schemas.SyncPlan;
 export type SyncPlanAction = Components.Schemas.SyncPlanAction;
@@ -4101,5 +6533,6 @@ export type SyncPlanMatch = Components.Schemas.SyncPlanMatch;
 export type SyncPlanMissingDependency = Components.Schemas.SyncPlanMissingDependency;
 export type SyncPlanReplanRequest = Components.Schemas.SyncPlanReplanRequest;
 export type SyncPlanUnresolvedConflict = Components.Schemas.SyncPlanUnresolvedConflict;
+export type SyncPlanWarning = Components.Schemas.SyncPlanWarning;
 export type SyncRequiredBy = Components.Schemas.SyncRequiredBy;
 export type SyncResourcePlan = Components.Schemas.SyncResourcePlan;

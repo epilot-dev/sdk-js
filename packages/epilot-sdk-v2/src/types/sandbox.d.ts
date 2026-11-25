@@ -1,6 +1,4 @@
 /* Auto-copied from sandbox-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -25,6 +23,34 @@ export declare namespace Components {
              * eyJhbGciOiJIUzI1NiIs...
              */
             SandboxToken;
+        }
+        /**
+         * The platform service that manages a pipeline (absent on pipelines an org created)
+         * example:
+         * configuration-hub
+         */
+        export type ManagedBy = string; // ^[a-z0-9][a-z0-9-]{0,62}$
+        export interface ManagedPipelineRequest {
+            sandbox_org_id: /**
+             * Epilot Tenant Organization ID
+             * example:
+             * 54321
+             */
+            OrgId;
+            sandbox_org_name?: string;
+            production_org_id: /**
+             * Epilot Tenant Organization ID
+             * example:
+             * 54321
+             */
+            OrgId;
+            production_org_name?: string;
+            managed_by: /**
+             * The platform service that manages a pipeline (absent on pipelines an org created)
+             * example:
+             * configuration-hub
+             */
+            ManagedBy /* ^[a-z0-9][a-z0-9-]{0,62}$ */;
         }
         /**
          * Epilot Tenant Organization ID
@@ -66,6 +92,24 @@ export declare namespace Components {
              */
             production_org_name?: string;
             created_at?: string; // date-time
+            managed_by?: /**
+             * The platform service that manages a pipeline (absent on pipelines an org created)
+             * example:
+             * configuration-hub
+             */
+            ManagedBy /* ^[a-z0-9][a-z0-9-]{0,62}$ */;
+            /**
+             * Only the sandbox org can list the pipeline and mint tokens through it (to the production org).
+             * Set on managed pipelines.
+             *
+             */
+            one_way?: boolean;
+            /**
+             * Most access a token minted through the pipeline carries, whatever the caller asks for.
+             * Set on managed pipelines (`config:read`).
+             *
+             */
+            max_access_profile?: "config:read";
         }
         /**
          * Unique identifier for a pipeline.
@@ -109,6 +153,24 @@ export declare namespace Components {
              */
             production_org_name?: string;
             created_at?: string; // date-time
+            managed_by?: /**
+             * The platform service that manages a pipeline (absent on pipelines an org created)
+             * example:
+             * configuration-hub
+             */
+            ManagedBy /* ^[a-z0-9][a-z0-9-]{0,62}$ */;
+            /**
+             * Only the sandbox org can list the pipeline and mint tokens through it (to the production org).
+             * Set on managed pipelines.
+             *
+             */
+            one_way?: boolean;
+            /**
+             * Most access a token minted through the pipeline carries, whatever the caller asks for.
+             * Set on managed pipelines (`config:read`).
+             *
+             */
+            max_access_profile?: "config:read";
         }
         /**
          * The role of the other organization in the pipeline from the perspective of the caller's organization
@@ -214,6 +276,7 @@ export declare namespace Paths {
     }
     namespace GeneratePipelineToken {
         namespace Parameters {
+            export type AccessProfile = "full" | "read" | "config:read";
             export type PipelineId = /**
              * Unique identifier for a pipeline.
              *
@@ -223,9 +286,14 @@ export declare namespace Paths {
              * 12345::54321
              */
             Components.Schemas.PipelineId;
+            export type ReadOnly = boolean;
         }
         export interface PathParameters {
             pipeline_id: Parameters.PipelineId;
+        }
+        export interface QueryParameters {
+            read_only?: Parameters.ReadOnly;
+            access_profile?: Parameters.AccessProfile;
         }
         namespace Responses {
             export interface $200 {
@@ -261,18 +329,6 @@ export declare namespace Paths {
         namespace Responses {
             export interface $200 {
                 results?: Components.Schemas.Pipeline[];
-                /**
-                 * example:
-                 * 1
-                 */
-                total?: number;
-            }
-        }
-    }
-    namespace ListSandboxRequests {
-        namespace Responses {
-            export interface $200 {
-                results?: Components.Schemas.SandboxRequest[];
                 /**
                  * example:
                  * 1
@@ -338,9 +394,19 @@ export interface OperationMethods {
    * generatePipelineToken - generatePipelineToken
    * 
    * Generate a temporary pipeline access token to access the other org from the pipeline
+   * 
+   * Read-only tokens carry the claim `read_only: true` (enforced by `@epilot/permissions`: only view actions are permitted)
+   * and expire after 15 minutes.
+   * 
+   * The token is never wider than the caller's token: its `read_only`, `anonymize` and `allowed_actions` claims carry over.
+   * 
+   * Agents (caller token with an `actor` claim) only ever get configuration access to the paired org, like the
+   * Access Token API's `config:read` profile: read-only, `allowed_actions` limited to configuration actions
+   * (plus `configuration_hub:view`), and anonymized. The caller's `actor` claim is copied into the generated token.
+   * 
    */
   'generatePipelineToken'(
-    parameters?: Parameters<Paths.GeneratePipelineToken.PathParameters> | null,
+    parameters?: Parameters<Paths.GeneratePipelineToken.QueryParameters & Paths.GeneratePipelineToken.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GeneratePipelineToken.Responses.$200>
@@ -354,16 +420,6 @@ export interface OperationMethods {
     data?: Paths.RequestSandbox.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RequestSandbox.Responses.$201>
-  /**
-   * listSandboxRequests - listSandboxRequests
-   * 
-   * List sandbox requests from users
-   */
-  'listSandboxRequests'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ListSandboxRequests.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -419,9 +475,19 @@ export interface PathsDictionary {
      * generatePipelineToken - generatePipelineToken
      * 
      * Generate a temporary pipeline access token to access the other org from the pipeline
+     * 
+     * Read-only tokens carry the claim `read_only: true` (enforced by `@epilot/permissions`: only view actions are permitted)
+     * and expire after 15 minutes.
+     * 
+     * The token is never wider than the caller's token: its `read_only`, `anonymize` and `allowed_actions` claims carry over.
+     * 
+     * Agents (caller token with an `actor` claim) only ever get configuration access to the paired org, like the
+     * Access Token API's `config:read` profile: read-only, `allowed_actions` limited to configuration actions
+     * (plus `configuration_hub:view`), and anonymized. The caller's `actor` claim is copied into the generated token.
+     * 
      */
     'get'(
-      parameters?: Parameters<Paths.GeneratePipelineToken.PathParameters> | null,
+      parameters?: Parameters<Paths.GeneratePipelineToken.QueryParameters & Paths.GeneratePipelineToken.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GeneratePipelineToken.Responses.$200>
@@ -438,18 +504,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RequestSandbox.Responses.$201>
   }
-  ['/v1/sandbox/requests']: {
-    /**
-     * listSandboxRequests - listSandboxRequests
-     * 
-     * List sandbox requests from users
-     */
-    'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ListSandboxRequests.Responses.$200>
-  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -457,6 +511,8 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type AccessToken = Components.Schemas.AccessToken;
 export type CreatePipelineRequest = Components.Schemas.CreatePipelineRequest;
+export type ManagedBy = Components.Schemas.ManagedBy;
+export type ManagedPipelineRequest = Components.Schemas.ManagedPipelineRequest;
 export type OrgId = Components.Schemas.OrgId;
 export type Pipeline = Components.Schemas.Pipeline;
 export type PipelineId = Components.Schemas.PipelineId;

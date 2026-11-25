@@ -406,11 +406,13 @@ const { data } = await client.getPartnerUsers({
         {
           "id": "123:partner_admin",
           "slug": "partner_admin",
-          "name": "Partner Administrator"
+          "name": "Partner Administrator",
+          "mutable": true
         }
       ]
     }
-  ]
+  ],
+  "can_manage_roles": true
 }
 ```
 
@@ -513,9 +515,11 @@ const { data } = await client.getPartnerRoles({
             }
           ]
         }
-      ]
+      ],
+      "mutable": true
     }
-  ]
+  ],
+  "can_manage_roles": true
 }
 ```
 
@@ -591,7 +595,8 @@ const { data } = await client.createPartnerRole(
         }
       ]
     }
-  ]
+  ],
+  "mutable": true
 }
 ```
 
@@ -669,7 +674,8 @@ const { data } = await client.updatePartnerRole(
         }
       ]
     }
-  ]
+  ],
+  "mutable": true
 }
 ```
 
@@ -712,7 +718,8 @@ const { data } = await client.deletePartnerRole({
         }
       ]
     }
-  ]
+  ],
+  "mutable": true
 }
 ```
 
@@ -866,7 +873,7 @@ Configuration options for sending a partner invitation
 
 ```ts
 type PartnerInvitationPayload = {
-  language?: "en" | "de"
+  language?: string
 }
 ```
 
@@ -957,6 +964,7 @@ type Assignable = {
   activated_at?: string // date-time
   status?: "Active" | "Pending" | "Deactivated" | "Deleted"
   group_id?: string
+  abbreviation?: string
 }
 ```
 
@@ -1039,6 +1047,7 @@ type AssignableGroup = {
   activated_at?: string // date-time
   status?: "Active" | "Pending" | "Deactivated" | "Deleted"
   group_id?: string
+  abbreviation?: string
 }
 ```
 
@@ -1178,6 +1187,7 @@ type PartnerUser = {
     id: string
     slug: string
     name: string
+    mutable: boolean
   }>
 }
 ```
@@ -1189,7 +1199,7 @@ Request payload for creating a new user in a partner organization
 ```ts
 type CreatePartnerUserPayload = {
   email: string // email
-  language?: "en" | "de"
+  language?: string
   roles?: string[]
 }
 ```
@@ -1338,6 +1348,7 @@ type PartnerRole = {
     effect?: "allow" | "deny"
     conditions?: object[]
   }>
+  mutable: boolean
 }
 ```
 

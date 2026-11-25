@@ -2944,9 +2944,14 @@ source/destination and `auto_apply: true` — no `:continue` c
 `POST /v2/blueprint-manifest/jobs/{job_id}:retry`
 
 ```ts
-const { data } = await client.retryInstallationJob({
-  job_id: 'example',
-})
+const { data } = await client.retryInstallationJob(
+  {
+    job_id: 'example',
+  },
+  {
+    source_auth_token: 'string'
+  },
+)
 ```
 
 ---
@@ -3044,7 +3049,8 @@ const { data } = await client.createMarketplaceListing(
   },
   {
     name: 'string',
-    slug: 'string'
+    slug: 'string',
+    installation_slug: 'string'
   },
 )
 ```

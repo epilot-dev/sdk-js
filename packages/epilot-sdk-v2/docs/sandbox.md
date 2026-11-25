@@ -33,7 +33,6 @@ const { data } = await sandboxClient.listPipelines(...)
 
 **Sandbox Requests**
 - [`requestSandbox`](#requestsandbox)
-- [`listSandboxRequests`](#listsandboxrequests)
 
 **Schemas**
 - [`OrgId`](#orgid)
@@ -41,6 +40,8 @@ const { data } = await sandboxClient.listPipelines(...)
 - [`PipelineRole`](#pipelinerole)
 - [`PipelineItem`](#pipelineitem)
 - [`Pipeline`](#pipeline)
+- [`ManagedBy`](#managedby)
+- [`ManagedPipelineRequest`](#managedpipelinerequest)
 - [`CreatePipelineRequest`](#createpipelinerequest)
 - [`AccessToken`](#accesstoken)
 - [`SandboxToken`](#sandboxtoken)
@@ -70,7 +71,10 @@ const { data } = await client.listPipelines()
       "sandbox_org_name": "Sandbox",
       "production_org_id": "54321",
       "production_org_name": "Production",
-      "created_at": "1970-01-01T00:00:00.000Z"
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "managed_by": "configuration-hub",
+      "one_way": true,
+      "max_access_profile": "config:read"
     }
   ],
   "total": 1
@@ -108,7 +112,10 @@ const { data } = await client.createPipeline(
   "sandbox_org_name": "Sandbox",
   "production_org_id": "54321",
   "production_org_name": "Production",
-  "created_at": "1970-01-01T00:00:00.000Z"
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "managed_by": "configuration-hub",
+  "one_way": true,
+  "max_access_profile": "config:read"
 }
 ```
 
@@ -139,7 +146,10 @@ const { data } = await client.getPipeline({
   "sandbox_org_name": "Sandbox",
   "production_org_id": "54321",
   "production_org_name": "Production",
-  "created_at": "1970-01-01T00:00:00.000Z"
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "managed_by": "configuration-hub",
+  "one_way": true,
+  "max_access_profile": "config:read"
 }
 ```
 
@@ -170,7 +180,10 @@ const { data } = await client.deletePipeline({
   "sandbox_org_name": "Sandbox",
   "production_org_id": "54321",
   "production_org_name": "Production",
-  "created_at": "1970-01-01T00:00:00.000Z"
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "managed_by": "configuration-hub",
+  "one_way": true,
+  "max_access_profile": "config:read"
 }
 ```
 
@@ -187,6 +200,8 @@ Generate a temporary pipeline access token to access the other org from the pipe
 ```ts
 const { data } = await client.generatePipelineToken({
   pipeline_id: 'example',
+  read_only: true,
+  access_profile: 'example',
 })
 ```
 
@@ -213,7 +228,7 @@ Request a sandbox account for a user
 const { data } = await client.requestSandbox(
   null,
   {
-    id: 12345,
+    id: '12345',
     fullname: 'John Doe',
     company_name: 'Company Name',
     position: 'Software Engineer',
@@ -232,7 +247,7 @@ const { data } = await client.requestSandbox(
 
 ```json
 {
-  "id": 12345,
+  "id": "12345",
   "fullname": "John Doe",
   "company_name": "Company Name",
   "position": "Software Engineer",
@@ -242,43 +257,6 @@ const { data } = await client.requestSandbox(
   "connected_to_existing_epilot_customer": true,
   "requested_at": "2022-01-01T00:00:00Z",
   "sandbox_request_category": "APP_DEVELOPER_ACCOUNT"
-}
-```
-
-</details>
-
----
-
-### `listSandboxRequests`
-
-List sandbox requests from users
-
-`GET /v1/sandbox/requests`
-
-```ts
-const { data } = await client.listSandboxRequests()
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "results": [
-    {
-      "id": 12345,
-      "fullname": "John Doe",
-      "company_name": "Company Name",
-      "position": "Software Engineer",
-      "email": "user@example.com",
-      "sandbox_usecase": "Build a payment integration",
-      "status": "pending",
-      "connected_to_existing_epilot_customer": true,
-      "requested_at": "2022-01-01T00:00:00Z",
-      "sandbox_request_category": "APP_DEVELOPER_ACCOUNT"
-    }
-  ],
-  "total": 1
 }
 ```
 
@@ -325,6 +303,9 @@ type PipelineItem = {
   production_org_id?: string
   production_org_name?: string
   created_at?: string // date-time
+  managed_by?: string
+  one_way?: boolean
+  max_access_profile?: "config:read"
 }
 ```
 
@@ -339,6 +320,29 @@ type Pipeline = {
   production_org_id?: string
   production_org_name?: string
   created_at?: string // date-time
+  managed_by?: string
+  one_way?: boolean
+  max_access_profile?: "config:read"
+}
+```
+
+### `ManagedBy`
+
+The platform service that manages a pipeline (absent on pipelines an org created)
+
+```ts
+type ManagedBy = string
+```
+
+### `ManagedPipelineRequest`
+
+```ts
+type ManagedPipelineRequest = {
+  sandbox_org_id: string
+  sandbox_org_name?: string
+  production_org_id: string
+  production_org_name?: string
+  managed_by: string
 }
 ```
 

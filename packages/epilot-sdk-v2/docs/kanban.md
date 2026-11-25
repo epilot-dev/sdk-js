@@ -41,6 +41,9 @@ const { data } = await kanbanClient.createKanbanBoard(...)
 **Schemas**
 - [`Error`](#error)
 - [`BoardSummary`](#boardsummary)
+- [`BoardPermission`](#boardpermission)
+- [`SharedWithGrant`](#sharedwithgrant)
+- [`SharedWith`](#sharedwith)
 - [`Board`](#board)
 - [`Swimlane`](#swimlane)
 - [`Sorting`](#sorting)
@@ -74,7 +77,9 @@ const { data } = await client.createKanbanBoard(
     updated_by: 'string',
     shared_with: ['string'],
     shared_with_org: true,
+    org_access: 'view',
     owners: ['string'],
+    my_access: 'owner',
     config: {
       dataset: 'workflow_tasks_overview',
       swimlanes: [
@@ -138,7 +143,9 @@ const { data } = await client.createKanbanBoard(
   "updated_by": "string",
   "shared_with": ["string"],
   "shared_with_org": true,
+  "org_access": "view",
   "owners": ["string"],
+  "my_access": "owner",
   "config": {
     "dataset": "workflow_tasks_overview",
     "swimlanes": [
@@ -199,6 +206,7 @@ Returns a list of all Kanban boards accessible to the authenticated user.
 ```ts
 const { data } = await client.getKanbanBoards({
   filter: 'example',
+  shared_with_format: 'example',
 })
 ```
 
@@ -218,7 +226,9 @@ const { data } = await client.getKanbanBoards({
     "updated_by": "string",
     "shared_with": ["string"],
     "shared_with_org": true,
-    "owners": ["string"]
+    "org_access": "view",
+    "owners": ["string"],
+    "my_access": "owner"
   }
 ]
 ```
@@ -235,6 +245,7 @@ Retrieves a Kanban board by ID, including its full configuration (swimlanes, fil
 
 ```ts
 const { data } = await client.getKanbanBoard({
+  shared_with_format: 'example',
   boardId: 'example',
 })
 ```
@@ -254,7 +265,9 @@ const { data } = await client.getKanbanBoard({
   "updated_by": "string",
   "shared_with": ["string"],
   "shared_with_org": true,
+  "org_access": "view",
   "owners": ["string"],
+  "my_access": "owner",
   "config": {
     "dataset": "workflow_tasks_overview",
     "swimlanes": [
@@ -315,6 +328,7 @@ Fully replaces the configuration of an existing Kanban board by ID.
 ```ts
 const { data } = await client.updateKanbanBoard(
   {
+    shared_with_format: 'example',
     boardId: 'example',
   },
   {
@@ -328,7 +342,9 @@ const { data } = await client.updateKanbanBoard(
     updated_by: 'string',
     shared_with: ['string'],
     shared_with_org: true,
+    org_access: 'view',
     owners: ['string'],
+    my_access: 'owner',
     config: {
       dataset: 'workflow_tasks_overview',
       swimlanes: [
@@ -392,7 +408,9 @@ const { data } = await client.updateKanbanBoard(
   "updated_by": "string",
   "shared_with": ["string"],
   "shared_with_org": true,
+  "org_access": "view",
   "owners": ["string"],
+  "my_access": "owner",
   "config": {
     "dataset": "workflow_tasks_overview",
     "swimlanes": [
@@ -453,6 +471,7 @@ Partially updates fields of an existing Kanban board by ID.
 ```ts
 const { data } = await client.patchKanbanBoard(
   {
+    shared_with_format: 'example',
     boardId: 'example',
   },
   {
@@ -460,6 +479,7 @@ const { data } = await client.patchKanbanBoard(
     description: 'Board description',
     shared_with: ['string'],
     shared_with_org: true,
+    org_access: 'view',
     owners: ['string']
   },
 )
@@ -480,7 +500,9 @@ const { data } = await client.patchKanbanBoard(
   "updated_by": "string",
   "shared_with": ["string"],
   "shared_with_org": true,
+  "org_access": "view",
   "owners": ["string"],
+  "my_access": "owner",
   "config": {
     "dataset": "workflow_tasks_overview",
     "swimlanes": [
@@ -705,10 +727,47 @@ type BoardSummary = {
   created_by?: string
   org_id?: string
   updated_by?: string
-  shared_with?: string[]
+  shared_with?: Array<string | {
+    user_id: string
+    permission: "view" | "edit"
+  }>
   shared_with_org?: boolean
+  org_access?: "view" | "edit"
   owners?: string[]
+  my_access?: "owner" | "edit" | "view"
 }
+```
+
+### `BoardPermission`
+
+Access level of a share. `view` is read-only. `edit` can additionally change the board configuration and title,
+but cannot delete the board, change sharing or change owners (owners only).
+
+
+```ts
+type BoardPermission = "view" | "edit"
+```
+
+### `SharedWithGrant`
+
+```ts
+type SharedWithGrant = {
+  user_id: string
+  permission: "view" | "edit"
+}
+```
+
+### `SharedWith`
+
+Principals the board is shared with. Responses return plain principal ids (read access and above) unless the
+request sets `shared_with_format=grants`, in which case each entry is a `{user_id, permission}` grant.
+Requests accept both forms; a plain id keeps the permission the principal already has (o
+
+```ts
+type SharedWith = Array<string | {
+  user_id: string
+  permission: "view" | "edit"
+}>
 ```
 
 ### `Board`
@@ -725,9 +784,14 @@ type Board = {
   created_by?: string
   org_id?: string
   updated_by?: string
-  shared_with?: string[]
+  shared_with?: Array<string | {
+    user_id: string
+    permission: "view" | "edit"
+  }>
   shared_with_org?: boolean
+  org_access?: "view" | "edit"
   owners?: string[]
+  my_access?: "owner" | "edit" | "view"
   config: {
     dataset?: string
     swimlanes?: Array<{
@@ -798,7 +862,7 @@ Defines how tasks should be grouped within each swimlane. Tasks with the same gr
 
 ```ts
 type GroupBy = {
-  field: "context_entity" | "phase" | "task"
+  field: "context_entity" | "phase" | "task" | "flow_template_id"
 }
 ```
 
@@ -887,7 +951,7 @@ type FlowsQueryRequest = {
     direction?: "asc" | "desc"
   }
   group_by?: {
-    field: "context_entity" | "phase" | "task"
+    field: "context_entity" | "phase" | "task" | "flow_template_id"
   }
   from?: number
   size?: number

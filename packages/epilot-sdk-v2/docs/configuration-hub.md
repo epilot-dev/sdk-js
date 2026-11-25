@@ -29,6 +29,7 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`listConfigs`](#listconfigs)
 - [`getConfigDependencies`](#getconfigdependencies)
 - [`getConfigUsedBy`](#getconfigusedby)
+- [`getConfigConnections`](#getconfigconnections)
 - [`getIndex`](#getindex)
 - [`rebuildIndex`](#rebuildindex)
 - [`getConfigInventory`](#getconfiginventory)
@@ -62,6 +63,14 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`getSyncPlanDiff`](#getsyncplandiff)
 - [`applySyncPlan`](#applysyncplan)
 - [`replanSyncPlan`](#replansyncplan)
+- [`rejectSyncPlan`](#rejectsyncplan)
+
+**Agent tasks**
+- [`listAgentTasks`](#listagenttasks)
+- [`getAgentTask`](#getagenttask)
+- [`putAgentTask`](#putagenttask)
+- [`updateAgentTaskItem`](#updateagenttaskitem)
+- [`signOffAgentTask`](#signoffagenttask)
 
 **Delete**
 - [`createDeleteJob`](#createdeletejob)
@@ -73,6 +82,7 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`createPreview`](#createpreview)
 - [`listPreviews`](#listpreviews)
 - [`getPreview`](#getpreview)
+- [`cancelPreview`](#cancelpreview)
 
 **Schemas**
 - [`ResourceType`](#resourcetype)
@@ -80,6 +90,7 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`ConfigNode`](#confignode)
 - [`ConfigListResponse`](#configlistresponse)
 - [`ConfigDependenciesResponse`](#configdependenciesresponse)
+- [`ConfigConnectionsResponse`](#configconnectionsresponse)
 - [`IndexRebuildResponse`](#indexrebuildresponse)
 - [`HealthScanStartResponse`](#healthscanstartresponse)
 - [`HealthFinding`](#healthfinding)
@@ -118,6 +129,8 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`HealthSeverityCounts`](#healthseveritycounts)
 - [`SyncJobHealthCheck`](#syncjobhealthcheck)
 - [`SyncJobHealth`](#syncjobhealth)
+- [`SyncHealthFinding`](#synchealthfinding)
+- [`SyncJobHealthBaseline`](#syncjobhealthbaseline)
 - [`SyncJob`](#syncjob)
 - [`SyncJobListResponse`](#syncjoblistresponse)
 - [`SyncJobResource`](#syncjobresource)
@@ -126,8 +139,11 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`SyncPlanMatch`](#syncplanmatch)
 - [`SyncPlanDiffStatus`](#syncplandiffstatus)
 - [`SyncResourcePlan`](#syncresourceplan)
+- [`SyncPlanWarning`](#syncplanwarning)
 - [`SyncPlanConflict`](#syncplanconflict)
 - [`SyncPlanConflictPath`](#syncplanconflictpath)
+- [`SyncMergeBlocker`](#syncmergeblocker)
+- [`SyncMergeChoice`](#syncmergechoice)
 - [`SyncPlanCounts`](#syncplancounts)
 - [`SyncPlan`](#syncplan)
 - [`SyncPlanChange`](#syncplanchange)
@@ -150,6 +166,15 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`SnapshotInventorySkippedType`](#snapshotinventoryskippedtype)
 - [`ConfigInventoryResponse`](#configinventoryresponse)
 - [`CreatePreviewRequest`](#createpreviewrequest)
+- [`SyncJobReportItemStatus`](#syncjobreportitemstatus)
+- [`SyncJobReportItemInput`](#syncjobreportiteminput)
+- [`AgentTaskStatus`](#agenttaskstatus)
+- [`AgentTaskItemInput`](#agenttaskiteminput)
+- [`AgentTaskItem`](#agenttaskitem)
+- [`AgentTaskChange`](#agenttaskchange)
+- [`AgentTaskInput`](#agenttaskinput)
+- [`AgentTaskSummary`](#agenttasksummary)
+- [`AgentTask`](#agenttask)
 - [`PreviewStatus`](#previewstatus)
 - [`Preview`](#preview)
 
@@ -162,7 +187,9 @@ with labels and icons. The frontend should
 `GET /v1/configs/types`
 
 ```ts
-const { data } = await client.listConfigTypes()
+const { data } = await client.listConfigTypes({
+  include_dependency_only: true,
+})
 ```
 
 <details>
@@ -177,7 +204,9 @@ const { data } = await client.listConfigTypes()
       "icon": "Route",
       "source_api": "https://journey.sls.epilot.io",
       "sdk_client": "@epilot/sdk/journey",
-      "deletable": true
+      "deletable": true,
+      "dependency_only": false,
+      "requires_blueprint_filter": false
     }
   ]
 }
@@ -340,6 +369,76 @@ const { data } = await client.getConfigUsedBy({
       "metadata": {}
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `getConfigConnections`
+
+What a config needs and what uses it, from the org's config index.
+Same connection graph as the `connections`, `connections_needs` and
+`connections_used_by` counts on index rows, so the two always agr
+
+`GET /v1/configs/{type}/{id}/connections`
+
+```ts
+const { data } = await client.getConfigConnections({
+  type: 'example',
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "needs": [
+    {
+      "type": "journey",
+      "id": "string",
+      "title": "string",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "updated_by": "string",
+      "tags": ["string"],
+      "aliases": ["string"],
+      "purposes": ["string"],
+      "link": "https://example.com/path",
+      "active": true,
+      "blueprints": [
+        {
+          "id": "string",
+          "title": "string"
+        }
+      ],
+      "metadata": {}
+    }
+  ],
+  "used_by": [
+    {
+      "type": "journey",
+      "id": "string",
+      "title": "string",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "updated_by": "string",
+      "tags": ["string"],
+      "aliases": ["string"],
+      "purposes": ["string"],
+      "link": "https://example.com/path",
+      "active": true,
+      "blueprints": [
+        {
+          "id": "string",
+          "title": "string"
+        }
+      ],
+      "metadata": {}
+    }
+  ],
+  "indexed_at": "1970-01-01T00:00:00.000Z"
 }
 ```
 
@@ -543,7 +642,7 @@ const { data } = await client.setHealthFindingsIgnored(
 
 Compare the caller org's configs of a single type against another
 (source) org, side by side. Rows are paired via the lineage registry in
-both sync directions (caller imported from source, or source i
+both sync directions (caller pulled from source, or source pul
 
 `POST /v1/configs/compare`
 
@@ -741,6 +840,7 @@ const { data } = await client.breakLineage({
 Create a new cross-org sync job. The job is enqueued for asynchronous execution
 by the worker Lambda; the response returns the persisted job header with status
 `pending`.
+A scoped token (an `allowed_a
 
 `POST /v1/configs/sync-jobs`
 
@@ -840,7 +940,8 @@ const { data } = await client.createSyncJob(
     "skip": 0,
     "failed": 0,
     "not_compared": 0,
-    "conflicts": 0
+    "conflicts": 0,
+    "warnings": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -855,6 +956,8 @@ const { data } = await client.createSyncJob(
       "approved_at": "1970-01-01T00:00:00.000Z"
     }
   ],
+  "rejected_at": "1970-01-01T00:00:00.000Z",
+  "rejected_by": "string",
   "errors_sample": [
     {
       "type": "string",
@@ -899,91 +1002,28 @@ const { data } = await client.listSyncJobs({
       "source_org_id": "string",
       "target_org_id": "string",
       "dry_run": true,
-      "counts": {
-        "total": 0,
-        "pending": 0,
-        "in_progress": 0,
-        "succeeded": 0,
-        "failed": 0,
-        "skipped_unchanged": 0
-      },
+      "counts": {},
       "current_phase": "phase_0",
-      "current_batch": {
-        "index": 0,
-        "of": 0,
-        "level": 0
-      },
+      "current_batch": {},
       "started_at": "1970-01-01T00:00:00.000Z",
       "finished_at": "1970-01-01T00:00:00.000Z",
-      "health_check": {
-        "status": "pending",
-        "counts": {
-          "error": 0,
-          "warning": 0,
-          "info": 0
-        }
-      },
-      "events": [
-        {
-          "id": "string",
-          "kind": "resource",
-          "seq": 0,
-          "ts": "1970-01-01T00:00:00.000Z",
-          "phase": "phase_0",
-          "type": "string",
-          "source_id": "string",
-          "target_id": "string",
-          "title": "string",
-          "status": "pending",
-          "attempt": 0,
-          "message": "string",
-          "error": "string",
-          "dependency": {
-            "outcome": "added",
-            "reason": "typed_reference",
-            "required_by": {
-              "type": "string",
-              "source_id": "string",
-              "title": "string"
-            },
-            "depth": 0
-          }
-        }
-      ],
+      "health_check": {},
+      "events": [],
       "created_by": "string",
       "retry_of": "string",
       "retried_by": ["string"],
       "plan_only": true,
-      "plan_summary": {
-        "total": 0,
-        "create": 0,
-        "update": 0,
-        "no_change": 0,
-        "skip": 0,
-        "failed": 0,
-        "not_compared": 0,
-        "conflicts": 0
-      },
+      "plan_summary": {},
       "planned_at": "1970-01-01T00:00:00.000Z",
       "expires_at": "1970-01-01T00:00:00.000Z",
       "applied_from_plan": "string",
       "applied_by": ["string"],
       "approved_by": "string",
       "approved_at": "1970-01-01T00:00:00.000Z",
-      "approvals": [
-        {
-          "job_id": "string",
-          "approved_by": "string",
-          "approved_at": "1970-01-01T00:00:00.000Z"
-        }
-      ],
-      "errors_sample": [
-        {
-          "type": "string",
-          "source_id": "string",
-          "error": "string"
-        }
-      ]
+      "approvals": [],
+      "rejected_at": "1970-01-01T00:00:00.000Z",
+      "rejected_by": "string",
+      "errors_sample": []
     }
   ]
 }
@@ -1082,7 +1122,8 @@ const { data } = await client.getSyncJob({
     "skip": 0,
     "failed": 0,
     "not_compared": 0,
-    "conflicts": 0
+    "conflicts": 0,
+    "warnings": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -1097,6 +1138,8 @@ const { data } = await client.getSyncJob({
       "approved_at": "1970-01-01T00:00:00.000Z"
     }
   ],
+  "rejected_at": "1970-01-01T00:00:00.000Z",
+  "rejected_by": "string",
   "errors_sample": [
     {
       "type": "string",
@@ -1140,6 +1183,20 @@ const { data } = await client.getSyncJobHealth({
     "info": 0
   },
   "error": "string",
+  "baseline": {
+    "status": "compared",
+    "reason": "string",
+    "counts": {
+      "error": 0,
+      "warning": 0,
+      "info": 0
+    },
+    "in_source_counts": {
+      "error": 0,
+      "warning": 0,
+      "info": 0
+    }
+  },
   "findings": [
     {
       "id": "string",
@@ -1167,7 +1224,8 @@ const { data } = await client.getSyncJobHealth({
       "ignored_by": "string",
       "ignored_reason": "string",
       "first_seen": "1970-01-01T00:00:00.000Z",
-      "last_seen": "1970-01-01T00:00:00.000Z"
+      "last_seen": "1970-01-01T00:00:00.000Z",
+      "baseline": "new"
     }
   ]
 }
@@ -1294,7 +1352,8 @@ const { data } = await client.retrySyncJob(
     "skip": 0,
     "failed": 0,
     "not_compared": 0,
-    "conflicts": 0
+    "conflicts": 0,
+    "warnings": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -1309,6 +1368,8 @@ const { data } = await client.retrySyncJob(
       "approved_at": "1970-01-01T00:00:00.000Z"
     }
   ],
+  "rejected_at": "1970-01-01T00:00:00.000Z",
+  "rejected_by": "string",
   "errors_sample": [
     {
       "type": "string",
@@ -1485,7 +1546,8 @@ const { data } = await client.cancelSyncJob({
     "skip": 0,
     "failed": 0,
     "not_compared": 0,
-    "conflicts": 0
+    "conflicts": 0,
+    "warnings": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -1500,6 +1562,8 @@ const { data } = await client.cancelSyncJob({
       "approved_at": "1970-01-01T00:00:00.000Z"
     }
   ],
+  "rejected_at": "1970-01-01T00:00:00.000Z",
+  "rejected_by": "string",
   "errors_sample": [
     {
       "type": "string",
@@ -1659,7 +1723,29 @@ const { data } = await client.listSyncJobResources({
             "total_fields": 214
           }
         ],
-        "conflict_resolution": "overwrite"
+        "merge_blockers": ["type_not_supported"],
+        "merge_choices": [
+          {
+            "path": "attributes[name=tax].label",
+            "reason": "both_edited",
+            "source": {},
+            "target": {}
+          }
+        ],
+        "merge_refusal": "string",
+        "conflict_resolution": "overwrite",
+        "warnings": [
+          {
+            "code": "unresolved_reference",
+            "message": "string",
+            "path": "string",
+            "ref": {
+              "type": "string",
+              "source_id": "string",
+              "title": "string"
+            }
+          }
+        ]
       },
       "excluded_from_apply": "unchanged"
     }
@@ -1710,7 +1796,8 @@ const { data } = await client.getSyncPlan({
     "skip": 0,
     "failed": 0,
     "not_compared": 0,
-    "conflicts": 0
+    "conflicts": 0,
+    "warnings": 0
   },
   "by_type": [
     {
@@ -1722,10 +1809,13 @@ const { data } = await client.getSyncPlan({
       "failed": 0,
       "not_compared": 0,
       "conflicts": 0,
+      "warnings": 0,
       "type": "string"
     }
   ],
-  "applied_by": ["string"]
+  "applied_by": ["string"],
+  "rejected_at": "1970-01-01T00:00:00.000Z",
+  "rejected_by": "string"
 }
 ```
 
@@ -1834,9 +1924,9 @@ const { data } = await client.getSyncPlanDiff({
 
 ### `applySyncPlan`
 
-Run a finished plan for real. Creates a new sync job (it carries
-`applied_from_plan`; the plan's `applied_by` gets the new job's id)
-and enqueues it.
+A scoped token (an `allowed_actions` claim, e.g. a `config:write`
+agent token) may only apply a plan whose target is its own
+organization (403 otherwise).
 
 `POST /v1/configs/sync-jobs/{id}/plan/apply`
 
@@ -1864,6 +1954,18 @@ const { data } = await client.applySyncPlan(
       {
         type: 'string',
         source_id: 'string'
+      }
+    ],
+    merge_conflicts: [
+      {
+        type: 'string',
+        source_id: 'string',
+        decisions: [
+          {
+            path: 'string',
+            take: 'source'
+          }
+        ]
       }
     ],
     allow_missing_dependencies: false
@@ -1946,7 +2048,8 @@ const { data } = await client.applySyncPlan(
     "skip": 0,
     "failed": 0,
     "not_compared": 0,
-    "conflicts": 0
+    "conflicts": 0,
+    "warnings": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -1961,6 +2064,8 @@ const { data } = await client.applySyncPlan(
       "approved_at": "1970-01-01T00:00:00.000Z"
     }
   ],
+  "rejected_at": "1970-01-01T00:00:00.000Z",
+  "rejected_by": "string",
   "errors_sample": [
     {
       "type": "string",
@@ -1996,10 +2101,512 @@ const { data } = await client.replanSyncPlan(
         type: 'string',
         source_id: 'string'
       }
+    ],
+    add_resources: [
+      {
+        type: 'string',
+        source_id: 'string'
+      }
     ]
   },
 )
 ```
+
+---
+
+### `rejectSyncPlan`
+
+Reject a plan that was not applied: it can no longer be applied or
+replanned (`applySyncPlan` / `replanSyncPlan` answer 409
+`plan_rejected`), `getSyncPlan` reports it as not `applicable`, and
+the job 
+
+`POST /v1/configs/sync-jobs/{id}/plan/reject`
+
+```ts
+const { data } = await client.rejectSyncPlan({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "string",
+  "name": "string",
+  "status": "pending",
+  "direction": "push",
+  "source_org_id": "string",
+  "target_org_id": "string",
+  "dry_run": true,
+  "counts": {
+    "total": 0,
+    "pending": 0,
+    "in_progress": 0,
+    "succeeded": 0,
+    "failed": 0,
+    "skipped_unchanged": 0
+  },
+  "current_phase": "phase_0",
+  "current_batch": {
+    "index": 0,
+    "of": 0,
+    "level": 0
+  },
+  "started_at": "1970-01-01T00:00:00.000Z",
+  "finished_at": "1970-01-01T00:00:00.000Z",
+  "health_check": {
+    "status": "pending",
+    "counts": {
+      "error": 0,
+      "warning": 0,
+      "info": 0
+    }
+  },
+  "events": [
+    {
+      "id": "string",
+      "kind": "resource",
+      "seq": 0,
+      "ts": "1970-01-01T00:00:00.000Z",
+      "phase": "phase_0",
+      "type": "string",
+      "source_id": "string",
+      "target_id": "string",
+      "title": "string",
+      "status": "pending",
+      "attempt": 0,
+      "message": "string",
+      "error": "string",
+      "dependency": {
+        "outcome": "added",
+        "reason": "typed_reference",
+        "required_by": {
+          "type": "string",
+          "source_id": "string",
+          "title": "string"
+        },
+        "depth": 0
+      }
+    }
+  ],
+  "created_by": "string",
+  "retry_of": "string",
+  "retried_by": ["string"],
+  "plan_only": true,
+  "plan_summary": {
+    "total": 0,
+    "create": 0,
+    "update": 0,
+    "no_change": 0,
+    "skip": 0,
+    "failed": 0,
+    "not_compared": 0,
+    "conflicts": 0,
+    "warnings": 0
+  },
+  "planned_at": "1970-01-01T00:00:00.000Z",
+  "expires_at": "1970-01-01T00:00:00.000Z",
+  "applied_from_plan": "string",
+  "applied_by": ["string"],
+  "approved_by": "string",
+  "approved_at": "1970-01-01T00:00:00.000Z",
+  "approvals": [
+    {
+      "job_id": "string",
+      "approved_by": "string",
+      "approved_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "rejected_at": "1970-01-01T00:00:00.000Z",
+  "rejected_by": "string",
+  "errors_sample": [
+    {
+      "type": "string",
+      "source_id": "string",
+      "error": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `listAgentTasks`
+
+The agent tasks of the caller's org, most recently changed first (at
+most 500), without their items and changes. An agent task is what a
+Configuration Agent session did in the org: see `putAgentTask`.
+
+`GET /v1/configs/agent-tasks`
+
+```ts
+const { data } = await client.listAgentTasks()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "session_id": "string",
+      "title": "string",
+      "status": "working",
+      "plan_job_id": "string",
+      "created_by": "string",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "open_items": 0,
+      "changes": 0
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getAgentTask`
+
+The agent task of a Configuration Agent session in the caller's org.
+
+`GET /v1/configs/agent-tasks/{session_id}`
+
+```ts
+const { data } = await client.getAgentTask({
+  session_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "session_id": "string",
+  "org_id": "string",
+  "title": "string",
+  "summary": "string",
+  "status": "working",
+  "state": "working",
+  "plan_job_id": "string",
+  "version": 0,
+  "created_by": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "signed_off_by": "string",
+  "signed_off_at": "1970-01-01T00:00:00.000Z",
+  "items": [
+    {
+      "id": "string",
+      "kind": "done",
+      "title": "string",
+      "detail": "string",
+      "resource": {
+        "type": "string",
+        "id": "string",
+        "title": "string"
+      },
+      "resolution": "merged",
+      "status": "open",
+      "options": [
+        {
+          "id": "string",
+          "label": "string",
+          "detail": "string"
+        }
+      ],
+      "resolved_by": "string",
+      "resolved_at": "1970-01-01T00:00:00.000Z",
+      "choice": "string"
+    }
+  ],
+  "changes": [
+    {
+      "type": "string",
+      "id": "string",
+      "title": "string",
+      "change": "created",
+      "note": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `putAgentTask`
+
+Written by the Configuration Agent, in the org its session works in:
+what the session did there, for the user to review and sign off. One
+task per session; the whole task each time (`version` goes up 
+
+`PUT /v1/configs/agent-tasks/{session_id}`
+
+```ts
+const { data } = await client.putAgentTask(
+  {
+    session_id: 'example',
+  },
+  {
+    title: 'string',
+    summary: 'string',
+    state: 'working',
+    plan_job_id: 'string',
+    items: [
+      {
+        id: 'string',
+        kind: 'done',
+        title: 'string',
+        detail: 'string',
+        resource: {
+          type: 'string',
+          id: 'string',
+          title: 'string'
+        },
+        resolution: 'merged',
+        status: 'open',
+        options: [
+          {
+            id: 'string',
+            label: 'string',
+            detail: 'string'
+          }
+        ]
+      }
+    ],
+    changes: [
+      {
+        type: 'string',
+        id: 'string',
+        title: 'string',
+        change: 'created',
+        note: 'string'
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "session_id": "string",
+  "org_id": "string",
+  "title": "string",
+  "summary": "string",
+  "status": "working",
+  "state": "working",
+  "plan_job_id": "string",
+  "version": 0,
+  "created_by": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "signed_off_by": "string",
+  "signed_off_at": "1970-01-01T00:00:00.000Z",
+  "items": [
+    {
+      "id": "string",
+      "kind": "done",
+      "title": "string",
+      "detail": "string",
+      "resource": {
+        "type": "string",
+        "id": "string",
+        "title": "string"
+      },
+      "resolution": "merged",
+      "status": "open",
+      "options": [
+        {
+          "id": "string",
+          "label": "string",
+          "detail": "string"
+        }
+      ],
+      "resolved_by": "string",
+      "resolved_at": "1970-01-01T00:00:00.000Z",
+      "choice": "string"
+    }
+  ],
+  "changes": [
+    {
+      "type": "string",
+      "id": "string",
+      "title": "string",
+      "change": "created",
+      "note": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `updateAgentTaskItem`
+
+Answers an open item of the task: picks one of its `options`
+(`choice`, which marks it done; `choice: null` opens it again), or
+marks it done or open without a choice (`status`). Records who and
+when.
+
+`PATCH /v1/configs/agent-tasks/{session_id}/items/{item_id}`
+
+```ts
+const { data } = await client.updateAgentTaskItem(
+  {
+    session_id: 'example',
+    item_id: 'example',
+  },
+  {
+    status: 'open',
+    choice: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "session_id": "string",
+  "org_id": "string",
+  "title": "string",
+  "summary": "string",
+  "status": "working",
+  "state": "working",
+  "plan_job_id": "string",
+  "version": 0,
+  "created_by": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "signed_off_by": "string",
+  "signed_off_at": "1970-01-01T00:00:00.000Z",
+  "items": [
+    {
+      "id": "string",
+      "kind": "done",
+      "title": "string",
+      "detail": "string",
+      "resource": {
+        "type": "string",
+        "id": "string",
+        "title": "string"
+      },
+      "resolution": "merged",
+      "status": "open",
+      "options": [
+        {
+          "id": "string",
+          "label": "string",
+          "detail": "string"
+        }
+      ],
+      "resolved_by": "string",
+      "resolved_at": "1970-01-01T00:00:00.000Z",
+      "choice": "string"
+    }
+  ],
+  "changes": [
+    {
+      "type": "string",
+      "id": "string",
+      "title": "string",
+      "change": "created",
+      "note": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `signOffAgentTask`
+
+The user has reviewed what the session did and accepts it. Only a
+task that is `awaiting_signoff` (the agent is done and no open item
+is open); signing off a signed-off task changes nothing. The chang
+
+`POST /v1/configs/agent-tasks/{session_id}/sign-off`
+
+```ts
+const { data } = await client.signOffAgentTask({
+  session_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "session_id": "string",
+  "org_id": "string",
+  "title": "string",
+  "summary": "string",
+  "status": "working",
+  "state": "working",
+  "plan_job_id": "string",
+  "version": 0,
+  "created_by": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "signed_off_by": "string",
+  "signed_off_at": "1970-01-01T00:00:00.000Z",
+  "items": [
+    {
+      "id": "string",
+      "kind": "done",
+      "title": "string",
+      "detail": "string",
+      "resource": {
+        "type": "string",
+        "id": "string",
+        "title": "string"
+      },
+      "resolution": "merged",
+      "status": "open",
+      "options": [
+        {
+          "id": "string",
+          "label": "string",
+          "detail": "string"
+        }
+      ],
+      "resolved_by": "string",
+      "resolved_at": "1970-01-01T00:00:00.000Z",
+      "choice": "string"
+    }
+  ],
+  "changes": [
+    {
+      "type": "string",
+      "id": "string",
+      "title": "string",
+      "change": "created",
+      "note": "string"
+    }
+  ]
+}
+```
+
+</details>
 
 ---
 
@@ -2008,6 +2615,7 @@ const { data } = await client.replanSyncPlan(
 Create a bulk-delete job for the caller's organization. The selected
 resources are deleted asynchronously by a worker Lambda; the response
 returns the persisted job header with status `pending`.
+A sco
 
 `POST /v1/configs/delete-jobs`
 
@@ -2046,7 +2654,8 @@ const { data } = await client.createDeleteJob(
   },
   "started_at": "1970-01-01T00:00:00.000Z",
   "finished_at": "1970-01-01T00:00:00.000Z",
-  "rebuild_triggered": true
+  "rebuild_triggered": true,
+  "created_by": "string"
 }
 ```
 
@@ -2090,7 +2699,8 @@ const { data } = await client.listDeleteJobs({
       },
       "started_at": "1970-01-01T00:00:00.000Z",
       "finished_at": "1970-01-01T00:00:00.000Z",
-      "rebuild_triggered": true
+      "rebuild_triggered": true,
+      "created_by": "string"
     }
   ]
 }
@@ -2132,7 +2742,8 @@ const { data } = await client.getDeleteJob({
   },
   "started_at": "1970-01-01T00:00:00.000Z",
   "finished_at": "1970-01-01T00:00:00.000Z",
-  "rebuild_triggered": true
+  "rebuild_triggered": true,
+  "created_by": "string"
 }
 ```
 
@@ -2188,7 +2799,9 @@ A new rebuild will cancel any in-flight build (see `build_token`).
 `POST /v1/configs/index:rebuild`
 
 ```ts
-const { data } = await client.rebuildIndex()
+const { data } = await client.rebuildIndex({
+  force: true,
+})
 ```
 
 <details>
@@ -2311,7 +2924,31 @@ const { data } = await client.listPreviews()
       },
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
-      "error": "string"
+      "error": "string",
+      "superseded_by": "string",
+      "cancelled_at": "1970-01-01T00:00:00.000Z",
+      "cancelled_by": "string",
+      "org_deletion_requested_at": "1970-01-01T00:00:00.000Z",
+      "org_deletion_error": "string",
+      "status_since": {
+        "creating_org": "2026-11-17T07:38:58.000Z",
+        "copying_configuration": "2026-11-17T07:40:12.000Z"
+      },
+      "invited_at": "1970-01-01T00:00:00.000Z",
+      "invite_accepted_at": "1970-01-01T00:00:00.000Z",
+      "invite_accept_error": "string",
+      "invite_link": "string",
+      "mirror_progress": {
+        "phase": "phase_0",
+        "processed_count": 0,
+        "batch": {
+          "index": 0,
+          "of": 0
+        },
+        "total_count": 0,
+        "failed_count": 0,
+        "last_activity_at": "1970-01-01T00:00:00.000Z"
+      }
     }
   ]
 }
@@ -2323,7 +2960,8 @@ const { data } = await client.listPreviews()
 
 ### `getPreview`
 
-Returns a preview requested from the caller's current org, with its progress.
+Returns a preview requested from the caller's current org, with its progress. Called from a
+preview org, it also returns that org's own preview (stored under the previewed org).
 
 `GET /v1/previews/{id}`
 
@@ -2357,7 +2995,101 @@ const { data } = await client.getPreview({
   },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
-  "error": "string"
+  "error": "string",
+  "superseded_by": "string",
+  "cancelled_at": "1970-01-01T00:00:00.000Z",
+  "cancelled_by": "string",
+  "org_deletion_requested_at": "1970-01-01T00:00:00.000Z",
+  "org_deletion_error": "string",
+  "status_since": {
+    "creating_org": "2026-11-17T07:38:58.000Z",
+    "copying_configuration": "2026-11-17T07:40:12.000Z"
+  },
+  "invited_at": "1970-01-01T00:00:00.000Z",
+  "invite_accepted_at": "1970-01-01T00:00:00.000Z",
+  "invite_accept_error": "string",
+  "invite_link": "string",
+  "mirror_progress": {
+    "phase": "phase_0",
+    "processed_count": 0,
+    "batch": {
+      "index": 0,
+      "of": 0
+    },
+    "total_count": 0,
+    "failed_count": 0,
+    "last_activity_at": "1970-01-01T00:00:00.000Z"
+  }
+}
+```
+
+</details>
+
+---
+
+### `cancelPreview`
+
+Cancels a preview that is still being made, or discards a `ready` one.
+Called from the previewed org (the org `listPreviews` lists it in);
+needs `organization:edit` there, like `createPreview`. No req
+
+`POST /v1/previews/{id}/cancel`
+
+```ts
+const { data } = await client.cancelPreview({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "string",
+  "name": "string",
+  "status": "creating_org",
+  "source_org_id": "string",
+  "preview_org_id": "string",
+  "sync_job_id": "string",
+  "sync_status": "string",
+  "skipped_types": [
+    {
+      "type": "string",
+      "reason": "string"
+    }
+  ],
+  "requested_by": {
+    "user_id": "string",
+    "email": "string"
+  },
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "error": "string",
+  "superseded_by": "string",
+  "cancelled_at": "1970-01-01T00:00:00.000Z",
+  "cancelled_by": "string",
+  "org_deletion_requested_at": "1970-01-01T00:00:00.000Z",
+  "org_deletion_error": "string",
+  "status_since": {
+    "creating_org": "2026-11-17T07:38:58.000Z",
+    "copying_configuration": "2026-11-17T07:40:12.000Z"
+  },
+  "invited_at": "1970-01-01T00:00:00.000Z",
+  "invite_accepted_at": "1970-01-01T00:00:00.000Z",
+  "invite_accept_error": "string",
+  "invite_link": "string",
+  "mirror_progress": {
+    "phase": "phase_0",
+    "processed_count": 0,
+    "batch": {
+      "index": 0,
+      "of": 0
+    },
+    "total_count": 0,
+    "failed_count": 0,
+    "last_activity_at": "1970-01-01T00:00:00.000Z"
+  }
 }
 ```
 
@@ -2374,7 +3106,7 @@ Matches blueprint-manifest-api V3 naming conventions.
 
 
 ```ts
-type ResourceType = "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "org_setting"
+type ResourceType = "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting"
 ```
 
 ### `ConfigTypeInfo`
@@ -2385,12 +3117,14 @@ No downstream API calls — just type + label + icon + source API info.
 
 ```ts
 type ConfigTypeInfo = {
-  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "org_setting"
+  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting"
   label: string
   icon: string
   source_api: string
   sdk_client: string
   deletable: boolean
+  dependency_only?: boolean
+  requires_blueprint_filter?: boolean
 }
 ```
 
@@ -2400,7 +3134,7 @@ Summary metadata for a single configuration item in the tree
 
 ```ts
 type ConfigNode = {
-  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "org_setting"
+  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting"
   id: string
   title: string
   updated_at?: string // date-time
@@ -2424,13 +3158,13 @@ Cursor-paginated list of configs for a specific type
 
 ```ts
 type ConfigListResponse = {
-  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "org_setting"
+  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting"
   label: string
   icon: string
   total?: number
   next_cursor?: string
   results: Array<{
-    type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "org_setting"
+    type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting"
     id: string
     title: string
     updated_at?: string // date-time
@@ -2458,7 +3192,7 @@ type ConfigDependenciesResponse = {
   total?: number
   next_cursor?: string
   results: Array<{
-    type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "org_setting"
+    type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting"
     id: string
     title: string
     updated_at?: string // date-time
@@ -2474,6 +3208,50 @@ type ConfigDependenciesResponse = {
     }>
     metadata?: Record<string, unknown>
   }>
+}
+```
+
+### `ConfigConnectionsResponse`
+
+A config's connections in the org's config index
+
+```ts
+type ConfigConnectionsResponse = {
+  needs: Array<{
+    type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting"
+    id: string
+    title: string
+    updated_at?: string // date-time
+    updated_by?: string
+    tags?: string[]
+    aliases?: string[]
+    purposes?: string[]
+    link?: string // uri
+    active?: boolean
+    blueprints?: Array<{
+      id: { ... }
+      title: { ... }
+    }>
+    metadata?: Record<string, unknown>
+  }>
+  used_by: Array<{
+    type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting"
+    id: string
+    title: string
+    updated_at?: string // date-time
+    updated_by?: string
+    tags?: string[]
+    aliases?: string[]
+    purposes?: string[]
+    link?: string // uri
+    active?: boolean
+    blueprints?: Array<{
+      id: { ... }
+      title: { ... }
+    }>
+    metadata?: Record<string, unknown>
+  }>
+  indexed_at?: string // date-time
 }
 ```
 
@@ -2505,7 +3283,7 @@ type HealthScanStartResponse = {
 ```ts
 type HealthFinding = {
   id: string
-  code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration" | "source_org_reference" | "secret_value_missing" | "env_value_missing"
+  code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_attribute_in_group" | "duplicate_attribute_id" | "duplicate_group_id" | "summary_attribute_missing" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration" | "source_org_reference" | "secret_value_missing" | "env_value_missing"
   severity: "error" | "warning" | "info"
   source_type: string
   source_id: string
@@ -2559,7 +3337,7 @@ type HealthReportResponse = {
   error?: string
   findings: Array<{
     id: string
-    code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration" | "source_org_reference" | "secret_value_missing" | "env_value_missing"
+    code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_attribute_in_group" | "duplicate_attribute_id" | "duplicate_group_id" | "summary_attribute_missing" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration" | "source_org_reference" | "secret_value_missing" | "env_value_missing"
     severity: "error" | "warning" | "info"
     source_type: string
     source_id: string
@@ -2610,7 +3388,7 @@ Request body for a per-type cross-org comparison
 type CompareRequest = {
   source_org_id: string
   source_auth_token: string
-  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "org_setting"
+  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting"
 }
 ```
 
@@ -2638,7 +3416,7 @@ the config exists on.
 type CompareRow = {
   match_status: "matched" | "only_current" | "only_source"
   current?: {
-    type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "org_setting"
+    type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting"
     id: string
     title: string
     updated_at?: string // date-time
@@ -2655,7 +3433,7 @@ type CompareRow = {
     metadata?: Record<string, unknown>
   }
   source?: {
-    type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "org_setting"
+    type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting"
     id: string
     title: string
     updated_at?: string // date-time
@@ -2698,7 +3476,7 @@ Side-by-side comparison of one config type across two orgs
 
 ```ts
 type CompareResponse = {
-  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "org_setting"
+  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting"
   label: string
   icon: string
   rows: Array<{
@@ -2754,7 +3532,7 @@ Request body for batched heuristic match suggestions
 type SuggestMatchesRequest = {
   source_org_id: string
   source_auth_token: string
-  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "org_setting"
+  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting"
   source_ids: string[]
 }
 ```
@@ -2777,7 +3555,7 @@ type MatchSuggestion = {
 
 ```ts
 type SuggestMatchesResponse = {
-  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "org_setting"
+  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting"
   suggestions: Array<{
     source_id: string
     candidate?: {
@@ -2794,7 +3572,7 @@ Persist a source→target lineage pairing (caller org as target)
 
 ```ts
 type ConfirmLineageRequest = {
-  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "org_setting"
+  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting"
   source_org_id: string
   source_id: string
   target_id: string
@@ -2807,7 +3585,7 @@ A persisted lineage entry
 
 ```ts
 type LineageEntryResponse = {
-  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "org_setting"
+  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting"
   target_org_id: string
   source_org_id: string
   source_id: string
@@ -2949,7 +3727,11 @@ type SyncJobRetryPlan = {
       note?: { ... }
       depends_on?: { ... }
       conflicts?: { ... }
+      merge_blockers?: { ... }
+      merge_choices?: { ... }
+      merge_refusal?: { ... }
       conflict_resolution?: { ... }
+      warnings?: { ... }
     }
     excluded_from_apply?: "unchanged" | "excluded" | "not_syncable"
   }>
@@ -2980,7 +3762,11 @@ type SyncJobRetryPlan = {
       note?: { ... }
       depends_on?: { ... }
       conflicts?: { ... }
+      merge_blockers?: { ... }
+      merge_choices?: { ... }
+      merge_refusal?: { ... }
       conflict_resolution?: { ... }
+      warnings?: { ... }
     }
     excluded_from_apply?: "unchanged" | "excluded" | "not_syncable"
   }>
@@ -3157,11 +3943,11 @@ type SyncJobBatch = {
 
 ### `SyncJobHealthStatus`
 
-State of a sync job's post-import health check. `pending`: queued,
+State of a sync job's post-sync health check. `pending`: queued,
 `running`: scanning, `done`: findings available, `failed`: the check
-itself failed or did not finish (the import is unaffected), `skipped`:
+itself failed or did not finish (the sync is unaffected), `skipped`:
 nothing to check (a plan, a job that wrote nothing, or a cancelled
-job), `not_run`: a finishe
+job), `not_run`: a finished jo
 
 ```ts
 type SyncJobHealthStatus = "pending" | "running" | "done" | "failed" | "skipped" | "not_run"
@@ -3179,7 +3965,7 @@ type HealthSeverityCounts = {
 
 ### `SyncJobHealthCheck`
 
-Compact state of the job's post-import health check. Full results:
+Compact state of the job's post-sync health check. Full results:
 `getSyncJobHealth`. Absent on plans and on jobs that finished before
 the check existed.
 
@@ -3213,9 +3999,23 @@ type SyncJobHealth = {
     info: number
   }
   error?: string
+  baseline?: {
+    status: "compared" | "unavailable"
+    reason?: string
+    counts: {
+      error: { ... }
+      warning: { ... }
+      info: { ... }
+    }
+    in_source_counts: {
+      error: { ... }
+      warning: { ... }
+      info: { ... }
+    }
+  }
   findings: Array<{
     id: string
-    code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration" | "source_org_reference" | "secret_value_missing" | "env_value_missing"
+    code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_attribute_in_group" | "duplicate_attribute_id" | "duplicate_group_id" | "summary_attribute_missing" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration" | "source_org_reference" | "secret_value_missing" | "env_value_missing"
     severity: "error" | "warning" | "info"
     source_type: string
     source_id: string
@@ -3240,7 +4040,71 @@ type SyncJobHealth = {
     ignored_reason?: string
     first_seen: string // date-time
     last_seen: string // date-time
+    baseline?: "new" | "in_source"
   }>
+}
+```
+
+### `SyncHealthFinding`
+
+A finding of the post-sync health check: a `HealthFinding` plus
+whether the source config the job copied has it too.
+
+
+```ts
+type SyncHealthFinding = {
+  id: string
+  code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_attribute_in_group" | "duplicate_attribute_id" | "duplicate_group_id" | "summary_attribute_missing" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration" | "source_org_reference" | "secret_value_missing" | "env_value_missing"
+  severity: "error" | "warning" | "info"
+  source_type: string
+  source_id: string
+  source_title: string
+  message: string
+  message_key?: string
+  message_params?: Record<string, unknown>
+  ref_type?: string
+  ref_id?: string
+  ref_title?: string
+  source_link?: string
+  ref_link?: string
+  owner_type?: string
+  owner_id?: string
+  owner_title?: string
+  owner_link?: string
+  path?: string
+  cleanable?: boolean
+  ignored?: boolean
+  ignored_at?: string // date-time
+  ignored_by?: string
+  ignored_reason?: string
+  first_seen: string // date-time
+  last_seen: string // date-time
+  baseline?: "new" | "in_source"
+}
+```
+
+### `SyncJobHealthBaseline`
+
+Comparison of the findings with the same checks run on the source
+versions of the written configs, with the source org as context.
+Present on `done` results computed since the baseline exists. The
+top-level `counts` keep counting every finding.
+
+
+```ts
+type SyncJobHealthBaseline = {
+  status: "compared" | "unavailable"
+  reason?: string
+  counts: {
+    error: number
+    warning: number
+    info: number
+  }
+  in_source_counts: {
+    error: number
+    warning: number
+    info: number
+  }
 }
 ```
 
@@ -3317,6 +4181,7 @@ type SyncJob = {
     failed: number
     not_compared: number
     conflicts?: number
+    warnings?: number
   }
   planned_at?: string // date-time
   expires_at?: string // date-time
@@ -3329,6 +4194,8 @@ type SyncJob = {
     approved_by?: string
     approved_at: string // date-time
   }>
+  rejected_at?: string // date-time
+  rejected_by?: string
   errors_sample?: Array<{
     type: string
     source_id: string
@@ -3401,6 +4268,7 @@ type SyncJobListResponse = {
       failed: { ... }
       not_compared: { ... }
       conflicts?: { ... }
+      warnings?: { ... }
     }
     planned_at?: string // date-time
     expires_at?: string // date-time
@@ -3413,6 +4281,8 @@ type SyncJobListResponse = {
       approved_by?: { ... }
       approved_at: { ... }
     }>
+    rejected_at?: string // date-time
+    rejected_by?: string
     errors_sample?: Array<{
       type: { ... }
       source_id: { ... }
@@ -3474,7 +4344,21 @@ type SyncJobResource = {
       replaced_fields?: { ... }
       total_fields?: { ... }
     }>
-    conflict_resolution?: "overwrite" | "keep_target"
+    merge_blockers?: "type_not_supported" | "not_exact" | "mostly_replaced" | "paths_truncated" | "list_changes" | "not_mergeable"[]
+    merge_choices?: Array<{
+      path: { ... }
+      reason: { ... }
+      source?: { ... }
+      target?: { ... }
+    }>
+    merge_refusal?: string
+    conflict_resolution?: "overwrite" | "keep_target" | "merge"
+    warnings?: Array<{
+      code: { ... }
+      message: { ... }
+      path?: { ... }
+      ref?: { ... }
+    }>
   }
   excluded_from_apply?: "unchanged" | "excluded" | "not_syncable"
 }
@@ -3514,7 +4398,11 @@ type SyncJobResourceListResponse = {
       note?: { ... }
       depends_on?: { ... }
       conflicts?: { ... }
+      merge_blockers?: { ... }
+      merge_choices?: { ... }
+      merge_refusal?: { ... }
       conflict_resolution?: { ... }
+      warnings?: { ... }
     }
     excluded_from_apply?: "unchanged" | "excluded" | "not_syncable"
   }>
@@ -3595,7 +4483,40 @@ type SyncResourcePlan = {
     replaced_fields?: number
     total_fields?: number
   }>
-  conflict_resolution?: "overwrite" | "keep_target"
+  merge_blockers?: "type_not_supported" | "not_exact" | "mostly_replaced" | "paths_truncated" | "list_changes" | "not_mergeable"[]
+  merge_choices?: Array<{
+    path: string
+    reason: "both_edited" | "both_added" | "removed_and_edited" | "probable_duplicate"
+    source?: unknown
+    target?: unknown
+  }>
+  merge_refusal?: string
+  conflict_resolution?: "overwrite" | "keep_target" | "merge"
+  warnings?: Array<{
+    code: "unresolved_reference" | "invalid_request" | "target_capability"
+    message: string
+    path?: string
+    ref?: {
+      type: { ... }
+      source_id: { ... }
+      title?: { ... }
+    }
+  }>
+}
+```
+
+### `SyncPlanWarning`
+
+```ts
+type SyncPlanWarning = {
+  code: "unresolved_reference" | "invalid_request" | "target_capability"
+  message: string
+  path?: string
+  ref?: {
+    type: string
+    source_id: string
+    title?: string
+  }
 }
 ```
 
@@ -3646,6 +4567,33 @@ type SyncPlanConflictPath = {
 }
 ```
 
+### `SyncMergeBlocker`
+
+Why a conflicted resource cannot be named in `merge_conflicts`:
+`type_not_supported` (only flat records are merged: email templates,
+signatures, notification templates, products, prices, taxes, coupons,
+webhooks, custom and environment variables, closing reasons,
+taxonomies and their classifications
+
+```ts
+type SyncMergeBlocker = "type_not_supported" | "not_exact" | "mostly_replaced" | "paths_truncated" | "list_changes" | "not_mergeable"
+```
+
+### `SyncMergeChoice`
+
+A choice the merge of an entity schema needs before it can write.
+Answer it with a decision on `path` in `merge_conflicts`.
+
+
+```ts
+type SyncMergeChoice = {
+  path: string
+  reason: "both_edited" | "both_added" | "removed_and_edited" | "probable_duplicate"
+  source?: unknown
+  target?: unknown
+}
+```
+
 ### `SyncPlanCounts`
 
 Planned resources by action. `not_compared` counts the `update`
@@ -3664,6 +4612,7 @@ type SyncPlanCounts = {
   failed: number
   not_compared: number
   conflicts?: number
+  warnings?: number
 }
 ```
 
@@ -3692,6 +4641,7 @@ type SyncPlan = {
     failed: number
     not_compared: number
     conflicts?: number
+    warnings?: number
   }
   by_type: Array<{
     total: number
@@ -3702,9 +4652,12 @@ type SyncPlan = {
     failed: number
     not_compared: number
     conflicts?: number
+    warnings?: number
     type: string
   }>
   applied_by?: string[]
+  rejected_at?: string // date-time
+  rejected_by?: string
 }
 ```
 
@@ -3782,7 +4735,7 @@ type SyncPlanDiffListResponse = {
 
 ```ts
 type SyncPlanApplyRequest = {
-  target_auth_token: string
+  target_auth_token?: string
   name?: string
   resources?: Array<{
     type: string
@@ -3796,6 +4749,14 @@ type SyncPlanApplyRequest = {
     type: string
     source_id: string
   }>
+  merge_conflicts?: Array<{
+    type: string
+    source_id: string
+    decisions?: Array<{
+      path: { ... }
+      take: { ... }
+    }>
+  }>
   allow_missing_dependencies?: boolean
 }
 ```
@@ -3804,8 +4765,12 @@ type SyncPlanApplyRequest = {
 
 ```ts
 type SyncPlanReplanRequest = {
-  target_auth_token: string
+  target_auth_token?: string
   resources?: Array<{
+    type: string
+    source_id: string
+  }>
+  add_resources?: Array<{
     type: string
     source_id: string
   }>
@@ -3833,7 +4798,7 @@ type SyncPlanMissingDependency = {
 type SyncPlanApplyErrorResponse = {
   status?: number
   error?: string
-  code?: "target_auth_token_missing" | "empty_selection" | "invalid_resources" | "plan_not_ready" | "plan_expired" | "nothing_to_apply" | "missing_dependencies" | "unresolved_conflicts"
+  code?: "target_auth_token_missing" | "empty_selection" | "invalid_resources" | "plan_not_ready" | "plan_expired" | "nothing_to_apply" | "missing_dependencies" | "unresolved_conflicts" | "merge_not_possible" | "plan_rejected" | "plan_already_applied" | "add_resources_not_allowed" | "apply_in_progress"
   message?: string
   invalid_resources?: Array<{
     type: string
@@ -3853,7 +4818,10 @@ type SyncPlanApplyErrorResponse = {
     type: string
     source_id: string
     title?: string
-    codes: "target_edited" | "both_edited" | "target_only_removed"[]
+    codes: "mostly_replaced" | "target_edited" | "both_edited" | "target_only_removed"[]
+    undecided_paths?: string[]
+    reasons?: "type_not_supported" | "not_exact" | "mostly_replaced" | "paths_truncated" | "list_changes" | "not_mergeable"[]
+    message?: string
   }>
 }
 ```
@@ -3865,7 +4833,10 @@ type SyncPlanUnresolvedConflict = {
   type: string
   source_id: string
   title?: string
-  codes: "target_edited" | "both_edited" | "target_only_removed"[]
+  codes: "mostly_replaced" | "target_edited" | "both_edited" | "target_only_removed"[]
+  undecided_paths?: string[]
+  reasons?: "type_not_supported" | "not_exact" | "mostly_replaced" | "paths_truncated" | "list_changes" | "not_mergeable"[]
+  message?: string
 }
 ```
 
@@ -3938,6 +4909,7 @@ type DeleteJob = {
   started_at: string // date-time
   finished_at?: string // date-time
   rebuild_triggered?: boolean
+  created_by?: string
 }
 ```
 
@@ -3964,6 +4936,7 @@ type DeleteJobListResponse = {
     started_at: string // date-time
     finished_at?: string // date-time
     rebuild_triggered?: boolean
+    created_by?: string
   }>
 }
 ```
@@ -4009,7 +4982,7 @@ Minimal identity of a single configuration resource.
 
 ```ts
 type SnapshotInventoryItem = {
-  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "org_setting"
+  type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting"
   id: string
 }
 ```
@@ -4036,7 +5009,7 @@ type ConfigInventoryResponse = {
   indexed_at: string // date-time
   resources_count: number
   resources: Array<{
-    type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "org_setting"
+    type: "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "event_catalog_event" | "org_setting"
     id: string
   }>
   skipped_types: Array<{
@@ -4060,17 +5033,187 @@ type CreatePreviewRequest = {
 }
 ```
 
+### `SyncJobReportItemStatus`
+
+```ts
+type SyncJobReportItemStatus = "open" | "done"
+```
+
+### `SyncJobReportItemInput`
+
+```ts
+type SyncJobReportItemInput = {
+  id: string
+  kind: "open_item" | "decision" | "check"
+  title: string
+  detail?: string
+  resource?: {
+    type: string
+    id: string
+    title?: string
+  }
+  resolution?: "merged" | "kept_target" | "took_source"
+  status?: "open" | "done"
+  options?: Array<{
+    id: string
+    label: string
+    detail?: string
+  }>
+}
+```
+
+### `AgentTaskStatus`
+
+`working`: the agent has more to do. `needs_input`: an open item
+waits for the user. `awaiting_signoff`: the agent is done and
+nothing is open. `signed_off`: the user accepted it.
+
+
+```ts
+type AgentTaskStatus = "working" | "needs_input" | "awaiting_signoff" | "signed_off"
+```
+
+### `AgentTaskItemInput`
+
+```ts
+type AgentTaskItemInput = {
+  id: string
+  kind: "done" | "decision" | "check" | "open_item"
+  title: string
+  detail?: string
+  resource?: {
+    type: string
+    id: string
+    title?: string
+  }
+  resolution?: "merged" | "kept_target" | "took_source"
+  status?: "open" | "done"
+  options?: Array<{
+    id: string
+    label: string
+    detail?: string
+  }>
+}
+```
+
+### `AgentTaskItem`
+
+```ts
+type AgentTaskItem = {
+  resolved_by?: string
+  resolved_at?: string // date-time
+  choice?: string
+}
+```
+
+### `AgentTaskChange`
+
+A resource of the org the session changed.
+
+```ts
+type AgentTaskChange = {
+  type: string
+  id: string
+  title?: string
+  change: "created" | "updated" | "deleted"
+  note?: string
+}
+```
+
+### `AgentTaskInput`
+
+```ts
+type AgentTaskInput = {
+  title: string
+  summary?: string
+  state: "working" | "done"
+  plan_job_id?: string
+  items: Array<{
+    id: string
+    kind: "done" | "decision" | "check" | "open_item"
+    title: string
+    detail?: string
+    resource?: {
+      type: { ... }
+      id: { ... }
+      title?: { ... }
+    }
+    resolution?: "merged" | "kept_target" | "took_source"
+    status?: "open" | "done"
+    options?: Array<{
+      id: { ... }
+      label: { ... }
+      detail?: { ... }
+    }>
+  }>
+  changes?: Array<{
+    type: string
+    id: string
+    title?: string
+    change: "created" | "updated" | "deleted"
+    note?: string
+  }>
+}
+```
+
+### `AgentTaskSummary`
+
+```ts
+type AgentTaskSummary = {
+  session_id: string
+  title: string
+  status: "working" | "needs_input" | "awaiting_signoff" | "signed_off"
+  plan_job_id?: string
+  created_by?: string
+  created_at: string // date-time
+  updated_at: string // date-time
+  open_items: number
+  changes: number
+}
+```
+
+### `AgentTask`
+
+```ts
+type AgentTask = {
+  session_id: string
+  org_id: string
+  title: string
+  summary: string
+  status: "working" | "needs_input" | "awaiting_signoff" | "signed_off"
+  state: "working" | "done"
+  plan_job_id?: string
+  version: number
+  created_by?: string
+  created_at: string // date-time
+  updated_at: string // date-time
+  signed_off_by?: string
+  signed_off_at?: string // date-time
+  items: Array<{
+    resolved_by?: string
+    resolved_at?: string // date-time
+    choice?: string
+  }>
+  changes: Array<{
+    type: string
+    id: string
+    title?: string
+    change: "created" | "updated" | "deleted"
+    note?: string
+  }>
+}
+```
+
 ### `PreviewStatus`
 
 - creating_org: the preview org is being created
 - copying_configuration: the sync job copying this org's configuration is running
 - inviting: the requester is being invited to the preview org
-- ready: the requester got the "your preview org is ready" email
-- failed: see `error`
-
+- ready: the requester is a member of the preview org (or, invited by email alone, got the
+  invitation ema
 
 ```ts
-type PreviewStatus = "creating_org" | "copying_configuration" | "inviting" | "ready" | "failed"
+type PreviewStatus = "creating_org" | "copying_configuration" | "inviting" | "ready" | "failed" | "superseded" | "cancelled"
 ```
 
 ### `Preview`
@@ -4079,7 +5222,7 @@ type PreviewStatus = "creating_org" | "copying_configuration" | "inviting" | "re
 type Preview = {
   id: string
   name: string
-  status: "creating_org" | "copying_configuration" | "inviting" | "ready" | "failed"
+  status: "creating_org" | "copying_configuration" | "inviting" | "ready" | "failed" | "superseded" | "cancelled"
   source_org_id: string
   preview_org_id?: string
   sync_job_id?: string
@@ -4095,5 +5238,26 @@ type Preview = {
   created_at: string // date-time
   updated_at: string // date-time
   error?: string
+  superseded_by?: string
+  cancelled_at?: string // date-time
+  cancelled_by?: string
+  org_deletion_requested_at?: string // date-time
+  org_deletion_error?: string
+  status_since?: Record<string, string // date-time>
+  invited_at?: string // date-time
+  invite_accepted_at?: string // date-time
+  invite_accept_error?: string
+  invite_link?: string
+  mirror_progress?: {
+    phase: "phase_0" | "dependencies" | "phase_a" | "phase_a5" | "phase_b" | "finalize"
+    processed_count: number
+    batch?: {
+      index?: { ... }
+      of?: { ... }
+    }
+    total_count: number
+    failed_count: number
+    last_activity_at?: string // date-time
+  }
 }
 ```

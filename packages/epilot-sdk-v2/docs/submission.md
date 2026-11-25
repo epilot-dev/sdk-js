@@ -29,7 +29,11 @@ const { data } = await submissionClient.createSubmission(...)
 - [`getNonce`](#getnonce)
 
 **Schemas**
+- [`SubmissionDuplicateResponse`](#submissionduplicateresponse)
+- [`JourneyContextOffline`](#journeycontextoffline)
+- [`ErrorResponse`](#errorresponse)
 - [`SubmissionNonce`](#submissionnonce)
+- [`SubmissionNonceCheckResult`](#submissionnoncecheckresult)
 - [`SubmissionPayload`](#submissionpayload)
 - [`SubmissionEntity`](#submissionentity)
 - [`OptIn`](#optin)
@@ -37,7 +41,7 @@ const { data } = await submissionClient.createSubmission(...)
 
 ### `createSubmission`
 
-Creates a submission from a public facing Journey
+Creates a submission from a public-facing Journey or other external source.
 
 `POST /v1/submission/submissions`
 
@@ -46,24 +50,24 @@ const { data } = await client.createSubmission(
   null,
   {
     organization_id: '123',
-    journey_submit_id: '123',
+    journey_submit_id: '5b0d3c1e-6a3e-4d2c-9d7e-0f1a2b3c4d5e',
     source_type: 'journey',
     source_id: 'ce99875f-fba9-4fe2-a8f9-afaf52059051',
     opt_ins: [
       {
         topic: 'EMAIL_MARKETING',
-        identifier: 'example@email.com',
+        identifier: 'jane.doe@example.com',
         meta: {}
       }
     ],
     entities: [
       {
         _schema: 'submission',
-        description: 'Submission created via API',
-        contact_first_name: 'First',
-        contact_last_name: 'Last',
-        contact_email: 'example@submission.com',
-        request: 'I would like to know more about electric vehicles',
+        description: 'Customer enquiry about EV charging',
+        contact_first_name: 'Jane',
+        contact_last_name: 'Doe',
+        contact_email: 'jane.doe@example.com',
+        request: 'I would like to know more about home EV charging options',
         files: [
           {
             s3ref: {
@@ -80,11 +84,23 @@ const { data } = await client.createSubmission(
 )
 ```
 
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "duplicate": true,
+  "submission_id": "string"
+}
+```
+
+</details>
+
 ---
 
 ### `getNonce`
 
-Check if a nonce was already used (aka exists in storage)
+Check whether a submission nonce has already been consumed (i.e. exists in storage).
 
 `GET /v1/submission/nonce/{nonce_id}`
 
@@ -99,11 +115,8 @@ const { data } = await client.getNonce({
 
 ```json
 {
-  "nonce": "string",
-  "submission_id": "string",
-  "organization_id": "string",
-  "ttl": 0,
-  "exists": true
+  "exists": true,
+  "nonce": "nonce-a1b2c3d4e5f6"
 }
 ```
 
@@ -112,6 +125,41 @@ const { data } = await client.getNonce({
 ---
 
 ## Schemas
+
+### `SubmissionDuplicateResponse`
+
+```ts
+type SubmissionDuplicateResponse = {
+  duplicate: true
+  submission_id?: string
+}
+```
+
+### `JourneyContextOffline`
+
+Set by the journey app when the submission was recorded offline and replayed later.
+The known keys are typed; unknown keys are accepted (newer app versions may add more).
+
+
+```ts
+type JourneyContextOffline = {
+  queued_at?: string // date-time
+  synced_at?: string // date-time
+  device_id?: string
+  pack_revision_id?: string
+  pack_published_revision_id?: string
+}
+```
+
+### `ErrorResponse`
+
+```ts
+type ErrorResponse = {
+  status?: number
+  error?: string
+  message?: string
+}
+```
 
 ### `SubmissionNonce`
 
@@ -124,9 +172,18 @@ type SubmissionNonce = {
 }
 ```
 
+### `SubmissionNonceCheckResult`
+
+```ts
+type SubmissionNonceCheckResult = {
+  exists: boolean
+  nonce?: string
+}
+```
+
 ### `SubmissionPayload`
 
-Holds content and meta information
+Holds content and meta information for a Journey submission
 
 ```ts
 type SubmissionPayload = {
@@ -142,6 +199,10 @@ type SubmissionPayload = {
   entities: Array<{
     _schema: "submission"
     description?: string
+    journey_context?: {
+      journey_revision_id?: { ... }
+      offline?: { ... }
+    }
     files?: Array<{
       s3ref: { ... }
       filename?: { ... }
@@ -155,12 +216,22 @@ type SubmissionPayload = {
 
 ### `SubmissionEntity`
 
-The submission entity to create
+An epilot entity to create as part of the submission
 
 ```ts
 type SubmissionEntity = {
   _schema: "submission"
   description?: string
+  journey_context?: {
+    journey_revision_id?: unknown
+    offline?: {
+      queued_at?: { ... }
+      synced_at?: { ... }
+      device_id?: { ... }
+      pack_revision_id?: { ... }
+      pack_published_revision_id?: { ... }
+    }
+  }
   files?: Array<{
     s3ref: {
       bucket: { ... }
@@ -175,6 +246,8 @@ type SubmissionEntity = {
 
 ### `OptIn`
 
+A consent opt-in record captured during the submission
+
 ```ts
 type OptIn = {
   topic?: string
@@ -185,7 +258,7 @@ type OptIn = {
 
 ### `S3Reference`
 
-S3 Reference from File API
+An S3 object reference returned by the epilot File API after a successful upload
 
 ```ts
 type S3Reference = {
