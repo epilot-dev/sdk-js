@@ -4601,6 +4601,9 @@
             "type": "string",
             "format": "date-time"
           },
+          "trigger_timing": {
+            "$ref": "#/components/schemas/TriggerTiming"
+          },
           "current_action_id": {
             "$ref": "#/components/schemas/AutomationActionId"
           },
@@ -5153,6 +5156,27 @@
           }
         }
       },
+      "TriggerTiming": {
+        "type": "object",
+        "description": "When the event that started this execution was emitted and when the trigger listener got it.\nSet on executions started by a trigger; absent on executions started by hand, by the API or by a bulk job.\n",
+        "properties": {
+          "event_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time the triggering event was put on its event bus (EventBridge `time`, second precision)"
+          },
+          "queued_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time the event was put on the trigger queue (SQS `SentTimestamp`)"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time the trigger listener received the event from the trigger queue"
+          }
+        }
+      },
       "ExecutionStatus": {
         "type": "string",
         "enum": [
@@ -5260,6 +5284,9 @@
           },
           "action_inputs": {
             "$ref": "#/components/schemas/ActionInputs"
+          },
+          "trigger_context": {
+            "$ref": "#/components/schemas/TriggerContext"
           }
         },
         "required": [
