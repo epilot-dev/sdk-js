@@ -166,6 +166,7 @@ const { data } = await automationClient.searchFlows(...)
 - [`TriggerEventEventCatalog`](#triggereventeventcatalog)
 - [`TriggerEventPayloadRef`](#triggereventpayloadref)
 - [`ApiCallerContext`](#apicallercontext)
+- [`TriggerTiming`](#triggertiming)
 - [`ExecutionStatus`](#executionstatus)
 - [`GetExecutionsResp`](#getexecutionsresp)
 - [`SearchExecutionsReq`](#searchexecutionsreq)
@@ -353,6 +354,7 @@ const { data } = await client.getExecutions({
       "flow_name": "Handle contact form",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
+      "trigger_timing": {},
       "current_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
       "conditions": [],
       "schedules": [],
@@ -438,6 +440,9 @@ const { data } = await client.startExecution(
         body: 'string',
         attachment_entity_ids: ['string']
       }
+    },
+    trigger_context: {
+      entity_id: 'a1b2c3d4-e5f6-7890-1234-567890abcdef'
     }
   },
 )
@@ -466,6 +471,11 @@ const { data } = await client.startExecution(
   "flow_name": "Handle contact form",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
+  "trigger_timing": {
+    "event_time": "1970-01-01T00:00:00.000Z",
+    "queued_at": "1970-01-01T00:00:00.000Z",
+    "received_at": "1970-01-01T00:00:00.000Z"
+  },
   "current_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
   "conditions": [
     {
@@ -647,6 +657,7 @@ const { data } = await client.searchExecutions(
       "flow_name": "Handle contact form",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
+      "trigger_timing": {},
       "current_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
       "conditions": [],
       "schedules": [],
@@ -902,6 +913,11 @@ const { data } = await client.getExecution({
   "flow_name": "Handle contact form",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
+  "trigger_timing": {
+    "event_time": "1970-01-01T00:00:00.000Z",
+    "queued_at": "1970-01-01T00:00:00.000Z",
+    "received_at": "1970-01-01T00:00:00.000Z"
+  },
   "current_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
   "conditions": [
     {
@@ -1079,6 +1095,11 @@ const { data } = await client.cancelExecution({
   "flow_name": "Handle contact form",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
+  "trigger_timing": {
+    "event_time": "1970-01-01T00:00:00.000Z",
+    "queued_at": "1970-01-01T00:00:00.000Z",
+    "received_at": "1970-01-01T00:00:00.000Z"
+  },
   "current_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
   "conditions": [
     {
@@ -1281,6 +1302,11 @@ const { data } = await client.resumeExecutionWithToken(
     "flow_name": "Handle contact form",
     "created_at": "1970-01-01T00:00:00.000Z",
     "updated_at": "1970-01-01T00:00:00.000Z",
+    "trigger_timing": {
+      "event_time": "1970-01-01T00:00:00.000Z",
+      "queued_at": "1970-01-01T00:00:00.000Z",
+      "received_at": "1970-01-01T00:00:00.000Z"
+    },
     "current_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
     "conditions": [
       {}
@@ -4414,6 +4440,11 @@ type AutomationExecution = {
   flow_name?: string
   created_at?: string // date-time
   updated_at?: string // date-time
+  trigger_timing?: {
+    event_time?: string // date-time
+    queued_at?: string // date-time
+    received_at?: string // date-time
+  }
   current_action_id?: string
   conditions?: Array<{
     id?: string
@@ -4490,11 +4521,6 @@ type AutomationExecution = {
     type?: "inform-erp"
     config?: {
       entity_sources?: { ... }
-      target_webhook_id?: { ... }
-      sync?: { ... }
-    }
-  } | {
-    type?: "trigger-event"
   // ...
 }
 ```
@@ -4695,6 +4721,20 @@ type ApiCallerContext = {
 }
 ```
 
+### `TriggerTiming`
+
+When the event that started this execution was emitted and when the trigger listener got it.
+Set on executions started by a trigger; absent on executions started by hand, by the API or by a bulk job.
+
+
+```ts
+type TriggerTiming = {
+  event_time?: string // date-time
+  queued_at?: string // date-time
+  received_at?: string // date-time
+}
+```
+
 ### `ExecutionStatus`
 
 ```ts
@@ -4725,6 +4765,11 @@ type GetExecutionsResp = {
     flow_name?: string
     created_at?: string // date-time
     updated_at?: string // date-time
+    trigger_timing?: {
+      event_time?: { ... }
+      queued_at?: { ... }
+      received_at?: { ... }
+    }
     current_action_id?: string
     conditions?: Array<{
       id?: { ... }
@@ -4799,11 +4844,6 @@ type GetExecutionsResp = {
     } | {
       type?: { ... }
       config?: { ... }
-    } | {
-      type?: { ... }
-      config?: { ... }
-    } | {
-      type?: { ... }
   // ...
 }
 ```
@@ -4843,6 +4883,11 @@ type SearchExecutionsResp = {
     flow_name?: string
     created_at?: string // date-time
     updated_at?: string // date-time
+    trigger_timing?: {
+      event_time?: { ... }
+      queued_at?: { ... }
+      received_at?: { ... }
+    }
     current_action_id?: string
     conditions?: Array<{
       id?: { ... }
@@ -4917,11 +4962,6 @@ type SearchExecutionsResp = {
     } | {
       type?: { ... }
       config?: { ... }
-    } | {
-      type?: { ... }
-      config?: { ... }
-    } | {
-      type?: { ... }
   // ...
 }
 ```
@@ -4970,6 +5010,7 @@ type StartExecutionRequest = {
       attachment_entity_ids?: { ... }
     }
   }
+  trigger_context?: Record<string, string>
 }
 ```
 
@@ -5911,6 +5952,11 @@ type ResumeResp = {
     flow_name?: string
     created_at?: string // date-time
     updated_at?: string // date-time
+    trigger_timing?: {
+      event_time?: { ... }
+      queued_at?: { ... }
+      received_at?: { ... }
+    }
     current_action_id?: string
     conditions?: Array<{
       id?: { ... }
@@ -5986,11 +6032,6 @@ type ResumeResp = {
       type?: { ... }
       config?: { ... }
     } | {
-      type?: { ... }
-      config?: { ... }
-    } | {
-      type?: { ... }
-      config?: { ... }
   // ...
 }
 ```
