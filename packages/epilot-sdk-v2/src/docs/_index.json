@@ -31,6 +31,7 @@
   "identity": "identity",
   "integrationToolkit": "integration-toolkit",
   "journey": "journey",
+  "journeySession": "journey-session",
   "kanban": "kanban",
   "message": "message",
   "metering": "metering",

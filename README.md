@@ -81,6 +81,7 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.identity` | `@epilot/sdk/identity` | [docs](./packages/epilot-sdk-v2/docs/identity.md) |
 | `epilot.integrationToolkit` | `@epilot/sdk/integration-toolkit` | [docs](./packages/epilot-sdk-v2/docs/integration-toolkit.md) |
 | `epilot.journey` | `@epilot/sdk/journey` | [docs](./packages/epilot-sdk-v2/docs/journey.md) |
+| `epilot.journeySession` | `@epilot/sdk/journey-session` | [docs](./packages/epilot-sdk-v2/docs/journey-session.md) |
 | `epilot.kanban` | `@epilot/sdk/kanban` | [docs](./packages/epilot-sdk-v2/docs/kanban.md) |
 | `epilot.message` | `@epilot/sdk/message` | [docs](./packages/epilot-sdk-v2/docs/message.md) |
 | `epilot.metering` | `@epilot/sdk/metering` | [docs](./packages/epilot-sdk-v2/docs/metering.md) |

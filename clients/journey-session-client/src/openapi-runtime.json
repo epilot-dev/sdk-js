@@ -1,0 +1,547 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/health": {
+      "get": {
+        "operationId": "getHealth",
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions": {
+      "post": {
+        "operationId": "startJourneySession",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AiAgentId"
+          },
+          {
+            "$ref": "#/components/parameters/ConversationId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listJourneySessions",
+        "parameters": [
+          {
+            "name": "journey_id",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions/handoff/open": {
+      "post": {
+        "operationId": "openJourneySessionHandoff",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions/{session_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/SessionId"
+        }
+      ],
+      "get": {
+        "operationId": "getJourneySession",
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "discardJourneySession",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/HandoffLease"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions/{session_id}/commands": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/SessionId"
+        },
+        {
+          "$ref": "#/components/parameters/HandoffLease"
+        },
+        {
+          "$ref": "#/components/parameters/AiAgentId"
+        },
+        {
+          "$ref": "#/components/parameters/ConversationId"
+        }
+      ],
+      "post": {
+        "operationId": "sendJourneySessionCommand",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions/{session_id}/handoff": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/SessionId"
+        }
+      ],
+      "post": {
+        "operationId": "handOffJourneySession",
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions/{session_id}/blocks/{block_id}/records": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/SessionId"
+        },
+        {
+          "$ref": "#/components/parameters/BlockId"
+        }
+      ],
+      "get": {
+        "operationId": "listJourneySessionRecords",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RecordsPage"
+          },
+          {
+            "$ref": "#/components/parameters/RecordsSearch"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions/{session_id}/blocks/{block_id}/options": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/SessionId"
+        },
+        {
+          "$ref": "#/components/parameters/BlockId"
+        }
+      ],
+      "get": {
+        "operationId": "listJourneySessionOptions",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RecordsPage"
+          },
+          {
+            "$ref": "#/components/parameters/OptionsSearch"
+          },
+          {
+            "$ref": "#/components/parameters/OptionsInstance"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions/{session_id}/blocks/{block_id}/document": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/SessionId"
+        },
+        {
+          "$ref": "#/components/parameters/BlockId"
+        }
+      ],
+      "get": {
+        "operationId": "getJourneySessionDocument",
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions/{session_id}/identify": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/SessionId"
+        },
+        {
+          "$ref": "#/components/parameters/SessionSecret"
+        }
+      ],
+      "post": {
+        "operationId": "identifyJourneySession",
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions/{session_id}/snapshot": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/SessionId"
+        },
+        {
+          "$ref": "#/components/parameters/HandoffLease"
+        }
+      ],
+      "put": {
+        "operationId": "keepJourneySessionSnapshot",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "getJourneySessionSnapshot",
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions/public": {
+      "post": {
+        "operationId": "startPublicJourneySession",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions/public/handoff/open": {
+      "post": {
+        "operationId": "openPublicJourneySessionHandoff",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions/public/{session_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/SessionId"
+        },
+        {
+          "$ref": "#/components/parameters/SessionSecret"
+        }
+      ],
+      "get": {
+        "operationId": "getPublicJourneySession",
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "discardPublicJourneySession",
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions/public/{session_id}/commands": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/SessionId"
+        },
+        {
+          "$ref": "#/components/parameters/SessionSecret"
+        }
+      ],
+      "post": {
+        "operationId": "sendPublicJourneySessionCommand",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions/public/{session_id}/snapshot": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/SessionId"
+        },
+        {
+          "$ref": "#/components/parameters/SessionSecret"
+        }
+      ],
+      "put": {
+        "operationId": "keepPublicJourneySessionSnapshot",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "getPublicJourneySessionSnapshot",
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions/public/{session_id}/handoff": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/SessionId"
+        },
+        {
+          "$ref": "#/components/parameters/SessionSecret"
+        }
+      ],
+      "post": {
+        "operationId": "handOffPublicJourneySession",
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions/public/{session_id}/blocks/{block_id}/records": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/SessionId"
+        },
+        {
+          "$ref": "#/components/parameters/BlockId"
+        },
+        {
+          "$ref": "#/components/parameters/SessionSecret"
+        }
+      ],
+      "get": {
+        "operationId": "listPublicJourneySessionRecords",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RecordsPage"
+          },
+          {
+            "$ref": "#/components/parameters/RecordsSearch"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions/public/{session_id}/blocks/{block_id}/options": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/SessionId"
+        },
+        {
+          "$ref": "#/components/parameters/BlockId"
+        },
+        {
+          "$ref": "#/components/parameters/SessionSecret"
+        }
+      ],
+      "get": {
+        "operationId": "listPublicJourneySessionOptions",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RecordsPage"
+          },
+          {
+            "$ref": "#/components/parameters/OptionsSearch"
+          },
+          {
+            "$ref": "#/components/parameters/OptionsInstance"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/journey_sessions/public/{session_id}/blocks/{block_id}/document": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/SessionId"
+        },
+        {
+          "$ref": "#/components/parameters/BlockId"
+        },
+        {
+          "$ref": "#/components/parameters/SessionSecret"
+        }
+      ],
+      "get": {
+        "operationId": "getPublicJourneySessionDocument",
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "SessionId": {
+        "name": "session_id",
+        "in": "path",
+        "required": true
+      },
+      "BlockId": {
+        "name": "block_id",
+        "in": "path",
+        "required": true
+      },
+      "RecordsPage": {
+        "name": "page",
+        "in": "query"
+      },
+      "RecordsSearch": {
+        "name": "search",
+        "in": "query"
+      },
+      "OptionsSearch": {
+        "name": "search",
+        "in": "query"
+      },
+      "OptionsInstance": {
+        "name": "instance",
+        "in": "query"
+      },
+      "SessionSecret": {
+        "name": "x-journey-session-secret",
+        "in": "header",
+        "required": true
+      },
+      "AiAgentId": {
+        "name": "x-epilot-ai-agent-id",
+        "in": "header"
+      },
+      "ConversationId": {
+        "name": "x-epilot-conversation-id",
+        "in": "header"
+      },
+      "HandoffLease": {
+        "name": "x-journey-session-secret",
+        "in": "header"
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Unauthorized": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InternalError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "UpstreamFailed": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "UpstreamTimeout": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "RecordsUnavailable": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "OptionsUnavailable": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "DocumentUnavailable": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "NotFound": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "NotFoundOrContextEntityNotFound": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ContextNotAccepted": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Forbidden": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "JourneyNotSupported": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SessionTooLarge": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SnapshotNotResumable": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SessionChanged": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "IdentityRequired": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "JourneyInactive": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SessionChangedOrJourneyInactive": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "HandedOffOrFinished": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SessionChangedOrHandedOff": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "HandoffGone": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://journey-session.sls.epilot.io"
+    }
+  ]
+}

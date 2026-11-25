@@ -30,6 +30,7 @@ import type { Client as IbanClient } from './types/iban';
 import type { Client as IdentityClient } from './types/identity';
 import type { Client as IntegrationToolkitClient } from './types/integration-toolkit';
 import type { Client as JourneyClient } from './types/journey';
+import type { Client as JourneySessionClient } from './types/journey-session';
 import type { Client as KanbanClient } from './types/kanban';
 import type { Client as MessageClient } from './types/message';
 import type { Client as MeteringClient } from './types/metering';
@@ -89,6 +90,7 @@ export type SDKClientMap = {
   identity: IdentityClient;
   integrationToolkit: IntegrationToolkitClient;
   journey: JourneyClient;
+  journeySession: JourneySessionClient;
   kanban: KanbanClient;
   message: MessageClient;
   metering: MeteringClient;
