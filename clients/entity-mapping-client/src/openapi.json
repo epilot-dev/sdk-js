@@ -2103,8 +2103,18 @@
             "description": "Entity attribute name to match against.",
             "example": "order_number"
           },
+          "operator": {
+            "type": "string",
+            "enum": [
+              "eq",
+              "neq"
+            ],
+            "default": "eq",
+            "description": "How `value` is compared to the attribute. `eq` (default) keeps entities whose attribute\nexactly equals `value`; `neq` keeps entities whose attribute does NOT equal `value`.\nForwarded as-is to entity-api (`neq` requires an entity-api version that supports it).\n",
+            "example": "neq"
+          },
           "value": {
-            "description": "Literal value the attribute must exactly equal. Supports `{{handlebars}}` placeholders\nresolved against sourceContext when given as a string.\n",
+            "description": "Literal value the attribute is compared against (see `operator`). Supports `{{handlebars}}`\nplaceholders resolved against sourceContext when given as a string.\n",
             "oneOf": [
               {
                 "type": "string",
