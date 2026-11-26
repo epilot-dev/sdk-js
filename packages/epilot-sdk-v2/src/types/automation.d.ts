@@ -4472,7 +4472,7 @@ export declare namespace Components {
              * graph edge.
              *
              */
-            filter?: /* Entities are included in this node's result only if `attribute` exactly equals the literal `value`. */ GraphNodeFilter[];
+            filter?: /* Entities are included in this node's result only if `attribute` equals (`eq`, default) / does not equal (`neq`) the literal `value`. */ GraphNodeFilter[];
             /**
              * Only meaningful for a node expected to resolve to a single entity (the seed node, or
              * "cardinality: one"). When true, finding zero matching entities is not an error - the
@@ -4483,7 +4483,7 @@ export declare namespace Components {
             optional?: boolean;
         }
         /**
-         * Entities are included in this node's result only if `attribute` exactly equals the literal `value`.
+         * Entities are included in this node's result only if `attribute` equals (`eq`, default) / does not equal (`neq`) the literal `value`.
          */
         export interface GraphNodeFilter {
             /**
@@ -4493,12 +4493,21 @@ export declare namespace Components {
              */
             attribute: string;
             /**
-             * Literal value the attribute must exactly equal for the entity to be included in this node's result. Supports `{{handlebars}}` placeholders resolved against sourceContext when given as a string.
+             * Comparison applied between `attribute` and `value`.
+             * - `eq` (default): keep entities whose attribute exactly equals `value`.
+             * - `neq`: keep entities whose attribute does NOT equal `value`.
+             *
+             * example:
+             * eq
+             */
+            operator?: "eq" | "neq";
+            /**
+             * Literal value the attribute is compared against (see `operator`) to decide whether the entity is included in this node's result. Supports `{{handlebars}}` placeholders resolved against sourceContext when given as a string.
              * example:
              * OR-113
              */
             value: /**
-             * Literal value the attribute must exactly equal for the entity to be included in this node's result. Supports `{{handlebars}}` placeholders resolved against sourceContext when given as a string.
+             * Literal value the attribute is compared against (see `operator`) to decide whether the entity is included in this node's result. Supports `{{handlebars}}` placeholders resolved against sourceContext when given as a string.
              * example:
              * OR-113
              */
