@@ -10890,6 +10890,7 @@ type GraphDefinition = {
     fields?: object
     filter?: Array<{
       attribute: { ... }
+      operator?: { ... }
       value: { ... }
     }>
   }>
@@ -10910,6 +10911,7 @@ type GraphNode = {
   fields?: object
   filter?: Array<{
     attribute: string
+    operator?: "eq" | "neq"
     value: object
   }>
 }
@@ -10917,11 +10919,14 @@ type GraphNode = {
 
 ### `GraphNodeFilter`
 
-Entities are included in this node's result only if `attribute` exactly equals the literal `value`.
+Entities are included in this node's result only if `attribute` equals (`eq`, default) / does not equal (`neq`) the literal `value`.
+With `neq`, an entity that does not have the attribute at all is included. Multiple filters on a node are AND-combined.
+
 
 ```ts
 type GraphNodeFilter = {
   attribute: string
+  operator?: "eq" | "neq"
   value: object
 }
 ```

@@ -383,15 +383,24 @@ declare namespace Components {
              */
             attribute: string;
             /**
-             * Literal value the attribute must exactly equal. Supports `{{handlebars}}` placeholders
-             * resolved against sourceContext when given as a string.
+             * How `value` is compared to the attribute. `eq` (default) keeps entities whose attribute
+             * exactly equals `value`; `neq` keeps entities whose attribute does NOT equal `value`.
+             * Forwarded as-is to entity-api (`neq` requires an entity-api version that supports it).
+             *
+             * example:
+             * neq
+             */
+            operator?: "eq" | "neq";
+            /**
+             * Literal value the attribute is compared against (see `operator`). Supports `{{handlebars}}`
+             * placeholders resolved against sourceContext when given as a string.
              *
              * example:
              * {{contract.origin_order}}
              */
             value: /**
-             * Literal value the attribute must exactly equal. Supports `{{handlebars}}` placeholders
-             * resolved against sourceContext when given as a string.
+             * Literal value the attribute is compared against (see `operator`). Supports `{{handlebars}}`
+             * placeholders resolved against sourceContext when given as a string.
              *
              * example:
              * {{contract.origin_order}}

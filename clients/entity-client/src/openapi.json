@@ -10645,7 +10645,7 @@
       },
       "GraphNodeFilter": {
         "type": "object",
-        "description": "Entities are included in this node's result only if `attribute` exactly equals the literal `value`.",
+        "description": "Entities are included in this node's result only if `attribute` equals (`eq`, default) / does not equal (`neq`) the literal `value`.\nWith `neq`, an entity that does not have the attribute at all is included. Multiple filters on a node are AND-combined.\n",
         "required": [
           "attribute",
           "value"
@@ -10656,13 +10656,23 @@
             "description": "Entity attribute name to match against. Must be a plain attribute name, not an Elasticsearch field path.",
             "example": "order_number"
           },
+          "operator": {
+            "type": "string",
+            "description": "Comparison operator. `eq` (default) keeps entities whose attribute exactly equals `value`;\n`neq` keeps entities whose attribute does not exactly equal `value` (including entities missing the attribute).\n",
+            "enum": [
+              "eq",
+              "neq"
+            ],
+            "default": "eq",
+            "example": "eq"
+          },
           "value": {
             "allOf": [
               {
                 "$ref": "#/components/schemas/SearchFilterValue"
               },
               {
-                "description": "Literal value the attribute must exactly equal for the entity to be included in this node's result."
+                "description": "Literal value the attribute is compared against (exact equality for `eq`, exact inequality for `neq`)."
               }
             ],
             "example": "OR-113"

@@ -1,5 +1,11 @@
 # @epilot/entity-client
 
+## 7.8.0
+
+### Minor Changes
+
+- ba1c859: Graph node filters (`GraphNodeFilter`, used by `queryEntityGraph`) accept an optional `operator`: `eq` (default) or `neq` (keep entities whose attribute does not equal `value`, including entities missing the attribute).
+
 ## 7.5.0
 
 ### Minor Changes

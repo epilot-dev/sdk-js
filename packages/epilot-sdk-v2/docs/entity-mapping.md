@@ -2421,6 +2421,7 @@ type GraphDefinition = {
     fields?: string[]
     filter?: Array<{
       attribute: { ... }
+      operator?: { ... }
       value: { ... }
     }>
     optional?: boolean
@@ -2444,6 +2445,7 @@ type GraphNode = {
   fields?: string[]
   filter?: Array<{
     attribute: string
+    operator?: "eq" | "neq"
     value: string | number | boolean
   }>
   optional?: boolean
@@ -2457,6 +2459,7 @@ Mirrors entity-api's GraphNodeFilter (see entity-api openapi.yml).
 ```ts
 type GraphNodeFilter = {
   attribute: string
+  operator?: "eq" | "neq"
   value: string | number | boolean
 }
 ```

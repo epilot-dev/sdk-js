@@ -1,5 +1,11 @@
 # @epilot/entity-mapping-client
 
+## 0.13.0
+
+### Minor Changes
+
+- Graph Context node filters (`GraphNodeFilter` in `graph_context`) accept an optional `operator`: `eq` (default) or `neq` (keep entities whose attribute does not equal `value`, including entities missing the attribute).
+
 ## 0.12.0
 
 ### Minor Changes

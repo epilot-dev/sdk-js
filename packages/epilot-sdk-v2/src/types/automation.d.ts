@@ -1641,6 +1641,12 @@ export declare namespace Components {
             flow_name?: string;
             created_at?: string; // date-time
             updated_at?: string; // date-time
+            trigger_timing?: /**
+             * When the event that started this execution was emitted and when the trigger listener got it.
+             * Set on executions started by a trigger; absent on executions started by hand, by the API or by a bulk job.
+             *
+             */
+            TriggerTiming;
             current_action_id?: /**
              * example:
              * 9ec3711b-db63-449c-b894-54d5bb622a8f
@@ -4466,7 +4472,7 @@ export declare namespace Components {
              * graph edge.
              *
              */
-            filter?: /* Entities are included in this node's result only if `attribute` exactly equals the literal `value`. */ GraphNodeFilter[];
+            filter?: /* Entities are included in this node's result only if `attribute` equals (`eq`, default) / does not equal (`neq`) the literal `value`. */ GraphNodeFilter[];
             /**
              * Only meaningful for a node expected to resolve to a single entity (the seed node, or
              * "cardinality: one"). When true, finding zero matching entities is not an error - the
@@ -4477,7 +4483,7 @@ export declare namespace Components {
             optional?: boolean;
         }
         /**
-         * Entities are included in this node's result only if `attribute` exactly equals the literal `value`.
+         * Entities are included in this node's result only if `attribute` equals (`eq`, default) / does not equal (`neq`) the literal `value`.
          */
         export interface GraphNodeFilter {
             /**
@@ -4487,12 +4493,21 @@ export declare namespace Components {
              */
             attribute: string;
             /**
-             * Literal value the attribute must exactly equal for the entity to be included in this node's result. Supports `{{handlebars}}` placeholders resolved against sourceContext when given as a string.
+             * Comparison applied between `attribute` and `value`.
+             * - `eq` (default): keep entities whose attribute exactly equals `value`.
+             * - `neq`: keep entities whose attribute does NOT equal `value`.
+             *
+             * example:
+             * eq
+             */
+            operator?: "eq" | "neq";
+            /**
+             * Literal value the attribute is compared against (see `operator`) to decide whether the entity is included in this node's result. Supports `{{handlebars}}` placeholders resolved against sourceContext when given as a string.
              * example:
              * OR-113
              */
             value: /**
-             * Literal value the attribute must exactly equal for the entity to be included in this node's result. Supports `{{handlebars}}` placeholders resolved against sourceContext when given as a string.
+             * Literal value the attribute is compared against (see `operator`) to decide whether the entity is included in this node's result. Supports `{{handlebars}}` placeholders resolved against sourceContext when given as a string.
              * example:
              * OR-113
              */
@@ -6258,6 +6273,14 @@ export declare namespace Components {
              *
              */
             ActionInputs;
+            trigger_context?: /**
+             * Additional contextual data for a bulk trigger automation. This would normally include additional entity IDs you'd need after a listener picks up an event.
+             * example:
+             * {
+             *   "entity_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+             * }
+             */
+            TriggerContext;
         }
         export interface SuffixCondition {
             suffix?: string;
@@ -6750,6 +6773,25 @@ export declare namespace Components {
              * Partner organizations to share the entity with, or to unshare it from
              */
             partner_org_ids?: string[];
+        }
+        /**
+         * When the event that started this execution was emitted and when the trigger listener got it.
+         * Set on executions started by a trigger; absent on executions started by hand, by the API or by a bulk job.
+         *
+         */
+        export interface TriggerTiming {
+            /**
+             * Time the triggering event was put on its event bus (EventBridge `time`, second precision)
+             */
+            event_time?: string; // date-time
+            /**
+             * Time the event was put on the trigger queue (SQS `SentTimestamp`)
+             */
+            queued_at?: string; // date-time
+            /**
+             * Time the trigger listener received the event from the trigger queue
+             */
+            received_at?: string; // date-time
         }
         export interface TriggerWebhookAction {
             id?: /**
@@ -8255,6 +8297,7 @@ export type TriggerEventPayloadRef = Components.Schemas.TriggerEventPayloadRef;
 export type TriggerShareEntityAction = Components.Schemas.TriggerShareEntityAction;
 export type TriggerShareEntityActionConfig = Components.Schemas.TriggerShareEntityActionConfig;
 export type TriggerShareEntityConfig = Components.Schemas.TriggerShareEntityConfig;
+export type TriggerTiming = Components.Schemas.TriggerTiming;
 export type TriggerWebhookAction = Components.Schemas.TriggerWebhookAction;
 export type TriggerWebhookActionConfig = Components.Schemas.TriggerWebhookActionConfig;
 export type TriggerWebhookConfig = Components.Schemas.TriggerWebhookConfig;
