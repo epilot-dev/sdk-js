@@ -6613,10 +6613,17 @@ declare namespace Components {
              * disambiguating among multiple entities reachable via the same graph edge.
              *
              */
-            filter?: /* Entities are included in this node's result only if `attribute` exactly equals the literal `value`. */ GraphNodeFilter[];
+            filter?: /**
+             * Entities are included in this node's result only if `attribute` equals (`eq`, default) / does not equal (`neq`) the literal `value`.
+             * With `neq`, an entity that does not have the attribute at all is included. Multiple filters on a node are AND-combined.
+             *
+             */
+            GraphNodeFilter[];
         }
         /**
-         * Entities are included in this node's result only if `attribute` exactly equals the literal `value`.
+         * Entities are included in this node's result only if `attribute` equals (`eq`, default) / does not equal (`neq`) the literal `value`.
+         * With `neq`, an entity that does not have the attribute at all is included. Multiple filters on a node are AND-combined.
+         *
          */
         export interface GraphNodeFilter {
             /**
@@ -6626,12 +6633,20 @@ declare namespace Components {
              */
             attribute: string;
             /**
-             * Literal value the attribute must exactly equal for the entity to be included in this node's result.
+             * Comparison operator. `eq` (default) keeps entities whose attribute exactly equals `value`;
+             * `neq` keeps entities whose attribute does not exactly equal `value` (including entities missing the attribute).
+             *
+             * example:
+             * eq
+             */
+            operator?: "eq" | "neq";
+            /**
+             * Literal value the attribute is compared against (exact equality for `eq`, exact inequality for `neq`).
              * example:
              * OR-113
              */
             value: /**
-             * Literal value the attribute must exactly equal for the entity to be included in this node's result.
+             * Literal value the attribute is compared against (exact equality for `eq`, exact inequality for `neq`).
              * example:
              * OR-113
              */
