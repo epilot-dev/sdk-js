@@ -2415,7 +2415,7 @@
       },
       "GraphNodeFilter": {
         "type": "object",
-        "description": "Entities are included in this node's result only if `attribute` exactly equals the literal `value`.",
+        "description": "Entities are included in this node's result only if `attribute` equals (`eq`, default) / does not equal (`neq`) the literal `value`.",
         "required": [
           "attribute",
           "value"
@@ -2426,8 +2426,18 @@
             "description": "Entity attribute name to match against.",
             "example": "order_number"
           },
+          "operator": {
+            "type": "string",
+            "description": "Comparison applied between `attribute` and `value`.\n- `eq` (default): keep entities whose attribute exactly equals `value`.\n- `neq`: keep entities whose attribute does NOT equal `value`.\n",
+            "enum": [
+              "eq",
+              "neq"
+            ],
+            "default": "eq",
+            "example": "eq"
+          },
           "value": {
-            "description": "Literal value the attribute must exactly equal for the entity to be included in this node's result. Supports `{{handlebars}}` placeholders resolved against sourceContext when given as a string.",
+            "description": "Literal value the attribute is compared against (see `operator`) to decide whether the entity is included in this node's result. Supports `{{handlebars}}` placeholders resolved against sourceContext when given as a string.",
             "oneOf": [
               {
                 "type": "string",
