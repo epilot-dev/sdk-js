@@ -3105,6 +3105,7 @@ type GraphDefinition = {
     fields?: string[]
     filter?: Array<{
       attribute: { ... }
+      operator?: { ... }
       value: { ... }
     }>
     optional?: boolean
@@ -3126,6 +3127,7 @@ type GraphNode = {
   fields?: string[]
   filter?: Array<{
     attribute: string
+    operator?: "eq" | "neq"
     value: string | number | boolean
   }>
   optional?: boolean
@@ -3134,11 +3136,12 @@ type GraphNode = {
 
 ### `GraphNodeFilter`
 
-Entities are included in this node's result only if `attribute` exactly equals the literal `value`.
+Entities are included in this node's result only if `attribute` equals (`eq`, default) / does not equal (`neq`) the literal `value`.
 
 ```ts
 type GraphNodeFilter = {
   attribute: string
+  operator?: "eq" | "neq"
   value: string | number | boolean
 }
 ```
