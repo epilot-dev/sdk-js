@@ -22811,6 +22811,16 @@ declare namespace Paths {
              *
              */
             portal_id?: string;
+            /**
+             * Portals the template references as `{{portal.<KEY>.*}}`. A key is a portal origin
+             * (e.g. `END_CUSTOMER_PORTAL`) or a portal id. Each resolved key is returned under `portal`.
+             *
+             * example:
+             * [
+             *   "END_CUSTOMER_PORTAL"
+             * ]
+             */
+            portal_keys?: string[];
         }
         namespace Responses {
             export interface $200 {
@@ -22925,6 +22935,22 @@ declare namespace Paths {
                      */
                     pagePaths?: {
                         [name: string]: string;
+                    };
+                };
+                /**
+                 * Variables per requested `portal_keys` entry, keyed by the key as sent.
+                 */
+                portal?: {
+                    [name: string]: {
+                        link?: string;
+                        invitationLink?: string;
+                        newDocumentLink?: string;
+                        entityLink?: string;
+                        userEmailsOnEntity?: string[];
+                        origin?: string;
+                        pagePaths?: {
+                            [name: string]: string;
+                        };
                     };
                 };
             }

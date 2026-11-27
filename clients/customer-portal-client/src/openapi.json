@@ -3082,6 +3082,16 @@
                   "portal_id": {
                     "type": "string",
                     "description": "The portal the send is for, e.g. the recipient's portal. Resolves `portalUser`.\nWithout it the portal is derived from the template (legacy fallback).\n"
+                  },
+                  "portal_keys": {
+                    "type": "array",
+                    "description": "Portals the template references as `{{portal.<KEY>.*}}`. A key is a portal origin\n(e.g. `END_CUSTOMER_PORTAL`) or a portal id. Each resolved key is returned under `portal`.\n",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "END_CUSTOMER_PORTAL"
+                    ]
                   }
                 }
               }
@@ -3205,6 +3215,42 @@
                             "documents": "/documents",
                             "contract": "/contract/:id",
                             "opportunities": "/requests/opportunities/:id"
+                          }
+                        }
+                      }
+                    },
+                    "portal": {
+                      "type": "object",
+                      "description": "Variables per requested `portal_keys` entry, keyed by the key as sent.",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "link": {
+                            "type": "string"
+                          },
+                          "invitationLink": {
+                            "type": "string"
+                          },
+                          "newDocumentLink": {
+                            "type": "string"
+                          },
+                          "entityLink": {
+                            "type": "string"
+                          },
+                          "userEmailsOnEntity": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "origin": {
+                            "type": "string"
+                          },
+                          "pagePaths": {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "string"
+                            }
                           }
                         }
                       }
