@@ -771,8 +771,7 @@
       "EmailTemplateRequest": {
         "type": "object",
         "required": [
-          "name",
-          "subject"
+          "name"
         ],
         "properties": {
           "_id": {
@@ -820,6 +819,17 @@
             "nullable": true,
             "example": 0
           },
+          "template_type": {
+            "description": "`partial` for blocks other templates reuse. A partial is never sent on its own, so it has\nno subject. Unset for a regular template.\n",
+            "type": "string",
+            "enum": [
+              "partial"
+            ],
+            "example": "partial"
+          },
+          "design_id": {
+            "$ref": "#/components/schemas/DesignId"
+          },
           "from": {
             "description": "From",
             "$ref": "#/components/schemas/From"
@@ -846,7 +856,7 @@
             }
           },
           "subject": {
-            "description": "Subject",
+            "description": "Subject. Required, except for a partial (`template_type` partial).",
             "type": "string",
             "example": "We have received your order!"
           },
@@ -948,6 +958,9 @@
                 "type": "number",
                 "nullable": true,
                 "example": 0
+              },
+              "design_id": {
+                "$ref": "#/components/schemas/DesignId"
               },
               "from": {
                 "description": "From",
@@ -1125,6 +1138,12 @@
             "default": true
           }
         }
+      },
+      "DesignId": {
+        "description": "Design Builder design linked to this template. When set, `{{design.*}}` placeholders\n(e.g. `{{design.assets.logo.url}}`, `{{design.colors.primary}}`) are replaced with the design's\ncurrent values at templating time.\n",
+        "type": "string",
+        "nullable": true,
+        "example": "7a0a1a2b-3c4d-4e5f-8a9b-0c1d2e3f4a5b"
       },
       "From": {
         "type": "object",
@@ -1350,6 +1369,14 @@
           },
           "custom_variables": {
             "$ref": "#/components/schemas/CustomVariables"
+          },
+          "partials_only": {
+            "type": "boolean",
+            "description": "Only put the current content of the partials in, and leave every other variable as it is,\ne.g. to preview a template without an entity.\n"
+          },
+          "portal_id": {
+            "type": "string",
+            "description": "The portal the send is for, e.g. the recipient's portal. Portal user variables\n(`{{portalUser.*}}`) link to this portal. Without it the portal is derived from the template.\n"
           }
         },
         "required": [
