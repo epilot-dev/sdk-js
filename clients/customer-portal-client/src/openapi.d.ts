@@ -21781,6 +21781,12 @@ declare namespace Paths {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             Components.Schemas.EntityId /* uuid */;
+            /**
+             * The portal to notify users of. Without it the portal's origin is derived from the
+             * template (legacy fallback).
+             *
+             */
+            portal_id?: string;
         }
         namespace Responses {
             export interface $200 {
@@ -22799,6 +22805,12 @@ declare namespace Paths {
                     journey_registration_portal_id?: string;
                 };
             };
+            /**
+             * The portal the send is for, e.g. the recipient's portal. Resolves `portalUser`.
+             * Without it the portal is derived from the template (legacy fallback).
+             *
+             */
+            portal_id?: string;
         }
         namespace Responses {
             export interface $200 {
