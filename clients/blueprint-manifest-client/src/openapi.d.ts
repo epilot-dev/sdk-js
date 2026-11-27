@@ -23,6 +23,13 @@ declare namespace Components {
         BlueprintAssistantSkillName?: Parameters.BlueprintAssistantSkillName /* ^[a-z0-9][a-z0-9-]{0,63}$ */;
     }
     namespace Schemas {
+        /**
+         * Body of an error raised by a handler. `error` is human-readable prose.
+         */
+        export interface ApiErrorResponse {
+            status: number;
+            error: string;
+        }
         export interface AppBlueprint {
             source_drift?: /**
              * V3 live-source plan capture only. Available on the install job and destination
@@ -836,7 +843,10 @@ declare namespace Components {
                 node_id: string;
                 resource_id: string;
                 resource_type: string;
-                reason: "step_cap" | "input_cap" | "deadline" | "model_error";
+                /**
+                 * `too_large`: only with `flows`, the subject's flow was past the per-generation part cap and never ran.
+                 */
+                reason: "step_cap" | "input_cap" | "deadline" | "model_error" | "too_large";
             }[];
             /**
              * One page of suggestions. Suggestions accepted from this generation are left out for good, also after their test case is deleted (a new generation offers them again), so a page may hold fewer than `limit` items, even none, while `next_cursor` is present. Paging ends only when `next_cursor` is absent.
@@ -861,6 +871,20 @@ declare namespace Components {
              */
             problems_total?: number;
             next_cursor?: string;
+            /**
+             * Coverage per business flow, only on a generation that ran one Luna session per flow. `offered` counts the kept suggestions the flow's run proposed. A failed flow carries its reason: `deadline` (its run ran out of time), `start_failed` (its run could not start), `session_failed`, or `too_large` (the blueprint had more flows than one generation runs; this one never ran and offers nothing).
+             */
+            flows?: {
+                id: string;
+                name: string;
+                status: "pending" | "running" | "submitted" | "failed";
+                reason?: "deadline" | "start_failed" | "session_failed" | "too_large";
+                offered: number;
+            }[];
+            /**
+             * Unix seconds by which the generation ends (completed or failed), only with `flows`. Recomputed once the flows are known; poll until shortly after it.
+             */
+            deadline?: number;
         }
         /**
          * A possible problem: a proposal the engine evaluated with every clause PASSED or FAILED and at least one FAILED.
@@ -1347,9 +1371,9 @@ declare namespace Components {
             reason?: string;
         }
         export interface BlueprintSuggestionGraphQuery {
-            tool: "list_subjects" | "graph_summary" | "list_nodes" | "get_node" | "follow_edges" | "list_paths" | "list_operators";
+            tool: "list_subjects" | "graph_summary" | "list_nodes" | "get_node" | "follow_edges" | "list_paths" | "list_operators" | "flow_brief" | "blueprint_outline";
             /**
-             * The tool's input. list_subjects: `{ cursor?: string }` (the previous page's `next_cursor`).
+             * The tool's input. list_subjects: `{ cursor?: string }` (the previous page's `next_cursor`); in a flow-mode part session it lists only the part's subjects. flow_brief (a part session only): `{}`, returns the blueprint brief and the part's flow. blueprint_outline (the plan session only): `{}`, returns the blueprint brief and a one-line-per-subject outline. Called by any other session, flow_brief and blueprint_outline return bad_input.
              */
             input?: {
                 [name: string]: any;
@@ -1362,6 +1386,10 @@ declare namespace Components {
             };
             truncated?: boolean;
             error?: "unknown_node" | "bad_input";
+        }
+        export interface BlueprintSuggestionPartResult {
+            status: "submitted";
+            flow_id: string;
         }
         export interface BlueprintSuggestionSubmission {
             /**
@@ -1428,6 +1456,10 @@ declare namespace Components {
              * Sync tags are deleted after 90 days; release tags never expire
              */
             expires_at?: string | null; // date-time
+            /**
+             * The sync tag a release was built from (`from_tag_id`)
+             */
+            source_tag_id?: string | null;
             package?: {
                 /**
                  * `zip`: the signed package, built once. `manifest`: the resources a sync sent; the download builds the signed zip on first use.
@@ -1439,7 +1471,7 @@ declare namespace Components {
                 error?: string | null;
             } | null;
             /**
-             * The sync a `sync` tag was recorded for
+             * The sync a `sync` tag was recorded for, or that a release was built from
              */
             sync?: {
                 job_id?: string;
@@ -2045,6 +2077,27 @@ declare namespace Components {
                 reason: string; // ^[a-z][a-z0-9_]{0,79}$
             }[];
             omitted_count: number;
+        }
+        /**
+         * The business flows the plan session proposes. Checked by the service (1 to 11 flows; `name` 3 to 80 characters, `why` at most 200; only subject node ids from the outline). A plan that fails the check is replaced by the candidate flows.
+         */
+        export interface BlueprintTestFlowPlan {
+            flows: {
+                name?: string;
+                why?: string;
+                subject_node_ids?: string[];
+            }[];
+        }
+        export interface BlueprintTestFlowPlanResult {
+            status: "accepted";
+            /**
+             * plan when the submitted plan was used, fallback when the candidate flows were used instead.
+             */
+            used: "plan" | "fallback";
+            /**
+             * The number of flows (parts) the generation now writes.
+             */
+            flows: number;
         }
         export interface BlueprintTestInterpretation {
             schema_version: "1";
@@ -2847,7 +2900,7 @@ declare namespace Components {
         }
         export interface BlueprintTestSuiteError {
             status: number;
-            code: "invalid_request" | "unauthorized" | "forbidden" | "not_found" | "conflict" | "credential_invalid" | "permissions_unavailable" | "permission_denied" | "feature_unavailable" | "session_expiring" | "storage_conflict" | "suite_unavailable" | "v2_case" | "active_generation" | "active_suite_run" | "org_run_limit" | "suggestions_stale" | "unknown_suggestion" | "suggestion_acceptance_changed" | "suggestion_input_too_large" | "generation_not_running" | "generation_submitting" | "invalid_clauses" | "not_implemented" | "interpretation_input_too_large" | "interpretation_incomplete" | "interpretation_not_ready" | "interpretation_used" | "confirmation_required";
+            code: "invalid_request" | "unauthorized" | "forbidden" | "not_found" | "conflict" | "credential_invalid" | "permissions_unavailable" | "permission_denied" | "feature_unavailable" | "session_expiring" | "storage_conflict" | "suite_unavailable" | "v2_case" | "active_generation" | "active_suite_run" | "org_run_limit" | "suggestions_stale" | "unknown_suggestion" | "suggestion_acceptance_changed" | "suggestion_input_too_large" | "generation_not_running" | "generation_submitting" | "session_mismatch" | "session_not_ready" | "plan_not_running" | "part_not_running" | "part_submitted" | "invalid_clauses" | "not_implemented" | "interpretation_input_too_large" | "interpretation_incomplete" | "interpretation_not_ready" | "interpretation_used" | "confirmation_required";
             /**
              * Whether repeating the same request later can succeed.
              */
@@ -3252,12 +3305,13 @@ declare namespace Components {
         }
         export interface BulkInstallTargetInput {
             destination_org_id: string;
-            destination_blueprint_id?: /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+            /**
+             * Blueprint instance to install into. Optional, but when present it must be non-empty and not
+             * blank: an empty or whitespace-only value is rejected with a 400 whose body carries
+             * `code: destination_blueprint_instance_required`.
+             *
              */
-            BlueprintID;
+            destination_blueprint_id?: string;
             /**
              * Write-only org-scoped token for the destination org. Never persisted or returned.
              */
@@ -4513,6 +4567,44 @@ declare namespace Components {
             findings?: HealthFinding[];
             coverage?: HealthScanCoverage;
             /**
+             * How the findings compare with the destination's state before this sync. Absent when there is nothing to compare against (the first check of an instance without a pre-sync scan).
+             */
+            diff?: {
+                baseline: {
+                    /**
+                     * `pre_sync` is a scan taken right before this sync wrote anything; `previous_report` is the instance's last health report, used when no pre-sync scan exists.
+                     */
+                    source: "pre_sync" | "previous_report";
+                    job_id: /**
+                     * ID of a job
+                     * example:
+                     * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                     */
+                    BlueprintJobID;
+                    generated_at: string; // date-time
+                };
+                /**
+                 * Findings that were not there before the sync (those with `is_new` true).
+                 */
+                new: number;
+                /**
+                 * Findings that were already there before the sync.
+                 */
+                unchanged: number;
+                /**
+                 * Findings from before the sync that are gone now.
+                 */
+                resolved: HealthFinding[];
+            };
+            /**
+             * When the automatic second pass runs. It replaces this report.
+             */
+            recheck_at?: string; // date-time
+            /**
+             * True when this report comes from the automatic second pass.
+             */
+            rechecked?: boolean;
+            /**
              * Failure reason when status is `failed`.
              */
             error?: string;
@@ -4840,6 +4932,10 @@ declare namespace Components {
                  * Durable details pointer; authenticated job GET hydrates source_drift with the complete lists.
                  */
                 source_drift_s3_key?: string;
+                /**
+                 * Organization the install could not read, on a source_org_access_denied error.
+                 */
+                source_org_id?: string;
                 formattedResource?: FormattedErrorData;
                 resource?: string;
                 resourceDependency?: string;
@@ -4862,9 +4958,13 @@ declare namespace Components {
                  * Resources the plan would add on top of the existing count
                  */
                 planned?: number;
+                /**
+                 * Addresses the caller asked to ignore when that left nothing to install (ignored_resources_exclude_all)
+                 */
+                root_addresses?: string[];
             };
         }
-        export type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference" | "source_resources_missing" | "custom_schema_id_conflict" | "custom_schema_check_unavailable";
+        export type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference" | "source_resources_missing" | "source_org_access_denied" | "custom_schema_id_conflict" | "custom_schema_check_unavailable" | "ignored_resources_exclude_all" | "no_resources_to_import" | "apply_evidence_requires_instance" | "apply_evidence_disabled";
         export interface FormattedErrorData {
             id?: string;
             name?: string;
@@ -4878,6 +4978,10 @@ declare namespace Components {
             details: string[];
         }
         export interface HealthFinding {
+            /**
+             * Whether the finding was absent before this sync. Only set when the report has a `diff`.
+             */
+            is_new?: boolean;
             check_id: "live_readability" | "referential_integrity" | "install_completeness" | "schema_consistency" | "mapping_integrity" | "execution_readiness" | "catalog_hygiene" | "spec_conformance";
             code: "missing_in_destination" | "fetch_error" | "no_readback" | "unreplaced_source_reference" | "broken_internal_reference" | "dropped_at_install" | "orphaned_group_reference" | "uuid_group_label" | "unreachable_attribute_purpose" | "duplicate_attribute_name" | "duplicate_headline" | "broken_mapping_reference" | "stale_mapping_version" | "mapping_slot_mismatch" | "mapping_parity_mismatch" | "stale_lineage" | "broken_trigger_reference" | "broken_action_reference" | "broken_workflow_step" | "invalid_mapping_target" | "invalid_mapping_source" | "invalid_mapping_version" | "unknown_mapping_attribute" | "workflow_edge_limit" | "dead_purpose_reference" | "broken_portal_reference" | "orphaned_portal_block" | "broken_closing_reason" | "broken_journey_settings" | "unresolved_assignee" | "current_write_invalid" | "duplicate_live_resource" | "missing_file_content" | "file_etag_mismatch" | "incomplete_webhook" | "broken_template_reference" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "cross_org_reference";
             severity: "error" | "warning" | "info";
@@ -5901,11 +6005,18 @@ declare namespace Components {
                 content?: MarketplaceListingUpdate;
             } | null;
             webflow_item_id?: string | null;
+            /**
+             * Informational record of the last Webflow push
+             */
             webflow_sync?: {
-                status?: "ok" | "failed";
+                status?: "ok" | "failed" | "skipped";
                 at?: string; // date-time
                 error?: string | null;
             } | null;
+            /**
+             * Mode of the Webflow push in this stage: `draft` (draft mode: new items are created as drafts; existing items get staged changes; nothing is published) or `live`
+             */
+            marketplace_mode: "draft" | "live";
         }
         export interface MarketplaceListingUpdate {
             name?: string;
@@ -7423,6 +7534,10 @@ declare namespace Paths {
              */
             name: string;
             note?: string | null;
+            /**
+             * Ready, succeeded sync tag of this blueprint to build the release from, instead of the current state
+             */
+            from_tag_id?: string | null;
         }
         namespace Responses {
             export type $202 = Components.Schemas.BlueprintTag;
@@ -7431,6 +7546,8 @@ declare namespace Paths {
             export interface $403 {
             }
             export interface $404 {
+            }
+            export interface $409 {
             }
         }
     }
@@ -8599,11 +8716,18 @@ declare namespace Paths {
                     content?: Components.Schemas.MarketplaceListingUpdate;
                 } | null;
                 webflow_item_id?: string | null;
+                /**
+                 * Informational record of the last Webflow push
+                 */
                 webflow_sync?: {
-                    status?: "ok" | "failed";
+                    status?: "ok" | "failed" | "skipped";
                     at?: string; // date-time
                     error?: string | null;
                 } | null;
+                /**
+                 * Mode of the Webflow push in this stage: `draft` (draft mode: new items are created as drafts; existing items get staged changes; nothing is published) or `live`
+                 */
+                marketplace_mode: "draft" | "live";
                 /**
                  * Versions without `resources` and `content`
                  */
@@ -8677,11 +8801,18 @@ declare namespace Paths {
                     content?: Components.Schemas.MarketplaceListingUpdate;
                 } | null;
                 webflow_item_id?: string | null;
+                /**
+                 * Informational record of the last Webflow push
+                 */
                 webflow_sync?: {
-                    status?: "ok" | "failed";
+                    status?: "ok" | "failed" | "skipped";
                     at?: string; // date-time
                     error?: string | null;
                 } | null;
+                /**
+                 * Mode of the Webflow push in this stage: `draft` (draft mode: new items are created as drafts; existing items get staged changes; nothing is published) or `live`
+                 */
+                marketplace_mode: "draft" | "live";
                 /**
                  * Versions without `resources` and `content`
                  */
@@ -8791,12 +8922,13 @@ declare namespace Paths {
              */
             source_blueprint_file?: string;
             destination_org_id: string;
-            destination_blueprint_id?: /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+            /**
+             * Blueprint instance to install into. Optional (one is created when omitted), but when
+             * present it must be non-empty and not blank: an empty or whitespace-only value is
+             * rejected with a 400 whose body carries `code: destination_blueprint_instance_required`.
+             *
              */
-            Components.Schemas.BlueprintID;
+            destination_blueprint_id?: string;
             /**
              * Auth token for the destination org. Required for cross-org installs where the caller's token belongs to the source org. Defaults to the caller's bearer token.
              */
@@ -8862,12 +8994,13 @@ declare namespace Paths {
              */
             source_blueprint_file: string;
             destination_org_id: string;
-            destination_blueprint_id?: /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+            /**
+             * Blueprint instance to install into. Optional (one is created when omitted), but when
+             * present it must be non-empty and not blank: an empty or whitespace-only value is
+             * rejected with a 400 whose body carries `code: destination_blueprint_instance_required`.
+             *
              */
-            Components.Schemas.BlueprintID;
+            destination_blueprint_id?: string;
             /**
              * Auth token for the destination org. Required for cross-org installs where the caller's token belongs to the source org. Defaults to the caller's bearer token.
              */
@@ -8937,11 +9070,14 @@ declare namespace Paths {
                 Components.Schemas.BlueprintID;
             }
             export interface $400 {
-                message?: string;
+                status?: number;
+                error?: string;
+                /**
+                 * `destination_blueprint_instance_required` when `destination_blueprint_id` is blank
+                 */
+                code?: string;
             }
-            export interface $403 {
-                message?: string;
-            }
+            export type $403 = /* Body of an error raised by a handler. `error` is human-readable prose. */ Components.Schemas.ApiErrorResponse;
         }
     }
     namespace ListBlueprintAssistantConversations {
@@ -9372,6 +9508,8 @@ declare namespace Paths {
             }
             export interface $413 {
             }
+            export interface $502 {
+            }
         }
     }
     namespace PublishMarketplaceListingVersion {
@@ -9397,6 +9535,8 @@ declare namespace Paths {
             export interface $409 {
             }
             export interface $413 {
+            }
+            export interface $502 {
             }
         }
     }
@@ -9450,6 +9590,7 @@ declare namespace Paths {
         export type RequestBody = /* Body of discard and refresh requests. */ Components.Schemas.MergePlanRevisionRequest;
         namespace Responses {
             export type $202 = Components.Schemas.MergePlanReplanResult;
+            export type $403 = /* Body of an error raised by a handler. `error` is human-readable prose. */ Components.Schemas.ApiErrorResponse;
             export type $404 = Components.Schemas.MergePlanError;
             export type $409 = Components.Schemas.MergePlanError;
         }
@@ -9562,6 +9703,7 @@ declare namespace Paths {
             }
             export interface $400 {
             }
+            export type $403 = /* Body of an error raised by a handler. `error` is human-readable prose. */ Components.Schemas.ApiErrorResponse;
             export interface $404 {
             }
         }
@@ -9587,6 +9729,8 @@ declare namespace Paths {
             }
             export interface $413 {
             }
+            export interface $502 {
+            }
         }
     }
     namespace SendBlueprintAssistantMessage {
@@ -9609,6 +9753,46 @@ declare namespace Paths {
             }
             export interface $409 {
             }
+        }
+    }
+    namespace SubmitBlueprintTestFlowPlan {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type GenerationId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            generation_id: Parameters.GenerationId /* uuid */;
+        }
+        export type RequestBody = /* The business flows the plan session proposes. Checked by the service (1 to 11 flows; `name` 3 to 80 characters, `why` at most 200; only subject node ids from the outline). A plan that fails the check is replaced by the candidate flows. */ Components.Schemas.BlueprintTestFlowPlan;
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintTestFlowPlanResult;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $409 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
+        }
+    }
+    namespace SubmitBlueprintTestSuggestionPart {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type PartKey = string;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            part_key: Parameters.PartKey;
+        }
+        export type RequestBody = Components.Schemas.BlueprintSuggestionSubmission;
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintSuggestionPartResult;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $409 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
         }
     }
     namespace SubmitBlueprintTestSuggestions {
@@ -9680,6 +9864,8 @@ declare namespace Paths {
             export interface $403 {
             }
             export interface $404 {
+            }
+            export interface $502 {
             }
         }
     }
@@ -10532,9 +10718,10 @@ export interface OperationMethods {
    * Must be called by a user of the destination org (where the job lives); the
    * caller's bearer token is used as the destination token. The plan reuses the
    * manifest persisted by the original install, but a cross-org job still reads
-   * the source org (file contents, a merge job's live source), so send a token for
-   * the source org (e.g. the pipeline token) as `source_auth_token`. Without it the
-   * caller's bearer stands in for the source and those reads fail with 403.
+   * the source org (file contents, a merge job's live source), so a source-org token
+   * (e.g. the pipeline token) is required as `source_auth_token` for a cross-org
+   * retry: without it the request is rejected with 400, because the destination
+   * bearer cannot read the source org. Marketplace-sourced jobs are exempt.
    * The original job's `options` (ignored resources, sync_notes) are
    * reused when present; older jobs without persisted options fall back to the
    * destination blueprint's `ignored_resource_addresses`.
@@ -10648,7 +10835,10 @@ export interface OperationMethods {
   /**
    * publishMarketplaceListingVersion - publishMarketplaceListingVersion
    * 
-   * Publish a draft version; archives the previous live version and pushes the listing to the Marketplace
+   * Publish a draft version: pushes it to the Marketplace (Webflow) first, then makes it live, archives the previous
+   * live version and marks its tag published. When the push fails nothing changes. In `draft` marketplace_mode
+   * (draft mode: new items are created as drafts; existing items get staged changes; nothing is published).
+   * 
    */
   'publishMarketplaceListingVersion'(
     parameters?: Parameters<Paths.PublishMarketplaceListingVersion.PathParameters> | null,
@@ -10658,7 +10848,9 @@ export interface OperationMethods {
   /**
    * rollbackMarketplaceListingVersion - rollbackMarketplaceListingVersion
    * 
-   * Make an archived version the live version again
+   * Make an archived version the live version again: pushes it to the Marketplace (Webflow) first, then makes it
+   * live. When the push fails nothing changes.
+   * 
    */
   'rollbackMarketplaceListingVersion'(
     parameters?: Parameters<Paths.RollbackMarketplaceListingVersion.PathParameters> | null,
@@ -10668,7 +10860,7 @@ export interface OperationMethods {
   /**
    * syncMarketplaceListing - syncMarketplaceListing
    * 
-   * Re-push the live listing to Webflow
+   * Re-push the live listing to Webflow, then store the push result
    */
   'syncMarketplaceListing'(
     parameters?: Parameters<Paths.SyncMarketplaceListing.PathParameters> | null,
@@ -10680,7 +10872,8 @@ export interface OperationMethods {
    * 
    * Publishes the listing's edited text on the live version: same tag, same zip, same version number, no update
    * for installers. The text it replaces is kept in the version's `content_revisions`. Changed resources need a new
-   * tag and a new version instead.
+   * tag and a new version instead. The text is pushed to the Marketplace (Webflow) first; when that fails nothing
+   * changes.
    * 
    */
   'publishMarketplaceListingContent'(
@@ -10974,7 +11167,9 @@ export interface OperationMethods {
    * 
    * **AI agents** (tokens such as "Connect ChatGPT to epilot") cannot use
    * `auto_apply` (403). Install without it, show the user the plan, and call
-   * `:continue` only after the user approves it.
+   * `:continue` only after the user approves it. Agent tokens are scoped to
+   * their own organization, so a `source_org_id` other than the token's org is
+   * rejected with 403; run cross-org deploys from the epilot portal.
    * 
    * **The plan fails instead of pausing** (`status: "FAILED"`, error code
    * `missing_required_reference`) when a resource references something that is
@@ -11438,6 +11633,26 @@ export interface OperationMethods {
     data?: Paths.SubmitBlueprintTestSuggestions.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SubmitBlueprintTestSuggestions.Responses.$200>
+  /**
+   * submitBlueprintTestFlowPlan - submitBlueprintTestFlowPlan
+   * 
+   * The flow plan of a flow-mode Luna generation: groups the blueprint's subjects into business flows. Only the generation's plan session may submit it, once, while the generation is planning (otherwise 409 plan_not_running). A plan that does not pass validation is still accepted and the candidate flows are used instead (`used: fallback`). Afterwards one Luna session per flow writes that flow's tests. Only a Luna agent token acting for the user who started the generation is accepted. Requires the blueprint-test-cases organization feature flag.
+   */
+  'submitBlueprintTestFlowPlan'(
+    parameters?: Parameters<Paths.SubmitBlueprintTestFlowPlan.PathParameters> | null,
+    data?: Paths.SubmitBlueprintTestFlowPlan.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SubmitBlueprintTestFlowPlan.Responses.$200>
+  /**
+   * submitBlueprintTestSuggestionPart - submitBlueprintTestSuggestionPart
+   * 
+   * Submission of one flow (part) of a flow-mode Luna generation, by that part's own session. Name the part's subjects (from list_subjects) with their suggestions; a subject outside the part is refused (400). Stored once: a second submit gets 409 part_submitted. Drafts are verified when every part has finished. Only a Luna agent token acting for the user who started the generation is accepted. Requires the blueprint-test-cases organization feature flag.
+   */
+  'submitBlueprintTestSuggestionPart'(
+    parameters?: Parameters<Paths.SubmitBlueprintTestSuggestionPart.PathParameters> | null,
+    data?: Paths.SubmitBlueprintTestSuggestionPart.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SubmitBlueprintTestSuggestionPart.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -11969,9 +12184,10 @@ export interface PathsDictionary {
      * Must be called by a user of the destination org (where the job lives); the
      * caller's bearer token is used as the destination token. The plan reuses the
      * manifest persisted by the original install, but a cross-org job still reads
-     * the source org (file contents, a merge job's live source), so send a token for
-     * the source org (e.g. the pipeline token) as `source_auth_token`. Without it the
-     * caller's bearer stands in for the source and those reads fail with 403.
+     * the source org (file contents, a merge job's live source), so a source-org token
+     * (e.g. the pipeline token) is required as `source_auth_token` for a cross-org
+     * retry: without it the request is rejected with 400, because the destination
+     * bearer cannot read the source org. Marketplace-sourced jobs are exempt.
      * The original job's `options` (ignored resources, sync_notes) are
      * reused when present; older jobs without persisted options fall back to the
      * destination blueprint's `ignored_resource_addresses`.
@@ -12099,7 +12315,10 @@ export interface PathsDictionary {
     /**
      * publishMarketplaceListingVersion - publishMarketplaceListingVersion
      * 
-     * Publish a draft version; archives the previous live version and pushes the listing to the Marketplace
+     * Publish a draft version: pushes it to the Marketplace (Webflow) first, then makes it live, archives the previous
+     * live version and marks its tag published. When the push fails nothing changes. In `draft` marketplace_mode
+     * (draft mode: new items are created as drafts; existing items get staged changes; nothing is published).
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.PublishMarketplaceListingVersion.PathParameters> | null,
@@ -12111,7 +12330,9 @@ export interface PathsDictionary {
     /**
      * rollbackMarketplaceListingVersion - rollbackMarketplaceListingVersion
      * 
-     * Make an archived version the live version again
+     * Make an archived version the live version again: pushes it to the Marketplace (Webflow) first, then makes it
+     * live. When the push fails nothing changes.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.RollbackMarketplaceListingVersion.PathParameters> | null,
@@ -12123,7 +12344,7 @@ export interface PathsDictionary {
     /**
      * syncMarketplaceListing - syncMarketplaceListing
      * 
-     * Re-push the live listing to Webflow
+     * Re-push the live listing to Webflow, then store the push result
      */
     'post'(
       parameters?: Parameters<Paths.SyncMarketplaceListing.PathParameters> | null,
@@ -12137,7 +12358,8 @@ export interface PathsDictionary {
      * 
      * Publishes the listing's edited text on the live version: same tag, same zip, same version number, no update
      * for installers. The text it replaces is kept in the version's `content_revisions`. Changed resources need a new
-     * tag and a new version instead.
+     * tag and a new version instead. The text is pushed to the Marketplace (Webflow) first; when that fails nothing
+     * changes.
      * 
      */
     'post'(
@@ -12471,7 +12693,9 @@ export interface PathsDictionary {
      * 
      * **AI agents** (tokens such as "Connect ChatGPT to epilot") cannot use
      * `auto_apply` (403). Install without it, show the user the plan, and call
-     * `:continue` only after the user approves it.
+     * `:continue` only after the user approves it. Agent tokens are scoped to
+     * their own organization, so a `source_org_id` other than the token's org is
+     * rejected with 403; run cross-org deploys from the epilot portal.
      * 
      * **The plan fails instead of pausing** (`status: "FAILED"`, error code
      * `missing_required_reference`) when a resource references something that is
@@ -13000,11 +13224,36 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SubmitBlueprintTestSuggestions.Responses.$200>
   }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/flow-plan']: {
+    /**
+     * submitBlueprintTestFlowPlan - submitBlueprintTestFlowPlan
+     * 
+     * The flow plan of a flow-mode Luna generation: groups the blueprint's subjects into business flows. Only the generation's plan session may submit it, once, while the generation is planning (otherwise 409 plan_not_running). A plan that does not pass validation is still accepted and the candidate flows are used instead (`used: fallback`). Afterwards one Luna session per flow writes that flow's tests. Only a Luna agent token acting for the user who started the generation is accepted. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.SubmitBlueprintTestFlowPlan.PathParameters> | null,
+      data?: Paths.SubmitBlueprintTestFlowPlan.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SubmitBlueprintTestFlowPlan.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/parts/{part_key}/submissions']: {
+    /**
+     * submitBlueprintTestSuggestionPart - submitBlueprintTestSuggestionPart
+     * 
+     * Submission of one flow (part) of a flow-mode Luna generation, by that part's own session. Name the part's subjects (from list_subjects) with their suggestions; a subject outside the part is refused (400). Stored once: a second submit gets 409 part_submitted. Drafts are verified when every part has finished. Only a Luna agent token acting for the user who started the generation is accepted. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.SubmitBlueprintTestSuggestionPart.PathParameters> | null,
+      data?: Paths.SubmitBlueprintTestSuggestionPart.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SubmitBlueprintTestSuggestionPart.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type ApiErrorResponse = Components.Schemas.ApiErrorResponse;
 export type AppBlueprint = Components.Schemas.AppBlueprint;
 export type Blueprint = Components.Schemas.Blueprint;
 export type BlueprintAssistantConversation = Components.Schemas.BlueprintAssistantConversation;
@@ -13042,6 +13291,7 @@ export type BlueprintSuggestionCheck = Components.Schemas.BlueprintSuggestionChe
 export type BlueprintSuggestionCheckResult = Components.Schemas.BlueprintSuggestionCheckResult;
 export type BlueprintSuggestionGraphQuery = Components.Schemas.BlueprintSuggestionGraphQuery;
 export type BlueprintSuggestionGraphQueryResult = Components.Schemas.BlueprintSuggestionGraphQueryResult;
+export type BlueprintSuggestionPartResult = Components.Schemas.BlueprintSuggestionPartResult;
 export type BlueprintSuggestionSubmission = Components.Schemas.BlueprintSuggestionSubmission;
 export type BlueprintSuggestionSubmissionResult = Components.Schemas.BlueprintSuggestionSubmissionResult;
 export type BlueprintTag = Components.Schemas.BlueprintTag;
@@ -13059,6 +13309,8 @@ export type BlueprintTestCatalogEntry = Components.Schemas.BlueprintTestCatalogE
 export type BlueprintTestCheckResult = Components.Schemas.BlueprintTestCheckResult;
 export type BlueprintTestCoverage = Components.Schemas.BlueprintTestCoverage;
 export type BlueprintTestDependencyValidation = Components.Schemas.BlueprintTestDependencyValidation;
+export type BlueprintTestFlowPlan = Components.Schemas.BlueprintTestFlowPlan;
+export type BlueprintTestFlowPlanResult = Components.Schemas.BlueprintTestFlowPlanResult;
 export type BlueprintTestInterpretation = Components.Schemas.BlueprintTestInterpretation;
 export type BlueprintTestInterpretationConfirmInput = Components.Schemas.BlueprintTestInterpretationConfirmInput;
 export type BlueprintTestInterpretationConfirmation = Components.Schemas.BlueprintTestInterpretationConfirmation;
