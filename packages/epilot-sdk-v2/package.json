@@ -207,6 +207,12 @@
       "require": "./dist/apis/journey.cjs"
     },
     "./journey/openapi.json": "./definitions/journey.json",
+    "./journey-session": {
+      "types": "./dist/apis/journey-session.d.ts",
+      "import": "./dist/apis/journey-session.js",
+      "require": "./dist/apis/journey-session.cjs"
+    },
+    "./journey-session/openapi.json": "./definitions/journey-session.json",
     "./kanban": {
       "types": "./dist/apis/kanban.d.ts",
       "import": "./dist/apis/kanban.js",
@@ -502,6 +508,9 @@
       ],
       "journey": [
         "./dist/apis/journey.d.ts"
+      ],
+      "journey-session": [
+        "./dist/apis/journey-session.d.ts"
       ],
       "kanban": [
         "./dist/apis/kanban.d.ts"

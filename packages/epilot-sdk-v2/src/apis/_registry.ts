@@ -172,6 +172,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   });
   registerApi({
     registry,
+    name: 'journeySession',
+    loader: () => expandDef(require('../definitions/journey-session-runtime.json')),
+  });
+  registerApi({
+    registry,
     name: 'kanban',
     loader: () => expandDef(require('../definitions/kanban-runtime.json')),
   });
