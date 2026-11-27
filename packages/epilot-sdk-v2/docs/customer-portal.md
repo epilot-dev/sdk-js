@@ -2765,7 +2765,8 @@ const { data } = await client.replaceECPTemplateVariables(
   null,
   {
     template_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
-    entity_context: {}
+    entity_context: {},
+    portal_id: 'string'
   },
 )
 ```
@@ -3909,7 +3910,8 @@ const { data } = await client.getRecipientsToNotifyOnAutomation(
   {
     emails: ['john@doe.com'],
     template_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
-    context_id: '5da0a718-c822-403d-9f5d-20d4584e0528'
+    context_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+    portal_id: 'string'
   },
 )
 ```
