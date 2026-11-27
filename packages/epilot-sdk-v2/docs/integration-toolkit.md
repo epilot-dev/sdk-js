@@ -738,6 +738,7 @@ const { data } = await client.simulateMappingV2(
     event_configuration: {
       direct: true,
       interactive: 'on_request',
+      payload_format: '2.0',
       entities: [
         { /* ... */ }
       ],
@@ -746,7 +747,8 @@ const { data } = await client.simulateMappingV2(
       ]
     },
     format: 'json',
-    payload: 'string'
+    payload: 'string',
+    original_request: {}
   },
 )
 ```
@@ -839,6 +841,7 @@ const { data } = await client.simulateDirect(
     event_configuration: {
       direct: true,
       interactive: 'on_request',
+      payload_format: '2.0',
       entities: [
         { /* ... */ }
       ],
@@ -1625,6 +1628,7 @@ const { data } = await client.createUseCase(
     configuration: {
       direct: true,
       interactive: 'on_request',
+      payload_format: '2.0',
       entities: [
         { /* ... */ }
       ],
@@ -1660,6 +1664,7 @@ const { data } = await client.createUseCase(
   "configuration": {
     "direct": true,
     "interactive": "on_request",
+    "payload_format": "2.0",
     "entities": [
       {}
     ],
@@ -1711,6 +1716,7 @@ const { data } = await client.getUseCase({
   "configuration": {
     "direct": true,
     "interactive": "on_request",
+    "payload_format": "2.0",
     "entities": [
       {}
     ],
@@ -1746,6 +1752,7 @@ const { data } = await client.updateUseCase(
     configuration: {
       direct: true,
       interactive: 'on_request',
+      payload_format: '2.0',
       entities: [
         { /* ... */ }
       ],
@@ -1781,6 +1788,7 @@ const { data } = await client.updateUseCase(
   "configuration": {
     "direct": true,
     "interactive": "on_request",
+    "payload_format": "2.0",
     "entities": [
       {}
     ],
@@ -4875,6 +4883,7 @@ const { data } = await client.createImportTemplate(
     mapping: {
       direct: true,
       interactive: 'on_request',
+      payload_format: '2.0',
       entities: [
         { /* ... */ }
       ],
@@ -4899,6 +4908,7 @@ const { data } = await client.createImportTemplate(
   "mapping": {
     "direct": true,
     "interactive": "on_request",
+    "payload_format": "2.0",
     "entities": [
       {}
     ],
@@ -4943,6 +4953,7 @@ const { data } = await client.getImportTemplate({
   "mapping": {
     "direct": true,
     "interactive": "on_request",
+    "payload_format": "2.0",
     "entities": [
       {}
     ],
@@ -4981,6 +4992,7 @@ const { data } = await client.updateImportTemplate(
     mapping: {
       direct: true,
       interactive: 'on_request',
+      payload_format: '2.0',
       entities: [
         { /* ... */ }
       ],
@@ -5005,6 +5017,7 @@ const { data } = await client.updateImportTemplate(
   "mapping": {
     "direct": true,
     "interactive": "on_request",
+    "payload_format": "2.0",
     "entities": [
       {}
     ],
@@ -5417,6 +5430,7 @@ type ImportTemplate = {
   mapping: {
     direct?: boolean
     interactive?: "disabled" | "on_request" | "always"
+    payload_format?: "1.0" | "2.0"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -5459,6 +5473,7 @@ type ImportTemplateList = {
     mapping: {
       direct?: { ... }
       interactive?: { ... }
+      payload_format?: { ... }
       entities?: { ... }
       meter_readings?: { ... }
     }
@@ -5508,6 +5523,7 @@ type UpsertImportTemplateRequest = {
   mapping: {
     direct?: boolean
     interactive?: "disabled" | "on_request" | "always"
+    payload_format?: "1.0" | "2.0"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -7156,6 +7172,7 @@ type IntegrationWithUseCases = {
     configuration?: {
       direct?: { ... }
       interactive?: { ... }
+      payload_format?: { ... }
       entities?: { ... }
       meter_readings?: { ... }
     }
@@ -7234,7 +7251,6 @@ type IntegrationWithUseCases = {
       response_mapping?: { ... }
       inbound_use_case_slug?: { ... }
     }
-    type_annotations?: {
   // ...
 }
 ```
@@ -7322,6 +7338,7 @@ type UpsertIntegrationWithUseCasesRequest = {
     configuration?: {
       direct?: { ... }
       interactive?: { ... }
+      payload_format?: { ... }
       entities?: { ... }
       meter_readings?: { ... }
     }
@@ -7341,7 +7358,6 @@ type UpsertIntegrationWithUseCasesRequest = {
   } | {
     id?: string // uuid
     name: string
-    slug?: string
   // ...
 }
 ```
@@ -7354,6 +7370,7 @@ Configuration for inbound use cases (ERP to epilot)
 type InboundIntegrationEventConfiguration = {
   direct?: boolean
   interactive?: "disabled" | "on_request" | "always"
+  payload_format?: "1.0" | "2.0"
   entities?: Array<{
     entity_schema: string
     unique_ids: string[]
@@ -8026,6 +8043,7 @@ type EmbeddedUseCaseRequest = {
   configuration?: {
     direct?: boolean
     interactive?: "disabled" | "on_request" | "always"
+    payload_format?: "1.0" | "2.0"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -8115,7 +8133,6 @@ type EmbeddedUseCaseRequest = {
       body_jsonata?: { ... }
       enabled?: { ... }
       body?: { ... }
-      response_type: { ... }
   // ...
 }
 ```
@@ -8145,6 +8162,7 @@ type EmbeddedInboundUseCaseRequest = {
   configuration?: {
     direct?: boolean
     interactive?: "disabled" | "on_request" | "always"
+    payload_format?: "1.0" | "2.0"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -8347,6 +8365,7 @@ type InboundUseCase = {
   configuration?: {
     direct?: boolean
     interactive?: "disabled" | "on_request" | "always"
+    payload_format?: "1.0" | "2.0"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -8571,6 +8590,7 @@ type UseCase = {
   configuration?: {
     direct?: boolean
     interactive?: "disabled" | "on_request" | "always"
+    payload_format?: "1.0" | "2.0"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -8650,7 +8670,6 @@ type UseCase = {
     fan_out?: {
       enabled: { ... }
     }
-    secure_proxy?: {
   // ...
 }
 ```
@@ -8666,6 +8685,7 @@ type CreateUseCaseRequest = {
   configuration?: {
     direct?: boolean
     interactive?: "disabled" | "on_request" | "always"
+    payload_format?: "1.0" | "2.0"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -8757,7 +8777,6 @@ type CreateUseCaseRequest = {
       body: { ... }
       encoding: { ... }
       filename?: { ... }
-      content_type?: { ... }
   // ...
 }
 ```
@@ -8783,6 +8802,7 @@ type CreateInboundUseCaseRequest = {
   configuration?: {
     direct?: boolean
     interactive?: "disabled" | "on_request" | "always"
+    payload_format?: "1.0" | "2.0"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -8943,6 +8963,7 @@ type UpdateUseCaseRequest = {
   configuration?: {
     direct?: boolean
     interactive?: "disabled" | "on_request" | "always"
+    payload_format?: "1.0" | "2.0"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -9033,7 +9054,6 @@ type UpdateUseCaseRequest = {
       response_type: { ... }
     }>
     response?: {
-      body: { ... }
   // ...
 }
 ```
@@ -9061,6 +9081,7 @@ type UpdateInboundUseCaseRequest = {
   configuration?: {
     direct?: boolean
     interactive?: "disabled" | "on_request" | "always"
+    payload_format?: "1.0" | "2.0"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -9256,6 +9277,7 @@ type UseCaseHistoryEntry = {
   configuration?: {
     direct?: boolean
     interactive?: "disabled" | "on_request" | "always"
+    payload_format?: "1.0" | "2.0"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -9333,7 +9355,6 @@ type UseCaseHistoryEntry = {
     direction?: "download" | "upload"
     upload?: {
       max_total_bytes?: { ... }
-      max_file_bytes?: { ... }
   // ...
 }
 ```
@@ -9387,6 +9408,7 @@ type InboundUseCaseHistoryEntry = {
   configuration?: {
     direct?: boolean
     interactive?: "disabled" | "on_request" | "always"
+    payload_format?: "1.0" | "2.0"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -10089,6 +10111,7 @@ type MappingSimulationV2Request = {
   event_configuration: {
     direct?: boolean
     interactive?: "disabled" | "on_request" | "always"
+    payload_format?: "1.0" | "2.0"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -10112,6 +10135,7 @@ type MappingSimulationV2Request = {
   }
   format: "json" | "xml"
   payload: string | Record<string, unknown>
+  original_request?: Record<string, unknown>
 }
 ```
 
@@ -10419,6 +10443,7 @@ type DirectSimulationRequest = {
   event_configuration: {
     direct?: boolean
     interactive?: "disabled" | "on_request" | "always"
+    payload_format?: "1.0" | "2.0"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -10638,6 +10663,7 @@ type IntegrationConfigurationV2 = {
     events: Record<string, {
       direct?: { ... }
       interactive?: { ... }
+      payload_format?: { ... }
       entities?: { ... }
       meter_readings?: { ... }
     }>
