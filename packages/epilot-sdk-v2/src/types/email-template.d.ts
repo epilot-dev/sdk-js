@@ -448,6 +448,15 @@ export declare namespace Components {
              */
             value?: string;
         }[];
+        /**
+         * Design Builder design linked to this template. When set, `{{design.*}}` placeholders
+         * (e.g. `{{design.assets.logo.url}}`, `{{design.colors.primary}}`) are replaced with the design's
+         * current values at templating time.
+         *
+         * example:
+         * 7a0a1a2b-3c4d-4e5f-8a9b-0c1d2e3f4a5b
+         */
+        export type DesignId = string | null;
         export interface EmailTemplateEntity {
             /**
              * Entity ID
@@ -516,6 +525,15 @@ export declare namespace Components {
              * 0
              */
             brand_id?: number | null;
+            design_id?: /**
+             * Design Builder design linked to this template. When set, `{{design.*}}` placeholders
+             * (e.g. `{{design.assets.logo.url}}`, `{{design.colors.primary}}`) are replaced with the design's
+             * current values at templating time.
+             *
+             * example:
+             * 7a0a1a2b-3c4d-4e5f-8a9b-0c1d2e3f4a5b
+             */
+            DesignId;
             from?: From;
             /**
              * To
@@ -651,6 +669,23 @@ export declare namespace Components {
              */
             brand_id?: number | null;
             /**
+             * `partial` for blocks other templates reuse. A partial is never sent on its own, so it has
+             * no subject. Unset for a regular template.
+             *
+             * example:
+             * partial
+             */
+            template_type?: "partial";
+            design_id?: /**
+             * Design Builder design linked to this template. When set, `{{design.*}}` placeholders
+             * (e.g. `{{design.assets.logo.url}}`, `{{design.colors.primary}}`) are replaced with the design's
+             * current values at templating time.
+             *
+             * example:
+             * 7a0a1a2b-3c4d-4e5f-8a9b-0c1d2e3f4a5b
+             */
+            DesignId;
+            /**
              * From
              */
             from?: From;
@@ -667,11 +702,11 @@ export declare namespace Components {
              */
             bcc?: To[];
             /**
-             * Subject
+             * Subject. Required, except for a partial (`template_type` partial).
              * example:
              * We have received your order!
              */
-            subject: string;
+            subject?: string;
             /**
              * Body
              * example:
@@ -1069,6 +1104,18 @@ export declare namespace Components {
              */
             user_id?: string;
             custom_variables?: /* Custom variables to be replaced in the email template */ CustomVariables;
+            /**
+             * Only put the current content of the partials in, and leave every other variable as it is,
+             * e.g. to preview a template without an entity.
+             *
+             */
+            partials_only?: boolean;
+            /**
+             * The portal the send is for, e.g. the recipient's portal. Portal user variables
+             * (`{{portalUser.*}}`) link to this portal. Without it the portal is derived from the template.
+             *
+             */
+            portal_id?: string;
         }
     }
 }
@@ -1575,6 +1622,7 @@ export type CreateSystemTemplatesResp = Components.Schemas.CreateSystemTemplates
 export type CreatedAt = Components.Schemas.CreatedAt;
 export type CreatedBy = Components.Schemas.CreatedBy;
 export type CustomVariables = Components.Schemas.CustomVariables;
+export type DesignId = Components.Schemas.DesignId;
 export type EmailTemplateEntity = Components.Schemas.EmailTemplateEntity;
 export type EmailTemplateRequest = Components.Schemas.EmailTemplateRequest;
 export type EmailTemplateResponse = Components.Schemas.EmailTemplateResponse;

@@ -815,7 +815,7 @@
           },
           "custom_variables": {
             "type": "array",
-            "description": "Custom variables with specified values form other services.",
+            "description": "Custom variables with specified values form other services. `generateJourneyLink` reads\n`_workflow_wait_execution_id`, `_workflow_wait_task_id`, `_campaign_id`, `_contract_id` and `_contact_id`.\n",
             "items": {
               "$ref": "#/components/schemas/ExternalCustomVariable"
             }
@@ -847,6 +847,10 @@
             "type": "string",
             "description": "The version of the variables syntax supported. Default is 1.0",
             "example": "2"
+          },
+          "portal_id": {
+            "type": "string",
+            "description": "The portal the send is for, e.g. the recipient's portal. Portal user variables\n(`{{portalUser.*}}`) link to this portal. Without it the portal is derived from the template.\n"
           }
         },
         "required": [

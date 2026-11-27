@@ -150,7 +150,8 @@ const { data } = await client.getVariableContext(
       template_name: 'string',
       template_tags: ['string'],
       template_id: 'string',
-      variables_version: '2'
+      variables_version: '2',
+      portal_id: 'string'
     },
     use_refs: false
   },
@@ -257,7 +258,8 @@ const { data } = await client.replaceTemplates(
       template_name: 'string',
       template_tags: ['string'],
       template_id: 'string',
-      variables_version: '2'
+      variables_version: '2',
+      portal_id: 'string'
     }
   },
 )
@@ -306,7 +308,8 @@ const { data } = await client.replaceTemplatesV2(
       template_name: 'string',
       template_tags: ['string'],
       template_id: 'string',
-      variables_version: '2'
+      variables_version: '2',
+      portal_id: 'string'
     }
   },
 )
@@ -1095,6 +1098,7 @@ type VariableParameters = {
   template_tags?: string[]
   template_id?: string
   variables_version?: string
+  portal_id?: string
 }
 ```
 

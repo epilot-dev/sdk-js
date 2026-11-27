@@ -287,7 +287,6 @@
         "x-epilot-agent": {
           "expose": false
         },
-        "x-portal-preview-read": true,
         "summary": "validateToken",
         "description": "Validates Portal Token is valid. Pass the token via Authorization Header.",
         "tags": [
@@ -298,7 +297,6 @@
             "PortalAuth": []
           }
         ],
-        "x-contact-identification-token": true,
         "responses": {
           "204": {
             "description": "Tokens is valid for the given organization."
@@ -318,7 +316,6 @@
         "x-epilot-agent": {
           "expose": false
         },
-        "x-portal-preview-read": true,
         "summary": "revokeToken",
         "description": "Revokes all of the access tokens for the given Refresh Token.",
         "tags": [
@@ -507,7 +504,6 @@
     "/v1/portal/exports": {
       "post": {
         "operationId": "createExport",
-        "x-portal-preview-read": true,
         "summary": "createExport",
         "description": "Request an asynchronous CSV or XLSX export of the portal user's entities for one schema. Columns come from the request Returns a job id to poll.\n",
         "tags": [
@@ -1131,7 +1127,6 @@
     "/v2/portal/visualization:export": {
       "post": {
         "operationId": "prepareVisualizationExport",
-        "x-portal-preview-read": true,
         "summary": "prepareVisualizationExport",
         "description": "Asks an installed App to prepare a downloadable export of a visualization (consumption chart, dynamic tariff chart, etc.). The export is produced by the third-party App via a configured portal extension hook of type `dataExport` — this endpoint does not generate the file itself, it forwards the request to the configured hook and returns the descriptor the App provides (typically a `download_url`).\n",
         "tags": [
@@ -3083,6 +3078,20 @@
                         }
                       }
                     }
+                  },
+                  "portal_id": {
+                    "type": "string",
+                    "description": "The portal the send is for, e.g. the recipient's portal. Resolves `portalUser`.\nWithout it the portal is derived from the template (legacy fallback).\n"
+                  },
+                  "portal_keys": {
+                    "type": "array",
+                    "description": "Portals the template references as `{{portal.<KEY>.*}}`. A key is a portal origin\n(e.g. `END_CUSTOMER_PORTAL`) or a portal id. Each resolved key is returned under `portal`.\n",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "END_CUSTOMER_PORTAL"
+                    ]
                   }
                 }
               }
@@ -3209,6 +3218,42 @@
                           }
                         }
                       }
+                    },
+                    "portal": {
+                      "type": "object",
+                      "description": "Variables per requested `portal_keys` entry, keyed by the key as sent.",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "link": {
+                            "type": "string"
+                          },
+                          "invitationLink": {
+                            "type": "string"
+                          },
+                          "newDocumentLink": {
+                            "type": "string"
+                          },
+                          "entityLink": {
+                            "type": "string"
+                          },
+                          "userEmailsOnEntity": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "origin": {
+                            "type": "string"
+                          },
+                          "pagePaths": {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -3268,7 +3313,6 @@
         "operationId": "getSchemas",
         "summary": "getSchemas",
         "description": "Retrieves the schemas. Only schemas usable in the private part of the portal are returned.",
-        "x-contact-identification-token": true,
         "tags": [
           "ECP"
         ],
@@ -3640,7 +3684,6 @@
         "operationId": "getContact",
         "summary": "getContact",
         "description": "Retrieves the contact of the logged in user.",
-        "x-contact-identification-token": true,
         "tags": [
           "ECP"
         ],
@@ -5285,6 +5328,10 @@
                   "context_id": {
                     "$ref": "#/components/schemas/EntityId",
                     "description": "Entity ID that is part of the automation"
+                  },
+                  "portal_id": {
+                    "type": "string",
+                    "description": "The portal to notify users of. Without it the portal's origin is derived from the\ntemplate (legacy fallback).\n"
                   }
                 }
               }
@@ -5945,7 +5992,6 @@
     "/v2/portal/contract/{id}/resolve-templates": {
       "post": {
         "operationId": "getContractWithTemplates",
-        "x-portal-preview-read": true,
         "summary": "getContractWithTemplates",
         "description": "Resolve Handlebars templates against a contract's related meters and return the contract with templates_output populated per meter. This is a read-only operation — it does not modify the contract. It uses POST only so the templates can be passed in the request body. Prefer getPortalUserEntity / getContract for reads that don't need templates.",
         "tags": [
@@ -7177,7 +7223,6 @@
     "/v2/portal/entity:get": {
       "post": {
         "operationId": "getPortalUserEntity",
-        "x-portal-preview-read": true,
         "summary": "getPortalUserEntity",
         "description": "Get a single entity for a portal user",
         "tags": [
@@ -7188,7 +7233,6 @@
             "PortalAuth": []
           }
         ],
-        "x-contact-identification-token": true,
         "requestBody": {
           "content": {
             "application/json": {
@@ -7227,10 +7271,8 @@
     "/v2/portal/entity:search": {
       "post": {
         "operationId": "searchPortalUserEntities",
-        "x-portal-preview-read": true,
         "summary": "searchPortalUserEntities",
         "description": "Search all entities of a portal user",
-        "x-contact-identification-token": true,
         "tags": [
           "ECP"
         ],
@@ -7799,7 +7841,6 @@
     "/v2/portal/entities/workflows/linearized/batch": {
       "post": {
         "operationId": "getEntityPortalWorkflowsBatch",
-        "x-portal-preview-read": true,
         "summary": "getEntityPortalWorkflowsBatch",
         "description": "Batch variant of `getEntityPortalWorkflows`: returns portal-relevant workflows for\nup to 50 entities — schemas may differ — in a single call, each already linearized\nby the Workflows API into a flat, ordered list of portal-visible tasks.\n\nIntended for portal list views (e.g. an entity list where every card shows its\nworkflow progress). Entities the portal user cannot access are omitted from the\nresponse; an entry with an empty task list means the entity has no portal-relevant\nworkflow.\n",
         "tags": [
@@ -8110,9 +8151,7 @@
     "/v2/portal/metering/readings": {
       "post": {
         "operationId": "getMeterReadings",
-        "x-portal-preview-read": true,
         "summary": "getMeterReadings",
-        "x-contact-identification-token": true,
         "description": "Fetches meter readings for a counter and optionally resolves Handlebars\ntemplate strings against each reading object using @epilot/variables.\n",
         "tags": [
           "ECP"
@@ -8456,7 +8495,6 @@
       "get": {
         "operationId": "getAllowedMeterReading",
         "summary": "getAllowedMeterReading",
-        "x-contact-identification-token": true,
         "description": "Returns the allowed min/max reading per counter of the meter, derived from its reading history.\nUnlike `getAllowedMeterReadingRange`, this needs no plausibility check hook.\n",
         "tags": [
           "ECP"
@@ -9422,7 +9460,6 @@
             "EitherAuth": []
           }
         ],
-        "x-contact-identification-token": true,
         "parameters": [
           {
             "in": "query",
@@ -9614,7 +9651,6 @@
     "/v2/portal/pages/interpolate": {
       "post": {
         "operationId": "interpolatePortalPages",
-        "x-portal-preview-read": true,
         "summary": "interpolatePortalPages",
         "description": "Interpolate template variables in portal pages without reading from the database. Accepts pages in the request body and returns them with templates resolved. Portal Builder preview only: requires a 360 (epilot) token or a `portal_preview` token; plain portal user tokens get 403.",
         "tags": [

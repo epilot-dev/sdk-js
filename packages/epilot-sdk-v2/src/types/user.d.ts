@@ -193,6 +193,7 @@ export declare namespace Components {
                  * `Deactivated` users can't log in and free their seat from the next billing month on (a user
                  * deactivated during a month is billed for that month). Only `Active` users can be deactivated, and
                  * only by someone else with `user:edit`; reactivation (`Deactivated` → `Active`) is possible at any time.
+                 * A deactivation can also be scheduled for a later day, see scheduleUserDeactivation.
                  *
                  */
                 status?: "Active" | "Pending" | "Deactivated" | "Deleted";
@@ -201,9 +202,35 @@ export declare namespace Components {
                  */
                 deactivated_at?: string; // date-time
                 /**
-                 * Id of the user who deactivated this user.
+                 * Id of the user who deactivated this user. For a scheduled deactivation (`deactivated_via: schedule`),
+                 * the user who scheduled it.
+                 *
                  */
                 deactivated_by?: string;
+                /**
+                 * Set when the user was not deactivated directly by a person: `schedule` = by the nightly job that carries
+                 * out scheduled deactivations (see `scheduled_deactivation_date`). Dropped on reactivation.
+                 *
+                 */
+                deactivated_via?: "schedule";
+                /**
+                 * Day (`YYYY-MM-DD`, German time / Europe/Berlin) from which the user no longer has access: a nightly job
+                 * deactivates the user just after midnight German time on that day. A deactivation scheduled for the 1st of
+                 * a month frees the seat for that month. Set with scheduleUserDeactivation, removed with
+                 * cancelScheduledUserDeactivation and when the user is deactivated.
+                 *
+                 * example:
+                 * 2027-01-01
+                 */
+                scheduled_deactivation_date?: string; // date
+                /**
+                 * Id of the user who scheduled the deactivation (absent when the caller had no user id).
+                 */
+                scheduled_deactivation_by?: string;
+                /**
+                 * When the deactivation was (last) scheduled.
+                 */
+                scheduled_deactivation_created_at?: string; // date-time
                 /**
                  * User's email address
                  */
@@ -570,6 +597,12 @@ export declare namespace Components {
              *
              */
             is_primary_org?: boolean;
+            /**
+             * Whether the organization is queued for deletion (still in its grace period). The org switcher
+             * hides such organizations.
+             *
+             */
+            deletion_scheduled?: boolean;
             /**
              * example:
              * eu-central-1
@@ -1261,6 +1294,21 @@ export declare namespace Components {
             }[];
         }
         export type Query = string;
+        export interface ScheduledDeactivationError {
+            status?: number;
+            error?: "cannot_schedule_self" | "invalid_date" | "user_not_active" | "user_is_owner";
+            message?: string;
+        }
+        export interface ScheduledDeactivationRequest {
+            /**
+             * First day (`YYYY-MM-DD`, German time / Europe/Berlin) on which the user no longer has access. Must be after
+             * today (Europe/Berlin) and at most 730 days ahead.
+             *
+             * example:
+             * 2027-01-01
+             */
+            date: string; // date
+        }
         export interface SignupUserPayload {
             organization_detail?: OrganizationDetail;
             user_detail?: UserDetail;
@@ -1620,6 +1668,7 @@ export declare namespace Components {
              * `Deactivated` users can't log in and free their seat from the next billing month on (a user
              * deactivated during a month is billed for that month). Only `Active` users can be deactivated, and
              * only by someone else with `user:edit`; reactivation (`Deactivated` → `Active`) is possible at any time.
+             * A deactivation can also be scheduled for a later day, see scheduleUserDeactivation.
              *
              */
             status?: "Active" | "Pending" | "Deactivated" | "Deleted";
@@ -1628,9 +1677,35 @@ export declare namespace Components {
              */
             deactivated_at?: string; // date-time
             /**
-             * Id of the user who deactivated this user.
+             * Id of the user who deactivated this user. For a scheduled deactivation (`deactivated_via: schedule`),
+             * the user who scheduled it.
+             *
              */
             deactivated_by?: string;
+            /**
+             * Set when the user was not deactivated directly by a person: `schedule` = by the nightly job that carries
+             * out scheduled deactivations (see `scheduled_deactivation_date`). Dropped on reactivation.
+             *
+             */
+            deactivated_via?: "schedule";
+            /**
+             * Day (`YYYY-MM-DD`, German time / Europe/Berlin) from which the user no longer has access: a nightly job
+             * deactivates the user just after midnight German time on that day. A deactivation scheduled for the 1st of
+             * a month frees the seat for that month. Set with scheduleUserDeactivation, removed with
+             * cancelScheduledUserDeactivation and when the user is deactivated.
+             *
+             * example:
+             * 2027-01-01
+             */
+            scheduled_deactivation_date?: string; // date
+            /**
+             * Id of the user who scheduled the deactivation (absent when the caller had no user id).
+             */
+            scheduled_deactivation_by?: string;
+            /**
+             * When the deactivation was (last) scheduled.
+             */
+            scheduled_deactivation_created_at?: string; // date-time
             /**
              * User's email address
              */
@@ -1910,6 +1985,22 @@ export declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.PasskeyRegistrationOptions;
             export interface $403 {
+            }
+        }
+    }
+    namespace CancelScheduledUserDeactivation {
+        namespace Parameters {
+            export type Id = /* User's unique identifier */ Components.Schemas.UserId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.UserV2;
+            export type $400 = Components.Schemas.ScheduledDeactivationError;
+            export interface $403 {
+            }
+            export interface $404 {
             }
         }
     }
@@ -2478,6 +2569,24 @@ export declare namespace Paths {
             }
         }
     }
+    namespace ScheduleUserDeactivation {
+        namespace Parameters {
+            export type Id = /* User's unique identifier */ Components.Schemas.UserId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.ScheduledDeactivationRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.UserV2;
+            export type $400 = Components.Schemas.ScheduledDeactivationError;
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export type $409 = Components.Schemas.ScheduledDeactivationError;
+        }
+    }
     namespace SendUserPasswordReset {
         export interface RequestBody {
             /**
@@ -2752,6 +2861,44 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetGroupsForUser.Responses.$200>
+  /**
+   * scheduleUserDeactivation - scheduleUserDeactivation
+   * 
+   * Schedule the deactivation of an active user for a later day, or move an existing schedule to another day.
+   * 
+   * `date` is the first day (German time, Europe/Berlin) on which the user no longer has access: a nightly job
+   * deactivates the user just after midnight German time on that day (same as setting `status: Deactivated`,
+   * with `deactivated_via: schedule`). Scheduling the 1st of a month means that month is not billed for the user.
+   * 
+   * Requires `user:edit` on the user, same as changing `status` with updateUserV2.
+   * 
+   * Rules:
+   * - You can't schedule, change or cancel the deactivation of your own user (`cannot_schedule_self`)
+   * - `date` must be a calendar date (`YYYY-MM-DD`) after today (Europe/Berlin) and at most 730 days ahead
+   *   (`invalid_date`)
+   * - Only `Active` users can be scheduled (`user_not_active`)
+   * - Organization owners can't be scheduled (`user_is_owner`)
+   * 
+   */
+  'scheduleUserDeactivation'(
+    parameters?: Parameters<Paths.ScheduleUserDeactivation.PathParameters> | null,
+    data?: Paths.ScheduleUserDeactivation.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ScheduleUserDeactivation.Responses.$200>
+  /**
+   * cancelScheduledUserDeactivation - cancelScheduledUserDeactivation
+   * 
+   * Cancel the scheduled deactivation of a user. Succeeds without changes when nothing is scheduled.
+   * 
+   * Requires `user:edit` on the user, same as changing `status` with updateUserV2. You can't cancel the scheduled
+   * deactivation of your own user (`cannot_schedule_self`).
+   * 
+   */
+  'cancelScheduledUserDeactivation'(
+    parameters?: Parameters<Paths.CancelScheduledUserDeactivation.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CancelScheduledUserDeactivation.Responses.$200>
   /**
    * getGroups - getGroups
    * 
@@ -3255,6 +3402,46 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetGroupsForUser.Responses.$200>
   }
+  ['/v2/users/{id}/scheduled-deactivation']: {
+    /**
+     * scheduleUserDeactivation - scheduleUserDeactivation
+     * 
+     * Schedule the deactivation of an active user for a later day, or move an existing schedule to another day.
+     * 
+     * `date` is the first day (German time, Europe/Berlin) on which the user no longer has access: a nightly job
+     * deactivates the user just after midnight German time on that day (same as setting `status: Deactivated`,
+     * with `deactivated_via: schedule`). Scheduling the 1st of a month means that month is not billed for the user.
+     * 
+     * Requires `user:edit` on the user, same as changing `status` with updateUserV2.
+     * 
+     * Rules:
+     * - You can't schedule, change or cancel the deactivation of your own user (`cannot_schedule_self`)
+     * - `date` must be a calendar date (`YYYY-MM-DD`) after today (Europe/Berlin) and at most 730 days ahead
+     *   (`invalid_date`)
+     * - Only `Active` users can be scheduled (`user_not_active`)
+     * - Organization owners can't be scheduled (`user_is_owner`)
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.ScheduleUserDeactivation.PathParameters> | null,
+      data?: Paths.ScheduleUserDeactivation.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ScheduleUserDeactivation.Responses.$200>
+    /**
+     * cancelScheduledUserDeactivation - cancelScheduledUserDeactivation
+     * 
+     * Cancel the scheduled deactivation of a user. Succeeds without changes when nothing is scheduled.
+     * 
+     * Requires `user:edit` on the user, same as changing `status` with updateUserV2. You can't cancel the scheduled
+     * deactivation of your own user (`cannot_schedule_self`).
+     * 
+     */
+    'delete'(
+      parameters?: Parameters<Paths.CancelScheduledUserDeactivation.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CancelScheduledUserDeactivation.Responses.$200>
+  }
   ['/v1/groups']: {
     /**
      * getGroups - getGroups
@@ -3649,6 +3836,8 @@ export type PasskeyRegistrationOptions = Components.Schemas.PasskeyRegistrationO
 export type PasskeyRegistrationResponse = Components.Schemas.PasskeyRegistrationResponse;
 export type PlatformActivitySummary = Components.Schemas.PlatformActivitySummary;
 export type Query = Components.Schemas.Query;
+export type ScheduledDeactivationError = Components.Schemas.ScheduledDeactivationError;
+export type ScheduledDeactivationRequest = Components.Schemas.ScheduledDeactivationRequest;
 export type SignupUserPayload = Components.Schemas.SignupUserPayload;
 export type UpdateGroupReq = Components.Schemas.UpdateGroupReq;
 export type User = Components.Schemas.User;

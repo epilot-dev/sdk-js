@@ -2600,6 +2600,69 @@ declare namespace Components {
                  */
                 interactive?: "disabled" | "on_request" | "always";
                 /**
+                 * What the root (`$`) of this use case's mappings is: the unique identifiers,
+                 * the entity-level and field expressions and the meter readings all read it.
+                 *
+                 * - `1.0`: the event's payload as it came. For an event pushed to the inbound
+                 *   API that is its parsed JSON. For a managed call's response routed here by
+                 *   `inbound_use_case_slug` it is the external API's JSON object or array as it
+                 *   came back, and anything else (XML, text, an empty body, a JSON number)
+                 *   wrapped as `{ "raw": <value> }`, so the shape depends on what the API
+                 *   answered on each call.
+                 * - `2.0`: always one object with the same four keys, whatever produced the
+                 *   event:
+                 *
+                 *   ```json
+                 *   {
+                 *     "kind": "object",
+                 *     "body": { "customerNumber": "C-1" },
+                 *     "raw": null,
+                 *     "original_request": null
+                 *   }
+                 *   ```
+                 *
+                 *   - `kind`: what the payload is. `object` (a JSON object, in `body`),
+                 *     `array` (a JSON array, in `body`), `scalar` (a JSON number, boolean or
+                 *     null, in `body`), `raw` (text that is not JSON, or a JSON string, in
+                 *     `raw`) or `empty` (no payload, or only whitespace).
+                 *   - `body`: the JSON value for `object`, `array` and `scalar`, otherwise
+                 *     `null`.
+                 *   - `raw`: the text for `raw`, otherwise `null`. An event sent with format
+                 *     `xml` is `raw`.
+                 *   - `original_request`: for the response of a managed call, the payload the
+                 *     managed call was executed with (before its `request_mapping`), the same
+                 *     value its `response_mapping` sees as `original_request`. `null` for
+                 *     every other event.
+                 *
+                 *   Typical use: match the entity the managed call was made for by its id,
+                 *   `"unique_ids": ["_id"]` with `_id` mapped from
+                 *   `original_request.<the id field>`, instead of by a value the external
+                 *   API may not echo back.
+                 *
+                 * Text sent with format `json` that does not parse is accepted as `raw`
+                 * under `2.0` (`1.0` refuses it), so a mapping should check `kind`.
+                 *
+                 * The event is not changed: monitoring and replay show the payload as it
+                 * arrived. Ignored in direct mode, which has no mapping. A use case with
+                 * `2.0` cannot drive a file import (import templates refuse it): an import
+                 * maps its file rows as they are.
+                 *
+                 * A managed call puts its request on the queued event only when the use
+                 * case it routes to is `2.0`. An event it queued while the use case was
+                 * still `1.0` and that is processed after the switch has no request: it is
+                 * read like a pushed event (its `{ "raw": ... }` payload is then `kind`
+                 * `object`).
+                 *
+                 * THE FIELD IS OPTIONAL AND ABSENT MEANS `1.0`. It is resolved when the
+                 * configuration is read and is never written into a stored configuration;
+                 * an explicit `"1.0"` is stored as sent. Changes take up to 5 minutes to
+                 * propagate (configuration cache).
+                 *
+                 * example:
+                 * 2.0
+                 */
+                payload_format?: "1.0" | "2.0";
+                /**
                  * Array of entity configurations for this event
                  */
                 entities?: IntegrationEntity[];
@@ -5411,6 +5474,69 @@ declare namespace Components {
              */
             interactive?: "disabled" | "on_request" | "always";
             /**
+             * What the root (`$`) of this use case's mappings is: the unique identifiers,
+             * the entity-level and field expressions and the meter readings all read it.
+             *
+             * - `1.0`: the event's payload as it came. For an event pushed to the inbound
+             *   API that is its parsed JSON. For a managed call's response routed here by
+             *   `inbound_use_case_slug` it is the external API's JSON object or array as it
+             *   came back, and anything else (XML, text, an empty body, a JSON number)
+             *   wrapped as `{ "raw": <value> }`, so the shape depends on what the API
+             *   answered on each call.
+             * - `2.0`: always one object with the same four keys, whatever produced the
+             *   event:
+             *
+             *   ```json
+             *   {
+             *     "kind": "object",
+             *     "body": { "customerNumber": "C-1" },
+             *     "raw": null,
+             *     "original_request": null
+             *   }
+             *   ```
+             *
+             *   - `kind`: what the payload is. `object` (a JSON object, in `body`),
+             *     `array` (a JSON array, in `body`), `scalar` (a JSON number, boolean or
+             *     null, in `body`), `raw` (text that is not JSON, or a JSON string, in
+             *     `raw`) or `empty` (no payload, or only whitespace).
+             *   - `body`: the JSON value for `object`, `array` and `scalar`, otherwise
+             *     `null`.
+             *   - `raw`: the text for `raw`, otherwise `null`. An event sent with format
+             *     `xml` is `raw`.
+             *   - `original_request`: for the response of a managed call, the payload the
+             *     managed call was executed with (before its `request_mapping`), the same
+             *     value its `response_mapping` sees as `original_request`. `null` for
+             *     every other event.
+             *
+             *   Typical use: match the entity the managed call was made for by its id,
+             *   `"unique_ids": ["_id"]` with `_id` mapped from
+             *   `original_request.<the id field>`, instead of by a value the external
+             *   API may not echo back.
+             *
+             * Text sent with format `json` that does not parse is accepted as `raw`
+             * under `2.0` (`1.0` refuses it), so a mapping should check `kind`.
+             *
+             * The event is not changed: monitoring and replay show the payload as it
+             * arrived. Ignored in direct mode, which has no mapping. A use case with
+             * `2.0` cannot drive a file import (import templates refuse it): an import
+             * maps its file rows as they are.
+             *
+             * A managed call puts its request on the queued event only when the use
+             * case it routes to is `2.0`. An event it queued while the use case was
+             * still `1.0` and that is processed after the switch has no request: it is
+             * read like a pushed event (its `{ "raw": ... }` payload is then `kind`
+             * `object`).
+             *
+             * THE FIELD IS OPTIONAL AND ABSENT MEANS `1.0`. It is resolved when the
+             * configuration is read and is never written into a stored configuration;
+             * an explicit `"1.0"` is stored as sent. Changes take up to 5 minutes to
+             * propagate (configuration cache).
+             *
+             * example:
+             * 2.0
+             */
+            payload_format?: "1.0" | "2.0";
+            /**
              * Array of entity configurations for this event
              */
             entities?: IntegrationEntity[];
@@ -6935,6 +7061,11 @@ declare namespace Components {
              * When set, the managed call response is queued to the inbound pipeline and processed
              * using the referenced inbound use case's mapping configuration.
              *
+             * What that mapping reads is set by the inbound use case's `payload_format`. With
+             * `2.0` it gets the response as `body` or `raw` with its `kind`, and the request
+             * this call was executed with as `original_request`, so it can update the entity
+             * the call was made for even when the response does not name it.
+             *
              */
             inbound_use_case_slug?: string;
         }
@@ -7123,6 +7254,16 @@ declare namespace Components {
              * The event data payload - can be either a serialized string or a direct JSON object
              */
             payload: /* The event data payload - can be either a serialized string or a direct JSON object */ string | {
+                [name: string]: any;
+            };
+            /**
+             * The managed call request the simulated payload answers. With
+             * `event_configuration.payload_format` `2.0` it is the envelope's
+             * `original_request`, so the response of a managed call can be simulated.
+             * Ignored by payload format `1.0`.
+             *
+             */
+            original_request?: {
                 [name: string]: any;
             };
         }
@@ -12470,10 +12611,7 @@ export interface OperationMethods {
    * 
    * The URL comes from the integration's `config_push.webhook_url`, the role
    * from its `api_key_role`. `409 config_push_not_enabled` when the
-   * integration's `config_push` is not enabled. Integrations without
-   * `config_push` may still declare both as environment variables in their
-   * `environment_config` (keys ending in `lifecycle_webhook_url` and
-   * `lifecycle_api_key_role`); that fallback goes once they are migrated.
+   * integration's `config_push` is not enabled.
    * 
    * `CREATE` carries the apiKey and the signing secret and is not signed; the
    * middleware authenticates it by reading the configuration with the apiKey.
@@ -14011,10 +14149,7 @@ export interface PathsDictionary {
      * 
      * The URL comes from the integration's `config_push.webhook_url`, the role
      * from its `api_key_role`. `409 config_push_not_enabled` when the
-     * integration's `config_push` is not enabled. Integrations without
-     * `config_push` may still declare both as environment variables in their
-     * `environment_config` (keys ending in `lifecycle_webhook_url` and
-     * `lifecycle_api_key_role`); that fallback goes once they are migrated.
+     * integration's `config_push` is not enabled.
      * 
      * `CREATE` carries the apiKey and the signing secret and is not signed; the
      * middleware authenticates it by reading the configuration with the apiKey.

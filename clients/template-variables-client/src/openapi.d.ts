@@ -867,7 +867,9 @@ declare namespace Components {
              */
             user_org_id?: string | null;
             /**
-             * Custom variables with specified values form other services.
+             * Custom variables with specified values form other services. `generateJourneyLink` reads
+             * `_workflow_wait_execution_id`, `_workflow_wait_task_id`, `_campaign_id`, `_contract_id` and `_contact_id`.
+             *
              */
             custom_variables?: ExternalCustomVariable[];
             /**
@@ -900,6 +902,12 @@ declare namespace Components {
              * 2
              */
             variables_version?: string;
+            /**
+             * The portal the send is for, e.g. the recipient's portal. Portal user variables
+             * (`{{portalUser.*}}`) link to this portal. Without it the portal is derived from the template.
+             *
+             */
+            portal_id?: string;
         }
         export interface VariableResult {
             type?: "simple" | "partial";

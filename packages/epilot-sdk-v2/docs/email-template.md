@@ -45,6 +45,7 @@ const { data } = await emailTemplateClient.saveTemplate(...)
 - [`EmailTemplateRequest`](#emailtemplaterequest)
 - [`EmailTemplateEntity`](#emailtemplateentity)
 - [`Attachment`](#attachment)
+- [`DesignId`](#designid)
 - [`From`](#from)
 - [`To`](#to)
 - [`PresignedRequest`](#presignedrequest)
@@ -90,6 +91,8 @@ const { data } = await client.saveTemplate(
     _purpose: ['a0ec23ac-12f8-4d89-9a63-91cba3787f2a', '310cd388-2f15-4b5b-8f98-ca14c1e03304'],
     name: 'Order confirmation',
     brand_id: 0,
+    template_type: 'partial',
+    design_id: '7a0a1a2b-3c4d-4e5f-8a9b-0c1d2e3f4a5b',
     from: {
       name: 'epilot',
       email: 'service@stadtwerke-example.de'
@@ -165,6 +168,7 @@ const { data } = await client.saveTemplate(
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "name": "Order confirmation",
   "brand_id": 0,
+  "design_id": "7a0a1a2b-3c4d-4e5f-8a9b-0c1d2e3f4a5b",
   "from": {
     "name": "epilot",
     "email": "service@stadtwerke-example.de"
@@ -256,6 +260,7 @@ const { data } = await client.getTemplateDetail({
     "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
     "name": "Order confirmation",
     "brand_id": 0,
+    "design_id": "7a0a1a2b-3c4d-4e5f-8a9b-0c1d2e3f4a5b",
     "from": {
       "name": "epilot",
       "email": "service@stadtwerke-example.de"
@@ -340,6 +345,8 @@ const { data } = await client.updateTemplateDetail(
     _purpose: ['a0ec23ac-12f8-4d89-9a63-91cba3787f2a', '310cd388-2f15-4b5b-8f98-ca14c1e03304'],
     name: 'Order confirmation',
     brand_id: 0,
+    template_type: 'partial',
+    design_id: '7a0a1a2b-3c4d-4e5f-8a9b-0c1d2e3f4a5b',
     from: {
       name: 'epilot',
       email: 'service@stadtwerke-example.de'
@@ -415,6 +422,7 @@ const { data } = await client.updateTemplateDetail(
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "name": "Order confirmation",
   "brand_id": 0,
+  "design_id": "7a0a1a2b-3c4d-4e5f-8a9b-0c1d2e3f4a5b",
   "from": {
     "name": "epilot",
     "email": "service@stadtwerke-example.de"
@@ -586,7 +594,9 @@ const { data } = await client.replaceVariablesAsync(
           variable: '{{abc.xyz}}',
           value: 'ReplacedValue'
         }
-      ]
+      ],
+      partials_only: true,
+      portal_id: 'string'
     },
     must_include_unsubscribe_link: false,
     skip_document_generation: false
@@ -619,6 +629,7 @@ const { data } = await client.replaceVariablesAsync(
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "name": "Order confirmation",
       "brand_id": 0,
+      "design_id": "7a0a1a2b-3c4d-4e5f-8a9b-0c1d2e3f4a5b",
       "from": {
         "name": "epilot",
         "email": "service@stadtwerke-example.de"
@@ -824,6 +835,7 @@ const { data } = await client.convertToBuilder(
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "name": "Order confirmation",
   "brand_id": 0,
+  "design_id": "7a0a1a2b-3c4d-4e5f-8a9b-0c1d2e3f4a5b",
   "from": {
     "name": "epilot",
     "email": "service@stadtwerke-example.de"
@@ -959,6 +971,8 @@ type EmailTemplateRequest = {
   _purpose?: string[]
   name: string
   brand_id?: number
+  template_type?: "partial"
+  design_id?: string
   from?: {
     name?: string
     email: string
@@ -975,7 +989,7 @@ type EmailTemplateRequest = {
     name?: string
     email: string
   }>
-  subject: string
+  subject?: string
   body?: string
   attachments?: Array<{
     cid?: string
@@ -1022,6 +1036,7 @@ type EmailTemplateEntity = {
   _manifest?: string // uuid[]
   name: string
   brand_id?: number
+  design_id?: string
   from?: {
     name?: string
     email: string
@@ -1086,6 +1101,17 @@ type Attachment = {
   type?: string
   copy_to_message?: boolean
 }
+```
+
+### `DesignId`
+
+Design Builder design linked to this template. When set, `{{design.*}}` placeholders
+(e.g. `{{design.assets.logo.url}}`, `{{design.colors.primary}}`) are replaced with the design's
+current values at templating time.
+
+
+```ts
+type DesignId = string
 ```
 
 ### `From`
@@ -1176,6 +1202,8 @@ type VariableParameters = {
     variable?: string
     value?: string
   }>
+  partials_only?: boolean
+  portal_id?: string
 }
 ```
 
@@ -1201,6 +1229,7 @@ type EmailTemplateResponse = {
     _manifest?: string // uuid[]
     name: string
     brand_id?: number
+    design_id?: string
     from?: {
       name?: { ... }
       email: { ... }
@@ -1275,6 +1304,7 @@ type AsyncEmailTemplateResponse = {
       _manifest?: { ... }
       name: { ... }
       brand_id?: { ... }
+      design_id?: { ... }
       from?: { ... }
       to?: { ... }
       cc?: { ... }

@@ -40,6 +40,8 @@ const { data } = await userClient.signUpUser(...)
 - [`resendUserInvitation`](#resenduserinvitation)
 - [`sendUserPasswordReset`](#senduserpasswordreset)
 - [`getGroupsForUser`](#getgroupsforuser)
+- [`scheduleUserDeactivation`](#scheduleuserdeactivation)
+- [`cancelScheduledUserDeactivation`](#cancelscheduleduserdeactivation)
 - [`verifyEmailWithToken`](#verifyemailwithtoken)
 - [`requestPasswordReset`](#requestpasswordreset)
 - [`resetPassword`](#resetpassword)
@@ -98,6 +100,8 @@ const { data } = await userClient.signUpUser(...)
 - [`UserActivationPayload`](#useractivationpayload)
 - [`UserVerificationPayload`](#userverificationpayload)
 - [`UserV2`](#userv2)
+- [`ScheduledDeactivationRequest`](#scheduleddeactivationrequest)
+- [`ScheduledDeactivationError`](#scheduleddeactivationerror)
 - [`User`](#user)
 - [`LoginParameters`](#loginparameters)
 - [`GroupImageUri`](#groupimageuri)
@@ -252,6 +256,10 @@ const { data } = await client.getMeV2()
   "status": "Active",
   "deactivated_at": "1970-01-01T00:00:00.000Z",
   "deactivated_by": "string",
+  "deactivated_via": "schedule",
+  "scheduled_deactivation_date": "2027-01-01",
+  "scheduled_deactivation_by": "string",
+  "scheduled_deactivation_created_at": "1970-01-01T00:00:00.000Z",
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
@@ -495,6 +503,10 @@ const { data } = await client.listUsersV2({
       "status": "Active",
       "deactivated_at": "1970-01-01T00:00:00.000Z",
       "deactivated_by": "string",
+      "deactivated_via": "schedule",
+      "scheduled_deactivation_date": "2027-01-01",
+      "scheduled_deactivation_by": "string",
+      "scheduled_deactivation_created_at": "1970-01-01T00:00:00.000Z",
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
@@ -600,6 +612,10 @@ const { data } = await client.getUserV2({
   "status": "Active",
   "deactivated_at": "1970-01-01T00:00:00.000Z",
   "deactivated_by": "string",
+  "deactivated_via": "schedule",
+  "scheduled_deactivation_date": "2027-01-01",
+  "scheduled_deactivation_by": "string",
+  "scheduled_deactivation_created_at": "1970-01-01T00:00:00.000Z",
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
@@ -698,6 +714,10 @@ const { data } = await client.updateUserV2(
     status: 'Active',
     deactivated_at: '1970-01-01T00:00:00.000Z',
     deactivated_by: 'string',
+    deactivated_via: 'schedule',
+    scheduled_deactivation_date: '2027-01-01',
+    scheduled_deactivation_by: 'string',
+    scheduled_deactivation_created_at: '1970-01-01T00:00:00.000Z',
     email: 'user@example.com',
     draft_email: 'user@example.com',
     draft_email_expires_at: '1970-01-01T00:00:00.000Z',
@@ -786,6 +806,10 @@ const { data } = await client.updateUserV2(
   "status": "Active",
   "deactivated_at": "1970-01-01T00:00:00.000Z",
   "deactivated_by": "string",
+  "deactivated_via": "schedule",
+  "scheduled_deactivation_date": "2027-01-01",
+  "scheduled_deactivation_by": "string",
+  "scheduled_deactivation_created_at": "1970-01-01T00:00:00.000Z",
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
@@ -943,6 +967,10 @@ const { data } = await client.inviteUser(
   "status": "Active",
   "deactivated_at": "1970-01-01T00:00:00.000Z",
   "deactivated_by": "string",
+  "deactivated_via": "schedule",
+  "scheduled_deactivation_date": "2027-01-01",
+  "scheduled_deactivation_by": "string",
+  "scheduled_deactivation_created_at": "1970-01-01T00:00:00.000Z",
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
@@ -1050,6 +1078,10 @@ const { data } = await client.resendUserInvitation(
   "status": "Active",
   "deactivated_at": "1970-01-01T00:00:00.000Z",
   "deactivated_by": "string",
+  "deactivated_via": "schedule",
+  "scheduled_deactivation_date": "2027-01-01",
+  "scheduled_deactivation_by": "string",
+  "scheduled_deactivation_created_at": "1970-01-01T00:00:00.000Z",
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
@@ -1182,6 +1214,10 @@ const { data } = await client.getGroupsForUser({
       "status": "Active",
       "deactivated_at": "1970-01-01T00:00:00.000Z",
       "deactivated_by": "string",
+      "deactivated_via": "schedule",
+      "scheduled_deactivation_date": "2027-01-01",
+      "scheduled_deactivation_by": "string",
+      "scheduled_deactivation_created_at": "1970-01-01T00:00:00.000Z",
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
@@ -1221,6 +1257,225 @@ const { data } = await client.getGroupsForUser({
     "abbreviation": "FN"
   }
 ]
+```
+
+</details>
+
+---
+
+### `scheduleUserDeactivation`
+
+Schedule the deactivation of an active user for a later day, or move an existing schedule to another day.
+
+`PUT /v2/users/{id}/scheduled-deactivation`
+
+```ts
+const { data } = await client.scheduleUserDeactivation(
+  {
+    id: '123e4567-e89b-12d3-a456-426614174000',
+  },
+  {
+    date: '2027-01-01'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "actor": {
+    "type": "agent",
+    "token_id": "string",
+    "token_name": "string",
+    "agent_id": "string",
+    "agent_name": "string",
+    "host_name": "string",
+    "client": "string"
+  },
+  "id": "string",
+  "organization_id": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "activated_at": "1970-01-01T00:00:00.000Z",
+  "display_name": "Example User",
+  "status": "Active",
+  "deactivated_at": "1970-01-01T00:00:00.000Z",
+  "deactivated_by": "string",
+  "deactivated_via": "schedule",
+  "scheduled_deactivation_date": "2027-01-01",
+  "scheduled_deactivation_by": "string",
+  "scheduled_deactivation_created_at": "1970-01-01T00:00:00.000Z",
+  "email": "user@example.com",
+  "draft_email": "user@example.com",
+  "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+  "password_reset_token_hash": "string",
+  "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+  "sso_required": false,
+  "department": "Sales",
+  "phone": 1234567890,
+  "secondary_phone": 1234567890,
+  "mfa_enabled": false,
+  "totp_enabled": false,
+  "has_passkeys": false,
+  "phone_verified": true,
+  "token": "string",
+  "signature": "<p>Thanks</p>",
+  "is_signature_enabled": true,
+  "preferred_language": "de",
+  "custom_start_page": "/app/dashboard",
+  "custom_navigation": "5gbe4nkp6jsfq",
+  "override_release_channel": "canary",
+  "feature_preferences": {
+    "feature_name": true
+  },
+  "image_uri": {
+    "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
+    "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
+  },
+  "favorites": {
+    "entity_views": {
+      "opportunity": "891a5409850abf8b92bd2cb7bdd2844d32ce6bec",
+      "order": "628aee91-7c2f-4047-ab0d-433582a19c49"
+    },
+    "dashboard": "751ff121-9ac2-4511-a2e6-851f11287380"
+  },
+  "email_notification_setting": {
+    "added_participant_opportunity": true,
+    "assigned_opportunity": true,
+    "assigned_task": true,
+    "comment_opportunity": true,
+    "deleted_task": true,
+    "escalated_task": true,
+    "message_receive_opportunity": true,
+    "message_send_opportunity": true,
+    "created_task": true,
+    "created_opportunity_manual": true,
+    "created_opportunity_auto": true,
+    "deleted_opportunity": true
+  },
+  "in_app_notification_setting": {
+    "integration_critical_error": true,
+    "integration_error_threshold": true,
+    "assigned_opportunity": true,
+    "assigned_task": true
+  },
+  "in_app_notification_popups": false,
+  "properties": [
+    {
+      "name": "profileImageName",
+      "value": "avatar.png"
+    }
+  ],
+  "tags": ["non-billable"]
+}
+```
+
+</details>
+
+---
+
+### `cancelScheduledUserDeactivation`
+
+Cancel the scheduled deactivation of a user. Succeeds without changes when nothing is scheduled.
+
+`DELETE /v2/users/{id}/scheduled-deactivation`
+
+```ts
+const { data } = await client.cancelScheduledUserDeactivation({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "actor": {
+    "type": "agent",
+    "token_id": "string",
+    "token_name": "string",
+    "agent_id": "string",
+    "agent_name": "string",
+    "host_name": "string",
+    "client": "string"
+  },
+  "id": "string",
+  "organization_id": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "activated_at": "1970-01-01T00:00:00.000Z",
+  "display_name": "Example User",
+  "status": "Active",
+  "deactivated_at": "1970-01-01T00:00:00.000Z",
+  "deactivated_by": "string",
+  "deactivated_via": "schedule",
+  "scheduled_deactivation_date": "2027-01-01",
+  "scheduled_deactivation_by": "string",
+  "scheduled_deactivation_created_at": "1970-01-01T00:00:00.000Z",
+  "email": "user@example.com",
+  "draft_email": "user@example.com",
+  "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+  "password_reset_token_hash": "string",
+  "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+  "sso_required": false,
+  "department": "Sales",
+  "phone": 1234567890,
+  "secondary_phone": 1234567890,
+  "mfa_enabled": false,
+  "totp_enabled": false,
+  "has_passkeys": false,
+  "phone_verified": true,
+  "token": "string",
+  "signature": "<p>Thanks</p>",
+  "is_signature_enabled": true,
+  "preferred_language": "de",
+  "custom_start_page": "/app/dashboard",
+  "custom_navigation": "5gbe4nkp6jsfq",
+  "override_release_channel": "canary",
+  "feature_preferences": {
+    "feature_name": true
+  },
+  "image_uri": {
+    "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
+    "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
+  },
+  "favorites": {
+    "entity_views": {
+      "opportunity": "891a5409850abf8b92bd2cb7bdd2844d32ce6bec",
+      "order": "628aee91-7c2f-4047-ab0d-433582a19c49"
+    },
+    "dashboard": "751ff121-9ac2-4511-a2e6-851f11287380"
+  },
+  "email_notification_setting": {
+    "added_participant_opportunity": true,
+    "assigned_opportunity": true,
+    "assigned_task": true,
+    "comment_opportunity": true,
+    "deleted_task": true,
+    "escalated_task": true,
+    "message_receive_opportunity": true,
+    "message_send_opportunity": true,
+    "created_task": true,
+    "created_opportunity_manual": true,
+    "created_opportunity_auto": true,
+    "deleted_opportunity": true
+  },
+  "in_app_notification_setting": {
+    "integration_critical_error": true,
+    "integration_error_threshold": true,
+    "assigned_opportunity": true,
+    "assigned_task": true
+  },
+  "in_app_notification_popups": false,
+  "properties": [
+    {
+      "name": "profileImageName",
+      "value": "avatar.png"
+    }
+  ],
+  "tags": ["non-billable"]
+}
 ```
 
 </details>
@@ -1318,6 +1573,10 @@ const { data } = await client.createGroup(
     "status": "Active",
     "deactivated_at": "1970-01-01T00:00:00.000Z",
     "deactivated_by": "string",
+    "deactivated_via": "schedule",
+    "scheduled_deactivation_date": "2027-01-01",
+    "scheduled_deactivation_by": "string",
+    "scheduled_deactivation_created_at": "1970-01-01T00:00:00.000Z",
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
@@ -1387,6 +1646,10 @@ const { data } = await client.createGroup(
       "status": "Active",
       "deactivated_at": "1970-01-01T00:00:00.000Z",
       "deactivated_by": "string",
+      "deactivated_via": "schedule",
+      "scheduled_deactivation_date": "2027-01-01",
+      "scheduled_deactivation_by": "string",
+      "scheduled_deactivation_created_at": "1970-01-01T00:00:00.000Z",
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
@@ -1470,6 +1733,10 @@ const { data } = await client.getGroup({
     "status": "Active",
     "deactivated_at": "1970-01-01T00:00:00.000Z",
     "deactivated_by": "string",
+    "deactivated_via": "schedule",
+    "scheduled_deactivation_date": "2027-01-01",
+    "scheduled_deactivation_by": "string",
+    "scheduled_deactivation_created_at": "1970-01-01T00:00:00.000Z",
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
@@ -1539,6 +1806,10 @@ const { data } = await client.getGroup({
       "status": "Active",
       "deactivated_at": "1970-01-01T00:00:00.000Z",
       "deactivated_by": "string",
+      "deactivated_via": "schedule",
+      "scheduled_deactivation_date": "2027-01-01",
+      "scheduled_deactivation_by": "string",
+      "scheduled_deactivation_created_at": "1970-01-01T00:00:00.000Z",
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
@@ -1631,6 +1902,10 @@ const { data } = await client.updateGroup(
     "status": "Active",
     "deactivated_at": "1970-01-01T00:00:00.000Z",
     "deactivated_by": "string",
+    "deactivated_via": "schedule",
+    "scheduled_deactivation_date": "2027-01-01",
+    "scheduled_deactivation_by": "string",
+    "scheduled_deactivation_created_at": "1970-01-01T00:00:00.000Z",
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
@@ -1700,6 +1975,10 @@ const { data } = await client.updateGroup(
       "status": "Active",
       "deactivated_at": "1970-01-01T00:00:00.000Z",
       "deactivated_by": "string",
+      "deactivated_via": "schedule",
+      "scheduled_deactivation_date": "2027-01-01",
+      "scheduled_deactivation_by": "string",
+      "scheduled_deactivation_created_at": "1970-01-01T00:00:00.000Z",
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
@@ -1796,6 +2075,10 @@ const { data } = await client.advanceUserAssignment({
     "status": "Active",
     "deactivated_at": "1970-01-01T00:00:00.000Z",
     "deactivated_by": "string",
+    "deactivated_via": "schedule",
+    "scheduled_deactivation_date": "2027-01-01",
+    "scheduled_deactivation_by": "string",
+    "scheduled_deactivation_created_at": "1970-01-01T00:00:00.000Z",
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
@@ -1865,6 +2148,10 @@ const { data } = await client.advanceUserAssignment({
       "status": "Active",
       "deactivated_at": "1970-01-01T00:00:00.000Z",
       "deactivated_by": "string",
+      "deactivated_via": "schedule",
+      "scheduled_deactivation_date": "2027-01-01",
+      "scheduled_deactivation_by": "string",
+      "scheduled_deactivation_created_at": "1970-01-01T00:00:00.000Z",
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
@@ -2259,6 +2546,7 @@ const { data } = await client.getUserLoginParametersV2({
       "organization_use": "Production",
       "parent_production_org_id": "123",
       "is_primary_org": true,
+      "deletion_scheduled": true,
       "cognito_region": "eu-central-1",
       "cognito_user_pool_id": "eu-central-sample",
       "cognito_user_pool_client_id": "asbkh213ehkquwhdi",
@@ -2361,6 +2649,7 @@ const { data } = await client.resolveDiscoverableCredential(
       "organization_use": "Production",
       "parent_production_org_id": "123",
       "is_primary_org": true,
+      "deletion_scheduled": true,
       "cognito_region": "eu-central-1",
       "cognito_user_pool_id": "eu-central-sample",
       "cognito_user_pool_client_id": "asbkh213ehkquwhdi",
@@ -2691,6 +2980,7 @@ const { data } = await client.getUserLoginParameters({
       "organization_use": "Production",
       "parent_production_org_id": "123",
       "is_primary_org": true,
+      "deletion_scheduled": true,
       "cognito_region": "eu-central-1",
       "cognito_user_pool_id": "eu-central-sample",
       "cognito_user_pool_client_id": "asbkh213ehkquwhdi",
@@ -2937,6 +3227,10 @@ type UserV2 = {
   status?: "Active" | "Pending" | "Deactivated" | "Deleted"
   deactivated_at?: string // date-time
   deactivated_by?: string
+  deactivated_via?: "schedule"
+  scheduled_deactivation_date?: string // date
+  scheduled_deactivation_by?: string
+  scheduled_deactivation_created_at?: string // date-time
   email?: string // email
   draft_email?: string // email
   draft_email_expires_at?: string // date-time
@@ -2974,6 +3268,24 @@ type UserV2 = {
 }
 ```
 
+### `ScheduledDeactivationRequest`
+
+```ts
+type ScheduledDeactivationRequest = {
+  date: string // date
+}
+```
+
+### `ScheduledDeactivationError`
+
+```ts
+type ScheduledDeactivationError = {
+  status?: number
+  error?: "cannot_schedule_self" | "invalid_date" | "user_not_active" | "user_is_owner"
+  message?: string
+}
+```
+
 ### `User`
 
 ```ts
@@ -3008,6 +3320,7 @@ type LoginParameters = {
   organization_use?: string
   parent_production_org_id?: string
   is_primary_org?: boolean
+  deletion_scheduled?: boolean
   cognito_region?: string
   cognito_user_pool_id?: string
   cognito_user_pool_client_id?: string
@@ -3092,6 +3405,10 @@ type Group = {
     status?: "Active" | "Pending" | "Deactivated" | "Deleted"
     deactivated_at?: string // date-time
     deactivated_by?: string
+    deactivated_via?: "schedule"
+    scheduled_deactivation_date?: string // date
+    scheduled_deactivation_by?: string
+    scheduled_deactivation_created_at?: string // date-time
     email?: string // email
     draft_email?: string // email
     draft_email_expires_at?: string // date-time
@@ -3146,6 +3463,10 @@ type Group = {
     status?: "Active" | "Pending" | "Deactivated" | "Deleted"
     deactivated_at?: string // date-time
     deactivated_by?: string
+    deactivated_via?: "schedule"
+    scheduled_deactivation_date?: string // date
+    scheduled_deactivation_by?: string
+    scheduled_deactivation_created_at?: string // date-time
     email?: string // email
     draft_email?: string // email
     draft_email_expires_at?: string // date-time
@@ -3159,14 +3480,6 @@ type Group = {
     totp_enabled?: boolean
     has_passkeys?: boolean
     phone_verified?: boolean
-    token?: string
-    signature?: string
-    is_signature_enabled?: boolean
-    preferred_language?: string
-    custom_start_page?: string
-    custom_navigation?: string
-    override_release_channel?: "canary" | "rc" | "stable" | null
-    feature_preferences?: Record<string, unknown>
   // ...
 }
 ```

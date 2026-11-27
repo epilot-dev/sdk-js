@@ -686,6 +686,140 @@
         }
       }
     },
+    "/v2/users/{id}/scheduled-deactivation": {
+      "put": {
+        "operationId": "scheduleUserDeactivation",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
+        "x-epilot-permissions": [
+          {
+            "action": "user:edit",
+            "resource": "{id}"
+          }
+        ],
+        "summary": "scheduleUserDeactivation",
+        "description": "Schedule the deactivation of an active user for a later day, or move an existing schedule to another day.\n\n`date` is the first day (German time, Europe/Berlin) on which the user no longer has access: a nightly job\ndeactivates the user just after midnight German time on that day (same as setting `status: Deactivated`,\nwith `deactivated_via: schedule`). Scheduling the 1st of a month means that month is not billed for the user.\n\nRequires `user:edit` on the user, same as changing `status` with updateUserV2.\n\nRules:\n- You can't schedule, change or cancel the deactivation of your own user (`cannot_schedule_self`)\n- `date` must be a calendar date (`YYYY-MM-DD`) after today (Europe/Berlin) and at most 730 days ahead\n  (`invalid_date`)\n- Only `Active` users can be scheduled (`user_not_active`)\n- Organization owners can't be scheduled (`user_is_owner`)\n",
+        "tags": [
+          "User V2"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/UserId"
+            },
+            "required": true,
+            "description": "The Id of user"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduledDeactivationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The user with the scheduled deactivation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserV2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid date, or the caller's own user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledDeactivationError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed to edit the user"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "409": {
+            "description": "The user can't be scheduled for deactivation (`user_not_active` or `user_is_owner`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledDeactivationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "cancelScheduledUserDeactivation",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
+        "x-epilot-permissions": [
+          {
+            "action": "user:edit",
+            "resource": "{id}"
+          }
+        ],
+        "summary": "cancelScheduledUserDeactivation",
+        "description": "Cancel the scheduled deactivation of a user. Succeeds without changes when nothing is scheduled.\n\nRequires `user:edit` on the user, same as changing `status` with updateUserV2. You can't cancel the scheduled\ndeactivation of your own user (`cannot_schedule_self`).\n",
+        "tags": [
+          "User V2"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/UserId"
+            },
+            "required": true,
+            "description": "The Id of user"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user without a scheduled deactivation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserV2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The caller's own user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledDeactivationError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed to edit the user"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
     "/v1/groups": {
       "get": {
         "operationId": "getGroups",
@@ -2425,7 +2559,7 @@
           },
           "status": {
             "type": "string",
-            "description": "`Deactivated` users can't log in and free their seat from the next billing month on (a user\ndeactivated during a month is billed for that month). Only `Active` users can be deactivated, and\nonly by someone else with `user:edit`; reactivation (`Deactivated` → `Active`) is possible at any time.\n",
+            "description": "`Deactivated` users can't log in and free their seat from the next billing month on (a user\ndeactivated during a month is billed for that month). Only `Active` users can be deactivated, and\nonly by someone else with `user:edit`; reactivation (`Deactivated` → `Active`) is possible at any time.\nA deactivation can also be scheduled for a later day, see scheduleUserDeactivation.\n",
             "enum": [
               "Active",
               "Pending",
@@ -2442,7 +2576,33 @@
           "deactivated_by": {
             "type": "string",
             "readOnly": true,
-            "description": "Id of the user who deactivated this user."
+            "description": "Id of the user who deactivated this user. For a scheduled deactivation (`deactivated_via: schedule`),\nthe user who scheduled it.\n"
+          },
+          "deactivated_via": {
+            "type": "string",
+            "readOnly": true,
+            "enum": [
+              "schedule"
+            ],
+            "description": "Set when the user was not deactivated directly by a person: `schedule` = by the nightly job that carries\nout scheduled deactivations (see `scheduled_deactivation_date`). Dropped on reactivation.\n"
+          },
+          "scheduled_deactivation_date": {
+            "type": "string",
+            "format": "date",
+            "readOnly": true,
+            "example": "2027-01-01",
+            "description": "Day (`YYYY-MM-DD`, German time / Europe/Berlin) from which the user no longer has access: a nightly job\ndeactivates the user just after midnight German time on that day. A deactivation scheduled for the 1st of\na month frees the seat for that month. Set with scheduleUserDeactivation, removed with\ncancelScheduledUserDeactivation and when the user is deactivated.\n"
+          },
+          "scheduled_deactivation_by": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Id of the user who scheduled the deactivation (absent when the caller had no user id)."
+          },
+          "scheduled_deactivation_created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "When the deactivation was (last) scheduled."
           },
           "email": {
             "description": "User's email address",
@@ -2667,6 +2827,40 @@
           }
         }
       },
+      "ScheduledDeactivationRequest": {
+        "type": "object",
+        "required": [
+          "date"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2027-01-01",
+            "description": "First day (`YYYY-MM-DD`, German time / Europe/Berlin) on which the user no longer has access. Must be after\ntoday (Europe/Berlin) and at most 730 days ahead.\n"
+          }
+        }
+      },
+      "ScheduledDeactivationError": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "error": {
+            "type": "string",
+            "enum": [
+              "cannot_schedule_self",
+              "invalid_date",
+              "user_not_active",
+              "user_is_owner"
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
       "User": {
         "type": "object",
         "properties": {
@@ -2787,6 +2981,10 @@
           "is_primary_org": {
             "type": "boolean",
             "description": "Whether this is the user's primary organization (the one they signed up with or were moved to).\nThe primary organization can't be left.\n"
+          },
+          "deletion_scheduled": {
+            "type": "boolean",
+            "description": "Whether the organization is queued for deletion (still in its grace period). The org switcher\nhides such organizations.\n"
           },
           "cognito_region": {
             "type": "string",

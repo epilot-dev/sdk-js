@@ -214,6 +214,36 @@
         "responses": {}
       }
     },
+    "/v2/users/{id}/scheduled-deactivation": {
+      "put": {
+        "operationId": "scheduleUserDeactivation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "cancelScheduledUserDeactivation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/groups": {
       "get": {
         "operationId": "getGroups",

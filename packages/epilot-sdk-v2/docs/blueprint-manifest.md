@@ -97,6 +97,8 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`queryBlueprintSuggestionGraph`](#queryblueprintsuggestiongraph)
 - [`checkBlueprintTestSuggestion`](#checkblueprinttestsuggestion)
 - [`submitBlueprintTestSuggestions`](#submitblueprinttestsuggestions)
+- [`submitBlueprintTestFlowPlan`](#submitblueprinttestflowplan)
+- [`submitBlueprintTestSuggestionPart`](#submitblueprinttestsuggestionpart)
 
 **Jobs**
 - [`listBlueprintJobs`](#listblueprintjobs)
@@ -169,6 +171,9 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`BlueprintSuggestionCheckResult`](#blueprintsuggestioncheckresult)
 - [`BlueprintSuggestionSubmission`](#blueprintsuggestionsubmission)
 - [`BlueprintSuggestionSubmissionResult`](#blueprintsuggestionsubmissionresult)
+- [`BlueprintTestFlowPlan`](#blueprinttestflowplan)
+- [`BlueprintTestFlowPlanResult`](#blueprinttestflowplanresult)
+- [`BlueprintSuggestionPartResult`](#blueprintsuggestionpartresult)
 - [`BlueprintGraphSuggestionsStarted`](#blueprintgraphsuggestionsstarted)
 - [`BlueprintTestInterpretationInput`](#blueprinttestinterpretationinput)
 - [`BlueprintTestInterpretationStarted`](#blueprinttestinterpretationstarted)
@@ -326,6 +331,7 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`MergeRevertSelection`](#mergerevertselection)
 - [`MergeRevertRequest`](#mergerevertrequest)
 - [`MergeRevertResult`](#mergerevertresult)
+- [`ApiErrorResponse`](#apierrorresponse)
 - [`MergePlanError`](#mergeplanerror)
 
 ### `uploadManifest`
@@ -2249,6 +2255,7 @@ const { data } = await client.addBlueprintResource(
         "missing_count": 0,
         "exclude_count": 0,
         "source_drift_s3_key": "string",
+        "source_org_id": "string",
         "formattedResource": {
           "id": "string",
           "name": "string",
@@ -2266,7 +2273,8 @@ const { data } = await client.addBlueprintResource(
         "originalError": "string",
         "current": 0,
         "max_allowed": 0,
-        "planned": 0
+        "planned": 0,
+        "root_addresses": ["string"]
       }
     }
   ],
@@ -2383,6 +2391,7 @@ const { data } = await client.bulkAddBlueprintResources(
         "missing_count": 0,
         "exclude_count": 0,
         "source_drift_s3_key": "string",
+        "source_org_id": "string",
         "formattedResource": {
           "id": "string",
           "name": "string",
@@ -2400,7 +2409,8 @@ const { data } = await client.bulkAddBlueprintResources(
         "originalError": "string",
         "current": 0,
         "max_allowed": 0,
-        "planned": 0
+        "planned": 0,
+        "root_addresses": ["string"]
       }
     }
   ],
@@ -2709,6 +2719,7 @@ const { data } = await client.listBlueprintJobs()
                 "missing_count": 0,
                 "exclude_count": 0,
                 "source_drift_s3_key": "string",
+                "source_org_id": "string",
                 "formattedResource": {
                   "id": "string",
                   "name": "string",
@@ -2726,7 +2737,8 @@ const { data } = await client.listBlueprintJobs()
                 "originalError": "string",
                 "current": 0,
                 "max_allowed": 0,
-                "planned": 0
+                "planned": 0,
+                "root_addresses": ["string"]
               }
             }
           ],
@@ -2793,6 +2805,7 @@ const { data } = await client.getBlueprintJob({
             "missing_count": 0,
             "exclude_count": 0,
             "source_drift_s3_key": "string",
+            "source_org_id": "string",
             "formattedResource": {
               "id": "string",
               "name": "string",
@@ -2810,7 +2823,8 @@ const { data } = await client.getBlueprintJob({
             "originalError": "string",
             "current": 0,
             "max_allowed": 0,
-            "planned": 0
+            "planned": 0,
+            "root_addresses": ["string"]
           }
         }
       ],
@@ -2986,6 +3000,7 @@ const { data } = await client.cancelBlueprintJob({
             "missing_count": 0,
             "exclude_count": 0,
             "source_drift_s3_key": "string",
+            "source_org_id": "string",
             "formattedResource": {
               "id": "string",
               "name": "string",
@@ -3003,7 +3018,8 @@ const { data } = await client.cancelBlueprintJob({
             "originalError": "string",
             "current": 0,
             "max_allowed": 0,
-            "planned": 0
+            "planned": 0,
+            "root_addresses": ["string"]
           }
         }
       ],
@@ -3146,7 +3162,8 @@ const { data } = await client.createMarketplaceListing(
     "status": "ok",
     "at": "1970-01-01T00:00:00.000Z",
     "error": "string"
-  }
+  },
+  "marketplace_mode": "draft"
 }
 ```
 
@@ -3258,6 +3275,7 @@ const { data } = await client.getMarketplaceListing({
     "at": "1970-01-01T00:00:00.000Z",
     "error": "string"
   },
+  "marketplace_mode": "draft",
   "versions": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -3393,7 +3411,8 @@ const { data } = await client.listMarketplaceListings()
         "status": "ok",
         "at": "1970-01-01T00:00:00.000Z",
         "error": "string"
-      }
+      },
+      "marketplace_mode": "draft"
     }
   ]
 }
@@ -3507,6 +3526,7 @@ const { data } = await client.getMarketplaceListingById({
     "at": "1970-01-01T00:00:00.000Z",
     "error": "string"
   },
+  "marketplace_mode": "draft",
   "versions": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -3680,7 +3700,8 @@ const { data } = await client.updateMarketplaceListing(
     "status": "ok",
     "at": "1970-01-01T00:00:00.000Z",
     "error": "string"
-  }
+  },
+  "marketplace_mode": "draft"
 }
 ```
 
@@ -3983,7 +4004,8 @@ const { data } = await client.updateMarketplaceListingVersion(
 
 ### `publishMarketplaceListingVersion`
 
-Publish a draft version; archives the previous live version and pushes the listing to the Marketplace
+Publish a draft version: pushes it to the Marketplace (Webflow) first, then makes it live, archives the previous
+live version and marks its tag published. When the push fails nothing changes. In `draf
 
 `POST /v1/marketplace-listings/{listing_id}/versions/{version_id}/publish`
 
@@ -4090,7 +4112,8 @@ const { data } = await client.publishMarketplaceListingVersion(
     "status": "ok",
     "at": "1970-01-01T00:00:00.000Z",
     "error": "string"
-  }
+  },
+  "marketplace_mode": "draft"
 }
 ```
 
@@ -4100,7 +4123,8 @@ const { data } = await client.publishMarketplaceListingVersion(
 
 ### `rollbackMarketplaceListingVersion`
 
-Make an archived version the live version again
+Make an archived version the live version again: pushes it to the Marketplace (Webflow) first, then makes it
+live. When the push fails nothing changes.
 
 `POST /v1/marketplace-listings/{listing_id}/versions/{version_id}/rollback`
 
@@ -4202,7 +4226,8 @@ const { data } = await client.rollbackMarketplaceListingVersion({
     "status": "ok",
     "at": "1970-01-01T00:00:00.000Z",
     "error": "string"
-  }
+  },
+  "marketplace_mode": "draft"
 }
 ```
 
@@ -4212,7 +4237,7 @@ const { data } = await client.rollbackMarketplaceListingVersion({
 
 ### `syncMarketplaceListing`
 
-Re-push the live listing to Webflow
+Re-push the live listing to Webflow, then store the push result
 
 `POST /v1/marketplace-listings/{listing_id}/sync`
 
@@ -4313,7 +4338,8 @@ const { data } = await client.syncMarketplaceListing({
     "status": "ok",
     "at": "1970-01-01T00:00:00.000Z",
     "error": "string"
-  }
+  },
+  "marketplace_mode": "draft"
 }
 ```
 
@@ -4425,7 +4451,8 @@ const { data } = await client.publishMarketplaceListingContent({
     "status": "ok",
     "at": "1970-01-01T00:00:00.000Z",
     "error": "string"
-  }
+  },
+  "marketplace_mode": "draft"
 }
 ```
 
@@ -4448,7 +4475,8 @@ const { data } = await client.createBlueprintTag(
   },
   {
     name: '1.2.0',
-    note: 'string'
+    note: 'string',
+    from_tag_id: 'string'
   },
 )
 ```
@@ -4490,6 +4518,7 @@ const { data } = await client.listBlueprintTags({
       },
       "published_at": "1970-01-01T00:00:00.000Z",
       "expires_at": "1970-01-01T00:00:00.000Z",
+      "source_tag_id": "string",
       "package": {
         "format": "zip",
         "job_id": "string",
@@ -4545,6 +4574,7 @@ const { data } = await client.getBlueprintTag({
   },
   "published_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
+  "source_tag_id": "string",
   "package": {
     "format": "zip",
     "job_id": "string",
@@ -5713,6 +5743,7 @@ const { data } = await client.getDeploymentHealthReportV3({
   },
   "findings": [
     {
+      "is_new": true,
       "check_id": "live_readability",
       "code": "missing_in_destination",
       "severity": "error",
@@ -5722,44 +5753,31 @@ const { data } = await client.getDeploymentHealthReportV3({
       "resource_name": "string",
       "message": "string",
       "verdict": "string",
-      "evidence": {
-        "path": "string",
-        "referenced_id": "string",
-        "referenced_type": "string",
-        "referenced_name": "string",
-        "referenced_lineage_id": "string",
-        "expected_target_id": "string",
-        "reference_kind": "string",
-        "operation": "string",
-        "rejection_reason": "string",
-        "error_message": "string",
-        "response_status": 0
-      }
+      "evidence": {}
     }
   ],
   "coverage": {
     "checks": [
-      {
-        "check_id": "live_readability",
-        "status": "completed",
-        "scope": "tracked_resources",
-        "resources_considered": 0,
-        "details": ["string"]
-      }
+      {}
     ],
     "resource_types": [
-      {
-        "resource_type": "string",
-        "tracked": 0,
-        "readable_by_lineage": 0,
-        "missing_by_lineage": 0,
-        "read_errors": 0,
-        "unchecked": 0,
-        "specialized_checks": ["live_readability"],
-        "known_blind_spots": ["string"]
-      }
+      {}
     ]
   },
+  "diff": {
+    "baseline": {
+      "source": "pre_sync",
+      "job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+      "generated_at": "1970-01-01T00:00:00.000Z"
+    },
+    "new": 0,
+    "unchanged": 0,
+    "resolved": [
+      {}
+    ]
+  },
+  "recheck_at": "1970-01-01T00:00:00.000Z",
+  "rechecked": true,
   "error": "string"
 }
 ```
@@ -5828,7 +5846,7 @@ const { data } = await client.createBulkInstallV3(
     targets: [
       {
         destination_org_id: 'string',
-        destination_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+        destination_blueprint_id: 'string',
         destination_auth_token: 'string'
       }
     ]
@@ -6807,7 +6825,17 @@ const { data } = await client.getBlueprintGraphSuggestions({
     }
   ],
   "problems_total": 0,
-  "next_cursor": "string"
+  "next_cursor": "string",
+  "flows": [
+    {
+      "id": "string",
+      "name": "string",
+      "status": "pending",
+      "reason": "deadline",
+      "offered": 0
+    }
+  ],
+  "deadline": 0
 }
 ```
 
@@ -7317,6 +7345,86 @@ const { data } = await client.submitBlueprintTestSuggestions(
 
 ---
 
+### `submitBlueprintTestFlowPlan`
+
+The flow plan of a flow-mode Luna generation: groups the blueprint's subjects into business flows. Only the generation's plan session may submit it, once, while the generation is planning (otherwise 4
+
+`POST /v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/flow-plan`
+
+```ts
+const { data } = await client.submitBlueprintTestFlowPlan(
+  {
+    blueprint_id: 'example',
+    generation_id: 'example',
+  },
+  {
+    flows: [
+      {
+        name: 'string',
+        why: 'string',
+        subject_node_ids: ['string']
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "status": "accepted",
+  "used": "plan",
+  "flows": 0
+}
+```
+
+</details>
+
+---
+
+### `submitBlueprintTestSuggestionPart`
+
+Submission of one flow (part) of a flow-mode Luna generation, by that part's own session. Name the part's subjects (from list_subjects) with their suggestions; a subject outside the part is refused (4
+
+`POST /v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/parts/{part_key}/submissions`
+
+```ts
+const { data } = await client.submitBlueprintTestSuggestionPart(
+  {
+    blueprint_id: 'example',
+    part_key: 'example',
+  },
+  {
+    subjects: [
+      {
+        subject_node_id: 'string',
+        suggestions: [
+          {
+            title: 'string'
+          }
+        ]
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "status": "submitted",
+  "flow_id": "string"
+}
+```
+
+</details>
+
+---
+
 ## Schemas
 
 ### `BlueprintTestSuiteError`
@@ -7324,7 +7432,7 @@ const { data } = await client.submitBlueprintTestSuggestions(
 ```ts
 type BlueprintTestSuiteError = {
   status: number
-  code: "invalid_request" | "unauthorized" | "forbidden" | "not_found" | "conflict" | "credential_invalid" | "permissions_unavailable" | "permission_denied" | "feature_unavailable" | "session_expiring" | "storage_conflict" | "suite_unavailable" | "v2_case" | "active_generation" | "active_suite_run" | "org_run_limit" | "suggestions_stale" | "unknown_suggestion" | "suggestion_acceptance_changed" | "suggestion_input_too_large" | "generation_not_running" | "generation_submitting" | "invalid_clauses" | "not_implemented" | "interpretation_input_too_large" | "interpretation_incomplete" | "interpretation_not_ready" | "interpretation_used" | "confirmation_required"
+  code: "invalid_request" | "unauthorized" | "forbidden" | "not_found" | "conflict" | "credential_invalid" | "permissions_unavailable" | "permission_denied" | "feature_unavailable" | "session_expiring" | "storage_conflict" | "suite_unavailable" | "v2_case" | "active_generation" | "active_suite_run" | "org_run_limit" | "suggestions_stale" | "unknown_suggestion" | "suggestion_acceptance_changed" | "suggestion_input_too_large" | "generation_not_running" | "generation_submitting" | "session_mismatch" | "session_not_ready" | "plan_not_running" | "part_not_running" | "part_submitted" | "invalid_clauses" | "not_implemented" | "interpretation_input_too_large" | "interpretation_incomplete" | "interpretation_not_ready" | "interpretation_used" | "confirmation_required"
   retriable: boolean
   active_run_id?: string // uuid
   generation_id?: string // uuid
@@ -7735,7 +7843,7 @@ type BlueprintGraphSuggestionProblem = {
 
 ```ts
 type BlueprintSuggestionGraphQuery = {
-  tool: "list_subjects" | "graph_summary" | "list_nodes" | "get_node" | "follow_edges" | "list_paths" | "list_operators"
+  tool: "list_subjects" | "graph_summary" | "list_nodes" | "get_node" | "follow_edges" | "list_paths" | "list_operators" | "flow_brief" | "blueprint_outline"
   input?: Record<string, unknown>
 }
 ```
@@ -7793,6 +7901,39 @@ type BlueprintSuggestionSubmissionResult = {
   status: "completed"
   total: number
   problems_total: number
+}
+```
+
+### `BlueprintTestFlowPlan`
+
+The business flows the plan session proposes. Checked by the service (1 to 11 flows; `name` 3 to 80 characters, `why` at most 200; only subject node ids from the outline). A plan that fails the check is replaced by the candidate flows.
+
+```ts
+type BlueprintTestFlowPlan = {
+  flows: Array<{
+    name?: string
+    why?: string
+    subject_node_ids?: string[]
+  }>
+}
+```
+
+### `BlueprintTestFlowPlanResult`
+
+```ts
+type BlueprintTestFlowPlanResult = {
+  status: "accepted"
+  used: "plan" | "fallback"
+  flows: number
+}
+```
+
+### `BlueprintSuggestionPartResult`
+
+```ts
+type BlueprintSuggestionPartResult = {
+  status: "submitted"
+  flow_id: string
 }
 ```
 
@@ -8131,7 +8272,7 @@ type BlueprintGraphSuggestionPage = {
     node_id: string
     resource_id: string
     resource_type: string
-    reason: "step_cap" | "input_cap" | "deadline" | "model_error"
+    reason: "step_cap" | "input_cap" | "deadline" | "model_error" | "too_large"
   }>
   items: Array<{
     id: string
@@ -10597,6 +10738,7 @@ type RestoreOutcomeItem = {
 
 ```ts
 type HealthFinding = {
+  is_new?: boolean
   check_id: "live_readability" | "referential_integrity" | "install_completeness" | "schema_consistency" | "mapping_integrity" | "execution_readiness" | "catalog_hygiene" | "spec_conformance"
   code: "missing_in_destination" | "fetch_error" | "no_readback" | "unreplaced_source_reference" | "broken_internal_reference" | "dropped_at_install" | "orphaned_group_reference" | "uuid_group_label" | "unreachable_attribute_purpose" | "duplicate_attribute_name" | "duplicate_headline" | "broken_mapping_reference" | "stale_mapping_version" | "mapping_slot_mismatch" | "mapping_parity_mismatch" | "stale_lineage" | "broken_trigger_reference" | "broken_action_reference" | "broken_workflow_step" | "invalid_mapping_target" | "invalid_mapping_source" | "invalid_mapping_version" | "unknown_mapping_attribute" | "workflow_edge_limit" | "dead_purpose_reference" | "broken_portal_reference" | "orphaned_portal_block" | "broken_closing_reason" | "broken_journey_settings" | "unresolved_assignee" | "current_write_invalid" | "duplicate_live_resource" | "missing_file_content" | "file_etag_mismatch" | "incomplete_webhook" | "broken_template_reference" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "cross_org_reference"
   severity: "error" | "warning" | "info"
@@ -10691,6 +10833,7 @@ type DeploymentHealthReport = {
     infos?: number
   }
   findings?: Array<{
+    is_new?: boolean
     check_id: "live_readability" | "referential_integrity" | "install_completeness" | "schema_consistency" | "mapping_integrity" | "execution_readiness" | "catalog_hygiene" | "spec_conformance"
     code: "missing_in_destination" | "fetch_error" | "no_readback" | "unreplaced_source_reference" | "broken_internal_reference" | "dropped_at_install" | "orphaned_group_reference" | "uuid_group_label" | "unreachable_attribute_purpose" | "duplicate_attribute_name" | "duplicate_headline" | "broken_mapping_reference" | "stale_mapping_version" | "mapping_slot_mismatch" | "mapping_parity_mismatch" | "stale_lineage" | "broken_trigger_reference" | "broken_action_reference" | "broken_workflow_step" | "invalid_mapping_target" | "invalid_mapping_source" | "invalid_mapping_version" | "unknown_mapping_attribute" | "workflow_edge_limit" | "dead_purpose_reference" | "broken_portal_reference" | "orphaned_portal_block" | "broken_closing_reason" | "broken_journey_settings" | "unresolved_assignee" | "current_write_invalid" | "duplicate_live_resource" | "missing_file_content" | "file_etag_mismatch" | "incomplete_webhook" | "broken_template_reference" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "cross_org_reference"
     severity: "error" | "warning" | "info"
@@ -10733,6 +10876,30 @@ type DeploymentHealthReport = {
       known_blind_spots: { ... }
     }>
   }
+  diff?: {
+    baseline: {
+      source: { ... }
+      job_id: { ... }
+      generated_at: { ... }
+    }
+    new: number
+    unchanged: number
+    resolved: Array<{
+      is_new?: { ... }
+      check_id: { ... }
+      code: { ... }
+      severity: { ... }
+      resource_type: { ... }
+      lineage_id: { ... }
+      target_id?: { ... }
+      resource_name?: { ... }
+      message: { ... }
+      verdict?: { ... }
+      evidence?: { ... }
+    }>
+  }
+  recheck_at?: string // date-time
+  rechecked?: boolean
   error?: string
 }
 ```
@@ -11083,11 +11250,12 @@ type BlueprintJobEvent = {
   message?: string
   errors?: Array<{
     error?: string | object
-    code?: "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference" | "source_resources_missing" | "custom_schema_id_conflict" | "custom_schema_check_unavailable"
+    code?: "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference" | "source_resources_missing" | "source_org_access_denied" | "custom_schema_id_conflict" | "custom_schema_check_unavailable" | "ignored_resources_exclude_all" | "no_resources_to_import" | "apply_evidence_requires_instance" | "apply_evidence_disabled"
     data?: {
       missing_count?: { ... }
       exclude_count?: { ... }
       source_drift_s3_key?: { ... }
+      source_org_id?: { ... }
       formattedResource?: { ... }
       resource?: { ... }
       resourceDependency?: { ... }
@@ -11098,6 +11266,7 @@ type BlueprintJobEvent = {
       current?: { ... }
       max_allowed?: { ... }
       planned?: { ... }
+      root_addresses?: { ... }
     }
   }>
   level?: "info" | "warning" | "error"
@@ -11513,11 +11682,12 @@ type Job = {
   is_verified?: boolean
   errors?: Array<{
     error?: string | object
-    code?: "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference" | "source_resources_missing" | "custom_schema_id_conflict" | "custom_schema_check_unavailable"
+    code?: "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference" | "source_resources_missing" | "source_org_access_denied" | "custom_schema_id_conflict" | "custom_schema_check_unavailable" | "ignored_resources_exclude_all" | "no_resources_to_import" | "apply_evidence_requires_instance" | "apply_evidence_disabled"
     data?: {
       missing_count?: { ... }
       exclude_count?: { ... }
       source_drift_s3_key?: { ... }
+      source_org_id?: { ... }
       formattedResource?: { ... }
       resource?: { ... }
       resourceDependency?: { ... }
@@ -11525,7 +11695,6 @@ type Job = {
       resources?: { ... }
       addresses?: { ... }
       originalError?: { ... }
-      current?: { ... }
   // ...
 }
 ```
@@ -11678,7 +11847,7 @@ type BlueprintInstallStatus = "SUCCESS" | "PARTIAL" | "FAILED"
 ### `FormattedErrorCodes`
 
 ```ts
-type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference" | "source_resources_missing" | "custom_schema_id_conflict" | "custom_schema_check_unavailable"
+type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference" | "source_resources_missing" | "source_org_access_denied" | "custom_schema_id_conflict" | "custom_schema_check_unavailable" | "ignored_resources_exclude_all" | "no_resources_to_import" | "apply_evidence_requires_instance" | "apply_evidence_disabled"
 ```
 
 ### `V3SourceResource`
@@ -11745,11 +11914,12 @@ type FormattedErrorData = {
 ```ts
 type FormattedError = {
   error?: string | object
-  code?: "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference" | "source_resources_missing" | "custom_schema_id_conflict" | "custom_schema_check_unavailable"
+  code?: "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference" | "source_resources_missing" | "source_org_access_denied" | "custom_schema_id_conflict" | "custom_schema_check_unavailable" | "ignored_resources_exclude_all" | "no_resources_to_import" | "apply_evidence_requires_instance" | "apply_evidence_disabled"
   data?: {
     missing_count?: number
     exclude_count?: number
     source_drift_s3_key?: string
+    source_org_id?: string
     formattedResource?: {
       id?: { ... }
       name?: { ... }
@@ -11768,6 +11938,7 @@ type FormattedError = {
     current?: number
     max_allowed?: number
     planned?: number
+    root_addresses?: string[]
   }
 }
 ```
@@ -11910,10 +12081,11 @@ type MarketplaceListing = {
   }
   webflow_item_id?: string
   webflow_sync?: {
-    status?: "ok" | "failed"
+    status?: "ok" | "failed" | "skipped"
     at?: string // date-time
     error?: string
   }
+  marketplace_mode: "draft" | "live"
 }
 ```
 
@@ -12106,6 +12278,7 @@ type BlueprintTag = {
   }
   published_at?: string // date-time
   expires_at?: string // date-time
+  source_tag_id?: string
   package?: {
     format?: "zip" | "manifest"
     job_id?: string
@@ -12637,6 +12810,17 @@ type MergeRevertRequest = {
 ```ts
 type MergeRevertResult = {
   job_id: string
+}
+```
+
+### `ApiErrorResponse`
+
+Body of an error raised by a handler. `error` is human-readable prose.
+
+```ts
+type ApiErrorResponse = {
+  status: number
+  error: string
 }
 ```
 

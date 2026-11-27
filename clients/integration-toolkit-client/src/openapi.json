@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.64.0",
+    "version": "1.65.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -2744,7 +2744,7 @@
           }
         ],
         "summary": "bootstrapIntegrationLifecycle",
-        "description": "Bootstraps the integration's middleware, or re-bootstraps it: issues a\nnew apiKey with the org role the integration names (the previous key is\nrevoked), a new signing secret and a new lifecycle version, and sends the\nlifecycle webhook `CREATE` to the integration's lifecycle webhook URL.\n\nThe URL comes from the integration's `config_push.webhook_url`, the role\nfrom its `api_key_role`. `409 config_push_not_enabled` when the\nintegration's `config_push` is not enabled. Integrations without\n`config_push` may still declare both as environment variables in their\n`environment_config` (keys ending in `lifecycle_webhook_url` and\n`lifecycle_api_key_role`); that fallback goes once they are migrated.\n\n`CREATE` carries the apiKey and the signing secret and is not signed; the\nmiddleware authenticates it by reading the configuration with the apiKey.\nLifecycle webhooks are never stored with their body.\n\nAnswers `200` with the middleware's response whenever the webhook was\nsent, whatever the middleware answered: that is the bootstrap status.\nBehind the feature flag `integration-middleware-config` during rollout.\n",
+        "description": "Bootstraps the integration's middleware, or re-bootstraps it: issues a\nnew apiKey with the org role the integration names (the previous key is\nrevoked), a new signing secret and a new lifecycle version, and sends the\nlifecycle webhook `CREATE` to the integration's lifecycle webhook URL.\n\nThe URL comes from the integration's `config_push.webhook_url`, the role\nfrom its `api_key_role`. `409 config_push_not_enabled` when the\nintegration's `config_push` is not enabled.\n\n`CREATE` carries the apiKey and the signing secret and is not signed; the\nmiddleware authenticates it by reading the configuration with the apiKey.\nLifecycle webhooks are never stored with their body.\n\nAnswers `200` with the middleware's response whenever the webhook was\nsent, whatever the middleware answered: that is the bootstrap status.\nBehind the feature flag `integration-middleware-config` during rollout.\n",
         "tags": [
           "integrations"
         ],
@@ -9775,6 +9775,15 @@
             "description": "Whether events of this use case may be processed on the interactive lane -\na dedicated low-latency lane whose events are recorded, so a caller can wait\nfor their result with `GET /v3/erp/updates/events?correlation_id=...`.\n\n- `on_request`: the ingest request's own `interactive: true` selects the\n  lane. The normal setting for a mapping that serves both the nightly batch\n  and a registration push.\n- `always`: every event of this use case is interactive, and the caller does\n  not have to ask. For use cases that exist only to serve a person waiting.\n- `disabled`: requests asking for interactive processing are processed\n  normally and told so in the result.\n\nTHE FIELD IS OPTIONAL AND ABSENT MEANS `disabled`. It is resolved when the\nconfiguration is read and is never written into a stored configuration: a\n`disabled` materialised on save would give a configuration a key its source\ndoes not have, which configuration-synchronisation tooling reports as drift\non every comparison. Send it only when you mean `on_request` or `always`,\nand remove it rather than setting it to `disabled`.\n\nThe per-organization interactive rate limit still applies to `always`.\n",
             "example": "on_request"
           },
+          "payload_format": {
+            "type": "string",
+            "enum": [
+              "1.0",
+              "2.0"
+            ],
+            "description": "What the root (`$`) of this use case's mappings is: the unique identifiers,\nthe entity-level and field expressions and the meter readings all read it.\n\n- `1.0`: the event's payload as it came. For an event pushed to the inbound\n  API that is its parsed JSON. For a managed call's response routed here by\n  `inbound_use_case_slug` it is the external API's JSON object or array as it\n  came back, and anything else (XML, text, an empty body, a JSON number)\n  wrapped as `{ \"raw\": <value> }`, so the shape depends on what the API\n  answered on each call.\n- `2.0`: always one object with the same four keys, whatever produced the\n  event:\n\n  ```json\n  {\n    \"kind\": \"object\",\n    \"body\": { \"customerNumber\": \"C-1\" },\n    \"raw\": null,\n    \"original_request\": null\n  }\n  ```\n\n  - `kind`: what the payload is. `object` (a JSON object, in `body`),\n    `array` (a JSON array, in `body`), `scalar` (a JSON number, boolean or\n    null, in `body`), `raw` (text that is not JSON, or a JSON string, in\n    `raw`) or `empty` (no payload, or only whitespace).\n  - `body`: the JSON value for `object`, `array` and `scalar`, otherwise\n    `null`.\n  - `raw`: the text for `raw`, otherwise `null`. An event sent with format\n    `xml` is `raw`.\n  - `original_request`: for the response of a managed call, the payload the\n    managed call was executed with (before its `request_mapping`), the same\n    value its `response_mapping` sees as `original_request`. `null` for\n    every other event.\n\n  Typical use: match the entity the managed call was made for by its id,\n  `\"unique_ids\": [\"_id\"]` with `_id` mapped from\n  `original_request.<the id field>`, instead of by a value the external\n  API may not echo back.\n\nText sent with format `json` that does not parse is accepted as `raw`\nunder `2.0` (`1.0` refuses it), so a mapping should check `kind`.\n\nThe event is not changed: monitoring and replay show the payload as it\narrived. Ignored in direct mode, which has no mapping. A use case with\n`2.0` cannot drive a file import (import templates refuse it): an import\nmaps its file rows as they are.\n\nA managed call puts its request on the queued event only when the use\ncase it routes to is `2.0`. An event it queued while the use case was\nstill `1.0` and that is processed after the switch has no request: it is\nread like a pushed event (its `{ \"raw\": ... }` payload is then `kind`\n`object`).\n\nTHE FIELD IS OPTIONAL AND ABSENT MEANS `1.0`. It is resolved when the\nconfiguration is read and is never written into a stored configuration;\nan explicit `\"1.0\"` is stored as sent. Changes take up to 5 minutes to\npropagate (configuration cache).\n",
+            "example": "2.0"
+          },
           "entities": {
             "type": "array",
             "description": "Array of entity configurations for this event",
@@ -11792,7 +11801,7 @@
           },
           "inbound_use_case_slug": {
             "type": "string",
-            "description": "Slug of the inbound use case to route responses to for async entity processing.\nWhen set, the managed call response is queued to the inbound pipeline and processed\nusing the referenced inbound use case's mapping configuration.\n"
+            "description": "Slug of the inbound use case to route responses to for async entity processing.\nWhen set, the managed call response is queued to the inbound pipeline and processed\nusing the referenced inbound use case's mapping configuration.\n\nWhat that mapping reads is set by the inbound use case's `payload_format`. With\n`2.0` it gets the response as `body` or `raw` with its `kind`, and the request\nthis call was executed with as `original_request`, so it can update the entity\nthe call was made for even when the response does not name it.\n"
           }
         }
       },
@@ -12532,6 +12541,11 @@
               }
             ],
             "description": "The event data payload - can be either a serialized string or a direct JSON object"
+          },
+          "original_request": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "The managed call request the simulated payload answers. With\n`event_configuration.payload_format` `2.0` it is the envelope's\n`original_request`, so the response of a managed call can be simulated.\nIgnored by payload format `1.0`.\n"
           }
         }
       },

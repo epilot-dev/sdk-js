@@ -1927,6 +1927,54 @@
         },
         "responses": {}
       }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/flow-plan": {
+      "post": {
+        "operationId": "submitBlueprintTestFlowPlan",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "generation_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/parts/{part_key}/submissions": {
+      "post": {
+        "operationId": "submitBlueprintTestSuggestionPart",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "part_key",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {
