@@ -2581,7 +2581,7 @@
           }
         ],
         "summary": "retryInstallationJob",
-        "description": "Retry a finished V3 installation job whose status is `FAILED` or\n`PARTIAL_SUCCESS`. Starts a fresh install job (new `job_id`) with the same\nsource/destination and `auto_apply: true` — no `:continue` call is needed.\nFor an AI-agent caller the new job instead pauses at the plan\n(`WAITING_USER_ACTION`) for the user to approve via `:continue`.\nThe plan phase re-resolves every resource: already-synced resources no-op,\nso effectively only the failed resources are re-applied.\n\nMust be called by a user of the destination org (where the job lives); the\ncaller's bearer token is used as the destination token. The plan reuses the\nmanifest persisted by the original install, but a cross-org job still reads\nthe source org (file contents, a merge job's live source), so send a token for\nthe source org (e.g. the pipeline token) as `source_auth_token`. Without it the\ncaller's bearer stands in for the source and those reads fail with 403.\nThe original job's `options` (ignored resources, sync_notes) are\nreused when present; older jobs without persisted options fall back to the\ndestination blueprint's `ignored_resource_addresses`.\n",
+        "description": "Retry a finished V3 installation job whose status is `FAILED` or\n`PARTIAL_SUCCESS`. Starts a fresh install job (new `job_id`) with the same\nsource/destination and `auto_apply: true` — no `:continue` call is needed.\nFor an AI-agent caller the new job instead pauses at the plan\n(`WAITING_USER_ACTION`) for the user to approve via `:continue`.\nThe plan phase re-resolves every resource: already-synced resources no-op,\nso effectively only the failed resources are re-applied.\n\nMust be called by a user of the destination org (where the job lives); the\ncaller's bearer token is used as the destination token. The plan reuses the\nmanifest persisted by the original install, but a cross-org job still reads\nthe source org (file contents, a merge job's live source), so a source-org token\n(e.g. the pipeline token) is required as `source_auth_token` for a cross-org\nretry: without it the request is rejected with 400, because the destination\nbearer cannot read the source org. Marketplace-sourced jobs are exempt.\nThe original job's `options` (ignored resources, sync_notes) are\nreused when present; older jobs without persisted options fall back to the\ndestination blueprint's `ignored_resource_addresses`.\n",
         "tags": [
           "Jobs"
         ],
@@ -2640,6 +2640,16 @@
           },
           "400": {
             "description": "Job is not a retryable V3 installation job"
+          },
+          "403": {
+            "description": "An AI-agent caller whose token org is not the job's source org; agent tokens cannot read another org",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
           },
           "404": {
             "description": "Job not found"
@@ -3209,7 +3219,7 @@
           }
         ],
         "summary": "publishMarketplaceListingVersion",
-        "description": "Publish a draft version; archives the previous live version and pushes the listing to the Marketplace",
+        "description": "Publish a draft version: pushes it to the Marketplace (Webflow) first, then makes it live, archives the previous\nlive version and marks its tag published. When the push fails nothing changes. In `draft` marketplace_mode\n(draft mode: new items are created as drafts; existing items get staged changes; nothing is published).\n",
         "tags": [
           "Marketplace Listing Versions"
         ],
@@ -3249,7 +3259,7 @@
         },
         "responses": {
           "200": {
-            "description": "Listing after publish; webflow_sync tells whether the Marketplace push worked",
+            "description": "The version is live and pushed to the Marketplace",
             "content": {
               "application/json": {
                 "schema": {
@@ -3268,10 +3278,13 @@
             "description": "Version or listing not found"
           },
           "409": {
-            "description": "Another version was published meanwhile, concurrent change, or package still building or failed"
+            "description": "Another version was published meanwhile, concurrent change, or package still building or failed\n"
           },
           "413": {
             "description": "Version is too large to publish"
+          },
+          "502": {
+            "description": "The Marketplace (Webflow) push failed; nothing was changed"
           }
         }
       }
@@ -3285,7 +3298,7 @@
           }
         ],
         "summary": "rollbackMarketplaceListingVersion",
-        "description": "Make an archived version the live version again",
+        "description": "Make an archived version the live version again: pushes it to the Marketplace (Webflow) first, then makes it\nlive. When the push fails nothing changes.\n",
         "tags": [
           "Marketplace Listing Versions"
         ],
@@ -3309,7 +3322,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Listing after rollback; webflow_sync tells whether the Marketplace push worked",
+            "description": "The version is live and pushed to the Marketplace",
             "content": {
               "application/json": {
                 "schema": {
@@ -3328,10 +3341,13 @@
             "description": "Version or listing not found"
           },
           "409": {
-            "description": "Another version was published meanwhile or concurrent change"
+            "description": "Another version was published meanwhile or concurrent change\n"
           },
           "413": {
             "description": "Version is too large to publish"
+          },
+          "502": {
+            "description": "The Marketplace (Webflow) push failed; nothing was changed"
           }
         }
       }
@@ -3345,7 +3361,7 @@
           }
         ],
         "summary": "syncMarketplaceListing",
-        "description": "Re-push the live listing to Webflow",
+        "description": "Re-push the live listing to Webflow, then store the push result",
         "tags": [
           "Marketplace Listings"
         ],
@@ -3378,6 +3394,9 @@
           },
           "404": {
             "description": "Listing not found"
+          },
+          "502": {
+            "description": "The Marketplace (Webflow) push failed; nothing was changed"
           }
         }
       }
@@ -3391,7 +3410,7 @@
           }
         ],
         "summary": "publishMarketplaceListingContent",
-        "description": "Publishes the listing's edited text on the live version: same tag, same zip, same version number, no update\nfor installers. The text it replaces is kept in the version's `content_revisions`. Changed resources need a new\ntag and a new version instead.\n",
+        "description": "Publishes the listing's edited text on the live version: same tag, same zip, same version number, no update\nfor installers. The text it replaces is kept in the version's `content_revisions`. Changed resources need a new\ntag and a new version instead. The text is pushed to the Marketplace (Webflow) first; when that fails nothing\nchanges.\n",
         "tags": [
           "Marketplace Listing Versions"
         ],
@@ -3407,7 +3426,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Listing after publish; webflow_sync tells whether the Marketplace push worked",
+            "description": "The text is live and pushed to the Marketplace",
             "content": {
               "application/json": {
                 "schema": {
@@ -3426,10 +3445,13 @@
             "description": "Listing not found"
           },
           "409": {
-            "description": "Another version was published meanwhile, or a concurrent change"
+            "description": "Another version was published meanwhile or a concurrent change\n"
           },
           "413": {
             "description": "Version is too large to publish"
+          },
+          "502": {
+            "description": "The Marketplace (Webflow) push failed; nothing was changed"
           }
         }
       }
@@ -3475,6 +3497,11 @@
                   "note": {
                     "type": "string",
                     "nullable": true
+                  },
+                  "from_tag_id": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "Ready, succeeded sync tag of this blueprint to build the release from, instead of the current state"
                   }
                 }
               }
@@ -3493,13 +3520,16 @@
             }
           },
           "400": {
-            "description": "Name is not a semantic version, is taken or is not higher than the latest release tag"
+            "description": "Name is not a semantic version, is taken or is not higher than the latest release tag, or `from_tag_id` is not a sync tag"
           },
           "403": {
             "description": "Blueprint versions (`blueprint-versioning` flag) are not enabled for this organization"
           },
           "404": {
-            "description": "Blueprint not found"
+            "description": "Blueprint or `from_tag_id` tag not found"
+          },
+          "409": {
+            "description": "The `from_tag_id` sync tag is not ready or its sync did not succeed"
           }
         }
       },
@@ -4633,6 +4663,16 @@
               }
             }
           },
+          "403": {
+            "description": "An AI-agent caller whose token org is not the update job's source org; agent tokens cannot read another org",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Merge plan not found in this organization",
             "content": {
@@ -4861,7 +4901,7 @@
           }
         ],
         "summary": "installBlueprintV3",
-        "description": "Install a blueprint into a single destination org using the V3 engine (direct API\ncalls, no Terraform). Creates resources in topological order with global ID\nreplacement and supports checkpoint-based resume on failure.\n\n**Lifecycle (how to drive an install to completion):**\n1. `POST /v3/blueprint-manifest/blueprint:install` returns `{ job_id }` (202).\n2. Poll the job with `GET /v2/blueprint-manifest/jobs/{job_id}` — V3 jobs are\n   served by the same v2 jobs endpoints as Terraform jobs and are identified by\n   `sync_engine: \"v3\"`. Watch `status` and `resource_progress[]`.\n3. If `auto_apply` is `false` (default), the job pauses at\n   `status: \"WAITING_USER_ACTION\"` after planning. Review the plan before resuming:\n   each `resource_progress[]` entry carries `impact_on_install` (`create`, `update`,\n   `no-op`, `error`) and, where relevant, `impact_on_install_reason`. Resume it with\n   `POST /v2/blueprint-manifest/jobs/{job_id}:continue` once the plan is approved.\n4. If `auto_apply` is `true`, the engine applies automatically after plan +\n   snapshot — no `:continue` call is needed. This is what the bulk-install worker\n   uses; to install into many orgs at once prefer `POST .../bulk-installs`.\n\n**AI agents** (tokens such as \"Connect ChatGPT to epilot\") cannot use\n`auto_apply` (403). Install without it, show the user the plan, and call\n`:continue` only after the user approves it.\n\n**The plan fails instead of pausing** (`status: \"FAILED\"`, error code\n`missing_required_reference`) when a resource references something that is\nneither in the blueprint nor in the destination org and the destination API\nwould reject it — for example a workflow whose automation tasks point at\nautomations the package does not contain. Fix it in the source blueprint: add\nthe missing resources (refreshing the blueprint picks up dependencies) and\npublish again. Keep resources in the blueprint even when they already exist in\nthe destination; an existing resource is matched and updated, not duplicated,\nand removing it leaves everything that references it pointing at an id the\ndestination does not have. Alternatively pass the blocked addresses in\n`options.resources_to_ignore` to install the rest.\n\nFor cross-org installs, pass `destination_auth_token` (the destination org's\ntoken); reads use the caller's bearer token, writes use that token.\n",
+        "description": "Install a blueprint into a single destination org using the V3 engine (direct API\ncalls, no Terraform). Creates resources in topological order with global ID\nreplacement and supports checkpoint-based resume on failure.\n\n**Lifecycle (how to drive an install to completion):**\n1. `POST /v3/blueprint-manifest/blueprint:install` returns `{ job_id }` (202).\n2. Poll the job with `GET /v2/blueprint-manifest/jobs/{job_id}` — V3 jobs are\n   served by the same v2 jobs endpoints as Terraform jobs and are identified by\n   `sync_engine: \"v3\"`. Watch `status` and `resource_progress[]`.\n3. If `auto_apply` is `false` (default), the job pauses at\n   `status: \"WAITING_USER_ACTION\"` after planning. Review the plan before resuming:\n   each `resource_progress[]` entry carries `impact_on_install` (`create`, `update`,\n   `no-op`, `error`) and, where relevant, `impact_on_install_reason`. Resume it with\n   `POST /v2/blueprint-manifest/jobs/{job_id}:continue` once the plan is approved.\n4. If `auto_apply` is `true`, the engine applies automatically after plan +\n   snapshot — no `:continue` call is needed. This is what the bulk-install worker\n   uses; to install into many orgs at once prefer `POST .../bulk-installs`.\n\n**AI agents** (tokens such as \"Connect ChatGPT to epilot\") cannot use\n`auto_apply` (403). Install without it, show the user the plan, and call\n`:continue` only after the user approves it. Agent tokens are scoped to\ntheir own organization, so a `source_org_id` other than the token's org is\nrejected with 403; run cross-org deploys from the epilot portal.\n\n**The plan fails instead of pausing** (`status: \"FAILED\"`, error code\n`missing_required_reference`) when a resource references something that is\nneither in the blueprint nor in the destination org and the destination API\nwould reject it — for example a workflow whose automation tasks point at\nautomations the package does not contain. Fix it in the source blueprint: add\nthe missing resources (refreshing the blueprint picks up dependencies) and\npublish again. Keep resources in the blueprint even when they already exist in\nthe destination; an existing resource is matched and updated, not duplicated,\nand removing it leaves everything that references it pointing at an id the\ndestination does not have. Alternatively pass the blocked addresses in\n`options.resources_to_ignore` to install the rest.\n\nFor cross-org installs, pass `destination_auth_token` (the destination org's\ntoken); reads use the caller's bearer token, writes use that token.\n",
         "tags": [
           "Blueprints"
         ],
@@ -4901,7 +4941,8 @@
                     "type": "string"
                   },
                   "destination_blueprint_id": {
-                    "$ref": "#/components/schemas/BlueprintID"
+                    "type": "string",
+                    "description": "Blueprint instance to install into. Optional (one is created when omitted), but when\npresent it must be non-empty and not blank: an empty or whitespace-only value is\nrejected with a 400 whose body carries `code: destination_blueprint_instance_required`.\n"
                   },
                   "destination_auth_token": {
                     "type": "string",
@@ -5001,14 +5042,21 @@
             }
           },
           "400": {
-            "description": "Missing required source or destination fields",
+            "description": "Missing required source or destination fields, or a blank `destination_blueprint_id`",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "message": {
+                    "status": {
+                      "type": "integer"
+                    },
+                    "error": {
                       "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "`destination_blueprint_instance_required` when `destination_blueprint_id` is blank"
                     }
                   }
                 }
@@ -5016,16 +5064,11 @@
             }
           },
           "403": {
-            "description": "`auto_apply` requested by an AI-agent caller",
+            "description": "`auto_apply` requested by an AI-agent caller, or an AI-agent caller whose source org is not the org its token belongs to",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ApiErrorResponse"
                 }
               }
             }
@@ -8254,6 +8297,252 @@
           }
         }
       }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/flow-plan": {
+      "post": {
+        "operationId": "submitBlueprintTestFlowPlan",
+        "summary": "submitBlueprintTestFlowPlan",
+        "x-epilot-agent": {
+          "effect": "write"
+        },
+        "description": "The flow plan of a flow-mode Luna generation: groups the blueprint's subjects into business flows. Only the generation's plan session may submit it, once, while the generation is planning (otherwise 409 plan_not_running). A plan that does not pass validation is still accepted and the candidate flows are used instead (`used: fallback`). Afterwards one Luna session per flow writes that flow's tests. Only a Luna agent token acting for the user who started the generation is accepted. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "generation_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintTestFlowPlan"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestFlowPlanResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable, the token is not a Luna agent token acting for the user who started the generation (forbidden), or its session has no role in the generation (session_mismatch)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint, generation or part not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The generation is not a running Luna generation (generation_not_running), the plan is not open (plan_not_running), or the session is not registered yet (session_not_ready, retriable)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/parts/{part_key}/submissions": {
+      "post": {
+        "operationId": "submitBlueprintTestSuggestionPart",
+        "summary": "submitBlueprintTestSuggestionPart",
+        "x-epilot-agent": {
+          "effect": "write"
+        },
+        "description": "Submission of one flow (part) of a flow-mode Luna generation, by that part's own session. Name the part's subjects (from list_subjects) with their suggestions; a subject outside the part is refused (400). Stored once: a second submit gets 409 part_submitted. Drafts are verified when every part has finished. Only a Luna agent token acting for the user who started the generation is accepted. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "part_key",
+            "required": true,
+            "description": "The part key from the session context (`<generation id>~<flow id>`).",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintSuggestionSubmission"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintSuggestionPartResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable, the token is not a Luna agent token acting for the user who started the generation (forbidden), or its session has no role in the generation (session_mismatch)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint, generation or part not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The generation is not a running Luna generation (generation_not_running), the part is not running (part_not_running) or already submitted (part_submitted), or the session is not registered yet (session_not_ready, retriable)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -8295,6 +8584,11 @@
               "suggestion_input_too_large",
               "generation_not_running",
               "generation_submitting",
+              "session_mismatch",
+              "session_not_ready",
+              "plan_not_running",
+              "part_not_running",
+              "part_submitted",
               "invalid_clauses",
               "not_implemented",
               "interpretation_input_too_large",
@@ -9065,13 +9359,15 @@
               "get_node",
               "follow_edges",
               "list_paths",
-              "list_operators"
+              "list_operators",
+              "flow_brief",
+              "blueprint_outline"
             ]
           },
           "input": {
             "type": "object",
             "additionalProperties": true,
-            "description": "The tool's input. list_subjects: `{ cursor?: string }` (the previous page's `next_cursor`)."
+            "description": "The tool's input. list_subjects: `{ cursor?: string }` (the previous page's `next_cursor`); in a flow-mode part session it lists only the part's subjects. flow_brief (a part session only): `{}`, returns the blueprint brief and the part's flow. blueprint_outline (the plan session only): `{}`, returns the blueprint brief and a one-line-per-subject outline. Called by any other session, flow_brief and blueprint_outline return bad_input."
           }
         }
       },
@@ -9227,6 +9523,83 @@
           },
           "problems_total": {
             "type": "integer"
+          }
+        }
+      },
+      "BlueprintTestFlowPlan": {
+        "type": "object",
+        "required": [
+          "flows"
+        ],
+        "description": "The business flows the plan session proposes. Checked by the service (1 to 11 flows; `name` 3 to 80 characters, `why` at most 200; only subject node ids from the outline). A plan that fails the check is replaced by the candidate flows.",
+        "properties": {
+          "flows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "why": {
+                  "type": "string"
+                },
+                "subject_node_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "BlueprintTestFlowPlanResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status",
+          "used",
+          "flows"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted"
+            ]
+          },
+          "used": {
+            "type": "string",
+            "enum": [
+              "plan",
+              "fallback"
+            ],
+            "description": "plan when the submitted plan was used, fallback when the candidate flows were used instead."
+          },
+          "flows": {
+            "type": "integer",
+            "description": "The number of flows (parts) the generation now writes."
+          }
+        }
+      },
+      "BlueprintSuggestionPartResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status",
+          "flow_id"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "submitted"
+            ]
+          },
+          "flow_id": {
+            "type": "string"
           }
         }
       },
@@ -9930,11 +10303,13 @@
                 },
                 "reason": {
                   "type": "string",
+                  "description": "`too_large`: only with `flows`, the subject's flow was past the per-generation part cap and never ran.",
                   "enum": [
                     "step_cap",
                     "input_cap",
                     "deadline",
-                    "model_error"
+                    "model_error",
+                    "too_large"
                   ]
                 }
               }
@@ -9961,6 +10336,55 @@
           },
           "next_cursor": {
             "type": "string"
+          },
+          "flows": {
+            "type": "array",
+            "description": "Coverage per business flow, only on a generation that ran one Luna session per flow. `offered` counts the kept suggestions the flow's run proposed. A failed flow carries its reason: `deadline` (its run ran out of time), `start_failed` (its run could not start), `session_failed`, or `too_large` (the blueprint had more flows than one generation runs; this one never ran and offers nothing).",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "name",
+                "status",
+                "offered"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "pending",
+                    "running",
+                    "submitted",
+                    "failed"
+                  ]
+                },
+                "reason": {
+                  "type": "string",
+                  "enum": [
+                    "deadline",
+                    "start_failed",
+                    "session_failed",
+                    "too_large"
+                  ]
+                },
+                "offered": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "deadline": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Unix seconds by which the generation ends (completed or failed), only with `flows`. Recomputed once the flows are known; poll until shortly after it."
           }
         }
       },
@@ -12921,7 +13345,8 @@
             "type": "string"
           },
           "destination_blueprint_id": {
-            "$ref": "#/components/schemas/BlueprintID"
+            "type": "string",
+            "description": "Blueprint instance to install into. Optional, but when present it must be non-empty and not\nblank: an empty or whitespace-only value is rejected with a 400 whose body carries\n`code: destination_blueprint_instance_required`.\n"
           },
           "destination_auth_token": {
             "type": "string",
@@ -13201,6 +13626,10 @@
           "message"
         ],
         "properties": {
+          "is_new": {
+            "type": "boolean",
+            "description": "Whether the finding was absent before this sync. Only set when the report has a `diff`."
+          },
           "check_id": {
             "type": "string",
             "enum": [
@@ -13521,6 +13950,67 @@
           },
           "coverage": {
             "$ref": "#/components/schemas/HealthScanCoverage"
+          },
+          "diff": {
+            "type": "object",
+            "description": "How the findings compare with the destination's state before this sync. Absent when there is nothing to compare against (the first check of an instance without a pre-sync scan).",
+            "required": [
+              "baseline",
+              "new",
+              "unchanged",
+              "resolved"
+            ],
+            "properties": {
+              "baseline": {
+                "type": "object",
+                "required": [
+                  "source",
+                  "job_id",
+                  "generated_at"
+                ],
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "description": "`pre_sync` is a scan taken right before this sync wrote anything; `previous_report` is the instance's last health report, used when no pre-sync scan exists.",
+                    "enum": [
+                      "pre_sync",
+                      "previous_report"
+                    ]
+                  },
+                  "job_id": {
+                    "$ref": "#/components/schemas/BlueprintJobID"
+                  },
+                  "generated_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "new": {
+                "type": "integer",
+                "description": "Findings that were not there before the sync (those with `is_new` true)."
+              },
+              "unchanged": {
+                "type": "integer",
+                "description": "Findings that were already there before the sync."
+              },
+              "resolved": {
+                "type": "array",
+                "description": "Findings from before the sync that are gone now.",
+                "items": {
+                  "$ref": "#/components/schemas/HealthFinding"
+                }
+              }
+            }
+          },
+          "recheck_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the automatic second pass runs. It replaces this report."
+          },
+          "rechecked": {
+            "type": "boolean",
+            "description": "True when this report comes from the automatic second pass."
           },
           "error": {
             "type": "string",
@@ -14600,8 +15090,13 @@
           "entity_mapping_journey_not_in_blueprint",
           "missing_required_reference",
           "source_resources_missing",
+          "source_org_access_denied",
           "custom_schema_id_conflict",
-          "custom_schema_check_unavailable"
+          "custom_schema_check_unavailable",
+          "ignored_resources_exclude_all",
+          "no_resources_to_import",
+          "apply_evidence_requires_instance",
+          "apply_evidence_disabled"
         ]
       },
       "V3SourceResource": {
@@ -14726,6 +15221,10 @@
                 "type": "string",
                 "description": "Durable details pointer; authenticated job GET hydrates source_drift with the complete lists."
               },
+              "source_org_id": {
+                "type": "string",
+                "description": "Organization the install could not read, on a source_org_access_denied error."
+              },
               "formattedResource": {
                 "$ref": "#/components/schemas/FormattedErrorData"
               },
@@ -14765,6 +15264,13 @@
               "planned": {
                 "type": "number",
                 "description": "Resources the plan would add on top of the existing count"
+              },
+              "root_addresses": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Addresses the caller asked to ignore when that left nothing to install (ignored_resources_exclude_all)"
               }
             }
           }
@@ -14912,7 +15418,8 @@
           "blueprint_id",
           "name",
           "slug",
-          "status"
+          "status",
+          "marketplace_mode"
         ],
         "properties": {
           "id": {
@@ -15122,12 +15629,14 @@
           "webflow_sync": {
             "type": "object",
             "nullable": true,
+            "description": "Informational record of the last Webflow push",
             "properties": {
               "status": {
                 "type": "string",
                 "enum": [
                   "ok",
-                  "failed"
+                  "failed",
+                  "skipped"
                 ]
               },
               "at": {
@@ -15139,6 +15648,14 @@
                 "nullable": true
               }
             }
+          },
+          "marketplace_mode": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "live"
+            ],
+            "description": "Mode of the Webflow push in this stage: `draft` (draft mode: new items are created as drafts; existing items get staged changes; nothing is published) or `live`"
           }
         }
       },
@@ -15551,6 +16068,11 @@
             "nullable": true,
             "description": "Sync tags are deleted after 90 days; release tags never expire"
           },
+          "source_tag_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "The sync tag a release was built from (`from_tag_id`)"
+          },
           "package": {
             "type": "object",
             "nullable": true,
@@ -15582,7 +16104,7 @@
           "sync": {
             "type": "object",
             "nullable": true,
-            "description": "The sync a `sync` tag was recorded for",
+            "description": "The sync a `sync` tag was recorded for, or that a release was built from",
             "properties": {
               "job_id": {
                 "type": "string"
@@ -16568,6 +17090,22 @@
           "job_id": {
             "type": "string",
             "description": "The `restore` job running the revert."
+          }
+        }
+      },
+      "ApiErrorResponse": {
+        "type": "object",
+        "description": "Body of an error raised by a handler. `error` is human-readable prose.",
+        "required": [
+          "status",
+          "error"
+        ],
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "error": {
+            "type": "string"
           }
         }
       },
