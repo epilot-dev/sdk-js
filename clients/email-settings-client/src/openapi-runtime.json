@@ -229,6 +229,25 @@
         "responses": {}
       }
     },
+    "/v2/outlook/mailbox/{email}/sync-options": {
+      "put": {
+        "operationId": "updateOutlookMailboxSyncOptions",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/outlook/mailbox/{email}/sync": {
       "post": {
         "operationId": "startMailboxSync",
