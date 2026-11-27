@@ -2766,7 +2766,8 @@ const { data } = await client.replaceECPTemplateVariables(
   {
     template_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
     entity_context: {},
-    portal_id: 'string'
+    portal_id: 'string',
+    portal_keys: ['END_CUSTOMER_PORTAL']
   },
 )
 ```
@@ -2802,7 +2803,8 @@ const { data } = await client.replaceECPTemplateVariables(
       "contract": "/contract/:id",
       "opportunities": "/requests/opportunities/:id"
     }
-  }
+  },
+  "portal": {}
 }
 ```
 
